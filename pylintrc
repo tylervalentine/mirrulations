@@ -1,0 +1,30 @@
+[MASTER]
+# Don't save data between runs
+persistent=no
+
+# This file contains options that are changed from default.
+# See https://pylint.readthedocs.io/en/latest/technical_reference/features.html
+
+[MESSAGES CONTROL]
+
+# All checks are enabled except the following
+disable=missing-class-docstring,
+    missing-module-docstring,
+    missing-function-docstring,
+    too-few-public-methods
+
+[REFACTORING]
+max-nested-blocks=3
+
+[DESIGN]
+max-args=4
+max-bool-expr=3
+max-branches=5
+max-locals=8
+max-public-methods=10
+max-returns=4
+max-statements=20
+
+[EXCEPTIONS]
+overgeneral-exceptions=BaseException,
+                       Exception
