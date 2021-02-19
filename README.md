@@ -6,6 +6,7 @@
 * Ben Coleman (colemanb@moravian.edu)
 * Colby Hillman (hillmanc@moravian.edu)
 * Emily Heiser (heisere@moravian.edu)
+* Francis Severino-Guzman (severinoguzmanf@moravian.edu)
 * Jarod Frekot (frekotj@moravian.edu)
 * John Lapatchak (lapatchakjrj@moravian.edu)
 * Jonah Beers (beersj02@moravian.edu)
