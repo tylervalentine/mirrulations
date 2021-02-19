@@ -15,15 +15,6 @@ pipeline {
         '''
       }
     }
-<<<<<<< HEAD
-    stage('Hello World')[
-      steps{
-        sh '''
-          echo Hello World
-        '''
-      }
-    ]
-
 //    stage('Unit Tests') {
 //      steps {
 //        sh '''
@@ -40,24 +31,5 @@ pipeline {
 //        '''
 //      }
 //    }
-=======
-
-    stage('Unit Tests') {
-      steps {
-        sh '''
-          . .venv/bin/activate
-          pytest
-        '''
-      }
-    }
-    stage('Static Analysis') {
-      steps {
-        sh '''
-          . .venv/bin/activate
-          pylint src/c21server/*.py tests/c21server/*.py
-        '''
-      }
-    }
->>>>>>> 4a686696a8316a7a9d4a5aa6dbc97b79474d5419
   }
 }
