@@ -1,6 +1,8 @@
 # Capstone2021
 
-A complete senior capstone project. The project requires use of a Python virtual environment, installation of necessary Python libraries using a requirements file, and installation of the project as an editable module. Additionally, we make use of make in order to run tests.
+A complete senior capstone project.
+The project requires use of a Python virtual environment and installation of the project as an editable module.
+Additionally, we make use of make in order to run tests.
 
 
 ## Setup
@@ -10,12 +12,6 @@ A complete senior capstone project. The project requires use of a Python virtual
   ```
   python3 -m venv .venv
   source .venv/bin/activate
-  ```
-
-* Install libraries
-
-  ```
-  pip install -r requirements.txt
   ```
 
 * Install source code as a module
