@@ -1,0 +1,8 @@
+.coverage
+.env
+.idea
+.venv
+*.egg-info
+unit-python.xml
+__pycache__
+htmlcov
