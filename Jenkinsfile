@@ -4,7 +4,7 @@ pipeline {
       image 'python:3.8'
     }
   }
-  
+
   stages {
     stage('Hello World') {
       steps {
