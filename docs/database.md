@@ -2,16 +2,11 @@
 
 ## Database Format
 
-The database will have three lists, with the names:
+The database will have three hash maps, with the names:
 
-`job_queue`, `in_progress`, and `done`.
+`jobs_waiting`, `in_progress`, and `done`.
 
 Each of these lists will store jobs for clients to process.
 
-An individual job will be represented as a dict:
-
-{`job_id`: 5, `value`: 3}
-
-with the keys shown here mapping to integers; 5 and 3 in this example, respectively.
-
-Each queue will hold some number of dicts representing jobs.
+Keys in the hash sets will be integers, the job ids of the jobs.
+These keys will be mapped to integers, the valuese
