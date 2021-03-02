@@ -16,7 +16,7 @@ def create_server(server=WorkServer()):
            Returns the first key value if the data is valid, otherwise returns -1
         '''
         keys = list(data.keys())
-        if len(keys) > 0 and keys[0].isdigit() and data[keys[0]]:
+        if len(keys) > 0 and keys[0].isdigit() and isinstance(data[keys[0]], int):
             return keys[0]
         return -1
 
