@@ -33,7 +33,7 @@ def do_work(work):
 
 def send_work(work_id, work, url):
 	end_point = "/put_results"
-	data = {work_id:work}
+	data = {work_id:int(work)}
 	request = requests.put(url + end_point, data=dumps(data))
 	request.raise_for_status()
 
@@ -43,5 +43,3 @@ if __name__ == "__main__":
 		work_id, work = get_work(server_url())
 		do_work(work)
 		send_work(work_id, work, server_url())
-		
-		
