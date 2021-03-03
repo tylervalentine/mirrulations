@@ -9,7 +9,7 @@ def generateJobs(r):
     for i in range(10):
         id = random.randint(0, 10000)
         value = random.randint(0, 10)
-        r.hset("jobs_wating", id, value)
+        r.hset("jobs_waiting", id, value)
 
 
 def emulateJobCreation(r):
@@ -19,4 +19,3 @@ def emulateJobCreation(r):
 
 
 emulateJobCreation(r)
-
