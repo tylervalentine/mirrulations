@@ -4,7 +4,7 @@
 
 The database will have three hashes, with the names:
 
-`jobs_waiting`, `in_progress`, and `done`.
+`jobs_waiting`, `jobs_in_progress`, and `jobs_done`.
 
 Each of these hashes will store jobs for clients to process.
 
