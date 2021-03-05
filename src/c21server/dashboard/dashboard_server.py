@@ -15,7 +15,7 @@ def index():
 
 @app.route('/data', methods=['GET'])
 def get_dashboard_data():
-    job_information = get_jobs_stats();
+    job_information = get_jobs_stats()
     return jsonify(job_information), 200
 
 if __name__ == '__main__':
