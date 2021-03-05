@@ -12,11 +12,14 @@ def create_server(server=WorkServer()):
     '''Create server, add endpoints, and return the server'''
 
     def get_first_key(data):
-        '''Checks to make sure JSON has at least one entry and that its key-value pair are both integers
-           Returns the first key value if the data is valid, otherwise returns -1
+        '''Checks to make sure JSON has at least one entry and
+            that its key-value pair are both integers
+           Returns the first key value if the data is valid,
+           otherwise returns -1
         '''
         keys = list(data.keys())
-        if len(keys) > 0 and keys[0].isdigit() and isinstance(data[keys[0]], int):
+        if len(keys) > 0 and keys[0].isdigit() and \
+                isinstance(data[keys[0]], int):
             return keys[0]
         return -1
 
@@ -24,7 +27,8 @@ def create_server(server=WorkServer()):
     def get_job():
         keys = server.redis.hkeys("jobs_waiting")
         if len(keys) == 0:
-            return jsonify({"error": "There are no jobs available"}), 400 
+            return jsonify(
+                {"error": "There are no jobs available"}), 400
         value = server.redis.hget("jobs_waiting", keys[0])
         server.redis.hdel("jobs_waiting", keys[0])
         return jsonify({keys[0].decode(): value.decode()}), 200
@@ -34,7 +38,7 @@ def create_server(server=WorkServer()):
         data = json.loads(request.data)
         key = get_first_key(data)
         if (key == -1):
-            return '', 400            
+            return '', 400
         print("job_id: %s, value: %s" % (key, data[key]))
         return '', 200
 
