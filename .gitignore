@@ -3,6 +3,7 @@
 .idea
 .venv
 *.egg-info
+*.rdb
 unit-python.xml
 __pycache__
 htmlcov
