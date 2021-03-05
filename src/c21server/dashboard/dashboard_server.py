@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route('/dashboard', methods=['GET'])
 def index():
-    job_information = get_jobs_stats();
+    job_information = get_jobs_stats()
     return render_template(
         'index.html', jobs_waiting=job_information['num_jobs_waiting'],
         jobs_in_progress=job_information['num_jobs_in_progress'],
