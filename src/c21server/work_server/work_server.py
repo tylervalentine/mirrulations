@@ -26,6 +26,7 @@ def create_server(server=WorkServer()):
         if len(keys) == 0:
             return jsonify({"error": "There are no jobs available"}), 400 
         value = server.redis.hget("jobs_waiting", keys[0])
+        server.redis.hset("jobs_in_progress", keys[0], value)
         server.redis.hdel("jobs_waiting", keys[0])
         return jsonify({keys[0].decode(): value.decode()}), 200
 
@@ -33,8 +34,10 @@ def create_server(server=WorkServer()):
     def put_results():
         data = json.loads(request.data)
         key = get_first_key(data)
-        if (key == -1):
-            return '', 400            
+        if (key == -1 or server.redis.hget("jobs_in_progress", key) is None):
+            return '', 400
+        server.redis.hdel("jobs_in_progress", key)
+        server.redis.hset("jobs_done", key, data[key])
         print("job_id: %s, value: %s" % (key, data[key]))
         return '', 200
 
