@@ -1,6 +1,7 @@
 from redis import Redis
 r = Redis()
 
+
 def get_jobs_stats():
     jobs_waiting = int(r.hlen('jobs_waiting'))
     jobs_in_progress = int(r.hlen('jobs_in_progress'))
