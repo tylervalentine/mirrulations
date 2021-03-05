@@ -52,9 +52,9 @@ def request_client_id(url):
 	end_point = "/get_id"
 	request = requests.get(url + end_point)
 
-	# Check if status code is 200 type code
+	# Check if status code is 200 type code: successful GET
 	if request.status_code // 100 == 2:
-		id = int(request.txt)
+		id = int(request.json())
 		write_client_id(id)
 		return id
 	else:
@@ -73,6 +73,7 @@ def get_client_id():
 if __name__ == "__main__":
 	client_id = get_client_id()
 	print("ID of this client: ", client_id)
+
 	while(True):
 		work_id, work = get_work(server_url())
 		do_work(work)
