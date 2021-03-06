@@ -8,40 +8,42 @@ class WorkServer:
         self.redis = Redis()
 
 
-def create_server(server=WorkServer()):
+def create_server(workserver=WorkServer()):
     '''Create server, add endpoints, and return the server'''
 
     def get_first_key(data):
-        '''Checks to make sure JSON has at least one entry and that its key-value pair are both integers
-           Returns the first key value if the data is valid, otherwise returns -1
+        '''Checks to make sure JSON has at least one entry and that its
+           key-value pair are both integers. Returns the first key value
+           if the data is valid, otherwise returns -1.
         '''
         keys = list(data.keys())
-        if len(keys) > 0 and keys[0].isdigit() and isinstance(data[keys[0]], int):
+        is_key_digit = len(keys) > 0 and keys[0].isdigit()
+        if is_key_digit and isinstance(data[keys[0]], int):
             return keys[0]
         return -1
 
-    @server.app.route('/get_job', methods=['GET'])
-    def get_job():
-        keys = server.redis.hkeys("jobs_waiting")
+    @workserver.app.route('/get_job', methods=['GET'])
+    def _get_job():
+        keys = workserver.redis.hkeys("jobs_waiting")
         if len(keys) == 0:
-            return jsonify({"error": "There are no jobs available"}), 400 
-        value = server.redis.hget("jobs_waiting", keys[0])
-        server.redis.hset("jobs_in_progress", keys[0], value)
-        server.redis.hdel("jobs_waiting", keys[0])
+            return jsonify({"error": "There are no jobs available"}), 400
+        value = workserver.redis.hget("jobs_waiting", keys[0])
+        workserver.redis.hset("jobs_in_progress", keys[0], value)
+        workserver.redis.hdel("jobs_waiting", keys[0])
         return jsonify({keys[0].decode(): value.decode()}), 200
 
-    @server.app.route('/put_results', methods=['PUT'])
-    def put_results():
+    @workserver.app.route('/put_results', methods=['PUT'])
+    def _put_results():
         data = json.loads(request.data)
         key = get_first_key(data)
-        if (key == -1 or server.redis.hget("jobs_in_progress", key) is None):
+        if key == -1 or workserver.redis.hget("jobs_in_progress", key) is None:
             return '', 400
-        server.redis.hdel("jobs_in_progress", key)
-        server.redis.hset("jobs_done", key, data[key])
+        workserver.redis.hdel("jobs_in_progress", key)
+        workserver.redis.hset("jobs_done", key, data[key])
         print("job_id: %s, value: %s" % (key, data[key]))
         return '', 200
 
-    return server
+    return workserver
 
 
 if __name__ == '__main__':
