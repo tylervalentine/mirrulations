@@ -37,8 +37,12 @@ p {
     height: 100%
 }
 
+.total-clients {
+    color: rgb(94, 182, 255);
+}
+
 .success {
-    color: rgb(129,180,134);
+    color: rgb(129, 180, 134);
 }
 
 .warning {
