@@ -1,0 +1,10 @@
+[Unit]
+Description=Dashboard: Shows the state of jobs available, being completed, and finished
+Requires=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/vagrant/capstone2021/scripts/dashboard.sh
+
+[Install]
+WantedBy=multi-user.target
