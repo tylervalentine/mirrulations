@@ -36,7 +36,8 @@ def create_server(workserver=WorkServer()):
     def _put_results():
         data = json.loads(request.data)
         key = get_first_key(data)
-        if key == -1 or workserver.redis.hget("jobs_in_progress", key) is None:
+        value = workserver.redis.hget("jobs_in_progress", key)
+        if key == -1 or value is None:
             return '', 400
         workserver.redis.hdel("jobs_in_progress", key)
         workserver.redis.hset("jobs_done", key, data[key])
