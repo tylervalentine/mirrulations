@@ -18,9 +18,10 @@ static:
 	pylint src tests;
 
 clean:
-	rm -rf htmlcov
 	rm -f unit-python.xml
 	rm -f .coverage
-	# find and remove all __pycache__ folders and all .pyc files (compiled python)
-	find . | grep -E "(__pycache__|\.pyc)" | xargs rm -rf
+	# Find and remove all __pycache__ folders and all .pyc files (compiled python)
+	find . | grep -E "(__pycache__|\.pyc)" | xargs rm -rfq
+	rm -rf htmlcov
 	rm -rf .pytest_cache
+	rm -rf .vagrant

@@ -1,5 +1,5 @@
-from c21client.client import dummy_client
+from c21client.client import server_url
 
 
-def test_dummy():
-    assert dummy_client() == 42
+def test_server_url():
+    assert server_url() == "http://localhost:8080"

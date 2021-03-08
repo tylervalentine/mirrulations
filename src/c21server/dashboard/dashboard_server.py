@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, render_template
-from job_stats import get_jobs_stats
+from c21server.dashboard.job_stats import get_jobs_stats
 
 app = Flask(__name__)
 
