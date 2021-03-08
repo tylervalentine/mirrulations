@@ -9,6 +9,7 @@ def generateJobs(r):
     for i in range(10):
         id = random.randint(0, 10000)
         value = random.randint(0, 10)
+        print(f"I am generating  work with value {value}!")
         r.hset("jobs_waiting", id, value)
 
 
