@@ -58,7 +58,7 @@ def write_client_id(c_id):
 
 
 def request_client_id(url):
-    end_point = "/get_id"
+    end_point = "/get_client_id"
     request = requests.get(url + end_point)
 
     # Check if status code is 200 type code: successful GET
