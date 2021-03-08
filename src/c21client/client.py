@@ -44,7 +44,46 @@ def send_work(work_id, work, url):
     request.raise_for_status()
 
 
+def read_client_id():
+    try:
+        with open("client.cfg", "r") as file:
+            return int(file.readline())
+    except FileNotFoundError:
+        return -1
+
+
+def write_client_id(id):
+    with open("client.cfg", "w") as file:
+        file.write(str(id))
+
+
+def request_client_id(url):
+    end_point = "/get_id"
+    request = requests.get(url + end_point)
+
+    # Check if status code is 200 type code: successful GET
+    if request.status_code // 100 == 2:
+        id = int(request.json())
+        write_client_id(id)
+        return id
+    else:
+        return -1
+
+
+# Reads from file, or requests if nothing there
+def get_client_id():
+    id = read_client_id()
+    if id == -1:
+        id = request_client_id(server_url())
+    if id == -1:
+        print("Could not get client ID!")
+    return id
+
+
 if __name__ == "__main__":
+    client_id = get_client_id()
+    print("ID of this client: ", client_id)
+
     while(True):
         work_id, work = get_work(server_url())
         do_work(work)
