@@ -2,14 +2,13 @@ import redis
 import random
 import time
 
-r = redis.Redis()
-
 
 def generateJobs(r):
     for i in range(10):
         id = random.randint(0, 10000)
         value = random.randint(0, 10)
         r.hset("jobs_wating", id, value)
+        print(id, value)
 
 
 def emulateJobCreation(r):
@@ -18,5 +17,13 @@ def emulateJobCreation(r):
         time.sleep(30)
 
 
-emulateJobCreation(r)
+r = redis.Redis()
 
+try:
+    r.ping()
+    print('Successfully connected to redis')
+
+    emulateJobCreation(r)
+
+except redis.exceptions.ConnectionError as r_con_error:
+    print('Redis connection error')
