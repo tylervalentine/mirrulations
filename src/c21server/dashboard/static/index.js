@@ -20,10 +20,10 @@ const updateDashboardData = () => {
             num_jobs_waiting 
         } = jobInformation;
 
-        document.getElementById('jobs-waiting').innerHTML = num_jobs_waiting;
-        document.getElementById('jobs-progress').innerHTML = num_jobs_in_progress;
-        document.getElementById('jobs-done').innerHTML = num_jobs_done;
-        document.getElementById('total-clients').innerHTML = clients_total;
+        document.getElementById('jobs-waiting').textContent = num_jobs_waiting;
+        document.getElementById('jobs-progress').textContent = num_jobs_in_progress;
+        document.getElementById('jobs-done').textContent = num_jobs_done;
+        document.getElementById('total-clients').textContent = clients_total;
 
     })
     .catch((err) => console.log(err));
