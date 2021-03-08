@@ -3,13 +3,14 @@ from redis import Redis
 
 
 class WorkServer:
-    def __init__(self):
+    def __init__(self, redis_server):
         self.app = Flask(__name__)
-        self.redis = Redis()
+        self.redis = redis_server
 
 
-def create_server(server=WorkServer()):
+def create_server(db):
     '''Create server, add endpoints, and return the server'''
+    ws = WorkServer(db)
 
     def get_first_key(data):
         '''Checks to make sure JSON has at least one entry and that its key-value pair are both integers
@@ -20,16 +21,16 @@ def create_server(server=WorkServer()):
             return keys[0]
         return -1
 
-    @server.app.route('/get_job', methods=['GET'])
+    @ws.app.route('/get_job', methods=['GET'])
     def get_job():
-        keys = server.redis.hkeys("jobs_waiting")
+        keys = ws.redis.hkeys("jobs_waiting")
         if len(keys) == 0:
             return jsonify({"error": "There are no jobs available"}), 400 
-        value = server.redis.hget("jobs_waiting", keys[0])
-        server.redis.hdel("jobs_waiting", keys[0])
+        value = ws.redis.hget("jobs_waiting", keys[0])
+        ws.redis.hdel("jobs_waiting", keys[0])
         return jsonify({keys[0].decode(): value.decode()}), 200
 
-    @server.app.route('/put_results', methods=['PUT'])
+    @ws.app.route('/put_results', methods=['PUT'])
     def put_results():
         data = json.loads(request.data)
         key = get_first_key(data)
@@ -38,9 +39,10 @@ def create_server(server=WorkServer()):
         print("job_id: %s, value: %s" % (key, data[key]))
         return '', 200
 
-    return server
+    return ws
 
 
 if __name__ == '__main__':
-    server = create_server()
+    db = Redis()
+    server = create_server(db)
     server.app.run(host='0.0.0.0', port=8080, debug=False)
