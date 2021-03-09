@@ -14,12 +14,11 @@ for more details of the allowable language.
 
 At a high level, our `Vagrantfile`:
 
-* Creates virtual machines for the `workserver`, `client`(s), `workgenerator`
-  and `dashboardserver`.
-* All machines run on a private network that makes each machine accessible
-  to each other
-* We will clone the `capstone2021` repo on each virtual machine and then
-  configure and start the appropriate portion of the project.
+* Creates virtual machines for the `workserver`, `client`(s), `workgenerator` and `dashboardserver`.
+* All machines run on a private network that makes each machine accessible to each other
+* Will clone the `capstone2021` repo on each virtual machine and then configure and start the appropriate portion of the project
+
+Our current `Vagrantfile` creates one virtual machine and runs all of `workserver`, `client`, `workgenerator`, and `dashboardserver` in order to demo them.
 
 ## Usage
 
@@ -29,6 +28,7 @@ details of the available commands.
 * To start the virtual machines, run `vagrant up`
 * To connect to one of the virtual machines, run `vagrant ssh workserver`,
   `vagrant ssh client`, etc.
+* For the current demo, connect to the virtual machine using `vagrant ssh demo`
 * To destroy (shutdown) all machines run `vagrant destroy -f`
 
 

@@ -1,22 +1,22 @@
-import redis
 import random
 import time
+import redis
 
-r = redis.Redis()
 
-
-def generateJobs(r):
-    for i in range(10):
-        id = random.randint(0, 10000)
+def generate_jobs(database):
+    for _ in range(10):
+        key = random.randint(0, 10000)
         value = random.randint(0, 10)
         print(f"I am generating  work with value {value}!")
-        r.hset("jobs_waiting", id, value)
+        database.hset("jobs_waiting", key, value)
 
 
-def emulateJobCreation(r):
-    for i in range(5):
-        generateJobs(r)
+def emulate_job_creation():
+    database = redis.Redis()
+    for _ in range(5):
+        generate_jobs(database)
         time.sleep(30)
 
 
-emulateJobCreation(r)
+if __name__ == "__main__":
+    emulate_job_creation()
