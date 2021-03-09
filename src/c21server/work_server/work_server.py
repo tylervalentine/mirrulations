@@ -3,13 +3,14 @@ from redis import Redis
 
 
 class WorkServer:
-    def __init__(self):
+    def __init__(self, redis_server):
         self.app = Flask(__name__)
-        self.redis = Redis()
+        self.redis = redis_server
 
 
-def create_server(workserver=WorkServer()):
+def create_server(database):
     '''Create server, add endpoints, and return the server'''
+    workserver = WorkServer(db)
 
     def get_first_key(data):
         '''Checks to make sure JSON has at least one entry and that its
@@ -49,4 +50,6 @@ def create_server(workserver=WorkServer()):
 
 if __name__ == '__main__':
     server = create_server()
+    database = Redis()
+    server = create_server(database)
     server.app.run(host='0.0.0.0', port=8080, debug=False)
