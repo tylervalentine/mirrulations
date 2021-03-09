@@ -10,7 +10,7 @@ class WorkServer:
 
 def create_server(database):
     '''Create server, add endpoints, and return the server'''
-    workserver = WorkServer(db)
+    workserver = WorkServer(database)
 
     def get_first_key(data):
         '''Checks to make sure JSON has at least one entry and that its
