@@ -7,7 +7,7 @@ class WorkServer:
         self.app = Flask(__name__)
         self.redis = redis_server
 
-    def set_data_and_key():
+    def set_data_and_key(request):
         data = json.loads(request.data)
         key = get_first_key(data)
         return data, key
@@ -40,6 +40,7 @@ def create_server(database):
 
     @workserver.app.route('/put_results', methods=['PUT'])
     def _put_results():
+        data, key = set_data_and_key(request)
         value = workserver.redis.hget("jobs_in_progress", key)
         if key == -1 or value is None:
             return '', 400
