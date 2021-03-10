@@ -44,14 +44,16 @@ def create_server(database):
         workserver.redis.hset("jobs_done", key, data[key])
         print("job_id: %s, value: %s" % (key, data[key]))
         return '', 200
+        
+    get_client_id()
 
-    @server.app.route('/get_client_id', methods=['GET'])
-    def get_client_id():
-        client_id = server.redis.get('total_num_client_ids')
-        if client_id is None:
-            client_id = 0
-        server.redis.incr('total_num_client_ids')
-        return client_id, 200
+@workserver.app.route('/get_client_id', methods=['GET'])
+def get_client_id():
+    client_id = server.redis.get('total_num_client_ids')
+    if client_id is None:
+        client_id = 0
+    server.redis.incr('total_num_client_ids')
+    return client_id, 200
 
     return workserver
 
