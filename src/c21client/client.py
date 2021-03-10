@@ -12,12 +12,12 @@ class Client:
             print(work)
             print("I'm sleeping a minute.")
             time.sleep(60)
-            j_id, work = self.request_job(self.url)
+            j_id, work = request_job(self.url)
         return j_id, work
 
     def get_job(self):
         full_url = f"{self.url}/get_job"
-        j_id, work = self.request_job(full_url)
+        j_id, work = request_job(full_url)
         if j_id == "error":
             j_id, work = self.handle_error(j_id, work)
         return j_id, work
@@ -35,13 +35,13 @@ class Client:
         # Check if status code is 200 type code: successful GET
         if request.status_code // 100 == 2:
             c_id = int(request.json())
-            self.write_client_id(c_id)
+            write_client_id(c_id)
             return c_id
         return -1
 
     # Reads from file, or requests if nothing there
     def get_client_id(self):
-        c_id = self.read_client_id()
+        c_id = read_client_id()
         if c_id == -1:
             c_id = self.request_client_id()
         if c_id == -1:
@@ -50,7 +50,7 @@ class Client:
 
     def complete_client_request(self):
         job_id, job = self.get_job()
-        self.perform_job(job)
+        perform_job(job)
         self.send_job_results(job_id, job)
 
 
@@ -68,7 +68,7 @@ def perform_job(j):
     time.sleep(int(j))
 
 
-def read_client_id(self):
+def read_client_id():
     try:
         with open("client.cfg", "r") as file:
             return int(file.readline())
@@ -76,7 +76,7 @@ def read_client_id(self):
         return -1
 
 
-def write_client_id(self, c_id):
+def write_client_id(c_id):
     with open("client.cfg", "w") as file:
         file.write(str(c_id))
 
