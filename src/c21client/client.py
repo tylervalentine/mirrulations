@@ -53,6 +53,7 @@ class Client:
         self.perform_job(job)
         self.send_job_results(job_id, job)
 
+
 # Helper functions (don't need to be a part of the class)
 def request_job(full_url):
     request = requests.get(full_url)
