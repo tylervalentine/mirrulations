@@ -17,14 +17,17 @@ class Client:
 
     def get_job(self):
         full_url = f"{self.url}/get_job"
-        j_id, work = request_job(full_url)
+        c_id = self.get_client_id()
+        data = {"client_id": c_id}
+        j_id, work = request_job(full_url, data)
         if j_id == "error":
             j_id, work = self.handle_error(j_id, work)
         return j_id, work
 
     def send_job_results(self, j_id, job_result):
         end_point = "/put_results"
-        data = {j_id: int(job_result)}
+        c_id = self.get_client_id()
+        data = {j_id: int(job_result), "client_id": c_id}
         request = requests.put(self.url + end_point, data=dumps(data))
         request.raise_for_status()
 
@@ -55,8 +58,8 @@ class Client:
 
 
 # Helper functions (don't need to be a part of the class)
-def request_job(full_url):
-    request = requests.get(full_url)
+def request_job(full_url, data):
+    request = requests.get(full_url, data=dumps(data))
     if request.status_code // 100 == 4:
         request.raise_for_status()
     work_id, work = list(loads(request.text).items())[0]
