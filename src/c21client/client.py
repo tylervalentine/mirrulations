@@ -7,8 +7,8 @@ class Client:
     def __init__(self):
         self.url = "http://localhost:8080"
 
-    def request_job(self):
-        request = requests.get(self.url)
+    def request_job(self, full_url):
+        request = requests.get(full_url)
         if request.status_code // 100 == 4:
             request.raise_for_status()
         work_id, work = list(loads(request.text).items())[0]
@@ -26,7 +26,7 @@ class Client:
 
     def get_job(self):
         full_url = f"{self.url}/get_job"
-        j_id, work = self.request_job()
+        j_id, work = self.request_job(full_url)
         if j_id == "error":
             j_id, work = self.handle_error(j_id, work)
         return j_id, work
