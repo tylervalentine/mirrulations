@@ -1,8 +1,12 @@
 .coverage
 .env
 .idea
+.vagrant
 .venv
+.vscode
 *.egg-info
+*.log
+*.rdb
 unit-python.xml
 __pycache__
 htmlcov

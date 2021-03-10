@@ -15,19 +15,19 @@ pipeline {
       }
     }
 
-    stage('Unit Tests') {
-      steps {
-        sh '''
-          . .venv/bin/activate
-          pytest
-        '''
-      }
-    }
+    //stage('Unit Tests') {
+    //  steps {
+    //    sh '''
+    //      . .venv/bin/activate
+    //      pytest
+    //    '''
+    //  }
+    //}
     stage('Static Analysis') {
       steps {
         sh '''
           . .venv/bin/activate
-          pylint src/c21server/*.py tests/c21server/*.py
+          make static
         '''
       }
     }
