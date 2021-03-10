@@ -46,11 +46,11 @@ def create_server(workserver=WorkServer()):
 
     @server.app.route('/get_client_id', methods=['GET'])
     def get_client_id():
-        id = server.redis.get('total_num_client_ids')
-        if id is None:
-            id = 0
+        client_id = server.redis.get('total_num_client_ids')
+        if client_id is None:
+            client_id = 0
         server.redis.incr('total_num_client_ids')
-        return id, 200
+        return client_id, 200
 
     return workserver
 
