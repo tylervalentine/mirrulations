@@ -7,7 +7,7 @@ class Client:
     def __init__(self):
         self.url = "http://localhost:8080"
 
-    def request_job():
+    def request_job(self):
         request = requests.get(self.url)
         if request.status_code != 400:
             request.raise_for_status()
@@ -15,7 +15,7 @@ class Client:
         return work_id, work
 
 
-    def handle_error(j_id, work):
+    def handle_error(self, j_id, work):
         while j_id == "error":
             print(work)
             print("I'm sleeping a minute.")
@@ -24,7 +24,7 @@ class Client:
         return j_id, work
 
 
-    def get_job():
+    def get_job(self):
         full_url = f"{self.url}/get_job"
         j_id, work = request_job(full_url)
         if j_id == "error":
@@ -32,12 +32,12 @@ class Client:
         return j_id, work
 
 
-    def perform_job(j):
+    def perform_job(self, j):
         print(f"I am working for {j} seconds.")
         time.sleep(int(j))
 
 
-    def send_job_results(j_id, job_result):
+    def send_job_results(self, j_id, job_result):
         end_point = "/put_results"
         data = {j_id: int(job_result)}
         request = requests.put(self.url + end_point, data=dumps(data))
@@ -52,12 +52,12 @@ class Client:
             return -1
 
 
-    def write_client_id(c_id):
+    def write_client_id(self, c_id):
         with open("client.cfg", "w") as file:
             file.write(str(c_id))
 
 
-    def request_client_id():
+    def request_client_id(self):
         end_point = "/get_client_id"
         request = requests.get(self.url + end_point)
 
