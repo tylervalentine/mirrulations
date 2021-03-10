@@ -34,7 +34,8 @@ class Client:
 
         # Check if status code is 200 type code: successful GET
         if request.status_code // 100 == 2:
-            c_id = int(request.json())
+            # Subject to change depending on how it will be implemented on the server side
+            c_id = int(request.json()['client_id'])
             write_client_id(c_id)
             return c_id
         return -1
