@@ -7,12 +7,12 @@ class Client:
     def __init__(self):
         self.url = "http://localhost:8080"
 
-    def handle_error(self, j_id, work):
+    def handle_error(self, j_id, work, data):
         while j_id == "error":
             print(work)
             print("I'm sleeping a minute.")
             time.sleep(60)
-            j_id, work = request_job(self.url)
+            j_id, work = request_job(self.url, data)
         return j_id, work
 
     def get_job(self):
@@ -21,7 +21,7 @@ class Client:
         data = {"client_id": c_id}
         j_id, work = request_job(full_url, data)
         if j_id == "error":
-            j_id, work = self.handle_error(j_id, work)
+            j_id, work = self.handle_error(j_id, work, data)
         return j_id, work
 
     def send_job_results(self, j_id, job_result):
