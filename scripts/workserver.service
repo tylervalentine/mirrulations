@@ -1,0 +1,10 @@
+[Unit]
+Description=Workserver: Flask server that hands out jobs and accepts results
+Requires=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/vagrant/capstone2021/scripts/workserver.sh
+
+[Install]
+WantedBy=multi-user.target
