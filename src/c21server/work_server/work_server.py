@@ -42,7 +42,6 @@ def create_server(database):
             return '', 400
         workserver.redis.hdel("jobs_in_progress", key)
         workserver.redis.hset("jobs_done", key, data[key])
-        'print("job_id: %s, value: %s" % (key, data[key]))''
         return '', 200
 
     @workserver.app.route('/get_client_id', methods=['GET'])
