@@ -7,7 +7,7 @@ class WorkServer:
         self.app = Flask(__name__)
         self.redis = redis_server
 
-    def set_data_and_key(request):
+    def _set_data_and_key(request):
         data = json.loads(request.data)
         key = get_first_key(data)
         return data, key
@@ -17,7 +17,7 @@ def create_server(database):
     '''Create server, add endpoints, and return the server'''
     workserver = WorkServer(database)
 
-    def get_first_key(data):
+    def _get_first_key(data):
         '''Checks to make sure JSON has at least one entry and that its
            key-value pair are both integers. Returns the first key value
            if the data is valid, otherwise returns -1.
