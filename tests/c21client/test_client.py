@@ -49,12 +49,20 @@ def test_client_handles_error_when_getting_id_from_server(requests_mock):
 
 def test_client_gets_job(requests_mock):
     client = Client()
+    requests_mock.get(
+        '{}/get_client_id'.format(BASE_URL),
+        json={'client_id': 9}
+    )
     requests_mock.get('{}/get_job'.format(BASE_URL), json={1: "1"})
     assert ("1", "1") == client.get_job()
 
 
 def test_client_handles_error_getting_jobs(requests_mock):
     client = Client()
+    requests_mock.get(
+        '{}/get_client_id'.format(BASE_URL),
+        json={'client_id': 99}
+    )
     requests_mock.get(
         '{}/get_job'.format(BASE_URL),
         json={"Error": "Error message"},
@@ -79,6 +87,11 @@ def test_client_sends_job_results(requests_mock):
     client = Client()
     mock_id = 1
     mock_job_result = "1"
+
+    requests_mock.get(
+        '{}/get_client_id'.format(BASE_URL),
+        json={'client_id': 999}
+    )
     requests_mock.put('{}/put_results'.format(BASE_URL), text='')
     try:
         client.send_job_results(mock_id, mock_job_result)
@@ -88,6 +101,10 @@ def test_client_sends_job_results(requests_mock):
 
 def test_client_completes_job_requested(requests_mock):
     client = Client()
+    requests_mock.get(
+        '{}/get_client_id'.format(BASE_URL),
+        json={'client_id': 9}
+    )
     requests_mock.get('{}/get_job'.format(BASE_URL), json={1: "1"})
     requests_mock.put('{}/put_results'.format(BASE_URL), text='')
 
