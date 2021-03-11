@@ -80,7 +80,10 @@ def test_client_sleeps_when_no_jobs_available(requests_mock, mocker):
         '{}/get_job'.format(BASE_URL),
         json={"error": "No jobs available"}
     )
-    mocker.patch('c21client.client.Client.handle_error', return_value=("2", "22"))
+    mocker.patch(
+        'c21client.client.Client.handle_error',
+        return_value=("2", "22")
+    )
     assert ("2", "22") == client.get_job()
 
 
