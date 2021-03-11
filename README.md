@@ -28,7 +28,7 @@ Type `make static` for only static tests
 Type `make test` for only pytest
 
 * Static analysis using `flake8`, `pycodestyle`, and `pylint`
-* Run `pytest` with coverage.  The coverage metric is set to 95%
+* Run `pytest` with coverage.  The coverage metric is set to 75% temporarily, until 95% is reached.
 * Sometimes if `pytest` is installed globally, the virtual environment will use that instead. Simply exit and reenter the virtual environment to resolve this.
 
 ## Contributors
