@@ -7,11 +7,6 @@ class WorkServer:
         self.app = Flask(__name__)
         self.redis = redis_server
 
-    def _set_data_and_key(request):
-        data = json.loads(request.data)
-        key = _get_first_key(data)
-        return data, key
-
 
 def create_server(database):
     '''Create server, add endpoints, and return the server'''
@@ -40,18 +35,18 @@ def create_server(database):
 
     @workserver.app.route('/put_results', methods=['PUT'])
     def _put_results():
-        data, key = _set_data_and_key(request)
+        data = json.loads(request.data)
+        key = _get_first_key(data)
         value = workserver.redis.hget("jobs_in_progress", key)
         if key == -1 or value is None:
             return '', 400
         workserver.redis.hdel("jobs_in_progress", key)
         workserver.redis.hset("jobs_done", key, data[key])
-        print("job_id: %s, value: %s" % (key, data[key]))
+        'print("job_id: %s, value: %s" % (key, data[key]))''
         return '', 200
 
     @workserver.app.route('/get_client_id', methods=['GET'])
     def get_client_id():
-        _set_data_and_key(request)
         client_id = server.redis.get('total_num_client_ids')
         if client_id is None:
             client_id = 0
