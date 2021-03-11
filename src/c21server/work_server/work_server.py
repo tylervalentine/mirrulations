@@ -51,6 +51,7 @@ def create_server(database):
 
     @workserver.app.route('/get_client_id', methods=['GET'])
     def get_client_id():
+        _set_data_and_key(request)
         client_id = server.redis.get('total_num_client_ids')
         if client_id is None:
             client_id = 0
