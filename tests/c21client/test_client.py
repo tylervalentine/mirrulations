@@ -62,8 +62,8 @@ def test_client_handles_error_getting_jobs(requests_mock):
     )
     try:
         client.get_job()
-    except requests.exceptions.HTTPError as e:
-        assert True, 'raised an exception: {}'.format(e)
+    except requests.exceptions.HTTPError as exception:
+        assert True, 'raised an exception: {}'.format(exception)
 
 
 # def test_client_sleeps_when_no_jobs_available(requests_mock):
@@ -82,8 +82,8 @@ def test_client_sends_job_results(requests_mock):
     requests_mock.put('{}/put_results'.format(BASE_URL), text='')
     try:
         client.send_job_results(mock_id, mock_job_result)
-    except Exception as e:
-        assert False, 'raised an exception: {}'.format(e)
+    except requests.exceptions.HTTPError as exception:
+        assert False, 'raised an exception: {}'.format(exception)
 
 
 def test_client_completes_job_requested(requests_mock):
@@ -93,5 +93,5 @@ def test_client_completes_job_requested(requests_mock):
 
     try:
         client.complete_client_request()
-    except Exception as e:
-        assert False, 'Raised an exception: {}'.format(e)
+    except requests.exceptions.HTTPError as exception:
+        assert False, 'Raised an exception: {}'.format(exception)
