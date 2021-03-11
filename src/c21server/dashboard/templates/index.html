@@ -7,6 +7,9 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <!-- CSS -->
         <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+
+        <!-- JS -->
+        <script src="{{ url_for('static', filename='index.js') }}"></script>
         <title>Dashboard</title>
     </head>
 
@@ -17,19 +20,19 @@
             </div>
             <div class="container flex">
                 <div class="card flex">
-                    <h2 class="error">{{jobs_waiting}}</h2>
+                    <h2 id="jobs-waiting" class="error">{{jobs_waiting}}</h2>
                     <p>Job Waiting</p>
                 </div>
                 <div class="card flex">
-                    <h2 class="warning">{{jobs_in_progress}}</h2>
+                    <h2 id="jobs-progress" class="warning">{{jobs_in_progress}}</h2>
                     <p>Jobs In Progress</p>
                 </div>
                 <div class="card flex">
-                    <h2 class="success">{{jobs_done}}</h2>
+                    <h2 id="jobs-done" class="success">{{jobs_done}}</h2>
                     <p>Jobs Done</p>
                 </div>
                 <div class="card flex">
-                    <h2 class="total-clients">{{clients_total}}</h2>
+                    <h2 id="total-clients" class="total-clients">{{clients_total}}</h2>
                     <p>Total Clients</p>
                 </div>
             </div>

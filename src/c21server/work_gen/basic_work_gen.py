@@ -21,4 +21,9 @@ def emulate_job_creation(database):
 
 if __name__ == "__main__":
     redis = redis.Redis()
-    emulate_job_creation(redis)
+    try:
+        redis.ping()
+        print('Successfully connected to redis')
+        emulate_job_creation(redis)
+    except redis.exceptions.ConnectionError as r_con_error:
+        print('Redis connection error:', r_con_error)
