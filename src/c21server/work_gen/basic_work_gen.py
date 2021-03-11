@@ -11,12 +11,17 @@ def generate_jobs(database):
         database.hset("jobs_waiting", key, value)
 
 
-def emulate_job_creation():
-    database = redis.Redis()
+def emulate_job_creation(database):
     for _ in range(5):
         generate_jobs(database)
         time.sleep(30)
 
 
 if __name__ == "__main__":
-    emulate_job_creation()
+    redis = redis.Redis()
+    try:
+        redis.ping()
+        print('Successfully connected to redis')
+        emulate_job_creation(redis)
+    except redis.exceptions.ConnectionError as r_con_error:
+        print('Redis connection error:', r_con_error)

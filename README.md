@@ -31,6 +31,10 @@ Type `make test` for only pytest
 * Run `pytest` with coverage.  The coverage metric is set to 95%
 * Sometimes if `pytest` is installed globally, the virtual environment will use that instead. Simply exit and reenter the virtual environment to resolve this.
 
+## Architecture
+The image below shows the overview of the architecture for our system. Right now, the portions in blue are implemented at a basic level. Those in red are the remaining parts we need to connect. Regardless, the image shows the relationship between the working parts but also includes the plan over the next few weeks.
+![Architecture](Architecture.png)
+
 ## Contributors
 * Abdullah Alharbi (alharbia02@moravian.edu)
 * Alex Meci (mecia@moravian.edu)
