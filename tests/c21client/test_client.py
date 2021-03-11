@@ -74,13 +74,14 @@ def test_client_handles_error_getting_jobs(requests_mock):
         assert True, 'raised an exception: {}'.format(exception)
 
 
-# def test_client_sleeps_when_no_jobs_available(requests_mock):
-#     client = Client()
-#     requests_mock.get(
-#         '{}/get_job'.format(BASE_URL),
-#         json={"error": "No jobs available"}
-#     )
-#     client.get_job()
+def test_client_sleeps_when_no_jobs_available(requests_mock, mocker):
+    client = Client()
+    requests_mock.get(
+        '{}/get_job'.format(BASE_URL),
+        json={"error": "No jobs available"}
+    )
+    mocker.patch('c21client.client.Client.handle_error', return_value=("2", "22"))
+    assert ("2", "22") == client.get_job()
 
 
 def test_client_sends_job_results(requests_mock):
