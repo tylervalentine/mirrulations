@@ -8,26 +8,26 @@ class WorkServer:
         self.redis = redis_server
 
 
+def get_first_key(data):
+    '''Checks to make sure JSON has at least one entry and that its
+        key-value pair are both integers. Returns the first key value
+        if the data is valid, otherwise returns -1.
+    '''
+    if data is not None:
+        keys = list(data.keys())
+        is_key_digit = len(keys) > 0 and keys[0].isdigit()
+        if is_key_digit and isinstance(data[keys[0]], int):
+            return keys[0]
+    return -1
+
+
 def create_server(database):
     '''Create server, add endpoints, and return the server'''
     workserver = WorkServer(database)
     try:
         workserver.redis.keys("*")
     except redis.exceptions.ConnectionError:
-        return
-
-
-    def get_first_key(data):
-        '''Checks to make sure JSON has at least one entry and that its
-           key-value pair are both integers. Returns the first key value
-           if the data is valid, otherwise returns -1.
-        '''
-        if data is not None:
-            keys = list(data.keys())
-            is_key_digit = len(keys) > 0 and keys[0].isdigit()
-            if is_key_digit and isinstance(data[keys[0]], int):
-                return keys[0]
-        return -1
+        return None
 
     @workserver.app.route('/get_job', methods=['GET'])
     def _get_job():
