@@ -18,6 +18,24 @@ In our code we can represent this with a python dictionary, and we can easily co
 To iterate through the first 5,000 items, we iterate through 250 items in each page, there are 20 pages per grouping which gives up a total of 5,000 items. 
 We then note last item’s last modified date down to the second. 
 Then iterate through the next 5,000 items starting with the last item noted as the parameter to filter everything after the parameter noted. Repeat. We are sorting by the last modified date.
+
+The syntax for a single call to actually do this is as follows:
+```
+https://api.regulations.gov/v4/END_POINT?page[size]=250&page[number]=PAGE_NUMBER&sort=lastModifiedDate,documentId&api_key=API_KEY
+```
+
+
+Where `END_POINT`, `PAGE_NUMBER`, and `API_KEY` are variables you put in. The max value for the page number is 20, and since each page only holds 250 items you can only get 5000 items with this format.
+
+Once you hit those 5000 items, you'll need to add the last modified date filter, using the oldest (last) date in the set of 5000:
+`filter[lastModifiedDate][ge]=2020-08-10 11:58:52 `
+
+To basically cut off the first 5000 items you got and then continue the same way from there.
+
+```
+Added onto the first example URL/call:
+https://api.regulations.gov/v4/END_POINT?filter[lastModifiedDate][ge]=2020-08-10 11:58:52&page[size]=250&page[number]=PAGE_NUMBER&sort=lastModifiedDate,documentId&api_key=API_KEY
+```
 	
 ### **Job Generator Endpoints**
 ***Three job generating endpoints***
