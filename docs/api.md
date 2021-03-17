@@ -47,12 +47,12 @@ Documents - Parent of Comments
 Comments - Child of Documents
 	
 ### **Check data overlaps between endpoints**
-*Comments* - Missing fields in detailed view for comments `lastModifieDate` and `highlightedContent`
+*Comments* - Missing fields in detailed view for comments `lastModifiedDate` and `highlightedContent`
 
-*Documents* - Missing fields in detailed view for Documents `lastModifieDate` and `highlightedContent`
+*Documents* - Missing fields in detailed view for Documents `lastModifiedDate` and `highlightedContent`
 
-*Dockets* - Missing fields in detailed view for Dockets `lastModifieDate` and `highlightedContent`
+*Dockets* - Missing fields in detailed view for Dockets `lastModifiedDate` and `highlightedContent`
 
 
 ***Additional Notes***
-`lastModifiedDate` and `ModifyDate` have the same values. Non-detailed view for all types have `modifyDate` instead of `lastModifiedDate`
+`lastModifiedDate` and `modifyDate` have the same values. Non-detailed view for all types have `modifyDate` instead of `lastModifiedDate`
