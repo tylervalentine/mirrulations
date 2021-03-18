@@ -18,7 +18,7 @@ def test_generate_jobs(mock_redis):
 
 
 def test_emulate_job_creation(mock_redis):
-    work_gen.emulate_job_creation(mock_redis)
+    work_gen.emulate_job_creation(mock_redis, 0)
     assert mock_redis.hlen("jobs_waiting") == 50
     expected_keys = (i for i in range(1, 51))
     keys = mock_redis.hkeys("jobs_waiting")
