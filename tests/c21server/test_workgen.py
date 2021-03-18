@@ -10,17 +10,22 @@ def fixture_mock_redis():
 
 def test_generate_jobs(mock_redis):
     work_gen.generate_jobs(mock_redis, 6)
-    assert mock_redis.hlen("jobs_waiting") == 10
+    assert mock_redis.hlen('jobs_waiting') == 10
     expected_keys = (i for i in range(6, 16))
-    keys = mock_redis.hkeys("jobs_waiting")
+    keys = mock_redis.hkeys('jobs_waiting')
     for key in keys:
         assert int(key) in expected_keys
 
 
+def test_generate_jobs_no_start_key(mock_redis):
+    work_gen.generate_jobs(mock_redis)
+    assert mock_redis.hlen('jobs_waiting') == 10
+
+
 def test_emulate_job_creation(mock_redis):
     work_gen.emulate_job_creation(mock_redis, 0)
-    assert mock_redis.hlen("jobs_waiting") == 50
+    assert mock_redis.hlen('jobs_waiting') == 50
     expected_keys = (i for i in range(1, 51))
-    keys = mock_redis.hkeys("jobs_waiting")
+    keys = mock_redis.hkeys('jobs_waiting')
     for key in keys:
         assert int(key) in expected_keys
