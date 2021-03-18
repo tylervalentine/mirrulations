@@ -42,7 +42,7 @@ or if there is no database to connect to it returns 500 and the JSON
 ```{"success": "The job was successfully completed"}```
 
 
-### '/get_client_id'
+### `/get_client_id`
 * Increments the `total_num_client_ids` value by one and returns it
 * If there is no database to connect to it returns 500 and the JSON
 ```{"error": "Cannot connect to the database"}```
