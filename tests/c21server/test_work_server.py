@@ -55,7 +55,7 @@ def test_get_job_returns_single_job(mock_server):
     mock_server.redis.hset('jobs_waiting', 1, 2)
     response = mock_server.client.get('/get_job')
     assert response.status_code == 200
-    expected = {'1': '2'}
+    expected = {'job': {'1': '2'}}
     assert response.get_json() == expected
 
 
@@ -70,14 +70,17 @@ def test_get_waiting_job_is_now_in_progress_and_not_waiting(mock_server):
 
 def test_put_results_with_zero_jobs_in_progress(mock_server):
     mock_server.redis.hset('jobs_in_progress', 2, '')
-    response = mock_server.client.put("/put_results", data=dumps({'': ''}))
+    data = dumps({'results': {'': ''}})
+    response = mock_server.client.put("/put_results", data=data)
     assert mock_server.redis.hget('jobs_in_progress', 2).decode() == ''
     assert response.status_code == 400
 
 
 def test_put_results_returns_correct_job(mock_server):
     mock_server.redis.hset('jobs_in_progress', 2, 3)
-    response = mock_server.client.put("/put_results", data=dumps({2: 3}))
+    data = dumps({'results': {2: 3}})
+    response = mock_server.client.put("/put_results", data=data)
     assert mock_server.redis.hget('jobs_done', 2).decode() == '3'
     assert response.status_code == 200
-    assert response.get_json() is None
+    expected = {'success': 'The job was successfully completed'}
+    assert response.get_json() == expected

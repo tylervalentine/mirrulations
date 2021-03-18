@@ -13,10 +13,10 @@ def generate_jobs(database, start_key=None):
         start_key += 1
 
 
-def emulate_job_creation(database):
+def emulate_job_creation(database, sleep_time):
     for current_key in range(1, 50, 10):
         generate_jobs(database, current_key)
-        time.sleep(30)
+        time.sleep(sleep_time)
 
 
 if __name__ == "__main__":
@@ -24,6 +24,6 @@ if __name__ == "__main__":
     try:
         redis.ping()
         print('Successfully connected to redis')
-        emulate_job_creation(redis)
+        emulate_job_creation(redis, 30)
     except redis.exceptions.ConnectionError as r_con_error:
         print('Redis connection error:', r_con_error)
