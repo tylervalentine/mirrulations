@@ -1,16 +1,25 @@
 from json import dumps
-from fakeredis import FakeRedis
+from fakeredis import FakeRedis, FakeServer
 from pytest import fixture
 from c21server.work_server.work_server import create_server
 
 
 @fixture(name='mock_server')
 def fixture_mock_server():
-    mock_db = FakeRedis()
+    redis_server = FakeServer()
+    mock_db = FakeRedis(server=redis_server)
     server = create_server(mock_db)
+    server.redis_server = redis_server
     server.app.config['TESTING'] = True
     server.client = server.app.test_client()
     return server
+
+
+def test_create_server_not_connected():
+    redis_server = FakeServer()
+    mock_db = FakeRedis(server=redis_server)
+    redis_server.connected = False
+    assert create_server(mock_db) is None
 
 
 def test_create_mock_database(mock_server):
@@ -68,6 +77,12 @@ def test_get_waiting_job_is_now_in_progress_and_not_waiting(mock_server):
     assert mock_server.redis.hget('jobs_in_progress', keys[0]).decode() == '3'
 
 
+def test_put_results_message_body_contains_no_results(mock_server):
+    response = mock_server.client.put("/put_results", data=dumps({}))
+    assert response.status_code == 400
+    assert response.json['error'] == 'The body does not contain the results'
+
+
 def test_put_results_with_zero_jobs_in_progress(mock_server):
     mock_server.redis.hset('jobs_in_progress', 2, '')
     data = dumps({'results': {'': ''}})
@@ -84,3 +99,30 @@ def test_put_results_returns_correct_job(mock_server):
     assert response.status_code == 200
     expected = {'success': 'The job was successfully completed'}
     assert response.get_json() == expected
+
+
+def test_total_num_client_ids_is_increased_on_get_client_id_call(mock_server):
+    previous_number_of_ids = mock_server.redis.get('total_num_client_ids')
+    assert previous_number_of_ids is None
+    mock_server.client.get('/get_client_id')
+    assert int(mock_server.redis.get('total_num_client_ids')) == 1
+
+
+def test_get_client_id_sends_correct_id(mock_server):
+    mock_server.redis.set('total_num_client_ids', 1)
+    assert int(mock_server.redis.get('total_num_client_ids')) == 1
+    assert mock_server.client.get('/get_client_id').json['client_id'] == 2
+
+
+def test_database_returns_error_when_database_does_not_exist(mock_server):
+    mock_server.redis_server.connected = False
+    respose = mock_server.client.get('/get_job')
+    assert respose.json['error'] == 'Cannot connect to the database'
+    assert mock_server.client.get('/get_job').status_code == 500
+
+
+def test_get_client_id_returns_tuple_when_no_success(mock_server):
+    mock_server.redis_server.connected = False
+    response = mock_server.client.get('/get_client_id')
+    assert response.json['error'] == 'Cannot connect to the database'
+    assert mock_server.client.get('/get_client_id').status_code == 500
