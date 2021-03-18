@@ -16,21 +16,21 @@ class Client:
         self.client_id = client_id
 
     def request_client_id(self):
-        endpoint = self.url + '/get_client_id'
+        endpoint = f'{self.url}/get_client_id'
         response = assure_request(requests.get, endpoint)
         client_id = int(response.json()['client_id'])
         write_client_id(client_id)
         return client_id
 
     def get_job(self):
-        endpoint = self.url + '/get_job'
+        endpoint = f'{self.url}/get_job'
         client_id = self.client_id
         data = {'client_id': client_id}
-        job_id, work = request_job(endpoint, data)
-        return job_id, work
+        job_id, value = request_job(endpoint, data)
+        return job_id, value
 
     def send_job_results(self, job_id, job_result):
-        endpoint = self.url + '/put_results'
+        endpoint = f'{self.url}/put_results'
         client_id = self.client_id
         data = {'results': {job_id: int(job_result)}, 'client_id': client_id}
         assure_request(requests.put, endpoint, data=dumps(data))
@@ -38,17 +38,17 @@ class Client:
 
 def execute_client_task(_client):
     print('Requesting new job from server...')
-    job_id, work = _client.get_job()
+    job_id, value = _client.get_job()
     print('Received job!')
-    perform_job(work)
+    perform_job(value)
     print('Sending result back to server...')
-    _client.send_job_results(job_id, work)
+    _client.send_job_results(job_id, value)
     print('Job complete!\n')
 
 
-def perform_job(work):
-    print(f'I am working for {work} seconds...')
-    time.sleep(int(work))
+def perform_job(value):
+    print(f'I am working for {value} seconds...')
+    time.sleep(int(value))
     print('Done with current job!')
 
 
@@ -56,9 +56,9 @@ def request_job(endpoint, data):
     response = assure_request(requests.get, endpoint,
                               data=dumps(data))
     job = loads(response.text)['job']
-    work_id = list(job.keys())[0]
-    work = job[work_id]
-    return work_id, work
+    job_id = list(job.keys())[0]
+    value = job[job_id]
+    return job_id, value
 
 
 def assure_request(request, url, **kwargs):
@@ -94,7 +94,7 @@ def read_client_id():
 
 def write_client_id(client_id):
     with open('client.cfg', 'w') as file:
-        file.write(str(client_id))
+        file.write(client_id)
 
 
 if __name__ == '__main__':
