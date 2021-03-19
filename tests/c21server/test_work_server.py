@@ -81,7 +81,7 @@ def test_put_results_message_body_contains_no_results(mock_server):
 def test_put_results_with_zero_jobs_in_progress(mock_server):
     mock_server.redis.hset('jobs_in_progress', 2, '')
     data = dumps({'results': {'': ''}})
-    response = mock_server.client.put("/put_results", data=data)
+    response = mock_server.client.put('/put_results', data=data)
     assert mock_server.redis.hget('jobs_in_progress', 2).decode() == ''
     assert response.status_code == 400
 
@@ -89,7 +89,7 @@ def test_put_results_with_zero_jobs_in_progress(mock_server):
 def test_put_results_returns_correct_job(mock_server):
     mock_server.redis.hset('jobs_in_progress', 2, 3)
     data = dumps({'results': {2: 3}})
-    response = mock_server.client.put("/put_results", data=data)
+    response = mock_server.client.put('/put_results', data=data)
     assert mock_server.redis.hget('jobs_done', 2).decode() == '3'
     assert response.status_code == 200
     expected = {'success': 'The job was successfully completed'}
@@ -111,8 +111,8 @@ def test_get_client_id_sends_correct_id(mock_server):
 
 def test_database_returns_error_when_database_does_not_exist(mock_server):
     mock_server.redis_server.connected = False
-    respose = mock_server.client.get('/get_job')
-    assert respose.json['error'] == 'Cannot connect to the database'
+    response = mock_server.client.get('/get_job')
+    assert response.json['error'] == 'Cannot connect to the database'
     assert mock_server.client.get('/get_job').status_code == 500
 
 
