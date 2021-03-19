@@ -116,8 +116,8 @@ def test_get_client_id_sends_correct_id(mock_server):
 
 def test_database_returns_error_when_database_does_not_exist(mock_server):
     mock_server.redis_server.connected = False
-    respose = mock_server.client.get('/get_job')
-    assert respose.json['error'] == 'Cannot connect to the database'
+    response = mock_server.client.get('/get_job')
+    assert response.json['error'] == 'Cannot connect to the database'
     assert mock_server.client.get('/get_job').status_code == 500
 
 
