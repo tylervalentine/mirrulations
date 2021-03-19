@@ -8,27 +8,28 @@ class Dashboard:
         self.redis = redis_server
 
 
+def get_jobs_stats(database):
+    jobs_waiting = int(database.hlen('jobs_waiting'))
+    jobs_in_progress = int(database.hlen('jobs_in_progress'))
+    jobs_done = int(database.hlen('jobs_done'))
+    jobs_total = jobs_waiting + jobs_in_progress + jobs_done
+    client_ids = database.get('total_num_client_ids')
+    clients_total = int(client_ids) if client_ids is not None else 0
+    return {
+        'num_jobs_waiting': jobs_waiting,
+        'num_jobs_in_progress': jobs_in_progress,
+        'num_jobs_done': jobs_done,
+        'jobs_total': jobs_total,
+        'clients_total': clients_total
+    }
+
+
 def create_server(database):
     dashboard = Dashboard(database)
 
-    def get_jobs_stats():
-        jobs_waiting = int(dashboard.redis.hlen('jobs_waiting'))
-        jobs_in_progress = int(dashboard.redis.hlen('jobs_in_progress'))
-        jobs_done = int(dashboard.redis.hlen('jobs_done'))
-        jobs_total = jobs_waiting + jobs_in_progress + jobs_done
-        client_ids = dashboard.redis.get('total_num_client_ids')
-        clients_total = int(client_ids) if client_ids is not None else 0
-        return {
-            'num_jobs_waiting': jobs_waiting,
-            'num_jobs_in_progress': jobs_in_progress,
-            'num_jobs_done': jobs_done,
-            'jobs_total': jobs_total,
-            'clients_total': clients_total
-        }
-
     @dashboard.app.route('/dashboard', methods=['GET'])
     def _index():
-        job_information = get_jobs_stats()
+        job_information = get_jobs_stats(dashboard.redis)
         return render_template(
             'index.html',
             jobs_waiting=job_information['num_jobs_waiting'],
@@ -40,7 +41,7 @@ def create_server(database):
 
     @dashboard.app.route('/data', methods=['GET'])
     def _get_dashboard_data():
-        job_information = get_jobs_stats()
+        job_information = get_jobs_stats(dashboard.redis)
         return jsonify(job_information), 200
 
     return dashboard
