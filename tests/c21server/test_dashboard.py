@@ -45,3 +45,12 @@ def test_dashboard_returns_job_information(mock_server):
         'clients_total': 2
     }
     assert response.get_json() == expected
+
+
+def test_dashboard_returns_html(mock_server):
+    add_mock_data_to_database(mock_server.redis)
+    response = mock_server.client.get('/dashboard')
+
+    assert response.status_code == 200
+    expected = '<!DOCTYPE html>'
+    assert response.data.decode().split('\n')[0] == expected
