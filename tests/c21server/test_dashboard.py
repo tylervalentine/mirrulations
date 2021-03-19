@@ -1,13 +1,26 @@
+from pytest import fixture
 from c21server.dashboard.dashboard_server import create_server
+from .test_utils import mock_flask_server
 
 
-def test_dashboard_returns_job_information():
-    database = Database()
-    server = create_server(database)
-    server.app.config['TESTING'] = True
-    client = server.app.test_client()
+@fixture(name='mock_server')
+def fixture_mock_server():
+    return mock_flask_server(create_server)
 
-    response = client.get('/data')
+
+def add_mock_data_to_database(database):
+    jobs_waiting = {i: i for i in range(1, 6)}
+    database.hset('jobs_waiting', mapping=jobs_waiting)
+    jobs_in_progress = {i: i for i in range(6, 10)}
+    database.hset('jobs_in_progress', mapping=jobs_in_progress)
+    jobs_done = {i: i for i in range(10, 13)}
+    database.hset('jobs_done', mapping=jobs_done)
+    database.set('total_num_client_ids', 2)
+
+
+def test_dashboard_returns_job_information(mock_server):
+    add_mock_data_to_database(mock_server.redis)
+    response = mock_server.client.get('/data')
 
     assert response.status_code == 200
     expected = {
@@ -19,19 +32,3 @@ def test_dashboard_returns_job_information():
     }
 
     assert response.get_json() == expected
-
-
-class Database:
-    def __init__(self):
-        self.data = {
-            'jobs_waiting': 5,
-            'jobs_in_progress': 4,
-            'jobs_done': 3,
-            'total_num_client_ids': 2
-        }
-
-    def hlen(self, key):
-        return self.data[key]
-
-    def get(self, key):
-        return self.data[key]
