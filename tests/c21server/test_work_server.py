@@ -2,17 +2,12 @@ from json import dumps
 from fakeredis import FakeRedis, FakeServer
 from pytest import fixture
 from c21server.work_server.work_server import create_server
+from .test_utils import mock_flask_server
 
 
 @fixture(name='mock_server')
 def fixture_mock_server():
-    redis_server = FakeServer()
-    mock_db = FakeRedis(server=redis_server)
-    server = create_server(mock_db)
-    server.redis_server = redis_server
-    server.app.config['TESTING'] = True
-    server.client = server.app.test_client()
-    return server
+    return mock_flask_server(create_server)
 
 
 def test_create_server_not_connected():
