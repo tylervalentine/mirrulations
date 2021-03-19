@@ -18,7 +18,6 @@ or if there is no database to connect to it returns 500 and the JSON
 * Otherwise if there is a job, then it returns 200 and the JSON
 ```
 {
-    "client_id": [client_id]
     "job": {[job_id]: [value]}
 }
 ```
