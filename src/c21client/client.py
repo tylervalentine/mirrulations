@@ -1,89 +1,114 @@
 import time
 from json import dumps, loads
 import requests
+from requests.exceptions import ConnectionError as RequestConnectionError
+from requests.exceptions import HTTPError, RequestException
 
 
-def server_url():
-    return "http://localhost:8080"
+class Client:
+
+    def __init__(self):
+        self.url = 'http://localhost:8080'
+        self.client_id = -1
+
+    def get_client_id(self):
+        client_id = read_client_id()
+        if client_id == -1:
+            client_id = self.request_client_id()
+        self.client_id = client_id
+
+    def request_client_id(self):
+        endpoint = f'{self.url}/get_client_id'
+        response = assure_request(requests.get, endpoint)
+        client_id = int(response.json()['client_id'])
+        write_client_id(client_id)
+        return client_id
+
+    def get_job(self):
+        endpoint = f'{self.url}/get_job'
+        client_id = self.client_id
+        data = {'client_id': client_id}
+        job_id, value = request_job(endpoint, data)
+        return job_id, value
+
+    def send_job_results(self, job_id, job_result):
+        endpoint = f'{self.url}/put_results'
+        client_id = self.client_id
+        data = {'results': {job_id: int(job_result)}, 'client_id': client_id}
+        assure_request(requests.put, endpoint, data=dumps(data))
 
 
-def request_job(url):
-    request = requests.get(url)
-    if request.status_code != 400:
-        request.raise_for_status()
-    work_id, work = list(loads(request.text).items())[0]
-    return work_id, work
+def execute_client_task(_client):
+    print('Requesting new job from server...')
+    job_id, value = _client.get_job()
+    print('Received job!')
+    perform_job(value)
+    print('Sending result back to server...')
+    _client.send_job_results(job_id, value)
+    print('Job complete!\n')
 
 
-def handle_error(j_id, work, url):
-    while j_id == "error":
-        print(work)
-        print("I'm sleeping a minute.")
-        time.sleep(60)
-        j_id, work = request_job(url)
-    return j_id, work
+def perform_job(value):
+    print(f'I am working for {value} seconds...')
+    time.sleep(int(value))
+    print('Done with current job!')
 
 
-def get_job(url):
-    full_url = f"{url}/get_job"
-    j_id, work = request_job(full_url)
-    if j_id == "error":
-        j_id, work = handle_error(j_id, work, full_url)
-    return j_id, work
+def request_job(endpoint, data):
+    response = assure_request(requests.get, endpoint,
+                              data=dumps(data))
+    job = loads(response.text)['job']
+    job_id = list(job.keys())[0]
+    value = job[job_id]
+    return job_id, value
 
 
-def perform_job(j):
-    print(f"I am working for {j} seconds.")
-    time.sleep(int(j))
+def assure_request(request, url, sleep_time=60, **kwargs):
+    while True:
+        response = attempt_request(request, url, sleep_time, **kwargs)
+        if response is not None:
+            return response
 
 
-def send_job_results(j_id, job_result, url):
-    end_point = "/put_results"
-    data = {j_id: int(job_result)}
-    request = requests.put(url + end_point, data=dumps(data))
-    request.raise_for_status()
+def attempt_request(request, url, sleep_time, **kwargs):
+    try:
+        response = request(url, **kwargs)
+        check_status_code(response.status_code)
+        response.raise_for_status()
+    except RequestConnectionError:
+        print('Unable to connect to the server. '
+              'Trying again in a minute...')
+        time.sleep(sleep_time)
+    except (HTTPError, RequestException):
+        time.sleep(sleep_time)
+    else:
+        return response
+    return None
+
+
+def check_status_code(status_code):
+    if status_code == 400:
+        print('No jobs available. Trying again in a minute...')
+    elif status_code > 400:
+        print('Server error. Trying again in a minute...')
 
 
 def read_client_id():
     try:
-        with open("client.cfg", "r") as file:
+        with open('client.cfg', 'r') as file:
             return int(file.readline())
     except FileNotFoundError:
         return -1
 
 
-def write_client_id(c_id):
-    with open("client.cfg", "w") as file:
-        file.write(str(c_id))
+def write_client_id(client_id):
+    with open('client.cfg', 'w') as file:
+        file.write(client_id)
 
 
-def request_client_id(url):
-    end_point = "/get_client_id"
-    request = requests.get(url + end_point)
-
-    # Check if status code is 200 type code: successful GET
-    if request.status_code // 100 == 2:
-        c_id = int(request.json())
-        write_client_id(c_id)
-        return c_id
-    return -1
-
-
-# Reads from file, or requests if nothing there
-def get_client_id():
-    c_id = read_client_id()
-    if c_id == -1:
-        c_id = request_client_id(server_url())
-    if c_id == -1:
-        print("Could not get client ID!")
-    return c_id
-
-
-if __name__ == "__main__":
-    client_id = get_client_id()
-    print("ID of this client: ", client_id)
-
+if __name__ == '__main__':
+    client = Client()
+    client.get_client_id()
+    print('Your ID is: ', client.client_id)
     while True:
-        job_id, job = get_job(server_url())
-        perform_job(job)
-        send_job_results(job_id, job, server_url())
+        execute_client_task(client)
