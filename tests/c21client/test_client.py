@@ -5,6 +5,7 @@ import requests_mock
 import c21client.client
 from c21client.client import Client, attempt_request, execute_client_task
 
+
 BASE_URL = 'http://localhost:8080'
 
 
