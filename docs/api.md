@@ -36,6 +36,13 @@ Added onto the first example URL/call:
 https://api.regulations.gov/v4/END_POINT?filter[lastModifiedDate][ge]=2020-08-10 11:58:52&page[size]=250&page[number]=PAGE_NUMBER&sort=lastModifiedDate,documentId&api_key=API_KEY
 ```
 
+### **What the client should do**
+While the above section describes how to generate all jobs, the client will do the actual work for each job. 
+
+This will be relatively simple: return the JSON given by the endpoint to the work server.
+
+Additionally, if a document/comment is being retrieved, return any attachments that go along with that document/comment. These can be identified in the JSON given under data/attributes/fileFormats.
+
 ### **Job Generator Endpoints**
 ***Three job generating endpoints***
 
