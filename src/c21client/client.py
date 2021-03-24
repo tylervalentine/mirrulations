@@ -21,7 +21,7 @@ class Client:
         endpoint = f'{self.url}/get_client_id'
         response = assure_request(requests.get, endpoint)
         client_id = int(response.json()['client_id'])
-        write_client_id('client.cf', client_id)
+        write_client_id('client.cfg', client_id)
         return client_id
 
     def get_job(self):
