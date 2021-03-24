@@ -2,14 +2,15 @@
 
 ### **What a Job is**
 
-A job is: {job_id, endpoint, variables},
+A job is: {`job_id`, `call_url`}
 
-Where job\_id is an integer, a job ID is mostly for the work server to use.
+`job_id` is an integer, mostly for the work server to use to manage jobs.
 
-Endpoint is a string; either "dockets", "documents", or "comments".
+`call_url` is a URL for the client to call. This will generally be in the format of:
+`https://api.regulations.gov/v4/END_POINT/ITEM_ID`
 
-Variables is a list of strings, each string representing an ID of a docket/document/comment in the regulations database,
-ex: "FMCSA-1997-2350-2476".
+Where `END_POINT` would be either "dockets", "documents", or "comments", specifying which endpoint to retrieve an item from.
+`ITEM_ID` is the specific thing to retrieve, whether a docket, document, or comment, and generally looks like this: `FMCSA-1997-2350-2476`.
 
 Within the code we can represent this with a python dictionary. We can easily convert said dictionary into a string with the JSON library for transferring between parts of our implementation.
 	
