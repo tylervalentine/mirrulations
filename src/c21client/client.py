@@ -1,6 +1,8 @@
 import time
 from json import dumps, loads
 import requests
+from requests.exceptions import ConnectionError as RequestConnectionError
+from requests.exceptions import HTTPError, RequestException
 
 
 class Client:
@@ -10,7 +12,7 @@ class Client:
         self.client_id = -1
 
     def get_client_id(self):
-        client_id = read_client_id()
+        client_id = read_client_id('client.cfg')
         if client_id == -1:
             client_id = self.request_client_id()
         self.client_id = client_id
@@ -19,7 +21,7 @@ class Client:
         endpoint = f'{self.url}/get_client_id'
         response = assure_request(requests.get, endpoint)
         client_id = int(response.json()['client_id'])
-        write_client_id(client_id)
+        write_client_id('client.cfg', client_id)
         return client_id
 
     def get_job(self):
@@ -61,20 +63,27 @@ def request_job(endpoint, data):
     return job_id, value
 
 
-def assure_request(request, url, **kwargs):
+def assure_request(request, url, sleep_time=60, **kwargs):
     while True:
-        try:
-            response = request(url, **kwargs)
-            check_status_code(response.status_code)
-            response.raise_for_status()
-        except requests.exceptions.ConnectionError:
-            print('Unable to connect to the server. '
-                  'Trying again in a minute...')
-            time.sleep(60)
-        except requests.exceptions.RequestException:
-            time.sleep(60)
-        else:
+        response = attempt_request(request, url, sleep_time, **kwargs)
+        if response is not None:
             return response
+
+
+def attempt_request(request, url, sleep_time, **kwargs):
+    try:
+        response = request(url, **kwargs)
+        check_status_code(response.status_code)
+        response.raise_for_status()
+    except RequestConnectionError:
+        print('Unable to connect to the server. '
+              'Trying again in a minute...')
+        time.sleep(sleep_time)
+    except (HTTPError, RequestException):
+        time.sleep(sleep_time)
+    else:
+        return response
+    return None
 
 
 def check_status_code(status_code):
@@ -84,16 +93,16 @@ def check_status_code(status_code):
         print('Server error. Trying again in a minute...')
 
 
-def read_client_id():
+def read_client_id(filename):
     try:
-        with open('client.cfg', 'r') as file:
+        with open(filename, 'r') as file:
             return int(file.readline())
     except FileNotFoundError:
         return -1
 
 
-def write_client_id(client_id):
-    with open('client.cfg', 'w') as file:
+def write_client_id(filename, client_id):
+    with open(filename, 'w') as file:
         file.write(client_id)
 
 
