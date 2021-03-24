@@ -12,7 +12,7 @@ class Client:
         self.client_id = -1
 
     def get_client_id(self):
-        client_id = read_client_id()
+        client_id = read_client_id('client.cfg')
         if client_id == -1:
             client_id = self.request_client_id()
         self.client_id = client_id
@@ -21,7 +21,7 @@ class Client:
         endpoint = f'{self.url}/get_client_id'
         response = assure_request(requests.get, endpoint)
         client_id = int(response.json()['client_id'])
-        write_client_id(client_id)
+        write_client_id('client.cf', client_id)
         return client_id
 
     def get_job(self):
@@ -93,16 +93,16 @@ def check_status_code(status_code):
         print('Server error. Trying again in a minute...')
 
 
-def read_client_id():
+def read_client_id(filename):
     try:
-        with open('client.cfg', 'r') as file:
+        with open(filename, 'r') as file:
             return int(file.readline())
     except FileNotFoundError:
         return -1
 
 
-def write_client_id(client_id):
-    with open('client.cfg', 'w') as file:
+def write_client_id(filename, client_id):
+    with open(filename, 'w') as file:
         file.write(client_id)
 
 
