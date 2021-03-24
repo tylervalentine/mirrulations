@@ -165,7 +165,7 @@ def test_read_client_id_file_not_found():
 
 def test_write_client_id(tmpdir):
     file = tmpdir.join('test_write.txt')
-    write_client_id(str(file), '1')  # or use str(file)
+    write_client_id(str(file), '1')
     assert file.read() == '1'
 
 
