@@ -3,7 +3,9 @@ from pytest import fixture
 import requests
 import requests_mock
 import c21client.client
-from c21client.client import Client, attempt_request, execute_client_task
+from c21client.client import Client, attempt_request
+from c21client.client import execute_client_task
+from c21client.client import read_client_id, write_client_id
 
 
 BASE_URL = 'http://localhost:8080'
@@ -149,6 +151,22 @@ def test_check_status_code_greater_than_400(mock_requests):
         )
         response = attempt_request(requests.get, f'{BASE_URL}/get_job', 0)
         assert response is None
+
+
+def test_read_client_id_success(tmpdir):
+    file = tmpdir.join('test_read.txt')
+    file.write('1')
+    assert int(file.read()) == read_client_id(str(file))
+
+
+def test_read_client_id_file_not_found():
+    assert read_client_id('nonexistent.txt') == -1
+
+
+def test_write_client_id(tmpdir):
+    file = tmpdir.join('test_write.txt')
+    write_client_id(str(file), '1')  # or use str(file)
+    assert file.read() == '1'
 
 
 def mock_assure_request(mocker):
