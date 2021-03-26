@@ -15,14 +15,14 @@ pipeline {
       }
     }
 
-    //stage('Unit Tests') {
-    //  steps {
-    //    sh '''
-    //      . .venv/bin/activate
-    //      pytest
-    //    '''
-    //  }
-    //}
+    stage('Unit Tests') {
+      steps {
+        sh '''
+          . .venv/bin/activate
+          make test
+        '''
+      }
+    }
     stage('Static Analysis') {
       steps {
         sh '''

@@ -8,22 +8,22 @@ def generate_jobs(database, start_key=None):
         start_key = random.randint(0, 10)
     for _ in range(10):
         value = random.randint(0, 10)
-        print(f"I am generating work {start_key} with value {value}!")
-        database.hset("jobs_waiting", start_key, value)
+        print(f'I am generating work {start_key} with value {value}!')
+        database.hset('jobs_waiting', start_key, value)
         start_key += 1
 
 
-def emulate_job_creation(database):
+def emulate_job_creation(database, sleep_time):
     for current_key in range(1, 50, 10):
         generate_jobs(database, current_key)
-        time.sleep(30)
+        time.sleep(sleep_time)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     redis = redis.Redis()
     try:
         redis.ping()
         print('Successfully connected to redis')
-        emulate_job_creation(redis)
+        emulate_job_creation(redis, 30)
     except redis.exceptions.ConnectionError as r_con_error:
         print('Redis connection error:', r_con_error)
