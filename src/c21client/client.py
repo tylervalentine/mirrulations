@@ -42,16 +42,19 @@ def execute_client_task(_client):
     print('Requesting new job from server...')
     job_id, value = _client.get_job()
     print('Received job!')
-    perform_job(value)
+    json = perform_job(value)
     print('Sending result back to server...')
     _client.send_job_results(job_id, value)
     print('Job complete!\n')
 
 
 def perform_job(value):
-    print(f'I am working for {value} seconds...')
-    time.sleep(int(value))
+    print(f'Getting docket at {value}')
+    json = assure_request(requests.get, value).json()
     print('Done with current job!')
+    return json
+
+
 
 
 def request_job(endpoint, data):
