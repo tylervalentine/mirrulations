@@ -1,9 +1,5 @@
-import requests
-import time
 import redis
-import os
 
-#get API key:  os.getenv('API_TOKEN')
 
 def generate_jobs(database, job_filename, start_key=0):
 
@@ -13,12 +9,18 @@ def generate_jobs(database, job_filename, start_key=0):
     with open(job_filename, "r") as job_file:
 
         for line in job_file:
-            #[:-1] is to remove the return character before making the call
+
+            # Check for bad data
+            if len(line.split("/")) != 2:
+                print('Bad line in file! Line was: {line}')
+                raise Exception
+
+            # [:-1] is to remove the return character before making the call
             url = url_base + line[:-1]
             database.hset('jobs_waiting', start_key, url)
             start_key += 1
-    
     print(f'I\'ve finished generating work from this file: {job_filename}')
+
 
 if __name__ == '__main__':
     redis_database = redis.Redis()
