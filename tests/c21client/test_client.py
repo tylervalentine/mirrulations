@@ -106,12 +106,17 @@ def test_client_completes_job_requested(mock_requests, mocker):
         )
         mock_requests.get(
             f'{BASE_URL}/get_job',
-            json={'job': {'1': 1}},
+            json={'job': {'1': 'http://test.com'}},
             status_code=200
         )
         mock_requests.put(
             f'{BASE_URL}/put_results',
             json={'success': 'The job was successfully completed'},
+            status_code=200
+        )
+        mock_requests.get(
+            'http://test.com',
+            json={'1': 1},
             status_code=200
         )
 
