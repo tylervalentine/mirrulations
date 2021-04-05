@@ -34,7 +34,7 @@ class Client:
     def send_job_results(self, job_id, job_result):
         endpoint = f'{self.url}/put_results'
         client_id = self.client_id
-        data = {'results': {job_id: int(job_result)}, 'client_id': client_id}
+        data = {'results': {job_id: job_result}, 'client_id': client_id}
         assure_request(requests.put, endpoint, data=dumps(data))
 
 
@@ -42,16 +42,17 @@ def execute_client_task(_client):
     print('Requesting new job from server...')
     job_id, value = _client.get_job()
     print('Received job!')
-    perform_job(value)
+    result = perform_job(value)
     print('Sending result back to server...')
-    _client.send_job_results(job_id, value)
+    _client.send_job_results(job_id, result)
     print('Job complete!\n')
 
 
 def perform_job(value):
-    print(f'I am working for {value} seconds...')
-    time.sleep(int(value))
+    print(f'Getting docket at {value}')
+    json = assure_request(requests.get, value).json()
     print('Done with current job!')
+    return json
 
 
 def request_job(endpoint, data):
