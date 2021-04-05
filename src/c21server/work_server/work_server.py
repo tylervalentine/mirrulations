@@ -32,8 +32,19 @@ def check_for_database(func):
     return wrapper
 
 
+def check_request_had_valid_client_id(workserver, data):
+    if data is None or 'client_id' not in data:
+        return False, jsonify({'error': 'Client ID was not provided'}), 401
+    if not check_client_id_is_valid(workserver, data['client_id']):
+        return False, jsonify({'error': 'Invalid client ID'}), 401
+    return (True,)
+
+
 @check_for_database
-def get_job(workserver):
+def get_job(workserver, data):
+    success, *values = check_request_had_valid_client_id(workserver, data)
+    if not success:
+        return False, values[0], values[1]
     keys = workserver.redis.hkeys('jobs_waiting')
     if len(keys) == 0:
         return False, jsonify({'error': 'There are no jobs available'}), 400
@@ -45,6 +56,9 @@ def get_job(workserver):
 
 @check_for_database
 def put_results(workserver, data):
+    success, *values = check_request_had_valid_client_id(workserver, data)
+    if not success:
+        return False, values[0], values[1]
     key = get_first_key(data)
     value = workserver.redis.hget('jobs_in_progress', key)
     if value is None:
@@ -61,6 +75,12 @@ def get_client_id(workserver):
     return True, int(workserver.redis.get('total_num_client_ids'))
 
 
+@check_for_database
+def check_client_id_is_valid(workserver, client_id):
+    num_ids = int(workserver.redis.get('total_num_client_ids'))
+    return isinstance(client_id, int) and 0 < client_id <= num_ids
+
+
 def create_server(database):
     '''Create server, add endpoints, and return the server'''
     workserver = WorkServer(database)
@@ -71,20 +91,21 @@ def create_server(database):
 
     @workserver.app.route('/get_job', methods=['GET'])
     def _get_job():
-        success, *values = get_job(workserver)
+        data = request.json
+        success, *values = get_job(workserver, data)
         if not success:
             return tuple(values)
         return jsonify({'job': {values[0]: values[1]}}), 200
 
     @workserver.app.route('/put_results', methods=['PUT'])
     def _put_results():
-        data = json.loads(request.data).get('results', None)
-        if data is None:
+        data = request.json
+        if data is None or 'results' not in data:
             body = {'error': 'The body does not contain the results'}
             return jsonify(body), 400
-        error = put_results(workserver, data)
-        if not error[0]:
-            return tuple(error[1:])
+        success, *values = put_results(workserver, data)
+        if not success:
+            return tuple(values)
         return jsonify({'success': 'The job was successfully completed'}), 200
 
     @workserver.app.route('/get_client_id', methods=['GET'])
