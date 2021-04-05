@@ -25,10 +25,15 @@ or if there is no database to connect to it returns 500 and the JSON
 ### `/put_results`
 * Accepts the results of a job from a client
 * Expects a request with a body of the form
+* Directory refers to the location of where the data where be stored
+* Job id refers points to an integer value
+* Results points to the json for corresponding job
 ```
 {
     "client_id": [client_id]
-    "results": {[job_id]: [value]}
+    "directory": ""
+    "job_id": [value]
+    "results": {...}
 }
 ```
 * If the body does not contain `results` then it returns 400 and the JSON
