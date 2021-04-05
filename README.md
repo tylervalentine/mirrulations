@@ -20,6 +20,7 @@ Additionally, we make use of make in order to run tests.
   pip install -e .
   ```
 
+* Download docket IDs into the src/c21server/data folder. For now they should be stored in said folder in a text file named `dockets_0.txt`
 
 ## Run Static Analysis and Tests
 
