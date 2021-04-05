@@ -17,9 +17,11 @@ Vagrant.configure("2") do |config|
     apt-get update && apt-get upgrade -y
     apt-get install -y python3-venv python3-pip redis-server nginx
 
-    git clone https://github.com/cs334s21/capstone2021.git
+    # Change this link to your personal repo for testing purposes.
+    git clone https://github.com/TheFavaLava/capstone2021.git
     cd capstone2021
-    # git checkout prod_env
+    # Change the branch to your testing branch 
+    git checkout sprint_three
 
     python3 -m venv .venv
     .venv/bin/pip install -e .
