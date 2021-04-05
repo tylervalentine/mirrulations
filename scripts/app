@@ -17,4 +17,5 @@ server {
     alias /home/vagrant/capstone2021/src/c21server/dashboard/static/;
   }
 
+
 }
