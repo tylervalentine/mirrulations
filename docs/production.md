@@ -12,5 +12,11 @@ Nginx and Gunicorn have been implemented to provide efficient load balancing and
 
 The Vagrant File is designed to automatically create an instance of a virtual machine on the Capstone2021 Virtual Box.
 
+## Usage
 
-Check the [Vagrant.md](https://github.com/cs334s21/capstone2021/blob/main/docs/vagrant.md) file for complete details involving how the VagrantFile is setup and used.
+* Install Vagrant on your machine
+* To create a vagrant file, run "**vagrant init**" in desired directory
+* Use "**vagrant up**" to run the vagrant file and start the VM headless.
+* Run "**vagrant ssh**" to ssh into the VM
+* To stop the machine, run "**vagrant suspend**"
+* To destroy (shutdown) the machine, run "**vagrant destroy -f**"
