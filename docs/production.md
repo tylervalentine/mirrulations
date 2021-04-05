@@ -32,4 +32,4 @@ This Vagrant File can also be used for testing new features on your local machin
 
 * If it is run on the virtual machine, it will appear on **capstone.cs.moravian.edu**
 
-* With both URL's, the work server can be accessed using **/workserver** and dashboard can be accessed using **/dashboard**
+* With both URL's, the work server can be accessed using **/work/*{endpoint}*** and dashboard can be accessed using **/dashboard/*{endpoint}***
