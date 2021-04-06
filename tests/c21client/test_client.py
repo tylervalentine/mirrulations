@@ -120,7 +120,7 @@ def test_client_completes_job_requested(mock_requests, mocker):
             'http://test.com',
             json={'data':
                       {'id': 1,
-                       'agencyId': 'NOAA'}},
+                       'agencyId': 'NOAA'}}
             status_code=200
         )
 
