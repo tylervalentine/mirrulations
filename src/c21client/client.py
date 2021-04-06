@@ -34,7 +34,12 @@ class Client:
     def send_job_results(self, job_id, job_result):
         endpoint = f'{self.url}/put_results'
         client_id = self.client_id
-        data = {'results': {job_id: job_result}, 'client_id': client_id}
+        agency_id = job_result['data']['agencyId']
+        docket_id = job_result['data']['id']
+        data = {'client_id': client_id,
+                'directory': f'{agency_id}/{docket_id}',
+                'job_id': job_id,
+                'results': job_result}
         assure_request(requests.put, endpoint, data=dumps(data))
 
 
