@@ -50,6 +50,7 @@ def get_job(workserver, data):
         return False, jsonify({'error': 'There are no jobs available'}), 400
     value = workserver.redis.hget('jobs_waiting', keys[0])
     workserver.redis.hset('jobs_in_progress', keys[0], value)
+    workserver.redis.hset('client_jobs', keys[0], data['client_id'])
     workserver.redis.hdel('jobs_waiting', keys[0])
     return True, keys[0].decode(), value.decode()
 
