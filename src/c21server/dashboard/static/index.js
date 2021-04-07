@@ -1,6 +1,6 @@
 'use strict';
 
-const BASE_URL = 'http://127.0.0.1:5000/'
+const BASE_URL = window.location.href;
 
 window.addEventListener('load', function init() {
     setInterval( () => {
