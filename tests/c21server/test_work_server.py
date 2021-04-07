@@ -48,24 +48,46 @@ def test_data_deleted_from_mock_database_is_gone(mock_server):
     assert mock_server.redis.get('val1') is None
 
 
-def test_get_job_has_no_available_job(mock_server):
+def test_get_job_without_client_id_is_unauthorized(mock_server):
     response = mock_server.client.get('/get_job')
+    assert response.status_code == 401
+    expected = {'error': 'Client ID was not provided'}
+    assert response.get_json() == expected
+
+
+def test_get_job_with_invalid_client_id_is_unauthorized(mock_server):
+    mock_server.redis.incr('total_num_client_ids')
+    data = dumps({'client_id': 2})
+    response = mock_server.client.get('/get_job', data=data)
+    assert response.status_code == 401
+    expected = {'error': 'Invalid client ID'}
+    assert response.get_json() == expected
+
+
+def test_get_job_has_no_available_job(mock_server):
+    mock_server.redis.incr('total_num_client_ids')
+    data = dumps({'client_id': 1})
+    response = mock_server.client.get('/get_job', data=data)
     assert response.status_code == 400
     expected = {'error': 'There are no jobs available'}
     assert response.get_json() == expected
 
 
 def test_get_job_returns_single_job(mock_server):
+    mock_server.redis.incr('total_num_client_ids')
+    data = dumps({'client_id': 1})
     mock_server.redis.hset('jobs_waiting', 1, 2)
-    response = mock_server.client.get('/get_job')
+    response = mock_server.client.get('/get_job', data=data)
     assert response.status_code == 200
     expected = {'job': {'1': '2'}}
     assert response.get_json() == expected
 
 
 def test_get_waiting_job_is_now_in_progress_and_not_waiting(mock_server):
+    mock_server.redis.incr('total_num_client_ids')
+    data = dumps({'client_id': 1})
     mock_server.redis.hset('jobs_waiting', 2, 3)
-    mock_server.client.get('/get_job')
+    mock_server.client.get('/get_job', data=data)
     keys = mock_server.redis.hkeys('jobs_waiting')
     assert keys == []
     keys = mock_server.redis.hkeys('jobs_in_progress')
