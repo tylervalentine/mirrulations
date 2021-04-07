@@ -1,3 +1,4 @@
+import os
 from flask import Flask, json, jsonify, request
 import redis
 
@@ -6,20 +7,6 @@ class WorkServer:
     def __init__(self, redis_server):
         self.app = Flask(__name__)
         self.redis = redis_server
-
-
-def get_first_key(data):
-    '''
-    Checks to make sure JSON has at least one entry and that its
-        key-value pair are both integers. Returns the first key value
-        if the data is valid, otherwise returns -1.
-    '''
-    if data is not None:
-        keys = list(data.keys())
-        is_key_digit = len(keys) > 0 and keys[0].isdigit()
-        if is_key_digit and isinstance(data[keys[0]], int):
-            return keys[0]
-    return -1
 
 
 def check_for_database(func):
@@ -45,13 +32,27 @@ def get_job(workserver):
 
 @check_for_database
 def put_results(workserver, data):
-    key = get_first_key(data)
-    value = workserver.redis.hget('jobs_in_progress', key)
+    client_id = data.get('client_id')
+    directory = data.get('directory')
+    job_id = data.get('job_id', -1)
+    results = data.get('results')
+    filename_start = directory.rfind('/')
+    if directory is None or filename_start == -1:
+        body = {'error': 'No directory was included or directory was incorrect'}
+        return False, jsonify(body), 400
+    value = workserver.redis.hget('jobs_in_progress', job_id)
     if value is None:
         body = {'error': 'The job being completed was not in progress'}
         return False, jsonify(body), 400
-    workserver.redis.hdel('jobs_in_progress', key)
-    workserver.redis.hset('jobs_done', key, value)
+    expected_client_id = workserver.redis.hget('client_jobs', job_id)
+    if not client_id == expected_client_id:
+        body = {'error': 'The client ID was incorrect'}
+        return False, jsonify(body), 400
+    workserver.redis.hdel('jobs_in_progress', job_id)
+    workserver.redis.hset('jobs_done', job_id, value)
+    os.makedirs(directory[:filename_start])
+    with open(directory, 'w+') as file:
+        file.write(json.dumps(results))
     return (True,)
 
 
@@ -78,7 +79,7 @@ def create_server(database):
 
     @workserver.app.route('/put_results', methods=['PUT'])
     def _put_results():
-        data = json.loads(request.data).get('results', None)
+        data = request.get_json()
         if data is None:
             body = {'error': 'The body does not contain the results'}
             return jsonify(body), 400
