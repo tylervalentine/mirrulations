@@ -37,10 +37,10 @@ def get_job(workserver):
     keys = workserver.redis.hkeys('jobs_waiting')
     if len(keys) == 0:
         return False, jsonify({'error': 'There are no jobs available'}), 400
-    value = workserver.redis.hget('jobs_waiting', keys[0])
-    workserver.redis.hset('jobs_in_progress', keys[0], value)
+    url = workserver.redis.hget('jobs_waiting', keys[0])
+    workserver.redis.hset('jobs_in_progress', keys[0], url)
     workserver.redis.hdel('jobs_waiting', keys[0])
-    return True, keys[0].decode(), value.decode()
+    return True, keys[0].decode(), url.decode()
 
 
 @check_for_database
