@@ -62,7 +62,6 @@ def perform_job(url, api_key):
     url = url + f'?api_key={api_key}'
     print(f'Getting docket at {url}')
     json = assure_request(requests.get, url).json()
-    print(json)
     print('Done with current job!')
     return json
 
