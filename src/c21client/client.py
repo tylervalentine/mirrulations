@@ -37,7 +37,7 @@ class Client:
         agency_id = job_result['data']['agencyId']
         docket_id = job_result['data']['id']
         data = {'client_id': client_id,
-                'directory': f'{agency_id}/{docket_id}',
+                'directory': f'{agency_id}/{docket_id}'/{docket_id}.json,
                 'job_id': job_id,
                 'results': job_result}
         assure_request(requests.put, endpoint, data=dumps(data))
