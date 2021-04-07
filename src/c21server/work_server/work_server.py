@@ -92,7 +92,7 @@ def create_server(database):
 
     @workserver.app.route('/get_job', methods=['GET'])
     def _get_job():
-        data = request.json
+        data = request.get_json()
         success, *values = get_job(workserver, data)
         if not success:
             return tuple(values)
@@ -100,7 +100,7 @@ def create_server(database):
 
     @workserver.app.route('/put_results', methods=['PUT'])
     def _put_results():
-        data = request.json
+        data = request.get_json()
         if data is None or 'results' not in data:
             body = {'error': 'The body does not contain the results'}
             return jsonify(body), 400
