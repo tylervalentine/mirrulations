@@ -10,23 +10,31 @@ Vagrant.configure("2") do |config|
   config.vm.network "forwarded_port", guest: 5000, host: 5000
   config.vm.network "forwarded_port", guest: 8080, host: 8080
   config.vm.network "forwarded_port", guest: 80, host: 80
+  config.vm.network "forwarded_port", guest: 443, host: 443
 
 
   config.vm.provision "shell", inline: <<-SHELL
 
     apt-get update && apt-get upgrade -y
-    apt-get install -y python3-venv python3-pip redis-server nginx
+    apt-get install -y python3-venv python3-pip redis-server nginx openssl
+
+    # Create SSL cert
+    openssl req -new -newkey rsa:2048 -nodes -out capstone_cs_moravian_edu.csr -keyout capstone_cs_moravian_edu.key -subj "/C=US/ST=Pennsylvania/L=Bethlehem/O=Moravian College/OU=Information Technology/CN=capstone.cs.moravian.edu"
+
+    openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
 
     # Change this link to your personal repo for testing purposes.
     git clone https://github.com/TheFavaLava/capstone2021.git
     cd capstone2021
-    # Change the branch to your testing branch 
+    # Change the branch to your testing branch
     git checkout sprint_three
 
     python3 -m venv .venv
     .venv/bin/pip install -e .
     .venv/bin/pip install wheel gunicorn
 
+    cp scripts/self-signed.conf /etc/nginx/snippets/self-signed.conf
+    cp scripts/ssl-params.conf /etc/nginx/snippets/ssl-params.conf
     cp -v scripts/*.service /etc/systemd/system
     cp scripts/app /etc/nginx/sites-available/
     ln -s /etc/nginx/sites-available/app /etc/nginx/sites-enabled

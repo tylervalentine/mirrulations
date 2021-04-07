@@ -1,4 +1,29 @@
 server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    include snippets/self-signed.conf;
+    include snippets/ssl-params.conf;
+
+    server_name _;
+
+    location /work/ {
+      include proxy_params;
+      proxy_pass http://0.0.0.0:8080/;
+    }
+
+    location /dashboard/ {
+      include proxy_params;
+      include /etc/nginx/mime.types;
+      proxy_pass http://0.0.0.0:5000/;
+    }
+
+    location /static/ {
+      alias /home/vagrant/capstone2021/src/c21server/dashboard/static/;
+    }
+
+}
+
+server {
   listen 80 default_server;
   server_name _;
 
