@@ -1,5 +1,7 @@
 import time
+import os
 from json import dumps, loads
+from dotenv import load_dotenv
 import requests
 from requests.exceptions import ConnectionError as RequestConnectionError
 from requests.exceptions import HTTPError, RequestException
@@ -10,6 +12,8 @@ class Client:
     def __init__(self):
         self.url = 'http://localhost:8080'
         self.client_id = -1
+        load_dotenv()
+        self.api_key = os.getenv('API_TOKEN')
 
     def get_client_id(self):
         client_id = read_client_id('client.cfg')
@@ -28,13 +32,13 @@ class Client:
         endpoint = f'{self.url}/get_job'
         client_id = self.client_id
         data = {'client_id': client_id}
-        job_id, value = request_job(endpoint, data)
-        return job_id, value
+        job_id, url = request_job(endpoint, data)
+        return job_id, url
 
     def send_job_results(self, job_id, job_result):
         endpoint = f'{self.url}/put_results'
         client_id = self.client_id
-        agency_id = job_result['data']['agencyId']
+        agency_id = job_result['data']['attributes']['agencyId']
         docket_id = job_result['data']['id']
         data = {'client_id': client_id,
                 'directory': f'{agency_id}/{docket_id}/{docket_id}.json',
@@ -45,17 +49,20 @@ class Client:
 
 def execute_client_task(_client):
     print('Requesting new job from server...')
-    job_id, value = _client.get_job()
+    job_id, url = _client.get_job()
     print('Received job!')
-    result = perform_job(value)
+    result = perform_job(url, _client.api_key)
     print('Sending result back to server...')
     _client.send_job_results(job_id, result)
     print('Job complete!\n')
+    time.sleep(0.72)
 
 
-def perform_job(value):
-    print(f'Getting docket at {value}')
-    json = assure_request(requests.get, value).json()
+def perform_job(url, api_key):
+    url = url + f'?api_key={api_key}'
+    print(f'Getting docket at {url}')
+    json = assure_request(requests.get, url).json()
+    print(json)
     print('Done with current job!')
     return json
 
