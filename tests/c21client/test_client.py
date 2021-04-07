@@ -86,7 +86,7 @@ def test_client_sends_job_results(mock_requests, mocker):
         )
         mock_requests.put(
             f'{BASE_URL}/put_results',
-            json=mock_job_result,
+            json={'success': 'The job was successfully completed'},
             status_code=200
         )
         try:
