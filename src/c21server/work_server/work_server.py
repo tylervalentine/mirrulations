@@ -33,7 +33,7 @@ def get_job(workserver):
 def check_results(workserver, data):
     directory = data.get('directory')
     if directory is not None:
-        filename_start = directory.rfind('/') 
+        filename_start = directory.rfind('/')
     if directory is None or filename_start == -1:
         error = {'error': 'No directory was included or was incorrect'}
         return False, jsonify(error), 400
@@ -42,7 +42,7 @@ def check_results(workserver, data):
     if value is None:
         error = {'error': 'The job being completed was not in progress'}
         return False, jsonify(error), 400
-    expected_client_id = int(workserver.redis.get('total_num_client_ids').decode())
+    expected_client_id = int(workserver.redis.get('total_num_client_ids'))
     if data.get('client_id') != expected_client_id:
         error = {'error': 'The client ID was incorrect'}
         return False, jsonify(error), 400

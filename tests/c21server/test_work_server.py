@@ -80,9 +80,9 @@ def test_put_results_message_body_contains_no_results(mock_server):
 
 def test_put_results_with_zero_jobs_in_progress(mock_server):
     data = dumps({'results': {'': ''}, 'directory': 'dir/dir'})
-    assert mock_server.redis.hget('jobs_in_progress', 2) == None
+    assert mock_server.redis.hget('jobs_in_progress', 2) is None
     response = mock_server.client.put('/put_results', json=data)
-    assert mock_server.redis.hget('jobs_done', 2) == None
+    assert mock_server.redis.hget('jobs_done', 2) is None
     assert response.status_code == 400
     expected = {'error': 'The job being completed was not in progress'}
     assert response.get_json() == expected
@@ -92,7 +92,8 @@ def test_put_results_returns_correct_job(mock_server, mocker):
     mock_write_results(mocker)
     mock_server.redis.hset('jobs_in_progress', 2, 3)
     mock_server.redis.set('total_num_client_ids', 1)
-    data = {'client_id': 1, 'job_id': 2, 'directory': 'dir/dir', 'results': {2: 3}}
+    data = {'client_id': 1, 'job_id': 2, 'directory': 'dir/dir',
+            'results': {2: 3}}
     response = mock_server.client.put('/put_results', json=dumps(data))
     print(response.get_json())
     assert mock_server.redis.hget('jobs_done', 2).decode() == '3'
