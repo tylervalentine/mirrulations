@@ -30,29 +30,42 @@ def get_job(workserver):
     return True, keys[0].decode(), url.decode()
 
 
-@check_for_database
-def put_results(workserver, data):
-    client_id = data.get('client_id')
+def check_results(workserver, data):
     directory = data.get('directory')
-    job_id = data.get('job_id', -1)
-    results = data.get('results')
-    filename_start = directory.rfind('/')
+    if directory is not None:
+        filename_start = directory.rfind('/') 
     if directory is None or filename_start == -1:
-        body = {'error': 'No directory was included or directory was incorrect'}
-        return False, jsonify(body), 400
+        error = {'error': 'No directory was included or was incorrect'}
+        return False, jsonify(error), 400
+    job_id = data.get('job_id', -1)
     value = workserver.redis.hget('jobs_in_progress', job_id)
     if value is None:
-        body = {'error': 'The job being completed was not in progress'}
-        return False, jsonify(body), 400
-    expected_client_id = workserver.redis.hget('client_jobs', job_id)
-    if not client_id == expected_client_id:
-        body = {'error': 'The client ID was incorrect'}
-        return False, jsonify(body), 400
+        error = {'error': 'The job being completed was not in progress'}
+        return False, jsonify(error), 400
+    expected_client_id = int(workserver.redis.get('total_num_client_ids').decode())
+    if data.get('client_id') != expected_client_id:
+        error = {'error': 'The client ID was incorrect'}
+        return False, jsonify(error), 400
+    return (True, directory[:filename_start])
+
+
+def write_results(directory, path, data):
+    os.makedirs(f'/regulations/{directory}')
+    with open(f'/regulations/{path}', 'w+') as file:
+        file.write(json.dumps(data))
+
+
+@check_for_database
+def put_results(workserver, data):
+    path = data.get('directory')
+    success, *results = check_results(workserver, data)
+    if not success:
+        return (success, *results)
+    job_id = data.get('job_id', -1)
+    result = workserver.redis.hget('jobs_in_progress', job_id)
     workserver.redis.hdel('jobs_in_progress', job_id)
-    workserver.redis.hset('jobs_done', job_id, value)
-    os.makedirs(directory[:filename_start])
-    with open(directory, 'w+') as file:
-        file.write(json.dumps(results))
+    workserver.redis.hset('jobs_done', job_id, result)
+    write_results(results[0], path, data.get('results'))
     return (True,)
 
 
@@ -79,8 +92,8 @@ def create_server(database):
 
     @workserver.app.route('/put_results', methods=['PUT'])
     def _put_results():
-        data = request.get_json()
-        if data is None:
+        data = json.loads(request.get_json())
+        if data is None or data.get('results') is None:
             body = {'error': 'The body does not contain the results'}
             return jsonify(body), 400
         error = put_results(workserver, data)
