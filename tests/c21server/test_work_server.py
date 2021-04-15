@@ -73,23 +73,29 @@ def test_get_waiting_job_is_now_in_progress_and_not_waiting(mock_server):
 
 
 def test_put_results_message_body_contains_no_results(mock_server):
-    response = mock_server.client.put("/put_results", data=dumps({}))
+    response = mock_server.client.put("/put_results", json=dumps({}))
     assert response.status_code == 400
     assert response.json['error'] == 'The body does not contain the results'
 
 
 def test_put_results_with_zero_jobs_in_progress(mock_server):
-    mock_server.redis.hset('jobs_in_progress', 2, '')
-    data = dumps({'results': {'': ''}})
-    response = mock_server.client.put('/put_results', data=data)
-    assert mock_server.redis.hget('jobs_in_progress', 2).decode() == ''
+    data = dumps({'results': {'': ''}, 'directory': 'dir/dir'})
+    assert mock_server.redis.hget('jobs_in_progress', 2) is None
+    response = mock_server.client.put('/put_results', json=data)
+    assert mock_server.redis.hget('jobs_done', 2) is None
     assert response.status_code == 400
+    expected = {'error': 'The job being completed was not in progress'}
+    assert response.get_json() == expected
 
 
-def test_put_results_returns_correct_job(mock_server):
+def test_put_results_returns_correct_job(mock_server, mocker):
+    mock_write_results(mocker)
     mock_server.redis.hset('jobs_in_progress', 2, 3)
-    data = dumps({'results': {2: 3}})
-    response = mock_server.client.put('/put_results', data=data)
+    mock_server.redis.set('total_num_client_ids', 1)
+    data = {'client_id': 1, 'job_id': 2, 'directory': 'dir/dir',
+            'results': {2: 3}}
+    response = mock_server.client.put('/put_results', json=dumps(data))
+    print(response.get_json())
     assert mock_server.redis.hget('jobs_done', 2).decode() == '3'
     assert response.status_code == 200
     expected = {'success': 'The job was successfully completed'}
@@ -121,3 +127,10 @@ def test_get_client_id_returns_tuple_when_no_success(mock_server):
     response = mock_server.client.get('/get_client_id')
     assert response.json['error'] == 'Cannot connect to the database'
     assert mock_server.client.get('/get_client_id').status_code == 500
+
+
+def mock_write_results(mocker):
+    mocker.patch(
+        'c21server.work_server.work_server.write_results',
+        return_value=None
+    )
