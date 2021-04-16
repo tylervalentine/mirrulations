@@ -72,7 +72,7 @@ def test_client_sleeps_when_no_jobs_available(mock_requests, mocker):
 def test_client_sends_job_results(mock_requests, mocker):
     client = Client()
     mock_job_id = '1'
-    mock_job_result = {'data': {'id': mock_job_id, 
+    mock_job_result = {'data': {'id': mock_job_id,
                        'attributes': {'agencyId': 'NOAA'}}}
     mock_client_id = 999
     read_mock_client_id(mocker, mock_client_id)
