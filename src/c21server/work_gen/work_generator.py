@@ -59,7 +59,7 @@ def write_endpoints(endpoint, database):
                     temp_job = database.get('temp_job')
                     job = f"{endpoint}/{item['id']}"
                     job_id = int(temp_job) if temp_job is not None else 0
-                    database.hset("jobs_waiting", job_id,job)
+                    database.hset("jobs_waiting", job_id, job)
                     database.incr('temp_job')
                     total_elements -= 1
             update_filter(url, params)
