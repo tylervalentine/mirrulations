@@ -21,6 +21,9 @@ Additionally, we make use of make in order to run tests.
   ```
 
 * Download docket IDs into the src/c21server/data folder. For now they should be stored in said folder in a text file named `dockets_0.txt`
+* The `dockets_0.txt` is needed in order to download data (for now), and it will be needed to run the vagrant instance as well. Check the [Production Docs](https://github.com/cs334s21/capstone2021/blob/main/docs/production.md) for more information on setting this up, along with details on how to run this virtually on your local machine. 
+* Lastly, the client needs an api key in order to properly make the calls to [regulations.gov](https://www.regulations.gov/). In `src/c21client`, make a `.env` file with the contents `API_TOKEN=[insert your api key here]`. To get an api key, visit [here](https://open.gsa.gov/api/regulationsgov/). Check [client docs](https://github.com/cs334s21/capstone2021/blob/main/docs/client.md) for more information.
+* For more guidance on specific aspects of the project, visit the [docs](https://github.com/cs334s21/capstone2021/blob/main/docs/). 
 
 ## Run Static Analysis and Tests
 
