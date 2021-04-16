@@ -9,7 +9,7 @@ window.addEventListener('load', function init() {
 })
 
 const updateDashboardData = () => {
-    fetch(`${BASE_URl}/data`)
+    fetch(`${BASE_URL}data`)
     .then(response => response.json())
     .then(jobInformation => {
         const { 

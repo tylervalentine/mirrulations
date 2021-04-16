@@ -29,7 +29,7 @@ def get_jobs_stats(database):
 def create_server(database):
     dashboard = Dashboard(database)
 
-    @dashboard.app.route('/dashboard', methods=['GET'])
+    @dashboard.app.route('/', methods=['GET'])
     def _index():
         job_information = get_jobs_stats(dashboard.redis)
         return render_template(
