@@ -78,13 +78,19 @@ def test_put_results_message_body_contains_no_results(mock_server):
     assert response.json['error'] == 'The body does not contain the results'
 
 
-def test_put_results_with_zero_jobs_in_progress(mock_server):
-    data = dumps({'results': {'': ''}, 'directory': 'dir/dir'})
-    assert mock_server.redis.hget('jobs_in_progress', 2) is None
+def test_put_results_returns_directory_error(mock_server):
+    data = dumps({'results': {'': ''}, 'directory': None})
     response = mock_server.client.put('/put_results', data=data)
-    assert mock_server.redis.hget('jobs_done', 2) is None
     assert response.status_code == 400
-    expected = {'error': 'The job being completed was not in progress'}
+    expected = {'error': 'No directory was included or was incorrect'}
+    assert response.get_json() == expected
+
+
+def test_put_results_returns_incorrect_client_id_errors(mock_server):
+    data = dumps({'results': {'': ''}, 'directory': None})
+    response = mock_server.client.put('/put_results', data=data)
+    assert response.status_code == 400
+    expected = {'error': 'No directory was included or was incorrect'}
     assert response.get_json() == expected
 
 
