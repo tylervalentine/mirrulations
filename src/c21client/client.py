@@ -24,6 +24,7 @@ class Client:
     def request_client_id(self):
         endpoint = f'{self.url}/get_client_id'
         response = assure_request(requests.get, endpoint)
+        print("HERE,", response.json())
         client_id = int(response.json()['client_id'])
         write_client_id('client.cfg', client_id)
         return client_id
@@ -38,10 +39,8 @@ class Client:
     def send_job_results(self, job_id, job_result):
         endpoint = f'{self.url}/put_results'
         client_id = self.client_id
-        agency_id = job_result['data']['attributes']['agencyId']
-        docket_id = job_result['data']['id']
         data = {'client_id': client_id,
-                'directory': f'{agency_id}/{docket_id}/{docket_id}.json',
+                'directory': get_output_path(job_result),
                 'job_id': job_id,
                 'results': job_result}
         assure_request(requests.put, endpoint, data=dumps(data))
@@ -115,7 +114,26 @@ def read_client_id(filename):
 
 def write_client_id(filename, client_id):
     with open(filename, 'w') as file:
-        file.write(client_id)
+        file.write(str(client_id))
+
+
+def get_key_path_string(results, key):
+    # if key == "docketId":
+
+    if key in results.keys():
+        return results[key] + "/"
+    return ""
+
+
+def get_output_path(results):
+    output_path = ""
+    data = results["data"]["attributes"]
+    output_path += get_key_path_string(data, "agencyId")
+    output_path += get_key_path_string(data, "docketId")
+    output_path += get_key_path_string(data, "commentOnDocumentId")
+    output_path += results["data"]["id"] + "/"
+    output_path += results["data"]["id"] + ".json"
+    return output_path
 
 
 if __name__ == '__main__':

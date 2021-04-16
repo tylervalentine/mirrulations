@@ -73,7 +73,7 @@ def test_get_waiting_job_is_now_in_progress_and_not_waiting(mock_server):
 
 
 def test_put_results_message_body_contains_no_results(mock_server):
-    response = mock_server.client.put("/put_results", json=dumps({}))
+    response = mock_server.client.put("/put_results", data=dumps({}))
     assert response.status_code == 400
     assert response.json['error'] == 'The body does not contain the results'
 
@@ -81,7 +81,7 @@ def test_put_results_message_body_contains_no_results(mock_server):
 def test_put_results_with_zero_jobs_in_progress(mock_server):
     data = dumps({'results': {'': ''}, 'directory': 'dir/dir'})
     assert mock_server.redis.hget('jobs_in_progress', 2) is None
-    response = mock_server.client.put('/put_results', json=data)
+    response = mock_server.client.put('/put_results', data=data)
     assert mock_server.redis.hget('jobs_done', 2) is None
     assert response.status_code == 400
     expected = {'error': 'The job being completed was not in progress'}
@@ -94,7 +94,7 @@ def test_put_results_returns_correct_job(mock_server, mocker):
     mock_server.redis.set('total_num_client_ids', 1)
     data = {'client_id': 1, 'job_id': 2, 'directory': 'dir/dir',
             'results': {2: 3}}
-    response = mock_server.client.put('/put_results', json=dumps(data))
+    response = mock_server.client.put('/put_results', data=dumps(data))
     print(response.get_json())
     assert mock_server.redis.hget('jobs_done', 2).decode() == '3'
     assert response.status_code == 200

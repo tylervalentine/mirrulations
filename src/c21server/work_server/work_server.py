@@ -50,8 +50,11 @@ def check_results(workserver, data):
 
 
 def write_results(directory, path, data):
-    os.makedirs(f'/regulations/{directory}')
-    with open(f'/regulations/{path}', 'w+') as file:
+    try:
+        os.makedirs(f'data/{directory}')
+    except FileExistsError:
+        print(f'Directory already exists: data/{directory}')
+    with open(f'data/{path}', 'w+') as file:
         file.write(json.dumps(data))
 
 
@@ -92,7 +95,8 @@ def create_server(database):
 
     @workserver.app.route('/put_results', methods=['PUT'])
     def _put_results():
-        data = json.loads(request.get_json())
+        print(request)
+        data = json.loads(request.get_data())
         if data is None or data.get('results') is None:
             body = {'error': 'The body does not contain the results'}
             return jsonify(body), 400
