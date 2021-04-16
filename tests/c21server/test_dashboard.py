@@ -49,7 +49,7 @@ def test_dashboard_returns_job_information(mock_server):
 
 def test_dashboard_returns_html(mock_server):
     add_mock_data_to_database(mock_server.redis)
-    response = mock_server.client.get('/dashboard')
+    response = mock_server.client.get('/')
 
     assert response.status_code == 200
     expected = '<!DOCTYPE html>'
