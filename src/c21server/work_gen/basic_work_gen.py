@@ -27,6 +27,6 @@ if __name__ == '__main__':
     try:
         redis_database.ping()
         print('Successfully connected to redis')
-        generate_jobs(redis_database, '../data/dockets_0.txt')
+        generate_jobs(redis_database, 'src/c21server/data/dockets_0.txt')
     except redis.exceptions.ConnectionError as r_con_error:
         print('Redis connection error:', r_con_error)
