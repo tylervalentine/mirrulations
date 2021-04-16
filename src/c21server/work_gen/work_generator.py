@@ -13,10 +13,7 @@ API_TOKEN = os.getenv('API_TOKEN')
 def make_request(url, params):
     response = requests.get(url, params=params)
     if response.status_code == 429:
-        print("Finished with 1000 calls")
-        print("I gonna nap an hour. bye, bye")
         time.sleep(3600)
-        print("Hey, I am back to work!!")
         response = requests.get(url, params=params)
     response.raise_for_status()
     return response
@@ -63,7 +60,6 @@ def write_endpoints(endpoint, database):
                     job_id = int(temp_job) if temp_job is not None else 0
                     print(f'Saving "{endpoint}/{item["id"]}" to redis as job number {job_id}...')
                     database.hset("jobs_waiting",job_id,f"{endpoint}/{item['id']}")
-                    print('done!\n')
                     database.incr('temp_job')
                     total_elements -= 1
             update_filter(url, params)
@@ -85,3 +81,4 @@ if __name__ == '__main__':
         create_jobs(redis)
     except redis.exceptions.ConnectionError as r_con_error:
         print('Redis connection error:', r_con_error)
+        
