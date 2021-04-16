@@ -86,14 +86,6 @@ def test_put_results_returns_directory_error(mock_server):
     assert response.get_json() == expected
 
 
-def test_put_results_returns_incorrect_client_id_errors(mock_server):
-    data = dumps({'results': {'': ''}, 'directory': None})
-    response = mock_server.client.put('/put_results', data=data)
-    assert response.status_code == 400
-    expected = {'error': 'No directory was included or was incorrect'}
-    assert response.get_json() == expected
-
-
 def test_put_results_returns_correct_job(mock_server, mocker):
     mock_write_results(mocker)
     mock_server.redis.hset('jobs_in_progress', 2, 3)
