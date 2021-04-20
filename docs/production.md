@@ -28,13 +28,12 @@ This Vagrant File can also be used for testing new features on your local machin
 
 ## Setup of Demo
 
-* In your local repo, create the folder `src/c21server/data` as well as `src/c21server/work_server/data`
-* Place the `dockets_0.txt` file in the `src/c21server/data` directory so that the work generator has the necessary Docket IDs
-
-* At this point, check the [Client Documentation](https://github.com/cs334s21/capstone2021/blob/main/docs/client.md) for information on how to run clients.
-
-	* **Make sure to delete your `client.cfg` file each time you destroy and rebuild your Vagrant instance**
-	* **Set your client `self.url` to `localhost/work`**
+1. In your local repo, create the folder `src/c21server/data` as well as `src/c21server/work_server/data`
+1. Place the `dockets_0.txt` file in the `src/c21server/data` directory so that the work generator has the necessary Docket IDs
+1. **Make sure to delete your `client.cfg` file each time you destroy and rebuild your Vagrant instance**
+1. **Set your client `self.url` to `localhost/work`**
+1. If all of the above steps have been performed, you can then run `sudo vagrant up` from the `capstone2021/scripts` directory
+2. At this point, check the [Client Documentation](https://github.com/cs334s21/capstone2021/blob/main/docs/client.md) for information on how to run clients. 
 
 * If you are testing locally, results will appear on **localhost**
 
