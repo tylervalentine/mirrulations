@@ -12,6 +12,7 @@ Vagrant.configure("2") do |config|
   config.vm.network "forwarded_port", guest: 80, host: 80
 
   config.vm.synced_folder "../src/c21server/data", "/data"
+  config.vm.synced_folder "../src/c21server/work_server/data", "/database"
 
   # Provision the VM
   config.vm.provision "shell", inline: <<-SHELL
@@ -20,18 +21,25 @@ Vagrant.configure("2") do |config|
     apt-get update && apt-get upgrade -y
     apt-get install -y python3-venv python3-pip redis-server nginx openssl
 
-    # Clone the repo and enter the local repo
+  SHELL
+
+  config.vm.provision "shell", privileged:false, inline: <<-SHELL
     git clone https://github.com/cs334s21/capstone2021.git
-    ln -s /data capstone2021/src/c21server/data
     cd capstone2021
-
-
     # Create the virtual environment and install all necessary packages
     python3 -m venv .venv
     .venv/bin/pip install -e .
     .venv/bin/pip install gunicorn wheel
 
 
+  SHELL
+
+  config.vm.provision "shell", inline: <<-SHELL
+
+    ln -s /data capstone2021/src/c21server/data
+    ln -s /database capstone2021/src/c21server/work_server/data
+
+    cd capstone2021
     # Move the scripts/config files to the necessary folders
     cp -v scripts/*.service /etc/systemd/system
     cp scripts/app /etc/nginx/sites-available/
