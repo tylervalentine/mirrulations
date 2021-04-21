@@ -50,7 +50,6 @@ def write_endpoints(endpoint, database):
     total_elements = int(results.json()['meta']['totalElements'])
 
     while total_elements > 0:
-
         try:
             for page in range(1, 21):
                 params["page[number]"] = str(page)
