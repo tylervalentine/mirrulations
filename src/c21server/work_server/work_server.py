@@ -78,8 +78,9 @@ def get_client_id(workserver):
 
 @check_for_database
 def check_client_id_is_valid(workserver, client_id):
-    num_ids = int(workserver.redis.get('total_num_client_ids'))
-    return isinstance(client_id, int) and 0 < client_id <= num_ids
+    num_ids = workserver.redis.get('total_num_client_ids')
+    total_ids = 0 if num_ids is None else int(num_ids)
+    return isinstance(client_id, int) and 0 < client_id <= total_ids
 
 
 def create_server(database):
