@@ -118,6 +118,11 @@ p {
     stroke: #4C84FF;
 }
 
+.violet {
+    background-color: #DF99CA;
+    stroke: #DF99CA;
+}
+
 .green {
     background-color: #7CF29C;
     stroke: #7CF29C;
