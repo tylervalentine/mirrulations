@@ -10,8 +10,10 @@ window.addEventListener('load', function init() {
 })
 
 const updateHtmlValues = (id, value, total) => {
-    const percent = (value/total) * 100;
+    let percent = (value/total) * 100;
+    percent = isNaN(percent) ? 0 : percent
     document.getElementById(id+'-number').textContent = value;
+    document.getElementById(id+'-circle-percentage').textContent = `${percent}%`;
     document.getElementById(id+'-circle-front').style.strokeDasharray = `${percent}, 100`;
 }
 
@@ -30,9 +32,7 @@ const updateDashboardData = () => {
         updateHtmlValues('jobs-waiting', num_jobs_waiting, jobs_total);
         updateHtmlValues('jobs-progress', num_jobs_in_progress, jobs_total);
         updateHtmlValues('jobs-done', num_jobs_done, jobs_total);
-
         document.getElementById('total-clients-number').textContent = clients_total;
-
     })
     .catch((err) => console.log(err));
 }
