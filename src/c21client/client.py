@@ -10,7 +10,7 @@ from requests.exceptions import HTTPError, RequestException
 class Client:
 
     def __init__(self):
-        self.url = 'http://localhost:8080'
+        self.url = 'http://localhost/work'
         self.client_id = -1
         load_dotenv()
         self.api_key = os.getenv('API_TOKEN')
@@ -54,7 +54,7 @@ def execute_client_task(_client):
     print('Sending result back to server...')
     _client.send_job_results(job_id, result)
     print('Job complete!\n')
-    time.sleep(0.72)
+    time.sleep(3.6)
 
 
 def perform_job(url, api_key):
