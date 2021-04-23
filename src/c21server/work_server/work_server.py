@@ -55,7 +55,7 @@ def check_results(workserver, data):
     if value is None:
         error = {'error': 'The job being completed was not in progress'}
         return False, jsonify(error), 400
-    expected_client_id = int(workserver.redis.get('total_num_client_ids'))
+    expected_client_id = workserver.redis.hget('client_jobs', job_id)
     if data.get('client_id') != expected_client_id:
         error = {'error': 'The client ID was incorrect'}
         return False, jsonify(error), 400
@@ -77,15 +77,14 @@ def put_results(workserver, data):
     success, *values = check_request_had_valid_client_id(workserver, client_id)
     if not success:
         return False, values[0], values[1]
-    path = data.get('directory')
     success, *results = check_results(workserver, data)
     if not success:
         return (success, *results)
-    job_id = data.get('job_id', -1)
+    job_id = data.get('job_id')
     result = workserver.redis.hget('jobs_in_progress', job_id)
     workserver.redis.hdel('jobs_in_progress', job_id)
     workserver.redis.hset('jobs_done', job_id, result)
-    write_results(results[0], path, data.get('results'))
+    write_results(results[0], data.get('directory'), data.get('results'))
     return (True,)
 
 
@@ -122,7 +121,7 @@ def create_server(database):
 
     @workserver.app.route('/put_results', methods=['PUT'])
     def _put_results():
-        data = json.loads(request.get_data())
+        data = json.loads(request.get_json())
         if data is None or data.get('results') is None:
             body = {'error': 'The body does not contain the results'}
             return jsonify(body), 400
