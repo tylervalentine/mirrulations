@@ -31,14 +31,8 @@ def create_server(database):
 
     @dashboard.app.route('/', methods=['GET'])
     def _index():
-        job_information = get_jobs_stats(dashboard.redis)
         return render_template(
-            'index.html',
-            jobs_waiting=job_information['num_jobs_waiting'],
-            jobs_in_progress=job_information['num_jobs_in_progress'],
-            jobs_done=job_information['num_jobs_done'],
-            jobs_total=job_information['jobs_total'],
-            clients_total=job_information['clients_total']
+            'index.html'
         )
 
     @dashboard.app.route('/data', methods=['GET'])
