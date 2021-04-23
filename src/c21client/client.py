@@ -10,7 +10,7 @@ from requests.exceptions import HTTPError, RequestException
 class Client:
 
     def __init__(self):
-        self.url = 'http://localhost/work'
+        self.url = 'http://localhost:8080'
         self.client_id = -1
         load_dotenv()
         self.api_key = os.getenv('API_TOKEN')
