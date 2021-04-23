@@ -15,7 +15,6 @@ def get_first_key(data):
         if the data is valid, otherwise returns -1.
     '''
     if data is not None:
-        print(data)
         keys = list(data.keys())
         is_key_digit = len(keys) > 0 and keys[0].isdigit()
         if is_key_digit and isinstance(data[keys[0]], int):
@@ -63,7 +62,6 @@ def put_results(workserver, data):
     success, *values = check_request_had_valid_client_id(workserver, client_id)
     if not success:
         return False, values[0], values[1]
-    print('data', data)
     key = get_first_key(data['results'])
     value = workserver.redis.hget('jobs_in_progress', key)
     if value is None:
