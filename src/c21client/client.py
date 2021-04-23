@@ -1,5 +1,7 @@
 import time
+import os
 from json import dumps, loads
+from dotenv import load_dotenv
 import requests
 from requests.exceptions import ConnectionError as RequestConnectionError
 from requests.exceptions import HTTPError, RequestException
@@ -10,6 +12,8 @@ class Client:
     def __init__(self):
         self.url = 'http://localhost:8080'
         self.client_id = -1
+        load_dotenv()
+        self.api_key = os.getenv('API_TOKEN')
 
     def get_client_id(self):
         client_id = read_client_id('client.cfg')
@@ -20,6 +24,7 @@ class Client:
     def request_client_id(self):
         endpoint = f'{self.url}/get_client_id'
         response = assure_request(requests.get, endpoint)
+        print("HERE,", response.json())
         client_id = int(response.json()['client_id'])
         write_client_id('client.cfg', client_id)
         return client_id
@@ -28,30 +33,36 @@ class Client:
         endpoint = f'{self.url}/get_job'
         client_id = self.client_id
         data = {'client_id': client_id}
-        job_id, value = request_job(endpoint, data)
-        return job_id, value
+        job_id, url = request_job(endpoint, data)
+        return job_id, url
 
     def send_job_results(self, job_id, job_result):
         endpoint = f'{self.url}/put_results'
         client_id = self.client_id
-        data = {'results': {job_id: int(job_result)}, 'client_id': client_id}
+        data = {'client_id': client_id,
+                'directory': get_output_path(job_result),
+                'job_id': job_id,
+                'results': job_result}
         assure_request(requests.put, endpoint, data=dumps(data))
 
 
 def execute_client_task(_client):
     print('Requesting new job from server...')
-    job_id, value = _client.get_job()
+    job_id, url = _client.get_job()
     print('Received job!')
-    perform_job(value)
+    result = perform_job(url, _client.api_key)
     print('Sending result back to server...')
-    _client.send_job_results(job_id, value)
+    _client.send_job_results(job_id, result)
     print('Job complete!\n')
+    time.sleep(0.72)
 
 
-def perform_job(value):
-    print(f'I am working for {value} seconds...')
-    time.sleep(int(value))
+def perform_job(url, api_key):
+    url = url + f'?api_key={api_key}'
+    print(f'Getting docket at {url}')
+    json = assure_request(requests.get, url).json()
     print('Done with current job!')
+    return json
 
 
 def request_job(endpoint, data):
@@ -103,7 +114,26 @@ def read_client_id(filename):
 
 def write_client_id(filename, client_id):
     with open(filename, 'w') as file:
-        file.write(client_id)
+        file.write(str(client_id))
+
+
+def get_key_path_string(results, key):
+    # if key == "docketId":
+
+    if key in results.keys():
+        return results[key] + "/"
+    return ""
+
+
+def get_output_path(results):
+    output_path = ""
+    data = results["data"]["attributes"]
+    output_path += get_key_path_string(data, "agencyId")
+    output_path += get_key_path_string(data, "docketId")
+    output_path += get_key_path_string(data, "commentOnDocumentId")
+    output_path += results["data"]["id"] + "/"
+    output_path += results["data"]["id"] + ".json"
+    return output_path
 
 
 if __name__ == '__main__':

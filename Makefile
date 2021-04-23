@@ -1,6 +1,6 @@
-# NOTE:  This file MUST use tabs for indentation rather than spaces
-#        If you get an error "*** missing separator. Stop" then you
-#        probably have spaces for indentation.
+# NOTE: This file MUST use tabs for indentation rather than spaces
+#       If you get an error "*** missing separator. Stop" then you
+#       probably have spaces for indentation.
 export PATH:=${PWD}/.venv/bin:${PATH};
 
 all: test static

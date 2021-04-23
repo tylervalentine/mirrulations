@@ -111,13 +111,24 @@ def test_put_results_with_zero_jobs_in_progress(mock_server):
     assert response.status_code == 400
 
 
-def test_put_results_returns_correct_job(mock_server):
-    mock_server.redis.incr('total_num_client_ids')
+def test_put_results_returns_directory_error(mock_server):
+    data = dumps({'results': {'': ''}, 'directory': None})
+    response = mock_server.client.put('/put_results', data=data)
+    assert response.status_code == 400
+    expected = {'error': 'No directory was included or was incorrect'}
+    assert response.get_json() == expected
+
+
+def test_put_results_returns_correct_job(mock_server, mocker):
+    mock_write_results(mocker)
     mock_server.redis.hset('jobs_in_progress', 2, 3)
-    data = {'results': {2: 3}}
+    mock_server.redis.set('total_num_client_ids', 1)
+    data = {'job_id': 2, 'directory': 'dir/dir',
+            'results': {2: 3}}
     params = {'client_id': 1}
-    response = mock_server.client.put('/put_results',
-                                      json=data, query_string=params)
+    response = mock_server.client.put('/put_results', json=data, query_string=params) # might need dumps?
+    print(response.get_json())
+    assert mock_server.redis.hget('jobs_done', 2).decode() == '3'
     assert response.status_code == 200
     expected = {'success': 'The job was successfully completed'}
     assert response.get_json() == expected
@@ -151,3 +162,10 @@ def test_get_client_id_returns_tuple_when_no_success(mock_server):
     response = mock_server.client.get('/get_client_id')
     assert response.json['error'] == 'Cannot connect to the database'
     assert response.status_code == 500
+
+
+def mock_write_results(mocker):
+    mocker.patch(
+        'c21server.work_server.work_server.write_results',
+        return_value=None
+    )

@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, render_template
+from flask_cors import CORS
 from redis import Redis
 
 
@@ -6,6 +7,7 @@ class Dashboard:
     def __init__(self, redis_server):
         self.app = Flask(__name__)
         self.redis = redis_server
+        CORS(self.app, resources={r'/data': {'origins': '*'}})
 
 
 def get_jobs_stats(database):
@@ -27,7 +29,7 @@ def get_jobs_stats(database):
 def create_server(database):
     dashboard = Dashboard(database)
 
-    @dashboard.app.route('/dashboard', methods=['GET'])
+    @dashboard.app.route('/', methods=['GET'])
     def _index():
         job_information = get_jobs_stats(dashboard.redis)
         return render_template(
