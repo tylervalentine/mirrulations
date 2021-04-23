@@ -1,4 +1,4 @@
-from flask import Flask, json, jsonify, request
+from flask import Flask, jsonify, request
 import redis
 
 
@@ -15,6 +15,7 @@ def get_first_key(data):
         if the data is valid, otherwise returns -1.
     '''
     if data is not None:
+        print(data)
         keys = list(data.keys())
         is_key_digit = len(keys) > 0 and keys[0].isdigit()
         if is_key_digit and isinstance(data[keys[0]], int):
@@ -32,17 +33,18 @@ def check_for_database(func):
     return wrapper
 
 
-def check_request_had_valid_client_id(workserver, data):
-    if data is None or 'client_id' not in data:
+def check_request_had_valid_client_id(workserver, client_id):
+    if client_id is None:
         return False, jsonify({'error': 'Client ID was not provided'}), 401
-    if not check_client_id_is_valid(workserver, data['client_id']):
+    if not check_client_id_is_valid(workserver, client_id):
         return False, jsonify({'error': 'Invalid client ID'}), 401
     return (True,)
 
 
 @check_for_database
-def get_job(workserver, data):
-    success, *values = check_request_had_valid_client_id(workserver, data)
+def get_job(workserver):
+    client_id = request.args.get('client_id')
+    success, *values = check_request_had_valid_client_id(workserver, client_id)
     if not success:
         return False, values[0], values[1]
     keys = workserver.redis.hkeys('jobs_waiting')
@@ -50,17 +52,19 @@ def get_job(workserver, data):
         return False, jsonify({'error': 'There are no jobs available'}), 400
     value = workserver.redis.hget('jobs_waiting', keys[0])
     workserver.redis.hset('jobs_in_progress', keys[0], value)
-    workserver.redis.hset('client_jobs', keys[0], data['client_id'])
+    workserver.redis.hset('client_jobs', keys[0], client_id)
     workserver.redis.hdel('jobs_waiting', keys[0])
     return True, keys[0].decode(), value.decode()
 
 
 @check_for_database
 def put_results(workserver, data):
-    success, *values = check_request_had_valid_client_id(workserver, data)
+    client_id = request.args.get('client_id')
+    success, *values = check_request_had_valid_client_id(workserver, client_id)
     if not success:
         return False, values[0], values[1]
-    key = get_first_key(data)
+    print('data', data)
+    key = get_first_key(data['results'])
     value = workserver.redis.hget('jobs_in_progress', key)
     if value is None:
         body = {'error': 'The job being completed was not in progress'}
@@ -80,7 +84,10 @@ def get_client_id(workserver):
 def check_client_id_is_valid(workserver, client_id):
     num_ids = workserver.redis.get('total_num_client_ids')
     total_ids = 0 if num_ids is None else int(num_ids)
-    return isinstance(client_id, int) and 0 < client_id <= total_ids
+    if not client_id.isdigit():
+        return False
+    client_id = int(client_id)
+    return 0 < client_id <= total_ids
 
 
 def create_server(database):
@@ -93,8 +100,7 @@ def create_server(database):
 
     @workserver.app.route('/get_job', methods=['GET'])
     def _get_job():
-        data = request.get_json()
-        success, *values = get_job(workserver, data)
+        success, *values = get_job(workserver)
         if not success:
             return tuple(values)
         return jsonify({'job': {values[0]: values[1]}}), 200
