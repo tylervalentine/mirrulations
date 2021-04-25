@@ -54,7 +54,7 @@ def execute_client_task(_client):
     print('Sending result back to server...')
     _client.send_job_results(job_id, result)
     print('Job complete!\n')
-    time.sleep(0.72)
+    time.sleep(3.6)
 
 
 def perform_job(url, api_key):
