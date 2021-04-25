@@ -40,9 +40,8 @@ def write_endpoints(endpoint, database):
         "page[size]": 250
     }
 
-    folder_path = f'regulations/{endpoint}'
-    if not os.path.exists(f"{folder_path}"):
-        os.makedirs(folder_path)
+    if not os.path.exists(f"{f'regulations/{endpoint}'}"):
+        os.makedirs(f'regulations/{endpoint}')
 
     url = f'https://api.regulations.gov/v4/{endpoint}'
 
@@ -54,16 +53,22 @@ def write_endpoints(endpoint, database):
             for page in range(1, 21):
                 params["page[number]"] = str(page)
                 items = make_request(url, params).json()
-                for item in items['data']:
-                    temp_job = database.get('temp_job')
-                    job = f"{endpoint}/{item['id']}"
-                    job_id = int(temp_job) if temp_job is not None else 0
-                    database.hset("jobs_waiting", job_id, job)
-                    database.incr('temp_job')
-                    total_elements -= 1
+                total_elements -= getting_jobs(endpoint, database, items)
             update_filter(url, params)
         except IndexError:
             print("ran out of items to download")
+
+
+def getting_jobs(endpoint, database, items):
+    counter = 0
+    for item in items['data']:
+        temp_job = database.get('temp_job')
+        job = f"{endpoint}/{item['id']}"
+        job_id = int(temp_job)if temp_job is not None else 0
+        database.hset("jobs_waiting", job_id, job)
+        database.incr('temp_job')
+        counter += 1
+    return counter
 
 
 def create_jobs(database):
