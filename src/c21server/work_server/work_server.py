@@ -51,10 +51,10 @@ def check_results(workserver, data):
 
 def write_results(directory, path, data):
     try:
-        os.makedirs(f'data/{directory}')
+        os.makedirs(f'../../../data/{directory}')
     except FileExistsError:
-        print(f'Directory already exists: data/{directory}')
-    with open(f'data/{path}', 'w+') as file:
+        print(f'Directory already exists in root: data/{directory}')
+    with open(f'../../../data/{path}', 'w+') as file:
         file.write(json.dumps(data))
 
 
