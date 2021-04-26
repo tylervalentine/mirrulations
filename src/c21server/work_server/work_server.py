@@ -53,7 +53,7 @@ def write_results(directory, path, data):
     try:
         os.makedirs(f'/data/{directory}')
     except FileExistsError:
-        print(f'Directory already exists in root: data/{directory}')
+        print(f'Directory already exists in root: /data/{directory}')
     with open(f'/data/{path}', 'w+') as file:
         file.write(json.dumps(data))
 
