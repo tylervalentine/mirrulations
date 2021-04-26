@@ -43,7 +43,7 @@ def get_job(workserver):
     return True, keys[0].decode(), url.decode()
 
 
-def check_results(workserver, data):
+def check_results(workserver, data, client_id):
     directory = data.get('directory')
     if directory is not None:
         filename_start = directory.rfind('/')
@@ -51,12 +51,12 @@ def check_results(workserver, data):
         error = {'error': 'No directory was included or was incorrect'}
         return False, jsonify(error), 400
     job_id = data.get('job_id', -1)
-    value = workserver.redis.hget('jobs_in_progress', job_id)
-    if value is None:
+    expected_client_id = workserver.redis.hget('client_jobs', job_id)
+    if (workserver.redis.hget('jobs_in_progress', job_id) is None or
+            expected_client_id is None):
         error = {'error': 'The job being completed was not in progress'}
         return False, jsonify(error), 400
-    expected_client_id = workserver.redis.hget('client_jobs', job_id)
-    if data.get('client_id') != expected_client_id:
+    if client_id != int(expected_client_id):
         error = {'error': 'The client ID was incorrect'}
         return False, jsonify(error), 400
     return (True, directory[:filename_start])
@@ -77,7 +77,7 @@ def put_results(workserver, data):
     success, *values = check_request_had_valid_client_id(workserver, client_id)
     if not success:
         return False, values[0], values[1]
-    success, *results = check_results(workserver, data)
+    success, *results = check_results(workserver, data, int(client_id))
     if not success:
         return (success, *results)
     job_id = data.get('job_id')

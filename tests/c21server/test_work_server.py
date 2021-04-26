@@ -122,9 +122,24 @@ def test_put_results_returns_directory_error(mock_server):
     assert response.get_json() == expected
 
 
+def test_client_attempts_to_put_job_that_it_did_not_get(mock_server):
+    mock_server.redis.hset('jobs_in_progress', 2, 3)
+    mock_server.redis.hset('client_jobs', 2, 2)
+    mock_server.redis.set('total_num_client_ids', 2)
+    data = dumps({'job_id': 2, 'directory': 'dir/dir',
+                  'results': {2: 3}})
+    params = {'client_id': 1}
+    response = mock_server.client.put('/put_results',
+                                      json=data, query_string=params)
+    assert response.status_code == 400
+    expected = {'error': 'The client ID was incorrect'}
+    assert response.get_json() == expected
+
+
 def test_put_results_returns_correct_job(mock_server, mocker):
     mock_write_results(mocker)
     mock_server.redis.hset('jobs_in_progress', 2, 3)
+    mock_server.redis.hset('client_jobs', 2, 1)
     mock_server.redis.set('total_num_client_ids', 1)
     data = dumps({'job_id': 2, 'directory': 'dir/dir',
                   'results': {2: 3}})
