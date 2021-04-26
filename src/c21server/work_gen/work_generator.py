@@ -80,11 +80,11 @@ def transform_date(date):
 
 
 if __name__ == '__main__':
-    redis = redis.Redis()
+    database = redis.Redis()
     try:
-        redis.ping()
+        database.ping()
         print('Successfully connected to redis!\nGetting new jobs...')
-        create_jobs(redis)
+        create_jobs(database)
         print('Done!')
     except redis.exceptions.ConnectionError as r_con_error:
         print('Redis connection error:', r_con_error)
