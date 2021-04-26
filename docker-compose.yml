@@ -5,3 +5,58 @@ services:
       env_file: clients_env/.env1
     client2:
       build: .
+      env_file: clients_env/.env2
+    client3:
+      build: .
+      env_file: clients_env/.env3
+    client4:
+      build: .
+      env_file: clients_env/.env4
+    client5:
+      build: .
+      env_file: clients_env/.env5
+    client6:
+      build: .
+      env_file: clients_env/.env6
+    client7:
+      build: .
+      env_file: clients_env/.env7
+    client8:
+      build: .
+      env_file: clients_env/.env8
+    client9:
+      build: .
+      env_file: clients_env/.env9
+    client10:
+      build: .
+      env_file: clients_env/.env10
+    client11:
+      build: .
+      env_file: clients_env/.env11
+    client12:
+      build: .
+      env_file: clients_env/.env12
+    client13:
+      build: .
+      env_file: clients_env/.env13
+    client14:
+      build: .
+      env_file: clients_env/.env14
+    client15:
+      build: .
+      env_file: clients_env/.env15
+    client16:
+      build: .
+      env_file: clients_env/.env16
+    client17:
+      build: .
+      env_file: clients_env/.env17
+    client18:
+      build: .
+      env_file: clients_env/.env18
+    client19:
+      build: .
+      env_file: clients_env/.env19
+    client20:
+      build: .
+      env_file: clients_env/.env20
