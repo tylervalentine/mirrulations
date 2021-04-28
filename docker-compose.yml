@@ -42,21 +42,3 @@ services:
     client14:
       build: .
       env_file: clients_env/.env14
-    client15:
-      build: .
-      env_file: clients_env/.env15
-    client16:
-      build: .
-      env_file: clients_env/.env16
-    client17:
-      build: .
-      env_file: clients_env/.env17
-    client18:
-      build: .
-      env_file: clients_env/.env18
-    client19:
-      build: .
-      env_file: clients_env/.env19
-    client20:
-      build: .
-      env_file: clients_env/.env20
