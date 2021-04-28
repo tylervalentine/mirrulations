@@ -1,11 +1,12 @@
-from fakeredis import FakeRedis
 from json import load
+from fakeredis import FakeRedis
 import requests_mock
 from pytest import fixture
-import c21server.work_gen.basic_work_gen as work_gen
+import c21server.work_gen.work_generator as work_gen
 
 
-BASE_URL = 'https://api.regulations.gov/v4/'
+BASE_URL = 'https://api.regulations.gov/v4/dockets'
+PARAMS = 'api_key=API_TOKEN&sort=lastModifiedDate&page%5Bsize%5D=250'
 
 
 @fixture(name='mock_redis')
@@ -18,18 +19,29 @@ def fixture_mock_requests():
     return requests_mock.Mocker()
 
 
+def mock_os_getenv(mocker):
+    mocker.patch(
+        'c21server.work_gen.work_generator.get_api_key',
+        return_value='API_TOKEN'
+    )
+
+
 def load_example_data():
-    with open('tests/data/dockets_request_example.json') as f:
-        return json.load(f)
+    with open('tests/data/dockets_request_example.json') as file:
+        return load(file)
 
 
-def test_get_jobs_for_dockets(mock_redis, mock_requests):
+def test_get_jobs(mock_redis, mock_requests, mocker):
     with mock_requests:
-        params = {
-            'sort': 'lastModifiedDate',
-            'page[size]': 250
-        }
-        mock_requests.get(f'{BASE_URL}/dockets', query_params=params)
+        url = f'{BASE_URL}?{PARAMS}'
+        mock_requests.get(
+            url,
+            json=load_example_data()
+        )
+        mock_os_getenv(mocker)
         work_gen.get_jobs('dockets', mock_redis)
-        expected = 5
-        assert len(list(mock_redis.hkeys('jobs_waiting'))) == expected
+        expected = 'dockets/EBSA-2005-0001'
+        assert mock_redis.hget('jobs_waiting', 1).decode() == expected
+        expected = 'dockets/EBSA-2005-0002'
+        assert mock_redis.hget('jobs_waiting', 10).decode() == expected
+        assert len(mock_redis.hkeys('jobs_waiting')) == 10
