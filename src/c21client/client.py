@@ -24,26 +24,24 @@ class Client:
     def request_client_id(self):
         endpoint = f'{self.url}/get_client_id'
         response = assure_request(requests.get, endpoint)
-        print("HERE,", response.json())
         client_id = int(response.json()['client_id'])
         write_client_id('client.cfg', client_id)
         return client_id
 
     def get_job(self):
         endpoint = f'{self.url}/get_job'
-        client_id = self.client_id
-        data = {'client_id': client_id}
-        job_id, url = request_job(endpoint, data)
+        params = {'client_id': self.client_id}
+        job_id, url = request_job(endpoint, dumps({}), params)
         return job_id, url
 
     def send_job_results(self, job_id, job_result):
         endpoint = f'{self.url}/put_results'
-        client_id = self.client_id
-        data = {'client_id': client_id,
-                'directory': get_output_path(job_result),
+        data = {'directory': get_output_path(job_result),
                 'job_id': job_id,
                 'results': job_result}
-        assure_request(requests.put, endpoint, data=dumps(data))
+        params = {'client_id': self.client_id}
+        print(dumps(data))
+        assure_request(requests.put, endpoint, json=dumps(data), params=params)
 
 
 def execute_client_task(_client):
@@ -65,9 +63,9 @@ def perform_job(url, api_key):
     return json
 
 
-def request_job(endpoint, data):
+def request_job(endpoint, data, params):
     response = assure_request(requests.get, endpoint,
-                              data=dumps(data))
+                              json=dumps(data), params=params)
     job = loads(response.text)['job']
     job_id = list(job.keys())[0]
     value = job[job_id]
@@ -84,22 +82,26 @@ def assure_request(request, url, sleep_time=60, **kwargs):
 def attempt_request(request, url, sleep_time, **kwargs):
     try:
         response = request(url, **kwargs)
-        check_status_code(response.status_code)
+        check_status_code(response)
         response.raise_for_status()
     except RequestConnectionError:
         print('Unable to connect to the server. '
               'Trying again in a minute...')
         time.sleep(sleep_time)
-    except (HTTPError, RequestException):
+    except (HTTPError, RequestException) as err:
+        if err.response.status_code == 400:
+            print('Endpoint not found!')
+            return {'error': 'Endpoint not found'}
         time.sleep(sleep_time)
     else:
         return response
     return None
 
 
-def check_status_code(status_code):
-    if status_code == 400:
-        print('No jobs available. Trying again in a minute...')
+def check_status_code(response):
+    status_code = response.status_code
+    if status_code == 403:
+        print(response.json()['error'])
     elif status_code > 400:
         print('Server error. Trying again in a minute...')
 
@@ -118,14 +120,14 @@ def write_client_id(filename, client_id):
 
 
 def get_key_path_string(results, key):
-    # if key == "docketId":
-
     if key in results.keys():
         return results[key] + "/"
     return ""
 
 
 def get_output_path(results):
+    if 'error' in results:
+        return -1
     output_path = ""
     data = results["data"]["attributes"]
     output_path += get_key_path_string(data, "agencyId")
