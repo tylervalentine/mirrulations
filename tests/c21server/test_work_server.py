@@ -68,7 +68,7 @@ def test_get_job_has_no_available_job(mock_server):
     mock_server.redis.incr('total_num_client_ids')
     params = {'client_id': 1}
     response = mock_server.client.get('/get_job', query_string=params)
-    assert response.status_code == 400
+    assert response.status_code == 403
     expected = {'error': 'There are no jobs available'}
     assert response.get_json() == expected
 
@@ -96,7 +96,7 @@ def test_get_waiting_job_is_now_in_progress_and_not_waiting(mock_server):
 
 def test_put_results_message_body_contains_no_results(mock_server):
     response = mock_server.client.put('/put_results', json=dumps({}))
-    assert response.status_code == 400
+    assert response.status_code == 403
     assert response.json['error'] == 'The body does not contain the results'
 
 
@@ -108,7 +108,7 @@ def test_put_results_with_zero_jobs_in_progress(mock_server):
     response = mock_server.client.put('/put_results',
                                       json=data, query_string=params)
     assert mock_server.redis.hget('jobs_in_progress', 2).decode() == ''
-    assert response.status_code == 400
+    assert response.status_code == 403
 
 
 def test_put_results_returns_directory_error(mock_server):
@@ -117,7 +117,7 @@ def test_put_results_returns_directory_error(mock_server):
     params = {'client_id': 1}
     response = mock_server.client.put('/put_results',
                                       json=data, query_string=params)
-    assert response.status_code == 400
+    assert response.status_code == 403
     expected = {'error': 'No directory was included or was incorrect'}
     assert response.get_json() == expected
 
@@ -147,7 +147,7 @@ def test_client_attempts_to_put_job_that_it_did_not_get(mock_server):
     params = {'client_id': 1}
     response = mock_server.client.put('/put_results',
                                       json=data, query_string=params)
-    assert response.status_code == 400
+    assert response.status_code == 403
     expected = {'error': 'The client ID was incorrect'}
     assert response.get_json() == expected
 
@@ -159,7 +159,7 @@ def test_client_attempts_to_put_job_that_does_not_exist(mock_server):
     params = {'client_id': 1}
     response = mock_server.client.put('/put_results',
                                       json=data, query_string=params)
-    assert response.status_code == 400
+    assert response.status_code == 403
     expected = {'error': 'The job being completed was not in progress'}
     assert response.get_json() == expected
 
@@ -178,6 +178,17 @@ def test_put_results_returns_correct_job(mock_server, mocker):
     assert response.status_code == 200
     expected = {'success': 'The job was successfully completed'}
     assert response.get_json() == expected
+
+
+def test_server_handles_client_error_to_access_api_endpoint(mock_server):
+    mock_server.redis.set('total_num_client_ids', 1)
+    mock_server.redis.hset('jobs_in_progress', 2, 3)
+    data = dumps({'job_id': 2, 'directory': -1,
+                  'results': {'error': 'Endpoint not found'}})
+    params = {'client_id': 1}
+    mock_server.client.put('/put_results', json=data, query_string=params)
+    invalid_jobs = mock_server.redis.hkeys('invalid_jobs')
+    assert len(invalid_jobs) == 1
 
 
 def test_total_num_client_ids_is_increased_on_get_client_id_call(mock_server):

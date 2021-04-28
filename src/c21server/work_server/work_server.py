@@ -35,7 +35,7 @@ def get_job(workserver):
         return False, values[0], values[1]
     keys = workserver.redis.hkeys('jobs_waiting')
     if len(keys) == 0:
-        return False, jsonify({'error': 'There are no jobs available'}), 400
+        return False, jsonify({'error': 'There are no jobs available'}), 403
     url = workserver.redis.hget('jobs_waiting', keys[0])
     workserver.redis.hset('jobs_in_progress', keys[0], url)
     workserver.redis.hset('client_jobs', keys[0], client_id)
@@ -49,16 +49,16 @@ def check_results(workserver, data, client_id):
         filename_start = directory.rfind('/')
     if directory is None or filename_start == -1:
         error = {'error': 'No directory was included or was incorrect'}
-        return False, jsonify(error), 400
+        return False, jsonify(error), 403
     job_id = data.get('job_id', -1)
     expected_client_id = workserver.redis.hget('client_jobs', job_id)
     if (workserver.redis.hget('jobs_in_progress', job_id) is None or
             expected_client_id is None):
         error = {'error': 'The job being completed was not in progress'}
-        return False, jsonify(error), 400
+        return False, jsonify(error), 403
     if client_id != int(expected_client_id):
         error = {'error': 'The client ID was incorrect'}
-        return False, jsonify(error), 400
+        return False, jsonify(error), 403
     return (True, directory[:filename_start])
 
 
@@ -77,6 +77,12 @@ def put_results(workserver, data):
     success, *values = check_request_had_valid_client_id(workserver, client_id)
     if not success:
         return False, values[0], values[1]
+    if 'error' in data['results']:
+        job_id = data['job_id']
+        result = workserver.redis.hget('jobs_in_progress', job_id)
+        workserver.redis.hdel('jobs_in_progress', job_id)
+        workserver.redis.hset('invalid_jobs', job_id, result)
+        return (True,)
     success, *results = check_results(workserver, data, int(client_id))
     if not success:
         return (success, *results)
@@ -124,7 +130,7 @@ def create_server(database):
         data = json.loads(request.get_json())
         if data is None or data.get('results') is None:
             body = {'error': 'The body does not contain the results'}
-            return jsonify(body), 400
+            return jsonify(body), 403
         success, *values = put_results(workserver, data)
         if not success:
             return tuple(values)
