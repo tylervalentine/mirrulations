@@ -6,8 +6,9 @@ import dotenv
 import redis
 
 
-dotenv.load_dotenv()
-API_TOKEN = os.getenv('API_TOKEN')
+def get_api_key():
+    dotenv.load_dotenv()
+    return os.getenv('API_TOKEN')
 
 
 def create_jobs(database):
@@ -18,7 +19,7 @@ def create_jobs(database):
 
 def get_jobs(endpoint, database):
     params = {
-        'api_key': API_TOKEN,
+        'api_key': get_api_key(),
         'sort': 'lastModifiedDate',
         'page[size]': 250
     }
@@ -36,7 +37,7 @@ def get_jobs(endpoint, database):
 
     while total_elements > 0:
         try:
-            for page in range(1, 21):
+            for page in range(1, int(items.json()['meta']['totalPages']) + 1):
                 params['page[number]'] = str(page)
                 items = make_request(url, params).json()
                 total_elements -= write_endpoints(endpoint, database, items)
