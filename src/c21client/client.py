@@ -82,22 +82,26 @@ def assure_request(request, url, sleep_time=60, **kwargs):
 def attempt_request(request, url, sleep_time, **kwargs):
     try:
         response = request(url, **kwargs)
-        check_status_code(response.status_code)
+        check_status_code(response)
         response.raise_for_status()
     except RequestConnectionError:
         print('Unable to connect to the server. '
               'Trying again in a minute...')
         time.sleep(sleep_time)
-    except (HTTPError, RequestException):
+    except (HTTPError, RequestException) as err:
+        if err.response.status_code == 400:
+            print('Endpoint not found!')
+            return {'error': 'Endpoint not found'}
         time.sleep(sleep_time)
     else:
         return response
     return None
 
 
-def check_status_code(status_code):
-    if status_code == 400:
-        print('No jobs available. Trying again in a minute...')
+def check_status_code(response):
+    status_code = response.status_code
+    if status_code == 403:
+        print(response.json()['error'])
     elif status_code > 400:
         print('Server error. Trying again in a minute...')
 
@@ -122,6 +126,8 @@ def get_key_path_string(results, key):
 
 
 def get_output_path(results):
+    if 'error' in results:
+        return -1
     output_path = ""
     data = results["data"]["attributes"]
     output_path += get_key_path_string(data, "agencyId")

@@ -134,7 +134,7 @@ def test_attempt_request_raises_request_exception(mock_requests):
             status_code=400
         )
         response = attempt_request(requests.get, f'{BASE_URL}/get_job', 0)
-        assert response is None
+        assert response == {'error': 'Endpoint not found'}
 
 
 def test_attempt_request_raises_connection_exception(mock_requests, mocker):
