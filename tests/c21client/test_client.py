@@ -8,7 +8,7 @@ from c21client.client import execute_client_task
 from c21client.client import read_client_id, write_client_id
 
 
-BASE_URL = 'http://localhost:8080'
+BASE_URL = 'http://capstone.cs.moravian.edu/work'
 
 
 @fixture(name='mock_requests')
