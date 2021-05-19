@@ -9,8 +9,8 @@ def fixture_mock_server():
 
 
 def add_mock_data_to_database(database):
-    jobs_waiting = {i: i for i in range(1, 6)}
-    database.hset('jobs_waiting', mapping=jobs_waiting)
+    for job in range(1, 6):
+        database.rpush('jobs_waiting_queue', job)
     jobs_in_progress = {i: i for i in range(6, 10)}
     database.hset('jobs_in_progress', mapping=jobs_in_progress)
     jobs_done = {i: i for i in range(10, 13)}
