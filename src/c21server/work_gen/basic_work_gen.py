@@ -1,3 +1,4 @@
+import json
 import redis
 
 
@@ -17,7 +18,8 @@ def generate_jobs(database, job_filename, start_key=0):
 
             # [:-1] is to remove the return character before making the call
             url = url_base + line[:-1]
-            database.hset('jobs_waiting', start_key, url)
+            job = {'job_id': start_key, 'url': url}
+            database.rpush('jobs_waiting_queue', json.dumps(job))
             start_key += 1
     print(f'I\'ve finished generating work from this file: {job_filename}')
 

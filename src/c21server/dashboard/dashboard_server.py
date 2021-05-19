@@ -11,7 +11,7 @@ class Dashboard:
 
 
 def get_jobs_stats(database):
-    jobs_waiting = int(database.hlen('jobs_waiting'))
+    jobs_waiting = int(database.llen('jobs_waiting_queue'))
     jobs_in_progress = int(database.hlen('jobs_in_progress'))
     jobs_done = int(database.hlen('jobs_done'))
     jobs_total = jobs_waiting + jobs_in_progress + jobs_done

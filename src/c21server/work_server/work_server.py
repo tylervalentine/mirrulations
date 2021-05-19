@@ -33,14 +33,14 @@ def get_job(workserver):
     success, *values = check_request_had_valid_client_id(workserver, client_id)
     if not success:
         return False, values[0], values[1]
-    keys = workserver.redis.hkeys('jobs_waiting')
-    if len(keys) == 0:
+    if workserver.redis.llen('jobs_waiting_queue') == 0:
         return False, jsonify({'error': 'There are no jobs available'}), 403
-    url = workserver.redis.hget('jobs_waiting', keys[0])
-    workserver.redis.hset('jobs_in_progress', keys[0], url)
-    workserver.redis.hset('client_jobs', keys[0], client_id)
-    workserver.redis.hdel('jobs_waiting', keys[0])
-    return True, keys[0].decode(), url.decode()
+    job = json.loads(workserver.redis.lpop('jobs_waiting_queue'))
+    job_id = job['job_id']
+    url = job['url']
+    workserver.redis.hset('jobs_in_progress', job_id, url)
+    workserver.redis.hset('client_jobs', job_id, client_id)
+    return True, job_id, url
 
 
 def check_results(workserver, data, client_id):
