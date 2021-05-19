@@ -76,7 +76,7 @@ def test_get_job_has_no_available_job(mock_server):
 def test_get_job_returns_single_job(mock_server):
     mock_server.redis.incr('total_num_client_ids')
     params = {'client_id': 1}
-    job = {'job_id':1, 'url':'url'}
+    job = {'job_id': 1, 'url': 'url'}
     mock_server.redis.rpush('jobs_waiting_queue', dumps(job))
     response = mock_server.client.get('/get_job', query_string=params)
     assert response.status_code == 200
@@ -87,12 +87,13 @@ def test_get_job_returns_single_job(mock_server):
 def test_get_waiting_job_is_now_in_progress_and_not_waiting(mock_server):
     mock_server.redis.incr('total_num_client_ids')
     params = {'client_id': 1}
-    job = {'job_id':3, 'url':'url'}
+    job = {'job_id': 3, 'url': 'url'}
     mock_server.redis.rpush('jobs_waiting_queue', dumps(job))
     mock_server.client.get('/get_job', query_string=params)
     assert mock_server.redis.llen('jobs_waiting_queue') == 0
     keys = mock_server.redis.hkeys('jobs_in_progress')
-    assert mock_server.redis.hget('jobs_in_progress', keys[0]).decode() == 'url'
+    assert mock_server.redis.hget('jobs_in_progress',
+                                  keys[0]).decode() == 'url'
 
 
 def test_put_results_message_body_contains_no_results(mock_server):

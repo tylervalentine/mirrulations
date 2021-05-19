@@ -1,8 +1,8 @@
+import json
 from fakeredis import FakeRedis
 import pytest
 from pytest import fixture
 import c21server.work_gen.basic_work_gen as work_gen
-import json
 
 
 @fixture(name='mock_redis')
