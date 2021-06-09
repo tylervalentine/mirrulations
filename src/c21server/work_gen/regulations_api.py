@@ -1,8 +1,9 @@
-import requests
 import time
+import requests
 
 
 MIN_DELAY_BETWEEN_CALLS = 60 / 1000
+
 
 class RegulationsAPI:
     """
@@ -17,9 +18,11 @@ class RegulationsAPI:
         self.last_time_called = None
         self.api_key = api_key
 
-    def download(self, url, params={}):
+    def download(self, url, params=None):
         if self.time_since_last_call() < MIN_DELAY_BETWEEN_CALLS:
             time.sleep(MIN_DELAY_BETWEEN_CALLS)
+        if params is None:
+            params = {}
         params['api_key'] = self.api_key
         result = requests.get(url, params=params)
         result.raise_for_status()

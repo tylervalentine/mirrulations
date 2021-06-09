@@ -1,6 +1,7 @@
 import pytest
-from c21server.work_gen.regulations_api import RegulationsAPI, MIN_DELAY_BETWEEN_CALLS
 from requests import HTTPError
+from c21server.work_gen.regulations_api import RegulationsAPI, \
+    MIN_DELAY_BETWEEN_CALLS
 
 
 def test_download_returns_json(requests_mock):
@@ -58,4 +59,3 @@ def test_params_passed(requests_mock):
     # Since the order of the params could be changed, I just look
     # for the string in the overall url
     assert 'key=value' in call.url
-

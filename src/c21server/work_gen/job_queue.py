@@ -1,12 +1,11 @@
 
 class JobQueue:
 
-    def __init__(self, db):
-        self.db = db
+    def __init__(self, database):
+        self.database = database
 
     def add_job(self, job):
-        self.db.lpush('jobs_waiting_queue', job)
+        self.database.lpush('jobs_waiting_queue', job)
 
     def get_num_jobs(self):
-        return self.db.llen('jobs_waiting_queue')
-
+        return self.database.llen('jobs_waiting_queue')

@@ -1,14 +1,13 @@
 
-from c21server.work_gen.job_queue import JobQueue
 from fakeredis import FakeRedis
+from c21server.work_gen.job_queue import JobQueue
+
 
 def test_job_added_with_next_id():
-    db = FakeRedis()
+    database = FakeRedis()
 
-    q = JobQueue(db)
+    queue = JobQueue(database)
 
-    q.add_job('http://a.b.c')
+    queue.add_job('http://a.b.c')
 
-    assert q.get_num_jobs() == 1
-
-
+    assert queue.get_num_jobs() == 1
