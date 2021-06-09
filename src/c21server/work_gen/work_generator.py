@@ -1,5 +1,4 @@
 import os
-from time import sleep
 from datetime import datetime, timedelta
 import requests
 import dotenv
@@ -28,29 +27,20 @@ def get_jobs(endpoint, database):
         date = database.get('last_modified_date')
         params['filter[lastModifiedDate][ge]'] = date
 
-    if not os.path.exists(f'{f"regulations/{endpoint}"}'):
-        os.makedirs(f'regulations/{endpoint}')
-
     url = f'https://api.regulations.gov/v4/{endpoint}'
     items = make_request(url, params=params)
     total_elements = int(items.json()['meta']['totalElements'])
 
     while total_elements > 0:
-        try:
-            for page in range(1, int(items.json()['meta']['totalPages']) + 1):
-                params['page[number]'] = str(page)
-                items = make_request(url, params).json()
-                total_elements -= write_endpoints(endpoint, database, items)
-            update_filter(url, params)
-        except IndexError:
-            print('Ran out of items to download')
+        for page in range(1, int(items.json()['meta']['totalPages']) + 1):
+            params['page[number]'] = str(page)
+            items = make_request(url, params).json()
+            total_elements -= write_endpoints(endpoint, database, items)
+        update_filter(url, params)
 
 
 def make_request(url, params):
     response = requests.get(url, params=params)
-    if response.status_code == 429:
-        sleep(3600)
-        response = requests.get(url, params=params)
     response.raise_for_status()
     return response
 
