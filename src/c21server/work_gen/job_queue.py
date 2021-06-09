@@ -1,5 +1,6 @@
 import json
 
+
 class JobQueue:
 
     def __init__(self, database):
