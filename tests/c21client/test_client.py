@@ -95,6 +95,8 @@ def test_client_sends_job_results(mock_requests, mocker):
 
 
 def test_client_completes_job_requested(mock_requests, mocker):
+
+    mocker.patch('time.sleep')
     client = Client()
     mock_client_id = 9
     read_mock_client_id(mocker, mock_client_id)
