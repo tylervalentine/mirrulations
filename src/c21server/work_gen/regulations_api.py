@@ -2,7 +2,7 @@ import time
 import requests
 
 
-MIN_DELAY_BETWEEN_CALLS = 60 / 1000
+MIN_DELAY_BETWEEN_CALLS = 3600 / 1000
 
 
 class RegulationsAPI:
