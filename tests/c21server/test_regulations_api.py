@@ -4,7 +4,8 @@ from c21server.work_gen.regulations_api import RegulationsAPI, \
     MIN_DELAY_BETWEEN_CALLS
 
 
-def test_download_returns_json(requests_mock):
+def test_download_returns_json(requests_mock, mocker):
+    mocker.patch('time.sleep')
     requests_mock.get(
         'http://a.b.c',
         json={'foo': 'bar'}
@@ -16,7 +17,8 @@ def test_download_returns_json(requests_mock):
     assert result == expected
 
 
-def test_404_raises_exception(requests_mock):
+def test_404_raises_exception(requests_mock, mocker):
+    mocker.patch('time.sleep')
     requests_mock.get(
         'http://a.b.c',
         status_code=404
@@ -37,14 +39,16 @@ def test_sleep_called_when_multiple_downloads(requests_mock, mocker):
     fake_time = mocker.patch('time.sleep')
 
     api.download('http://a.b.c')
-    # assert no sleep
+    assert fake_time.called
+    fake_time.called = False
     assert not fake_time.called
     api.download('http://a.b.c')
     assert fake_time.called
     fake_time.assert_called_with(MIN_DELAY_BETWEEN_CALLS)
 
 
-def test_params_passed(requests_mock):
+def test_params_passed(requests_mock, mocker):
+    mocker.patch('time.sleep')
     requests_mock.get(
         'http://a.b.c', json={'foo': 'bar'}
     )

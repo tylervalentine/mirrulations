@@ -15,24 +15,13 @@ class RegulationsAPI:
     """
 
     def __init__(self, api_key):
-        self.last_time_called = None
         self.api_key = api_key
 
     def download(self, url, params=None):
-        if self.time_since_last_call() < MIN_DELAY_BETWEEN_CALLS:
-            time.sleep(MIN_DELAY_BETWEEN_CALLS)
+        time.sleep(MIN_DELAY_BETWEEN_CALLS)
         if params is None:
             params = {}
         params['api_key'] = self.api_key
         result = requests.get(url, params=params)
         result.raise_for_status()
         return result.json()
-
-    def time_since_last_call(self):
-        if self.last_time_called is None:
-            self.last_time_called = time.time()
-            return float('inf')
-        last = self.last_time_called
-        now = time.time()
-        self.last_time_called = now
-        return now - last
