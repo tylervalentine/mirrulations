@@ -27,6 +27,6 @@ class JobQueue:
             return self.database.get('last_timestamp').decode()
         return '1972-01-01 00:00:00'
 
-    def set_last_timestamp(self, date_string):
+    def set_last_timestamp_string(self, date_string):
         self.database.set('last_timestamp', date_string.replace('T', ' ')
                           .replace('Z', ''))

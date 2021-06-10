@@ -35,6 +35,6 @@ def test_last_timestamp():
 
     assert queue.get_last_timestamp_string() == '1972-01-01 00:00:00'
 
-    queue.set_last_timestamp('2020-06-10T20:49:03Z')
+    queue.set_last_timestamp_string('2020-06-10T20:49:03Z')
 
     assert queue.get_last_timestamp_string() == '2020-06-10 20:49:03'
