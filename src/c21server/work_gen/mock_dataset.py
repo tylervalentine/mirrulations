@@ -1,11 +1,15 @@
 import datetime
 import json
+import pytz
 
 
 class MockDataSet:
 
-    def __init__(self, num_results):
-        self.start = datetime.datetime(2020, 1, 1, 0, 0, 0, 0)
+    def __init__(self, num_results, start_date='2020-01-01 00:00:00'):
+        utc = pytz.utc
+
+        self.start = datetime.datetime.fromisoformat(start_date)\
+            .replace(tzinfo=utc)
         self.delta = datetime.timedelta(seconds=1)
         self.counter = 1
         self.num_results = num_results
