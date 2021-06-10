@@ -25,19 +25,26 @@ class MockDataSet:
 
         return self.results
 
+    def make_item(self):
+        attributes = {
+            'lastModifiedDate': (
+                (self.start + self.delta * self.counter).strftime(
+                    '%Y-%m-%dT%H:%M:%SZ'))
+        }
+        links = {
+            'self': f'http://a.b.c/{self.counter}'
+        }
+        return {
+            'id': self.counter,
+            'attributes': attributes,
+            'links': links
+        }
+
     def make_full_pages_of_results(self, count, total_count):
         for result_count in range(1, count + 1):
             data = []
             for _ in range(250):
-                attributes = {
-                    'lastModifiedDate': (
-                        (self.start + self.delta * self.counter).strftime(
-                            '%Y-%m-%dT%H:%M:%SZ'))
-                }
-                data.append({
-                    'id': self.counter,
-                    'attributes': attributes
-                })
+                data.append(self.make_item())
                 self.counter += 1
             meta = {
                 'totalElements': total_count,
@@ -51,15 +58,7 @@ class MockDataSet:
     def make_partial_page_of_results(self, result_count, total_count):
         data = []
         for _ in range(result_count):
-            date_str = (self.start + self.delta * self.counter).strftime(
-                '%Y-%m-%dT%H:%M:%SZ')
-            attributes = {
-                'lastModifiedDate': date_str
-            }
-            data.append({
-                'id': self.counter,
-                'attributes': attributes
-            })
+            data.append(self.make_item())
             self.counter += 1
         meta = {
             'totalElements': total_count,
