@@ -4,29 +4,6 @@ from c21server.work_gen.regulations_api import RegulationsAPI
 from c21server.work_gen.mock_dataset import MockDataSet
 
 
-def make_get_result(page_number, total_pages, total_results):
-
-    if page_number == total_pages:
-        num_results = 5
-    else:
-        num_results = 10
-    data = [{'id': 'TEST-{}'.format(page_number * 10 + n)}
-            for n in range(num_results)]
-
-    meta = {
-        'pageNumber': page_number,
-        'pageSize': num_results,
-        'totalElements': total_results,
-        'totalPages': total_pages,
-    }
-
-    result = {'data': data,
-              'meta': meta
-              }
-
-    return {'text': json.dumps(result)}
-
-
 def test_iterate_one_page(requests_mock, mocker):
     mocker.patch('time.sleep')
 
