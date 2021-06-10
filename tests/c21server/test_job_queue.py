@@ -1,4 +1,5 @@
 
+import datetime
 from fakeredis import FakeRedis
 from c21server.work_gen.job_queue import JobQueue
 
@@ -26,3 +27,15 @@ def test_job_added_with_next_id():
     job = queue.get_job()
     assert job['job_id'] == 43
     assert job['url'] == 'http://a.b.c'
+
+
+def test_last_timestamp():
+
+    database = FakeRedis()
+    queue = JobQueue(database)
+
+    assert queue.get_last_timestamp_string() == '1972-01-01 00:00:00'
+
+    queue.set_last_timestamp('2020-06-10T20:49:03Z')
+
+    assert queue.get_last_timestamp_string() == '2020-06-10 20:49:03'

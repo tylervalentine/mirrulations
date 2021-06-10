@@ -1,3 +1,4 @@
+import datetime
 import json
 
 
@@ -21,3 +22,12 @@ class JobQueue:
     def get_job_id(self):
         job_id = self.database.incr('last_job_id')
         return job_id
+
+    def get_last_timestamp_string(self):
+        if self.database.exists('last_timestamp'):
+            return self.database.get('last_timestamp').decode()
+        return '1972-01-01 00:00:00'
+
+    def set_last_timestamp(self, date_string):
+        self.database.set('last_timestamp', date_string.replace('T', ' ')
+                          .replace('Z', ''))
