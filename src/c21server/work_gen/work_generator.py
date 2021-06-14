@@ -1,7 +1,7 @@
 import os
 import dotenv
 import redis
-from c21server.work_gen.search_traverser import SearchIterator
+from c21server.work_gen.search_iterator import SearchIterator
 from c21server.work_gen.results_processor import ResultsProcessor
 from c21server.work_gen.regulations_api import RegulationsAPI
 from c21server.work_gen.job_queue import JobQueue

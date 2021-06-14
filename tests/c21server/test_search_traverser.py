@@ -1,4 +1,4 @@
-from c21server.work_gen.search_traverser import SearchIterator
+from c21server.work_gen.search_iterator import SearchIterator
 from c21server.work_gen.regulations_api import RegulationsAPI
 from c21server.work_gen.mock_dataset import MockDataSet
 
