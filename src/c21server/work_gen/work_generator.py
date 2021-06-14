@@ -18,8 +18,8 @@ class WorkGenerator:
         last_timestamp = self.job_queue.get_last_timestamp_string()
         for result in SearchIterator(self.api, endpoint, last_timestamp):
             self.processor.process_results(result)
-            timestamp_str = result['data'][-1]['attributes']['lastModifiedDate']
-            self.job_queue.set_last_timestamp_string(timestamp_str)
+            timestamp = result['data'][-1]['attributes']['lastModifiedDate']
+            self.job_queue.set_last_timestamp_string(timestamp)
 
 
 if __name__ == '__main__':
