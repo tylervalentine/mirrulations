@@ -1,0 +1,735 @@
+{
+  "data": [
+    {
+      "id": "ED-2021-SCC-0032",
+      "type": "dockets",
+      "attributes": {
+        "docketType": "Nonrulemaking",
+        "lastModifiedDate": "2021-05-10T07:48:24Z",
+        "highlightedContent": null,
+        "agencyId": "ED",
+        "title": "Title I, Part A Accountability Waiver Requests for School Year 2020-2021",
+        "objectId": "0b00006484a5bd4d"
+      },
+      "links": {
+        "self": "https://api.regulations.gov/v4/dockets/ED-2021-SCC-0032"
+      }
+    },
+    {
+      "id": "OPM-2021-0003",
+      "type": "dockets",
+      "attributes": {
+        "docketType": "Rulemaking",
+        "lastModifiedDate": "2021-05-10T07:59:49Z",
+        "highlightedContent": null,
+        "agencyId": "OPM",
+        "title": "Representative Payees Under the Civil Service Retirement System and Federal Employees’ Retirement System",
+        "objectId": "0b00006484a6b677"
+      },
+      "links": {
+        "self": "https://api.regulations.gov/v4/dockets/OPM-2021-0003"
+      }
+    },
+    {
+      "id": "EPA-HQ-OAR-2019-0055",
+      "type": "dockets",
+      "attributes": {
+        "docketType": "Rulemaking",
+        "lastModifiedDate": "2021-05-10T08:19:29Z",
+        "highlightedContent": null,
+        "agencyId": "EPA",
+        "title": "Control of Air Pollution from New Motor Vehicles: Heavy-Duty Engine Standards",
+        "objectId": "0b00006483a8a5c2"
+      },
+      "links": {
+        "self": "https://api.regulations.gov/v4/dockets/EPA-HQ-OAR-2019-0055"
+      }
+    },
+    {
+      "id": "EPA-R03-OAR-2020-0488",
+      "type": "dockets",
+      "attributes": {
+        "docketType": "Rulemaking",
+        "lastModifiedDate": "2021-05-10T08:36:21Z",
+        "highlightedContent": null,
+        "agencyId": "EPA",
+        "title": "Clearfield-Indiana Area PA 1997 Ozone Limited Maintenance Plan",
+        "objectId": "0b00006484853635"
+      },
+      "links": {
+        "self": "https://api.regulations.gov/v4/dockets/EPA-R03-OAR-2020-0488"
+      }
+    },
+    {
+      "id": "USCG-2020-0033",
+      "type": "dockets",
+      "attributes": {
+        "docketType": "Rulemaking",
+        "lastModifiedDate": "2021-05-10T08:37:53Z",
+        "highlightedContent": null,
+        "agencyId": "USCG",
+        "title": "Rainy River, Rainy Lake and their tributaries, Rainier, MN",
+        "objectId": "0b000064842646ea"
+      },
+      "links": {
+        "self": "https://api.regulations.gov/v4/dockets/USCG-2020-0033"
+      }
+    },
+    {
+      "id": "EPA-R08-OAR-2020-0739",
+      "type": "dockets",
+      "attributes": {
+        "docketType": "Rulemaking",
+        "lastModifiedDate": "2021-05-10T08:53:32Z",
+        "highlightedContent": null,
+        "agencyId": "EPA",
+        "title": "ARSD Rule Revisions",
+        "objectId": "0b000064849d1edd"
+      },
+      "links": {
+        "self": "https://api.regulations.gov/v4/dockets/EPA-R08-OAR-2020-0739"
+      }
+    },
+    {
+      "id": "APHIS-2020-0115",
+      "type": "dockets",
+      "attributes": {
+        "docketType": "Nonrulemaking",
+        "lastModifiedDate": "2021-05-10T09:00:46Z",
+        "highlightedContent": null,
+        "agencyId": "APHIS",
+        "title": "Double-Crested Cormorant Damage Management in Ohio",
+        "objectId": "0b00006484969bcf"
+      },
+      "links": {
+        "self": "https://api.regulations.gov/v4/dockets/APHIS-2020-0115"
+      }
+    },
+    {
+      "id": "FAA-2015-8380",
+      "type": "dockets",
+      "attributes": {
+        "docketType": "Nonrulemaking",
+        "lastModifiedDate": "2021-05-10T09:04:19Z",
+        "highlightedContent": null,
+        "agencyId": "FAA",
+        "title": "skyVuze LLC - Exemption/Rulemaking",
+        "objectId": "0b00006481dcc5bc"
+      },
+      "links": {
+        "self": "https://api.regulations.gov/v4/dockets/FAA-2015-8380"
+      }
+    },
+    {
+      "id": "NOAA-NMFS-2020-0146",
+      "type": "dockets",
+      "attributes": {
+        "docketType": "Rulemaking",
+        "lastModifiedDate": "2021-05-10T09:04:38Z",
+        "highlightedContent": null,
+        "agencyId": "NOAA",
+        "title": "Amendment 12 to the Fishery Management Plan (FMP) for the Dolphin and Wahoo Fishery of the Atlantic (Dolphin Wahoo Amendment 12)",
+        "objectId": "0b0000648494680b"
+      },
+      "links": {
+        "self": "https://api.regulations.gov/v4/dockets/NOAA-NMFS-2020-0146"
+      }
+    },
+    {
+      "id": "EPA-HQ-OECA-2014-0056",
+      "type": "dockets",
+      "attributes": {
+        "docketType": "Nonrulemaking",
+        "lastModifiedDate": "2021-05-10T09:07:07Z",
+        "highlightedContent": null,
+        "agencyId": "EPA",
+        "title": "NESHAP for Shipbuilding and Ship repair Facilities-Surface Coating (40 CFR Part 63, Subpart II)",
+        "objectId": "0b00006481506f56"
+      },
+      "links": {
+        "self": "https://api.regulations.gov/v4/dockets/EPA-HQ-OECA-2014-0056"
+      }
+    }
+  ],
+  "meta": {
+    "aggregations": {
+      "priorityCategory": [
+        {
+          "docCount": 213,
+          "label": "Routine and Frequent"
+        },
+        {
+          "docCount": 67,
+          "label": "Substantive/Nonsignificant"
+        },
+        {
+          "docCount": 44,
+          "label": "Other Significant"
+        },
+        {
+          "docCount": 20,
+          "label": "Economically Significant"
+        },
+        {
+          "docCount": 2,
+          "label": "Info/Admin/Other"
+        }
+      ],
+      "docketType": [
+        {
+          "docCount": 1288,
+          "label": "Nonrulemaking"
+        },
+        {
+          "docCount": 740,
+          "label": "Rulemaking"
+        }
+      ],
+      "major": [
+        {
+          "docCount": 310,
+          "label": "No"
+        },
+        {
+          "docCount": 19,
+          "label": "Yes"
+        },
+        {
+          "docCount": 17,
+          "label": "Undetermined"
+        }
+      ],
+      "ruleStage": [
+        {
+          "docCount": 212,
+          "label": "Long-Term Actions"
+        },
+        {
+          "docCount": 59,
+          "label": "Proposed Rule Stage"
+        },
+        {
+          "docCount": 36,
+          "label": "Final Rule Stage"
+        },
+        {
+          "docCount": 21,
+          "label": "Completed Actions"
+        },
+        {
+          "docCount": 18,
+          "label": "Prerule Stage"
+        }
+      ],
+      "smallEntities": [
+        {
+          "docCount": 213,
+          "label": "Businesses"
+        },
+        {
+          "docCount": 78,
+          "label": "No"
+        },
+        {
+          "docCount": 17,
+          "label": "Organizations"
+        },
+        {
+          "docCount": 7,
+          "label": "Governmental Jurisdictions"
+        }
+      ],
+      "energyAffected": [
+        {
+          "docCount": 293,
+          "label": "No"
+        },
+        {
+          "docCount": 11,
+          "label": "Undetermined"
+        }
+      ],
+      "eo13771Designation": [
+        {
+          "docCount": 205,
+          "label": "Other"
+        },
+        {
+          "docCount": 70,
+          "label": "Not subject to/Not significant"
+        },
+        {
+          "docCount": 17,
+          "label": "Regulatory"
+        },
+        {
+          "docCount": 14,
+          "label": "Deregulatory"
+        },
+        {
+          "docCount": 12,
+          "label": "Fully or Partially Exempt"
+        },
+        {
+          "docCount": 11,
+          "label": "Independent agency"
+        }
+      ],
+      "agencyId": [
+        {
+          "docCount": 345,
+          "value": "FAA"
+        },
+        {
+          "docCount": 334,
+          "value": "EPA"
+        },
+        {
+          "docCount": 300,
+          "value": "FDA"
+        },
+        {
+          "docCount": 101,
+          "value": "DOT"
+        },
+        {
+          "docCount": 78,
+          "value": "FMCSA"
+        },
+        {
+          "docCount": 73,
+          "value": "USCG"
+        },
+        {
+          "docCount": 65,
+          "value": "FRA"
+        },
+        {
+          "docCount": 47,
+          "value": "CMS"
+        },
+        {
+          "docCount": 47,
+          "value": "NRC"
+        },
+        {
+          "docCount": 36,
+          "value": "FWS"
+        },
+        {
+          "docCount": 34,
+          "value": "NOAA"
+        },
+        {
+          "docCount": 31,
+          "value": "EERE"
+        },
+        {
+          "docCount": 29,
+          "value": "DOD"
+        },
+        {
+          "docCount": 28,
+          "value": "PHMSA"
+        },
+        {
+          "docCount": 26,
+          "value": "NHTSA"
+        },
+        {
+          "docCount": 22,
+          "value": "ED"
+        },
+        {
+          "docCount": 19,
+          "value": "AID"
+        },
+        {
+          "docCount": 19,
+          "value": "APHIS"
+        },
+        {
+          "docCount": 18,
+          "value": "AMS"
+        },
+        {
+          "docCount": 16,
+          "value": "CDC"
+        },
+        {
+          "docCount": 15,
+          "value": "OSHA"
+        },
+        {
+          "docCount": 14,
+          "value": "DHS"
+        },
+        {
+          "docCount": 14,
+          "value": "HUD"
+        },
+        {
+          "docCount": 14,
+          "value": "NCUA"
+        },
+        {
+          "docCount": 12,
+          "value": "CPSC"
+        },
+        {
+          "docCount": 12,
+          "value": "USCIS"
+        },
+        {
+          "docCount": 11,
+          "value": "DARS"
+        },
+        {
+          "docCount": 11,
+          "value": "USCBP"
+        },
+        {
+          "docCount": 11,
+          "value": "USTR"
+        },
+        {
+          "docCount": 10,
+          "value": "FEMA"
+        },
+        {
+          "docCount": 10,
+          "value": "VA"
+        },
+        {
+          "docCount": 9,
+          "value": "CFPB"
+        },
+        {
+          "docCount": 9,
+          "value": "FTC"
+        },
+        {
+          "docCount": 9,
+          "value": "PTO"
+        },
+        {
+          "docCount": 9,
+          "value": "SSA"
+        },
+        {
+          "docCount": 8,
+          "value": "USA"
+        },
+        {
+          "docCount": 7,
+          "value": "BOEM"
+        },
+        {
+          "docCount": 7,
+          "value": "GSA"
+        },
+        {
+          "docCount": 7,
+          "value": "OCC"
+        },
+        {
+          "docCount": 6,
+          "value": "BIS"
+        },
+        {
+          "docCount": 6,
+          "value": "DOE"
+        },
+        {
+          "docCount": 6,
+          "value": "FHWA"
+        },
+        {
+          "docCount": 6,
+          "value": "MARAD"
+        },
+        {
+          "docCount": 6,
+          "value": "MSHA"
+        },
+        {
+          "docCount": 5,
+          "value": "DEA"
+        },
+        {
+          "docCount": 5,
+          "value": "HHS"
+        },
+        {
+          "docCount": 5,
+          "value": "NARA"
+        },
+        {
+          "docCount": 5,
+          "value": "SBA"
+        },
+        {
+          "docCount": 5,
+          "value": "TREAS"
+        },
+        {
+          "docCount": 4,
+          "value": "DOI"
+        },
+        {
+          "docCount": 4,
+          "value": "ETA"
+        },
+        {
+          "docCount": 4,
+          "value": "FNS"
+        },
+        {
+          "docCount": 4,
+          "value": "FSA"
+        },
+        {
+          "docCount": 4,
+          "value": "NTSB"
+        },
+        {
+          "docCount": 4,
+          "value": "OSM"
+        },
+        {
+          "docCount": 4,
+          "value": "TSA"
+        },
+        {
+          "docCount": 3,
+          "value": "CNCS"
+        },
+        {
+          "docCount": 3,
+          "value": "COE"
+        },
+        {
+          "docCount": 3,
+          "value": "FS"
+        },
+        {
+          "docCount": 3,
+          "value": "USN"
+        },
+        {
+          "docCount": 2,
+          "value": "ASC"
+        },
+        {
+          "docCount": 2,
+          "value": "ATF"
+        },
+        {
+          "docCount": 2,
+          "value": "COLC"
+        },
+        {
+          "docCount": 2,
+          "value": "DOL"
+        },
+        {
+          "docCount": 2,
+          "value": "DOS"
+        },
+        {
+          "docCount": 2,
+          "value": "EEOC"
+        },
+        {
+          "docCount": 2,
+          "value": "EIB"
+        },
+        {
+          "docCount": 2,
+          "value": "FCIC"
+        },
+        {
+          "docCount": 2,
+          "value": "FSIS"
+        },
+        {
+          "docCount": 2,
+          "value": "FTA"
+        },
+        {
+          "docCount": 2,
+          "value": "IRS"
+        },
+        {
+          "docCount": 2,
+          "value": "ITA"
+        },
+        {
+          "docCount": 2,
+          "value": "LMSO"
+        },
+        {
+          "docCount": 2,
+          "value": "OMB"
+        },
+        {
+          "docCount": 2,
+          "value": "OPM"
+        },
+        {
+          "docCount": 2,
+          "value": "RBS"
+        },
+        {
+          "docCount": 2,
+          "value": "RITA"
+        },
+        {
+          "docCount": 2,
+          "value": "RUS"
+        },
+        {
+          "docCount": 2,
+          "value": "USBC"
+        },
+        {
+          "docCount": 2,
+          "value": "USDA"
+        },
+        {
+          "docCount": 1,
+          "value": "AHRQ"
+        },
+        {
+          "docCount": 1,
+          "value": "BIA"
+        },
+        {
+          "docCount": 1,
+          "value": "BLM"
+        },
+        {
+          "docCount": 1,
+          "value": "CCC"
+        },
+        {
+          "docCount": 1,
+          "value": "DOC"
+        },
+        {
+          "docCount": 1,
+          "value": "EAC"
+        },
+        {
+          "docCount": 1,
+          "value": "EBSA"
+        },
+        {
+          "docCount": 1,
+          "value": "EIA"
+        },
+        {
+          "docCount": 1,
+          "value": "FINCEN"
+        },
+        {
+          "docCount": 1,
+          "value": "FISCAL"
+        },
+        {
+          "docCount": 1,
+          "value": "FRTIB"
+        },
+        {
+          "docCount": 1,
+          "value": "ICEB"
+        },
+        {
+          "docCount": 1,
+          "value": "IHS"
+        },
+        {
+          "docCount": 1,
+          "value": "NASS"
+        },
+        {
+          "docCount": 1,
+          "value": "NIGC"
+        },
+        {
+          "docCount": 1,
+          "value": "NRCS"
+        },
+        {
+          "docCount": 1,
+          "value": "NSF"
+        },
+        {
+          "docCount": 1,
+          "value": "OFAC"
+        },
+        {
+          "docCount": 1,
+          "value": "ONDCP"
+        },
+        {
+          "docCount": 1,
+          "value": "PCSCOTUS"
+        },
+        {
+          "docCount": 1,
+          "value": "RHS"
+        },
+        {
+          "docCount": 1,
+          "value": "RMA"
+        },
+        {
+          "docCount": 1,
+          "value": "USAF"
+        },
+        {
+          "docCount": 1,
+          "value": "USMINT"
+        },
+        {
+          "docCount": 1,
+          "value": "WCPO"
+        },
+        {
+          "docCount": 1,
+          "value": "WHD"
+        }
+      ],
+      "internationalInterest": [
+        {
+          "docCount": 334,
+          "label": "No"
+        },
+        {
+          "docCount": 9,
+          "label": "Yes"
+        },
+        {
+          "docCount": 3,
+          "label": "Not Collected"
+        }
+      ]
+    },
+    "filters": {
+      "lastModifiedDate": {
+        "fromDate": "2021-05-09 00:00:00",
+        "toDate": null
+      }
+    },
+    "hasNextPage": true,
+    "hasPreviousPage": false,
+    "numberOfElements": 10,
+    "pageNumber": 1,
+    "pageSize": 10,
+    "totalElements": 2028,
+    "totalPages": 20,
+    "lastPage": false,
+    "firstPage": true
+  }
+}

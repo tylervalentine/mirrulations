@@ -1,80 +1,35 @@
-import json
 from fakeredis import FakeRedis
-import pytest
-from pytest import fixture
-import c21server.work_gen.basic_work_gen as work_gen
+from c21server.work_gen.job_queue import JobQueue
+from c21server.work_gen.work_generator import WorkGenerator
+from c21server.work_gen.regulations_api import RegulationsAPI
+from c21server.work_gen.mock_dataset import MockDataSet
 
 
-@fixture(name='mock_redis')
-def fixture_mock_redis():
-    return FakeRedis()
+def test_work_generator_single_page(requests_mock, mocker):
+    mocker.patch('time.sleep')
+    results = MockDataSet(150).get_results()
+    requests_mock.get('https://api.regulations.gov/v4/documents', results)
+
+    database = FakeRedis()
+    api = RegulationsAPI('FAKE_KEY')
+    job_queue = JobQueue(database)
+
+    generator = WorkGenerator(job_queue, api)
+    generator.download('documents')
+
+    assert database.llen('jobs_waiting_queue') == 150
 
 
-def test_generate_jobs(mock_redis):
-    work_gen.generate_jobs(mock_redis, 'tests/data/dockets_test_0.txt', 6)
-    assert mock_redis.llen('jobs_waiting_queue') == 10
-    # expected_keys = (i for i in range(6, 16))
-    expected_values = ["https://api.regulations.gov/v4/dockets/EBSA-2005-0001",
-                       "https://api.regulations.gov/v4/dockets/NASA-2005-0001",
-                       "https://api.regulations.gov/v4/dockets/DOD-2005-0002",
-                       "https://api.regulations.gov/v4/dockets/RHS-2005-0001",
-                       "https://api.regulations.gov/v4/dockets/DOD-2005-0003",
-                       "https://api.regulations.gov/v4/dockets/DOD-2005-0004",
-                       "https://api.regulations.gov/v4/dockets/DOD-2005-0005",
-                       "https://api.regulations.gov/v4/dockets/NASA-2005-0002",
-                       "https://api.regulations.gov/v4/dockets/DOD-2005-0006",
-                       "https://api.regulations.gov/v4/dockets/EBSA-2005-0002"]
+def test_work_generator_large(requests_mock, mocker):
+    mocker.patch('time.sleep')
+    results = MockDataSet(6666).get_results()
+    requests_mock.get('https://api.regulations.gov/v4/documents', results)
 
-    while mock_redis.llen('jobs_waiting_queue') != 0:
-        job = json.loads(mock_redis.lpop('jobs_waiting_queue'))
-        value = job['url']
-        assert value in expected_values
+    database = FakeRedis()
+    api = RegulationsAPI('FAKE_KEY')
+    job_queue = JobQueue(database)
 
+    generator = WorkGenerator(job_queue, api)
+    generator.download('documents')
 
-def test_generate_jobs_no_start_key(mock_redis):
-    work_gen.generate_jobs(mock_redis, 'tests/data/dockets_test_0.txt')
-    assert mock_redis.llen('jobs_waiting_queue') == 10
-    # expected_keys = (i for i in range(10))
-    expected_values = ["https://api.regulations.gov/v4/dockets/EBSA-2005-0001",
-                       "https://api.regulations.gov/v4/dockets/NASA-2005-0001",
-                       "https://api.regulations.gov/v4/dockets/DOD-2005-0002",
-                       "https://api.regulations.gov/v4/dockets/RHS-2005-0001",
-                       "https://api.regulations.gov/v4/dockets/DOD-2005-0003",
-                       "https://api.regulations.gov/v4/dockets/DOD-2005-0004",
-                       "https://api.regulations.gov/v4/dockets/DOD-2005-0005",
-                       "https://api.regulations.gov/v4/dockets/NASA-2005-0002",
-                       "https://api.regulations.gov/v4/dockets/DOD-2005-0006",
-                       "https://api.regulations.gov/v4/dockets/EBSA-2005-0002"]
-
-    while mock_redis.llen('jobs_waiting_queue') != 0:
-        job = json.loads(mock_redis.lpop('jobs_waiting_queue'))
-        value = job['url']
-        assert value in expected_values
-
-
-def test_generate_jobs_bad_filename(mock_redis):
-    with pytest.raises(FileNotFoundError):
-        work_gen.generate_jobs(mock_redis, 'tests/data/dockit_test_0.txt')
-
-
-def test_generate_jobs_bad_data(mock_redis):
-    with pytest.raises(Exception):
-        work_gen.generate_jobs(mock_redis, 'tests/data/dockets_test_0_bad.txt')
-
-    assert mock_redis.llen('jobs_waiting_queue') == 3
-    # expected_keys = (i for i in range(3))
-    expected_values = ["https://api.regulations.gov/v4/dockets/EBSA-2005-0001",
-                       "https://api.regulations.gov/v4/dockets/NASA-2005-0001",
-                       "https://api.regulations.gov/v4/dockets/DOD-2005-0002",
-                       "https://api.regulations.gov/v4/dockets/RHS-2005-0001",
-                       "https://api.regulations.gov/v4/dockets/DOD-2005-0003",
-                       "https://api.regulations.gov/v4/dockets/DOD-2005-0004",
-                       "https://api.regulations.gov/v4/dockets/DOD-2005-0005",
-                       "https://api.regulations.gov/v4/dockets/NASA-2005-0002",
-                       "https://api.regulations.gov/v4/dockets/DOD-2005-0006",
-                       "https://api.regulations.gov/v4/dockets/EBSA-2005-0002"]
-
-    while mock_redis.llen('jobs_waiting_queue') != 0:
-        job = json.loads(mock_redis.lpop('jobs_waiting_queue'))
-        value = job['url']
-        assert value in expected_values
+    assert database.llen('jobs_waiting_queue') == 6666
