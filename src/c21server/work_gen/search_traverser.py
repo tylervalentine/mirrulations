@@ -59,6 +59,8 @@ class SearchIterator:
         # Dates in query have a space between and nothing at the end
         last_date = result['data'][-1]['attributes']['lastModifiedDate']\
             .replace('T', ' ').replace('Z', '')
+        # Dates in the data are UTC, but dates in query are EST
+        # Covert the date to the proper form.
         last_utc = datetime.datetime.fromisoformat(last_date).replace(
             tzinfo=self.utc)
         next_date = last_utc.astimezone(self.est).strftime('%Y-%m-%d %H:%M:%S')
