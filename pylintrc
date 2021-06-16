@@ -1,6 +1,8 @@
 [MASTER]
 # Don't save data between runs
 persistent=no
+load-plugins=pylint_pytest
+
 
 # This file contains options that are changed from default.
 # See https://pylint.readthedocs.io/en/latest/technical_reference/features.html
