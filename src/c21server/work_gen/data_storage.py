@@ -1,10 +1,12 @@
 import os
 import pathlib
+from c21server.core.config import settings
 
 
 class DataStorage:
     def __init__(self):
-        self.base_path = pathlib.PosixPath('~/data/data/').expanduser()
+        self.base_path = pathlib.PosixPath(settings.get('datapath'))\
+            .expanduser()
 
     def exists(self, search_element):
         result_id, agency_id, docket_id = extract_ids(search_element)
