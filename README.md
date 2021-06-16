@@ -28,23 +28,9 @@ Additionally, we make use of make in order to run tests.
 * Create a `settings.toml` file in the root of the project:
 
   ```
-  [default]
   datapath = "<path to data on local machine>"
-
-  [testing]
-  datapath = "tests/data"
   ```
 
-* Create a `.env` file in the root of the project:
-
-  ```
-  ENV_FOR_DYNACONF=default
-  API_TOKEN=<regulations.gov API Token>
-  ```
-  
-  The API_TOKEN is only needed if you plan to run the work generator or client
-  directly on your machine.
-  
 ## Run Static Analysis and Tests
 
 Type `make` to run all. 
