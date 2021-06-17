@@ -1,5 +1,6 @@
 import datetime
 import pytz
+from requests import HTTPError
 
 
 class SearchIterator:
@@ -40,7 +41,11 @@ class SearchIterator:
         self.params['page[number]'] = self.next_page
         self.next_page += 1
 
-        result = self.api.download(self.url, self.params)
+        try:
+            result = self.api.download(self.url, self.params)
+        except HTTPError as error:
+            print(f'FAILED: {self.url}\n{error}')
+
         self.iteration_done = self.check_if_done(result)
 
         return result
