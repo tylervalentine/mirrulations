@@ -1,3 +1,4 @@
+import os
 from functools import partial
 from pytest import fixture
 import requests
@@ -8,7 +9,14 @@ from c21client.client import execute_client_task
 from c21client.client import read_client_id, write_client_id
 
 
-BASE_URL = 'http://capstone.cs.moravian.edu/work'
+BASE_URL = 'http://work_server:8080'
+
+
+@fixture(autouse=True)
+def mock_env():
+    os.environ['WORK_SERVER_HOSTNAME'] = 'work_server'
+    os.environ['WORK_SERVER_PORT'] = '8080'
+    os.environ['API_KEY'] = 'TESTING_KEY'
 
 
 @fixture(name='mock_requests')

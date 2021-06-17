@@ -10,11 +10,12 @@ from requests.exceptions import HTTPError, RequestException
 class Client:
 
     def __init__(self):
-        self.url = 'http://capstone.cs.moravian.edu/work'
-        # self.url = 'http://localhost:8080' # If you want to run locally
-        self.client_id = -1
         load_dotenv()
+        work_server_hostname = os.getenv('WORK_SERVER_HOSTNAME')
+        work_server_port = os.getenv('WORK_SERVER_PORT')
+        self.url = f'http://{work_server_hostname}:{work_server_port}'
         self.api_key = os.getenv('API_TOKEN')
+        self.client_id = -1
 
     def get_client_id(self):
         client_id = read_client_id('client.cfg')
