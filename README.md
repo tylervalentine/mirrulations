@@ -25,6 +25,12 @@ Additionally, we make use of make in order to run tests.
 * Lastly, the client needs an api key in order to properly make the calls to [regulations.gov](https://www.regulations.gov/). In `src/c21client`, make a `.env` file with the contents `API_TOKEN=[insert your api key here]`. To get an api key, visit [here](https://open.gsa.gov/api/regulationsgov/). Check [client docs](https://github.com/cs334s21/capstone2021/blob/main/docs/client.md) for more information.
 * For more guidance on specific aspects of the project, visit the [docs](https://github.com/cs334s21/capstone2021/blob/main/docs/). 
 
+* Create a `settings.toml` file in the root of the project:
+
+  ```
+  datapath = "<path to data on local machine>"
+  ```
+
 ## Run Static Analysis and Tests
 
 Type `make` to run all. 

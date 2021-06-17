@@ -5,14 +5,15 @@ from c21server.work_gen.search_iterator import SearchIterator
 from c21server.work_gen.results_processor import ResultsProcessor
 from c21server.work_gen.regulations_api import RegulationsAPI
 from c21server.work_gen.job_queue import JobQueue
+from c21server.work_gen.data_storage import DataStorage
 
 
 class WorkGenerator:
 
-    def __init__(self, job_queue, api):
+    def __init__(self, job_queue, api, datastorage):
         self.job_queue = job_queue
         self.api = api
-        self.processor = ResultsProcessor(job_queue)
+        self.processor = ResultsProcessor(job_queue, datastorage)
 
     def download(self, endpoint):
         last_timestamp = self.job_queue.get_last_timestamp_string()
@@ -32,8 +33,12 @@ if __name__ == '__main__':
         database = redis.Redis()
         job_queue = JobQueue(database)
 
-        generator = WorkGenerator(job_queue, api)
+        storage = DataStorage()
+
+        generator = WorkGenerator(job_queue, api, storage)
 
         generator.download('dockets')
+        generator.download('documents')
+        generator.download('comments')
 
     generate_work()

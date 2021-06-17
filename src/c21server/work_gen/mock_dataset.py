@@ -39,7 +39,7 @@ class MockDataSet:
             'self': f'http://a.b.c/{self.counter}'
         }
         return {
-            'id': self.counter,
+            'id': f'ABC-2020-{self.counter}',
             'attributes': attributes,
             'links': links
         }
