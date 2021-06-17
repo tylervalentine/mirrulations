@@ -1,5 +1,4 @@
 
-from c21server.core.config import settings
 from c21server.work_gen.data_storage import DataStorage
 
 
@@ -11,24 +10,58 @@ def does_not_exist(storage, the_id):
     assert storage.exists({'id': the_id}) is False
 
 
-def test_data_knows_about_existing_files():
-    settings.configure(datapath="tests/data")
+class FindOnly:
+    def __init__(self, value):
+        self.value = value
+
+    def count_documents(self, search):
+        if search['id'] == self.value:
+            return 1
+        return 0
+
+
+def test_docket_found_others_not(monkeypatch):
     storage = DataStorage()
 
+    monkeypatch.setattr(storage, 'dockets', FindOnly('DOCK-2020-1234'))
+    monkeypatch.setattr(storage, 'documents', FindOnly('NOTHING'))
+    monkeypatch.setattr(storage, 'comments', FindOnly('NOTHING'))
+
     # docket exists
-    exists(storage, 'OCC-2020-0031')
+    exists(storage, 'DOCK-2020-1234')
+    # document does not exist
+    does_not_exist(storage, 'DOC-2020-1234')
+    # comment does not exist
+    does_not_exist(storage, 'COM-2020-1234')
+
+
+def test_document_found_others_not(monkeypatch):
+    storage = DataStorage()
+
+    monkeypatch.setattr(storage, 'dockets', FindOnly('NOTHING'))
+    monkeypatch.setattr(storage, 'documents', FindOnly('DOC-2020-1234'))
+    monkeypatch.setattr(storage, 'comments', FindOnly('NOTHING'))
+
+    # docket does not exists
+    does_not_exist(storage, 'DOCK-2020-1234')
+    # document does exist
+    exists(storage, 'DOC-2020-1234')
+    # comment does not exist
+    does_not_exist(storage, 'COM-2020-1234')
+
+
+def test_comment_found_others_not(monkeypatch):
+    storage = DataStorage()
+
+    monkeypatch.setattr(storage, 'dockets', FindOnly('NOTHING'))
+    monkeypatch.setattr(storage, 'documents', FindOnly('NOTHING'))
+    monkeypatch.setattr(storage, 'comments', FindOnly('COM-2020-1234'))
 
     # docket does not exist
-    does_not_exist(storage, 'OCC-2020-9999')
-
-    # document exists
-    exists(storage, 'OCC-2020-0031-0001')
+    does_not_exist(storage, 'DOCK-2020-1234')
 
     # document does not exist
-    does_not_exist(storage, 'OCC-2020-0031-9999')
+    does_not_exist(storage, 'DOC-2020-1234')
 
     # comment exists
-    exists(storage, 'OCC-2020-0031-0008')
-
-    # comment does not exist
-    does_not_exist(storage, 'OCC-2020-0031-9999')
+    exists(storage, 'COM-2020-1234')
