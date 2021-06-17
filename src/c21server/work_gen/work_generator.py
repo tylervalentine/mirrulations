@@ -7,6 +7,7 @@ from c21server.work_gen.regulations_api import RegulationsAPI
 from c21server.work_gen.job_queue import JobQueue
 from c21server.work_gen.data_storage import DataStorage
 
+
 class WorkGenerator:
 
     def __init__(self, job_queue, api, datastorage):

@@ -1,5 +1,3 @@
-from c21server.work_gen.data_storage import DataStorage
-
 
 class ResultsProcessor:
 

@@ -1,7 +1,4 @@
-import os
-import pathlib
 import pymongo
-from c21server.core.config import settings
 
 
 class DataStorage:
