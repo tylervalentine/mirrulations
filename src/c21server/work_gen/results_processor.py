@@ -3,9 +3,9 @@ from c21server.work_gen.data_storage import DataStorage
 
 class ResultsProcessor:
 
-    def __init__(self, job_queue):
+    def __init__(self, job_queue, data_storage):
         self.job_queue = job_queue
-        self.data_storage = DataStorage()
+        self.data_storage = data_storage
 
     def process_results(self, results_dict):
         for item in results_dict['data']:
