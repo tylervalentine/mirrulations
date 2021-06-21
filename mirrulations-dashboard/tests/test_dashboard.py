@@ -1,16 +1,6 @@
 from pytest import fixture
-from fakeredis import FakeRedis, FakeServer
 from mirrdash.dashboard_server import create_server, get_jobs_stats
-
-
-def mock_flask_server(create_server):
-    redis_server = FakeServer()
-    mock_db = FakeRedis(server=redis_server)
-    server = create_server(mock_db)
-    server.redis_server = redis_server
-    server.app.config['TESTING'] = True
-    server.client = server.app.test_client()
-    return server
+from mirrmock.mock_flask_server import mock_flask_server
 
 
 @fixture(name='mock_server')
