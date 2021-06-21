@@ -14,10 +14,12 @@ static:
 	pylint mirrulations-client mirrulations-dashboard mirrulations-work-generator mirrulations-work-server;
 
 clean:
-	-rm -f unit-python.xml
-	-rm -f .coverage
-	# Find and remove all __pycache__ folders and all .pyc files (compiled python)
+	# Find and remove all files and  folders that match
+    # -E for extended grep to match the pattern
 	-find . | grep -E "(__pycache__|\.pyc)" | xargs rm -rf
-	-rm -rf htmlcov
-	-rm -rf .pytest_cache
-	-rm -rf .vagrant
+    # -w for whole word so it does not match .coveragerc
+	-find . | grep -w "unit-python.xml" | xargs rm -rf
+	-find . | grep -w ".coverage" | xargs rm -rf
+	-find . | grep -w "htmlcov" | xargs rm -rf
+	-find . | grep -w ".pytest_cache" | xargs rm -rf
+	-find . | grep -w ".vagrant" | xargs rm -rf
