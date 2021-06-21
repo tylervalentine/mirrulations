@@ -1,5 +1,5 @@
 from redis import Redis
-from dashboard_server import create_server
+from mirrdash.dashboard_server import create_server
 
 server = create_server(Redis('redis'))
 app = server.app

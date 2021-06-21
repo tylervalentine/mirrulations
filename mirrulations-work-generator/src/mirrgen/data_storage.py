@@ -3,7 +3,7 @@ import pymongo
 
 class DataStorage:
     def __init__(self):
-        database = pymongo.MongoClient()['mirrulations']
+        database = pymongo.MongoClient('mongo', 27017)['mirrulations']
         self.dockets = database['dockets']
         self.documents = database['documents']
         self.comments = database['comments']
