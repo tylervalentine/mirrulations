@@ -10,7 +10,11 @@ pipeline {
         sh '''
           python3 -m venv .venv
           . .venv/bin/activate
-          pip install -e .
+          pip install -e mirrulations-client
+          pip install -e mirrulations-dashboard
+          pip install -e mirrulations-mocks
+          pip install -e mirrulations-work-generator
+          pip install -e mirrulations-work-server
         '''
       }
     }
