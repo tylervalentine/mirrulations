@@ -147,7 +147,7 @@ def create_server(database):
 
 
 if __name__ == '__main__':
-    server = create_server(redis.Redis())
+    server = create_server(redis.Redis('redis'))
     if server is None:
         print('There is no Redis database to connect to.')
     else:

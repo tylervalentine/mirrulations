@@ -44,5 +44,5 @@ def create_server(database):
 
 
 if __name__ == '__main__':
-    server = create_server(Redis())
+    server = create_server(Redis('redis'))
     server.app.run(port=5000)

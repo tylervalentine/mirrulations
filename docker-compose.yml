@@ -1,44 +1,23 @@
 version: "3.9"
 services:
-    client1:
-      build: .
-      env_file: clients_env/.env1
-    client2:
-      build: .
-      env_file: clients_env/.env2
-    client3:
-      build: .
-      env_file: clients_env/.env3
-    client4:
-      build: .
-      env_file: clients_env/.env4
-    client5:
-      build: .
-      env_file: clients_env/.env5
-    client6:
-      build: .
-      env_file: clients_env/.env6
-    client7:
-      build: .
-      env_file: clients_env/.env7
-    client8:
-      build: .
-      env_file: clients_env/.env8
-    client9:
-      build: .
-      env_file: clients_env/.env9
-    client10:
-      build: .
-      env_file: clients_env/.env10
-    client11:
-      build: .
-      env_file: clients_env/.env11
-    client12:
-      build: .
-      env_file: clients_env/.env12
-    client13:
-      build: .
-      env_file: clients_env/.env13
-    client14:
-      build: .
-      env_file: clients_env/.env14
+  nginx:
+    image: nginx
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "80:80"
+  redis:
+    image: redis
+    volumes:
+      - "~/data/redis:/data"
+  work_server:
+    build:
+      context: src/c21server/work_server
+  dashboard:
+    build:
+      context: src/c21server/dashboard
+  client1:
+    build:
+      context: src/c21client
+    env_file: env_files/client1.env
+

@@ -1,4 +1,5 @@
 import os
+import time
 import dotenv
 import redis
 from c21server.work_gen.search_iterator import SearchIterator
@@ -16,11 +17,11 @@ class WorkGenerator:
         self.processor = ResultsProcessor(job_queue, datastorage)
 
     def download(self, endpoint):
-        last_timestamp = self.job_queue.get_last_timestamp_string()
+        last_timestamp = self.job_queue.get_last_timestamp_string(endpoint)
         for result in SearchIterator(self.api, endpoint, last_timestamp):
             self.processor.process_results(result)
             timestamp = result['data'][-1]['attributes']['lastModifiedDate']
-            self.job_queue.set_last_timestamp_string(timestamp)
+            self.job_queue.set_last_timestamp_string(endpoint, timestamp)
 
 
 if __name__ == '__main__':
@@ -41,4 +42,7 @@ if __name__ == '__main__':
         generator.download('documents')
         generator.download('comments')
 
-    generate_work()
+    while True:
+        generate_work()
+        # sleep 6 hours
+        time.sleep(60 * 60 * 6)

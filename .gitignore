@@ -11,6 +11,6 @@
 unit-python.xml
 __pycache__
 htmlcov
-clients_env
+env_files
 .secrets.*
 settings.toml
