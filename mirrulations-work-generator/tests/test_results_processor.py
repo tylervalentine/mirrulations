@@ -3,7 +3,7 @@ import os
 from fakeredis import FakeRedis
 from mirrgen.results_processor import ResultsProcessor
 from mirrgen.job_queue import JobQueue
-from mirrgen.mock_data_storage import MockDataStorage
+from mirrmock.mock_data_storage import MockDataStorage
 
 
 def test_process_results():

@@ -1,6 +1,6 @@
 from mirrgen.search_iterator import SearchIterator
 from mirrgen.regulations_api import RegulationsAPI
-from mirrgen.mock_dataset import MockDataSet
+from mirrmock.mock_dataset import MockDataSet
 
 
 def test_iterate_one_page(requests_mock, mocker):
