@@ -1,4 +1,5 @@
 import os
+import time
 import dotenv
 import redis
 from c21server.work_gen.search_iterator import SearchIterator
@@ -41,4 +42,7 @@ if __name__ == '__main__':
         generator.download('documents')
         generator.download('comments')
 
-    generate_work()
+    while True:
+        generate_work()
+        # sleep 6 hours
+        time.sleep(60 * 60 * 6)
