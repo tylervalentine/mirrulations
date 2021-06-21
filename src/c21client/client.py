@@ -14,7 +14,7 @@ class Client:
         work_server_hostname = os.getenv('WORK_SERVER_HOSTNAME')
         work_server_port = os.getenv('WORK_SERVER_PORT')
         self.url = f'http://{work_server_hostname}:{work_server_port}'
-        self.api_key = os.getenv('API_TOKEN')
+        self.api_key = os.getenv('API_KEY')
         self.client_id = -1
 
     def get_client_id(self):
