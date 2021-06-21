@@ -1,7 +1,7 @@
 from json import dumps
 from fakeredis import FakeRedis, FakeServer
 from pytest import fixture
-from c21server.work_server.work_server import create_server
+from mirrserver.work_server import create_server
 
 
 def mock_flask_server(create_server):
@@ -233,6 +233,6 @@ def test_get_client_id_returns_tuple_when_no_success(mock_server):
 
 def mock_write_results(mocker):
     mocker.patch(
-        'c21server.work_server.work_server.write_results',
+        'mirrserver.work_server.write_results',
         return_value=None
     )
