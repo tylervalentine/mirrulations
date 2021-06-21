@@ -9,9 +9,9 @@ test:
 	pytest;
 
 static:
-	flake8 src tests;
-	pycodestyle src tests;
-	pylint src tests;
+	flake8 mirrulations-client mirrulations-dashboard mirrulations-work-generator mirrulations-work-server;
+	pycodestyle mirrulations-client mirrulations-dashboard mirrulations-work-generator mirrulations-work-server;
+	pylint mirrulations-client mirrulations-dashboard mirrulations-work-generator mirrulations-work-server;
 
 clean:
 	-rm -f unit-python.xml
