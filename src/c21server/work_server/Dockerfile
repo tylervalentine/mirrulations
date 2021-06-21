@@ -2,7 +2,7 @@ FROM python:3.8-slim-buster
 
 WORKDIR /app
 
-COPY src/c21server/work_server/* .
+COPY * .
 
 RUN python3 -m venv .venv
 RUN .venv/bin/pip install flask redis gunicorn

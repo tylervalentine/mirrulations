@@ -5,6 +5,6 @@ WORKDIR /app
 RUN python3 -m venv .venv
 RUN .venv/bin/pip install requests python-dotenv
 
-COPY src/c21client/client.py .
+COPY * .
 
 CMD [".venv/bin/python", "client.py"]

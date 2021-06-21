@@ -2,25 +2,18 @@ version: "3.9"
 services:
   redis:
     image: redis
+    volumes:
+      - "~/data/redis:/data"
   work_server:
     build:
-      context: .
-      dockerfile: Dockerfile.work_server
-    links:
-      - redis
+      context: src/c21server/work_server
   dashboard:
     build:
-      context: .
-      dockerfile: Dockerfile.dashboard
-    links:
-      - redis
+      context: src/c21server/dashboard
     ports:
       - "5000:5000"
   client1:
     build:
-      context: .
-      dockerfile: Dockerfile.client
+      context: src/c21client
     env_file: env_files/client1.env
-    links:
-      - work_server
 
