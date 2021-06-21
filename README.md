@@ -1,9 +1,6 @@
 # Capstone2021
 
-A complete senior capstone project.
-The project requires use of a Python virtual environment and installation of the project as an editable module.
-Additionally, we make use of make in order to run tests.
-
+A client/server application to ownload [`Regulations.gov`](https://www.regulations.gov/).
 
 ## Setup
 
