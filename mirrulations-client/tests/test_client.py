@@ -3,10 +3,10 @@ from functools import partial
 from pytest import fixture
 import requests
 import requests_mock
-import c21client.client
-from c21client.client import Client, attempt_request
-from c21client.client import execute_client_task
-from c21client.client import read_client_id, write_client_id
+import mirrclient.client
+from mirrclient.client import Client, attempt_request
+from mirrclient.client import execute_client_task
+from mirrclient.client import read_client_id, write_client_id
 
 
 BASE_URL = 'http://work_server:8080'
@@ -187,14 +187,14 @@ def test_write_client_id(tmpdir):
 
 def mock_assure_request(mocker):
     mocker.patch(
-        'c21client.client.Client.get_job',
-        side_effect=partial(c21client.client.attempt_request, sleep_time=0)
+        'mirrclient.client.Client.get_job',
+        side_effect=partial(mirrclient.client.attempt_request, sleep_time=0)
     )
 
 
 def mock_get_job(mocker):
     mocker.patch(
-        'c21client.client.Client.get_job',
+        'mirrclient.client.Client.get_job',
         return_value=None
     )
 
@@ -208,13 +208,13 @@ def mock_raise_connection_error(mocker):
 
 def read_mock_client_id(mocker, value):
     mocker.patch(
-        'c21client.client.read_client_id',
+        'mirrclient.client.read_client_id',
         return_value=value
     )
 
 
 def write_mock_client_id(mocker):
     mocker.patch(
-        'c21client.client.write_client_id',
+        'mirrclient.client.write_client_id',
         return_value=''
     )
