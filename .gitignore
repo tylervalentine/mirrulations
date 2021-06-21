@@ -1,3 +1,4 @@
+.DS_Store
 *client.cfg
 .coverage
 .env
@@ -12,5 +13,3 @@ unit-python.xml
 __pycache__
 htmlcov
 env_files
-.secrets.*
-settings.toml

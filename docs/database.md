@@ -2,7 +2,12 @@
 
 ## Database Format
 
-The database has three "tables", with the names:
+We use [Redis](https://redis.io/) to store jobs as well as key values that must
+be remembered.
+
+## Job Management
+
+The REDIS database has three "queues", with the names:
 
 `jobs_waiting_queue`, `jobs_in_progress`, and `jobs_done`.
 
@@ -32,3 +37,24 @@ This list holds JSON strings representing each job (a job_id and a url)
 > { [job_id] : [client_id] } 
 
 
+## Last timestamps
+
+These three variables are used by the work generator to remember the last 
+timestamp seen when querying regulations.gov.
+
+* `docket_last_timestamp` - The timestamp (in UTC) of the last docket discovered
+  by the work generator.
+* `document_last_timestamp` - The timestamp (in UTC) of the last document 
+  discovered by the work generator.
+* `comment_last_timestamp` - The timestamp (in UTC) of the last commment 
+  discovered by the work generator.
+  
+## Job IDs
+
+The `last_job_id` variable is used by the work generator to ensure it generates
+unique ids for each job.
+
+## Client IDs
+
+The 'last_client_id' variable is used by the work server to ensure that it
+generates unique client ids.
