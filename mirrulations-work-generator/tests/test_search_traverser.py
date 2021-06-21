@@ -1,6 +1,6 @@
-from c21server.work_gen.search_iterator import SearchIterator
-from c21server.work_gen.regulations_api import RegulationsAPI
-from c21server.work_gen.mock_dataset import MockDataSet
+from mirrgen.search_iterator import SearchIterator
+from mirrgen.regulations_api import RegulationsAPI
+from mirrgen.mock_dataset import MockDataSet
 
 
 def test_iterate_one_page(requests_mock, mocker):

@@ -1,5 +1,5 @@
 
-from c21server.work_gen.data_storage import DataStorage
+from mirrgen.data_storage import DataStorage
 
 
 def exists(storage, the_id):

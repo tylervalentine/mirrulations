@@ -2,11 +2,11 @@ import os
 import time
 import dotenv
 import redis
-from c21server.work_gen.search_iterator import SearchIterator
-from c21server.work_gen.results_processor import ResultsProcessor
-from c21server.work_gen.regulations_api import RegulationsAPI
-from c21server.work_gen.job_queue import JobQueue
-from c21server.work_gen.data_storage import DataStorage
+from mirrgen.search_iterator import SearchIterator
+from mirrgen.results_processor import ResultsProcessor
+from mirrgen.regulations_api import RegulationsAPI
+from mirrgen.job_queue import JobQueue
+from mirrgen.data_storage import DataStorage
 
 
 class WorkGenerator:

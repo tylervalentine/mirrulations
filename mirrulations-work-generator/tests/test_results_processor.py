@@ -1,8 +1,8 @@
 import json
 from fakeredis import FakeRedis
-from c21server.work_gen.results_processor import ResultsProcessor
-from c21server.work_gen.job_queue import JobQueue
-from c21server.work_gen.mock_data_storage import MockDataStorage
+from mirrgen.results_processor import ResultsProcessor
+from mirrgen.job_queue import JobQueue
+from mirrgen.mock_data_storage import MockDataStorage
 
 
 def test_process_results():
