@@ -16,32 +16,60 @@ Additionally, we make use of make in order to run tests.
 
 * Install source code as a module
 
-  ```
-  pip install -e .
-  ```
-
-* Download docket IDs into the src/c21server/data folder. For now they should be stored in said folder in a text file named `dockets_0.txt`
-* The `dockets_0.txt` is needed in order to download data (for now), and it will be needed to run the vagrant instance as well. Check the [Production Docs](https://github.com/cs334s21/capstone2021/blob/main/docs/production.md) for more information on setting this up, along with details on how to run this virtually on your local machine. 
-* Lastly, the client needs an api key in order to properly make the calls to [regulations.gov](https://www.regulations.gov/). In `src/c21client`, make a `.env` file with the contents `API_TOKEN=[insert your api key here]`. To get an api key, visit [here](https://open.gsa.gov/api/regulationsgov/). Check [client docs](https://github.com/cs334s21/capstone2021/blob/main/docs/client.md) for more information.
-* For more guidance on specific aspects of the project, visit the [docs](https://github.com/cs334s21/capstone2021/blob/main/docs/). 
-
-* Create a `settings.toml` file in the root of the project:
+  The project is organized into multiple modules, which must each be installed as "editable"
+  (using the `-e` switch on `pip`):
 
   ```
-  datapath = "<path to data on local machine>"
+  pip install -e mirrulations-client
+  pip install -e mirrulations-dashboard
+  pip install -e mirrulations-mocks
+  pip install -e mirrulations-work-generator 
+  pip install -e mirrulations-work-server
   ```
 
+## Configuration Files
+
+The client and work generator use environment variables to load key values.
+You can either set the relevant values as environment variables or create 
+a `.env` file in the relevant module:
+
+* `mirrulations-client`
+  
+  Place the `.env` file in the `mirrclient` folder:
+  
+  ```
+  WORK_SERVER_HOSTNAME=work_server
+  WORK_SERVER_PORT=8080
+  API_KEY=YOUR_KEY
+  ```
+
+* `mirrulation-work-generator`
+  
+  Place the `.env` file in the `mirrgen` folder:
+  
+  ```
+  API_KEY=YOUR_KEY
+  ```
+
+  To get an api key, visit [here](https://open.gsa.gov/api/regulationsgov/). 
+  Check [client docs](https://github.com/cs334s21/capstone2021/blob/main/docs/client.md) 
+  for more information.
+  
 ## Run Static Analysis and Tests
 
 Type `make` to run all. 
 
 Type `make static` for only static tests.
 
-Type `make test` for only pytest.
+Type `make test` for only pytest.  Alternatively, run `pytest` in the root of
+the project to run all tests.  You can run `pytest` in any of module folders
+(e.g. in `mirrulations-client`) to run tests for just that module.  Note that
+there are `pytest.ini` files in each module as well as a global `pytest.ini`.
 
-* Static analysis using `flake8`, `pycodestyle`, and `pylint`
-* Run `pytest` with coverage.  The coverage metric is set to 95%.
-* Sometimes if `pytest` is installed globally, the virtual environment will use that instead. Simply exit and reenter the virtual environment to resolve this.
+* Static analysis uses `flake8`, `pycodestyle`, and `pylint`
+* `pytest` uses a coverage metric of 95%.
+* NOTE: Sometimes if `pytest` is installed globally, the virtual environment will use that instead. Simply exit and reenter the virtual environment to resolve this.
+  Alternatively, uninstall `pytest` from the global packages (`pip3 uninstall pytest` in new termainal).
 
 ## Architecture
 The image below shows the overview of the architecture for our system. Right now, the portions in blue are implemented at a basic level. Those in red are the remaining parts we need to connect. Regardless, the image shows the relationship between the working plumbing but also includes the plan over the next few weeks.
