@@ -29,9 +29,11 @@ if __name__ == '__main__':
     # about shadowing api and job_queue
     def generate_work():
         dotenv.load_dotenv()
-        api = RegulationsAPI(os.getenv('API_TOKEN'))
+        api = RegulationsAPI(os.getenv('API_KEY'))
 
-        database = redis.Redis()
+        # Sleep to allow Redis to come online
+        time.sleep(10)
+        database = redis.Redis('redis')
         job_queue = JobQueue(database)
 
         storage = DataStorage()

@@ -8,4 +8,4 @@ COPY . .
 
 RUN .venv/bin/pip install -e .
 
-CMD [".venv/bin/python", "src/mirrclient/client.py"]
+CMD [".venv/bin/python", "src/mirrgen/work_generator.py"]
