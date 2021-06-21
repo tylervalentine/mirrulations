@@ -33,8 +33,16 @@ def test_last_timestamp():
     database = FakeRedis()
     queue = JobQueue(database)
 
-    assert queue.get_last_timestamp_string() == '1972-01-01 00:00:00'
+    assert queue.get_last_timestamp_string('dockets') == '1972-01-01 00:00:00'
+    assert queue.get_last_timestamp_string('documents') == \
+           '1972-01-01 00:00:00'
+    assert queue.get_last_timestamp_string('comments') == '1972-01-01 00:00:00'
 
-    queue.set_last_timestamp_string('2020-06-10T20:49:03Z')
+    queue.set_last_timestamp_string('dockets', '2010-06-10T20:49:03Z')
+    queue.set_last_timestamp_string('documents', '2015-06-10T20:49:03Z')
+    queue.set_last_timestamp_string('comments', '2020-06-10T20:49:03Z')
 
-    assert queue.get_last_timestamp_string() == '2020-06-10 20:49:03'
+    assert queue.get_last_timestamp_string('dockets') == '2010-06-10 20:49:03'
+    assert queue.get_last_timestamp_string('documents') == \
+           '2015-06-10 20:49:03'
+    assert queue.get_last_timestamp_string('comments') == '2020-06-10 20:49:03'

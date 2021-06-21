@@ -16,11 +16,11 @@ class WorkGenerator:
         self.processor = ResultsProcessor(job_queue, datastorage)
 
     def download(self, endpoint):
-        last_timestamp = self.job_queue.get_last_timestamp_string()
+        last_timestamp = self.job_queue.get_last_timestamp_string(endpoint)
         for result in SearchIterator(self.api, endpoint, last_timestamp):
             self.processor.process_results(result)
             timestamp = result['data'][-1]['attributes']['lastModifiedDate']
-            self.job_queue.set_last_timestamp_string(timestamp)
+            self.job_queue.set_last_timestamp_string(endpoint, timestamp)
 
 
 if __name__ == '__main__':
