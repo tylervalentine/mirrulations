@@ -1,5 +1,5 @@
 
-from mirrgen.data_storage import DataStorage
+from mirrcore.data_storage import DataStorage
 
 
 def exists(storage, the_id):

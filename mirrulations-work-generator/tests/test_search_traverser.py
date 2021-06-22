@@ -1,5 +1,5 @@
 from mirrgen.search_iterator import SearchIterator
-from mirrgen.regulations_api import RegulationsAPI
+from mirrcore.regulations_api import RegulationsAPI
 from mirrmock.mock_dataset import MockDataSet
 
 

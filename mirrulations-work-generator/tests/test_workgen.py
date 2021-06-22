@@ -1,9 +1,9 @@
 from fakeredis import FakeRedis
-from mirrgen.job_queue import JobQueue
-from mirrgen.work_generator import WorkGenerator
-from mirrgen.regulations_api import RegulationsAPI
+from mirrcore.job_queue import JobQueue
+from mirrcore.regulations_api import RegulationsAPI
 from mirrmock.mock_dataset import MockDataSet
 from mirrmock.mock_data_storage import MockDataStorage
+from mirrgen.work_generator import WorkGenerator
 
 
 def test_work_generator_single_page(requests_mock, mocker):

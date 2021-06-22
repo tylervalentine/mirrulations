@@ -2,7 +2,7 @@ import json
 import os
 from fakeredis import FakeRedis
 from mirrgen.results_processor import ResultsProcessor
-from mirrgen.job_queue import JobQueue
+from mirrcore.job_queue import JobQueue
 from mirrmock.mock_data_storage import MockDataStorage
 
 

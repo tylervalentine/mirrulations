@@ -1,6 +1,6 @@
 
 from fakeredis import FakeRedis
-from mirrgen.job_queue import JobQueue
+from mirrcore.job_queue import JobQueue
 
 
 def test_first_job_added_with_id_0():
