@@ -2,7 +2,7 @@ FROM python:3.8-slim-buster
 
 WORKDIR /app
 
-COPY . .
+COPY mirrulations-work-server .
 
 RUN python3 -m venv .venv
 

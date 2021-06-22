@@ -16,16 +16,20 @@ services:
       - "~/data/db:/data/db"
   work_generator:
     build:
-      context: mirrulations-work-generator
+      context: .
+      dockerfile: mirrulations-work-generator/Dockerfile
     env_file: env_files/work_gen.env
   work_server:
     build:
-      context: mirrulations-work-server
+      context: .
+      dockerfile: mirrulations-work-server/Dockerfile
   dashboard:
     build:
-      context: mirrulations-dashboard
+      context: .
+      dockerfile: mirrulations-dashboard/Dockerfile
   client1:
     build:
-      context: mirrulations-client
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
     env_file: env_files/client1.env
 
