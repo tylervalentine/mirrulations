@@ -20,6 +20,14 @@ class FindOnly:
         return 0
 
 
+class MockDB:
+    def __init__(self):
+        self.saved = []
+
+    def insert_one(self, data):
+        self.saved.append(data)
+
+
 def test_docket_found_others_not(monkeypatch):
     storage = DataStorage()
 
@@ -65,3 +73,69 @@ def test_comment_found_others_not(monkeypatch):
 
     # comment exists
     exists(storage, 'COM-2020-1234')
+
+
+def test_add_docket(monkeypatch):
+
+    storage = DataStorage()
+
+    monkeypatch.setattr(storage, 'dockets', MockDB())
+    monkeypatch.setattr(storage, 'documents', MockDB())
+    monkeypatch.setattr(storage, 'comments', MockDB())
+
+    to_insert = {
+        'data': {
+            'id': 'DOCK-2020-1234',
+            'type': 'dockets'
+        }
+    }
+
+    storage.add(to_insert)
+
+    assert len(storage.dockets.saved) == 1
+    assert len(storage.documents.saved) == 0
+    assert len(storage.comments.saved) == 0
+
+
+def test_add_documents(monkeypatch):
+
+    storage = DataStorage()
+
+    monkeypatch.setattr(storage, 'dockets', MockDB())
+    monkeypatch.setattr(storage, 'documents', MockDB())
+    monkeypatch.setattr(storage, 'comments', MockDB())
+
+    to_insert = {
+        'data': {
+            'id': 'DOC-2020-1234',
+            'type': 'documents'
+        }
+    }
+
+    storage.add(to_insert)
+
+    assert len(storage.dockets.saved) == 0
+    assert len(storage.documents.saved) == 1
+    assert len(storage.comments.saved) == 0
+
+
+def test_add_comment(monkeypatch):
+
+    storage = DataStorage()
+
+    monkeypatch.setattr(storage, 'dockets', MockDB())
+    monkeypatch.setattr(storage, 'documents', MockDB())
+    monkeypatch.setattr(storage, 'comments', MockDB())
+
+    to_insert = {
+        'data': {
+            'id': 'COMM-2020-1234',
+            'type': 'comments'
+        }
+    }
+
+    storage.add(to_insert)
+
+    assert len(storage.dockets.saved) == 0
+    assert len(storage.documents.saved) == 0
+    assert len(storage.comments.saved) == 1
