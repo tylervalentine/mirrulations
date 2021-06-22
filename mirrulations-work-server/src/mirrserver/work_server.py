@@ -1,12 +1,14 @@
 import os
 from flask import Flask, json, jsonify, request
 import redis
+from mirrcore.data_storage import DataStorage
 
 
 class WorkServer:
     def __init__(self, redis_server):
         self.app = Flask(__name__)
         self.redis = redis_server
+        self.data = DataStorage()
 
 
 def check_for_database(func):
@@ -69,6 +71,7 @@ def write_results(directory, path, data):
         print(f'Directory already exists in root: /data/{directory}')
     with open(f'/data/{path}', 'w+') as file:
         file.write(json.dumps(data))
+    self.data.add(data)
 
 
 @check_for_database
