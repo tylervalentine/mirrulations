@@ -218,3 +218,29 @@ def write_mock_client_id(mocker):
         'mirrclient.client.write_client_id',
         return_value=''
     )
+
+
+def test_client_handles_missing_docket_id(mock_requests, mocker):
+    client = Client()
+    mock_job_id = '1'
+    mock_job_result = {'data': {'id': mock_job_id,
+                       'attributes': {'agencyId': 'NOAA',
+                                      "docketId": None}}}
+    mock_client_id = 999
+    read_mock_client_id(mocker, mock_client_id)
+
+    with mock_requests:
+        mock_requests.get(
+            f'{BASE_URL}/get_client_id',
+            json={'client_id': 999},
+            status_code=200
+        )
+        mock_requests.put(
+            f'{BASE_URL}/put_results',
+            json={'success': 'The job was successfully completed'},
+            status_code=200
+        )
+        try:
+            client.send_job_results(mock_job_id, mock_job_result)
+        except requests.exceptions.HTTPError as exception:
+            assert False, f'raised an exception: {exception}'

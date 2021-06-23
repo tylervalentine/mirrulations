@@ -123,6 +123,8 @@ def write_client_id(filename, client_id):
 
 def get_key_path_string(results, key):
     if key in results.keys():
+        if results[key] is None:
+            return 'None/'
         return results[key] + "/"
     return ""
 
