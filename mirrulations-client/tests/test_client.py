@@ -225,7 +225,7 @@ def test_client_handles_missing_docket_id(mock_requests, mocker):
     mock_job_id = '1'
     mock_job_result = {'data': {'id': mock_job_id,
                        'attributes': {'agencyId': 'NOAA',
-                                      "docketId" : None,}}}
+                                      "docketId": None}}}
     mock_client_id = 999
     read_mock_client_id(mocker, mock_client_id)
 
