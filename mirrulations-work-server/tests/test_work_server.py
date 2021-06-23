@@ -167,12 +167,15 @@ def test_client_attempts_to_put_job_that_does_not_exist(mock_server):
 
 
 def test_put_results_returns_correct_job(mock_server, mocker):
+
     mock_write_results(mocker)
     mock_server.redis.hset('jobs_in_progress', 2, 3)
     mock_server.redis.hset('client_jobs', 2, 1)
     mock_server.redis.set('total_num_client_ids', 1)
     data = dumps({'job_id': 2, 'directory': 'dir/dir',
-                  'results': {2: 3}})
+                  'results': {'data': {
+                      'type': 'dockets'
+                  }}})
     params = {'client_id': 1}
     response = mock_server.client.put('/put_results',
                                       json=data, query_string=params)
@@ -180,6 +183,7 @@ def test_put_results_returns_correct_job(mock_server, mocker):
     assert response.status_code == 200
     expected = {'success': 'The job was successfully completed'}
     assert response.get_json() == expected
+    assert len(mock_server.data.added) == 1
 
 
 def test_server_handles_client_error_to_access_api_endpoint(mock_server):

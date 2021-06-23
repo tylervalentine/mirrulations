@@ -71,7 +71,6 @@ def write_results(directory, path, data):
         print(f'Directory already exists in root: /data/{directory}')
     with open(f'/data/{path}', 'w+') as file:
         file.write(json.dumps(data))
-    self.data.add(data)
 
 
 @check_for_database
@@ -94,6 +93,7 @@ def put_results(workserver, data):
     workserver.redis.hdel('jobs_in_progress', job_id)
     workserver.redis.hset('jobs_done', job_id, result)
     write_results(results[0], data.get('directory'), data.get('results'))
+    workserver.data.add(data.get('results'))
     return (True,)
 
 

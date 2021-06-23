@@ -1,5 +1,5 @@
 from fakeredis import FakeRedis, FakeServer
-
+from mirrmock.mock_data_storage import MockDataStorage
 
 def mock_flask_server(create_server):
     redis_server = FakeServer()
@@ -8,4 +8,5 @@ def mock_flask_server(create_server):
     server.redis_server = redis_server
     server.app.config['TESTING'] = True
     server.client = server.app.test_client()
+    server.data = MockDataStorage()
     return server
