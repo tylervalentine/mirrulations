@@ -34,4 +34,83 @@ services:
       context: .
       dockerfile: mirrulations-client/Dockerfile
     env_file: env_files/client1.env
-
+  client2:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    env_file: env_files/client2.env
+  client3:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    env_file: env_files/client3.env
+  client4:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    env_file: env_files/client4.env
+  client5:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    env_file: env_files/client5.env
+  client6:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    env_file: env_files/client6.env
+  client7:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    env_file: env_files/client7.env
+  client8:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    env_file: env_files/client8.env
+  client9:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    env_file: env_files/client9.env
+  client10:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    env_file: env_files/client10.env
+  client11:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    env_file: env_files/client11.env
+  client12:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    env_file: env_files/client12.env
+  client13:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    env_file: env_files/client13.env
+  client14:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    env_file: env_files/client14.env
+  client15:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    env_file: env_files/client15.env
+  client16:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    env_file: env_files/client16.env
+  client17:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    env_file: env_files/client17.env
