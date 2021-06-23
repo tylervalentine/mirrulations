@@ -23,6 +23,8 @@ services:
     build:
       context: .
       dockerfile: mirrulations-work-server/Dockerfile
+    volumes:
+      - ~/data/data:/data
   dashboard:
     build:
       context: .
