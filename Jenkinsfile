@@ -11,6 +11,7 @@ pipeline {
           python3 -m venv .venv
           . .venv/bin/activate
           pip install -e mirrulations-client
+          pip install -e mirrulations-core
           pip install -e mirrulations-dashboard
           pip install -e mirrulations-mocks
           pip install -e mirrulations-work-generator
