@@ -1,6 +1,6 @@
 import pytest
 from requests import HTTPError
-from mirrgen.regulations_api import RegulationsAPI, MIN_DELAY_BETWEEN_CALLS
+from mirrcore.regulations_api import RegulationsAPI, MIN_DELAY_BETWEEN_CALLS
 
 
 def test_download_returns_json(requests_mock, mocker):

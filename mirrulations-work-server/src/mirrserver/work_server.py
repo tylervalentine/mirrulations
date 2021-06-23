@@ -1,12 +1,14 @@
 import os
 from flask import Flask, json, jsonify, request
 import redis
+from mirrcore.data_storage import DataStorage
 
 
 class WorkServer:
     def __init__(self, redis_server):
         self.app = Flask(__name__)
         self.redis = redis_server
+        self.data = DataStorage()
 
 
 def check_for_database(func):
@@ -91,6 +93,7 @@ def put_results(workserver, data):
     workserver.redis.hdel('jobs_in_progress', job_id)
     workserver.redis.hset('jobs_done', job_id, result)
     write_results(results[0], data.get('directory'), data.get('results'))
+    workserver.data.add(data.get('results'))
     return (True,)
 
 

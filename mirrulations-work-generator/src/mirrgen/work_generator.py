@@ -4,9 +4,9 @@ import dotenv
 import redis
 from mirrgen.search_iterator import SearchIterator
 from mirrgen.results_processor import ResultsProcessor
-from mirrgen.regulations_api import RegulationsAPI
-from mirrgen.job_queue import JobQueue
-from mirrgen.data_storage import DataStorage
+from mirrcore.regulations_api import RegulationsAPI
+from mirrcore.job_queue import JobQueue
+from mirrcore.data_storage import DataStorage
 
 
 class WorkGenerator:

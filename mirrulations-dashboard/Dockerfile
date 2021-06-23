@@ -4,7 +4,7 @@ WORKDIR /app
 
 RUN python3 -m venv .venv
 
-COPY . .
+COPY mirrulations-dashboard .
 
 RUN .venv/bin/pip install -e .
 

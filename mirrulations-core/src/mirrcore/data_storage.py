@@ -14,3 +14,11 @@ class DataStorage:
         return self.dockets.count_documents({'id': result_id}) > 0 or \
             self.documents.count_documents({'id': result_id}) > 0 or \
             self.comments.count_documents({'id': result_id}) > 0
+
+    def add(self, data):
+        if data['data']['type'] == 'dockets':
+            self.dockets.insert_one(data)
+        elif data['data']['type'] == 'documents':
+            self.documents.insert_one(data)
+        elif data['data']['type'] == 'comments':
+            self.comments.insert_one(data)
