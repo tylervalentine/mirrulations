@@ -38,13 +38,18 @@ class SearchIterator:
         if self.iteration_done:
             raise StopIteration
 
-        self.params['page[number]'] = self.next_page
-        self.next_page += 1
-
+        # If the downlaod results in an error, don't
+        # iterate next_page.  This will cause the download
+        # to be re-tried next iteration.  This could cause an
+        # infinite loop, but it handles a period 500-error, which
+        # we were seeing.
         try:
+            self.params['page[number]'] = self.next_page
             result = self.api.download(self.url, self.params)
+            self.next_page += 1
         except HTTPError as error:
             print(f'FAILED: {self.url}\n{error}')
+            return {}
 
         self.iteration_done = self.check_if_done(result)
 
