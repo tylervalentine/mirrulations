@@ -102,6 +102,9 @@ def attempt_request(request, url, sleep_time, **kwargs):
         if err.response.status_code >= 500:
             print('Regulations.gov internal error')
             return response
+        if err.response.status_code == 404:
+            print('ID not found in regulations.gov')
+            return response
     else:
         return response
     return None
