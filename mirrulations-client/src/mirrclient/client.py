@@ -38,9 +38,14 @@ class Client:
 
     def send_job_results(self, job_id, job_result):
         endpoint = f'{self.url}/put_results'
-        data = {'directory': get_output_path(job_result),
-                'job_id': job_id,
-                'results': job_result}
+        if 'errors' in job_result:
+            data = {'job_id': job_id,
+                    'results': job_result
+                    }
+        else:
+            data = {'directory': get_output_path(job_result),
+                    'job_id': job_id,
+                    'results': job_result}
         params = {'client_id': self.client_id}
         print(dumps(data))
         assure_request(requests.put, endpoint, json=dumps(data), params=params)
@@ -94,7 +99,9 @@ def attempt_request(request, url, sleep_time, **kwargs):
         if err.response.status_code == 400:
             print('Endpoint not found!')
             return {'error': 'Endpoint not found'}
-        time.sleep(sleep_time)
+        if err.response.status_code >= 500:
+            print('Regulations.gov internal error')
+            return response
     else:
         return response
     return None

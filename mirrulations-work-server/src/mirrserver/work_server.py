@@ -79,7 +79,7 @@ def put_results(workserver, data):
     success, *values = check_request_had_valid_client_id(workserver, client_id)
     if not success:
         return False, values[0], values[1]
-    if 'error' in data['results']:
+    if 'error' in data['results'] or 'errors' in data['results']:
         job_id = data['job_id']
         result = workserver.redis.hget('jobs_in_progress', job_id)
         workserver.redis.hdel('jobs_in_progress', job_id)
