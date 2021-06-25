@@ -211,6 +211,30 @@ def test_put_results_returns_500_error_from_regulations(mock_server, mocker):
     assert mock_server.redis.hlen('jobs_in_progress') == 0
 
 
+def test_put_results_returns_404_error_from_regulations(mock_server, mocker):
+
+    mock_write_results(mocker)
+    mock_server.redis.hset('jobs_in_progress', 2, 3)
+    mock_server.redis.hset('client_jobs', 2, 1)
+    mock_server.redis.set('total_num_client_ids', 1)
+
+    data = dumps({'job_id': 2, 'results': {"errors": [{
+        "status": "404",
+        "title": "The document ID could not be found."}]}})
+
+    params = {'client_id': 1}
+    response = mock_server.client.put('/put_results',
+                                      json=data, query_string=params)
+    assert response.status_code == 200
+    # Not sure this is the best way to do this...
+    expected = {'success': 'The job was successfully completed'}
+    assert response.get_json() == expected
+
+    assert mock_server.redis.hlen('invalid_jobs') == 1
+    assert mock_server.redis.hlen('jobs_done') == 0
+    assert mock_server.redis.hlen('jobs_in_progress') == 0
+
+
 def test_server_handles_client_error_to_access_api_endpoint(mock_server):
     mock_server.redis.set('total_num_client_ids', 1)
     mock_server.redis.hset('jobs_in_progress', 2, 3)

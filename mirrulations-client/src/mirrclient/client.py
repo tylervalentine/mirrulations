@@ -96,12 +96,13 @@ def attempt_request(request, url, sleep_time, **kwargs):
               'Trying again in a minute...')
         time.sleep(sleep_time)
     except (HTTPError, RequestException) as err:
-        if err.response.status_code == 400:
-            print('Endpoint not found!')
-            return {'error': 'Endpoint not found'}
         if err.response.status_code >= 500:
             print('Regulations.gov internal error')
             return response
+        if err.response.status_code == 404:
+            print('ID not found in regulations.gov')
+            return response
+        time.sleep(sleep_time)
     else:
         return response
     return None
