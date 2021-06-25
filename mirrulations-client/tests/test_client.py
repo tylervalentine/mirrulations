@@ -137,16 +137,6 @@ def test_client_completes_job_requested(mock_requests, mocker):
             assert False, f'Raised an exception: {exception}'
 
 
-def test_attempt_request_raises_request_exception(mock_requests):
-    with mock_requests:
-        mock_requests.get(
-            f'{BASE_URL}/get_job',
-            status_code=400
-        )
-        response = attempt_request(requests.get, f'{BASE_URL}/get_job', 0)
-        assert response == {'error': 'Endpoint not found'}
-
-
 def test_attempt_request_raises_connection_exception(mock_requests, mocker):
     mock_raise_connection_error(mocker)
     with mock_requests:
