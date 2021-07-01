@@ -1,5 +1,8 @@
+from collections import namedtuple
+from unittest.mock import Mock, MagicMock
 from pytest import fixture
-from mirrdash.dashboard_server import create_server, get_jobs_stats
+from mirrdash.dashboard_server import create_server, get_jobs_stats, \
+    get_container_stats
 from mirrmock.mock_flask_server import mock_flask_server
 
 
@@ -33,11 +36,23 @@ def test_get_jobs_stats(mock_server):
 
 
 def test_dashboard_returns_job_information(mock_server):
+    client = MagicMock()
+
+    # Mock out the docker object to return Container-like values
+    # for the list method.
+    Container = namedtuple('Container', ['name', 'status'])
+    return_value = [Container('capstone_client1_1', 'running'),
+                    Container('capstone_work_server_1', 'running')]
+    client.containers.list = Mock(return_value=return_value)
+
     add_mock_data_to_database(mock_server.redis)
+    mock_server.docker = client
     response = mock_server.client.get('/data')
 
     assert response.status_code == 200
     expected = {
+        'client1': 'running',
+        'work_server': 'running',
         'num_jobs_waiting': 5,
         'num_jobs_in_progress': 4,
         'num_jobs_done': 3,
@@ -54,3 +69,21 @@ def test_dashboard_returns_html(mock_server):
     assert response.status_code == 200
     expected = '<!DOCTYPE html>'
     assert response.data.decode().split('\n')[0] == expected
+
+
+def test_get_container_stats():
+    client = MagicMock()
+
+    # Mock out the docker object to return Container-like values
+    # for the list method.
+    Container = namedtuple('Container', ['name', 'status'])
+    return_value = [Container('capstone_client1_1', 'running'),
+                    Container('capstone_work_server_1', 'running')]
+    client.containers.list = Mock(return_value=return_value)
+
+    stats = get_container_stats(client)
+
+    expected = {'client1': 'running',
+                'work_server': 'running'}
+
+    assert stats == expected
