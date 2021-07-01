@@ -21,20 +21,6 @@ def add_mock_data_to_database(database):
     database.set('total_num_client_ids', 2)
 
 
-def test_get_jobs_stats(mock_server):
-    add_mock_data_to_database(mock_server.redis)
-    jobs_stats = get_jobs_stats(mock_server.redis)
-
-    expected = {
-        'num_jobs_waiting': 5,
-        'num_jobs_in_progress': 4,
-        'num_jobs_done': 3,
-        'jobs_total': 12,
-        'clients_total': 2
-    }
-    assert jobs_stats == expected
-
-
 def test_dashboard_returns_job_information(mock_server):
     client = MagicMock()
 
