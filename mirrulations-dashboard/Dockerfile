@@ -1,7 +1,7 @@
 FROM python:3.8-slim-buster
 
 WORKDIR /app
-
+RUN apt-get update; apt-get install docker.io -y
 RUN python3 -m venv .venv
 
 COPY mirrulations-dashboard .
