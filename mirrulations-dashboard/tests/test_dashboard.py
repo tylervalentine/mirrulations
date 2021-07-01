@@ -1,14 +1,13 @@
 from collections import namedtuple
 from unittest.mock import Mock, MagicMock
 from pytest import fixture
-from mirrdash.dashboard_server import create_server, get_jobs_stats, \
-    get_container_stats
-from mirrmock.mock_flask_server import mock_flask_server
+from mirrdash.dashboard_server import create_server, get_container_stats
+from mirrmock.mock_flask_server import mock_dashboard_server
 
 
 @fixture(name='mock_server')
 def fixture_mock_server():
-    return mock_flask_server(create_server)
+    return mock_dashboard_server(create_server)
 
 
 def add_mock_data_to_database(database):

@@ -5,10 +5,10 @@ import docker
 
 
 class Dashboard:
-    def __init__(self, redis_server):
+    def __init__(self, redis_server, docker_server):
         self.app = Flask(__name__)
         self.redis = redis_server
-        self.docker = docker.from_env()
+        self.docker = docker_server
         CORS(self.app, resources={r'/data': {'origins': '*'}})
 
 
@@ -40,8 +40,8 @@ def get_container_stats(client):
     return stats
 
 
-def create_server(database):
-    dashboard = Dashboard(database)
+def create_server(database, docker_server):
+    dashboard = Dashboard(database, docker_server)
 
     @dashboard.app.route('/', methods=['GET'])
     def _index():
@@ -60,5 +60,5 @@ def create_server(database):
 
 
 if __name__ == '__main__':
-    server = create_server(Redis('redis'))
+    server = create_server(Redis('redis'), docker.from_env())
     server.app.run(port=5000)
