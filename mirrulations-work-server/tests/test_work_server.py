@@ -2,12 +2,12 @@ from json import dumps
 from fakeredis import FakeRedis, FakeServer
 from pytest import fixture
 from mirrserver.work_server import create_server
-from mirrmock.mock_flask_server import mock_flask_server
+from mirrmock.mock_flask_server import mock_work_server
 
 
 @fixture(name='mock_server')
 def fixture_mock_server():
-    return mock_flask_server(create_server)
+    return mock_work_server(create_server)
 
 
 def test_create_server_not_connected():
