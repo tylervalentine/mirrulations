@@ -12,7 +12,8 @@ def test_process_results():
     dir_path = os.path.dirname(os.path.realpath(__file__))
 
     processor = ResultsProcessor(JobQueue(database), MockDataStorage())
-    data = open(f'{dir_path}/data/dockets_listing.json').read()
-    processor.process_results(json.loads(data))
+    with open(f'{dir_path}/data/dockets_listing.json') as listings:
+        data = listings.read()
+        processor.process_results(json.loads(data))
 
     assert database.llen('jobs_waiting_queue') == 10
