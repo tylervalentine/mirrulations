@@ -17,6 +17,19 @@ const updateHtmlValues = (id, value, total) => {
     document.getElementById(id+'-circle-front').style.strokeDasharray = `${percent}, 100`;
 }
 
+const updateStatus = (container, status) => {
+        let status_span = document.getElementById(container)
+        if (status == "running") {
+            status_span.textContent = "RUNNING";
+            status_span.style.color = "green"
+        }
+        else {
+            status_span.textContent = 'ERROR';
+            status_span.style.color = "red"
+        }
+
+}
+
 
 const updateDashboardData = () => {
     fetch(`${BASE_URL}data`)
@@ -54,30 +67,28 @@ const updateDashboardData = () => {
 
         updateHtmlValues('jobs-waiting', num_jobs_waiting, jobs_total);
         updateHtmlValues('jobs-done', num_jobs_done, jobs_total);
-        document.getElementById('total-clients-number').textContent = clients_total;
-        document.getElementById('total-jobs-number').textContent = jobs_total;
-        document.getElementById('client1-status').textContent = client1;
-        document.getElementById('client2-status').textContent = client2;
-        document.getElementById('client3-status').textContent = client3;
-        document.getElementById('client4-status').textContent = client4;
-        document.getElementById('client5-status').textContent = client5;
-        document.getElementById('client6-status').textContent = client6;
-        document.getElementById('client7-status').textContent = client7;
-        document.getElementById('client8-status').textContent = client8;
-        document.getElementById('client9-status').textContent = client9;
-        document.getElementById('client10-status').textContent = client10;
-        document.getElementById('client11-status').textContent = client11;
-        document.getElementById('client12-status').textContent = client12;
-        document.getElementById('client13-status').textContent = client13;
-        document.getElementById('client14-status').textContent = client14;
-        document.getElementById('client15-status').textContent = client15;
-        document.getElementById('client16-status').textContent = client16;
-        document.getElementById('client17-status').textContent = client17;
-        document.getElementById('nginx-status').textContent = nginx;
-        document.getElementById('mongo-status').textContent = mongo;
-        document.getElementById('redis-status').textContent = redis;
-        document.getElementById('work-generator-status').textContent = work_generator;
-        document.getElementById('work-server-status').textContent = work_server;
+        updateStatus('client1-status', client1)
+        updateStatus('client2-status', client2)
+        updateStatus('client3-status', client3)
+        updateStatus('client4-status', client4)
+        updateStatus('client5-status', client5)
+        updateStatus('client6-status', client6)
+        updateStatus('client7-status', client7)
+        updateStatus('client8-status', client8)
+        updateStatus('client9-status', client9)
+        updateStatus('client10-status', client10)
+        updateStatus('client11-status', client11)
+        updateStatus('client12-status', client12)
+        updateStatus('client13-status', client13)
+        updateStatus('client14-status', client14)
+        updateStatus('client15-status', client15)
+        updateStatus('client16-status', client16)
+        updateStatus('client17-status', client17)
+        updateStatus('nginx-status', nginx)
+        updateStatus('mongo-status', mongo)
+        updateStatus('redis-status', redis);
+        updateStatus('work-generator-status', work_generator);
+        updateStatus('work-server-status', work_server);
     })
     .catch((err) => console.log(err));
 }
