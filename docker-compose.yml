@@ -10,10 +10,14 @@ services:
     image: redis
     volumes:
       - "~/data/redis:/data"
+    ports:
+      - "6379:6379"
   mongo:
     image: mongo
     volumes:
       - "~/data/db:/data/db"
+    ports:
+      - "27017:27017"
   work_generator:
     build:
       context: .
@@ -36,83 +40,100 @@ services:
       context: .
       dockerfile: mirrulations-client/Dockerfile
     env_file: env_files/client1.env
+    restart: always
   client2:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
     env_file: env_files/client2.env
+    restart: always
   client3:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
     env_file: env_files/client3.env
+    restart: always
   client4:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
     env_file: env_files/client4.env
+    restart: always
   client5:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
     env_file: env_files/client5.env
+    restart: always
   client6:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
     env_file: env_files/client6.env
+    restart: always
   client7:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
     env_file: env_files/client7.env
+    restart: always
   client8:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
     env_file: env_files/client8.env
+    restart: always
   client9:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
     env_file: env_files/client9.env
+    restart: always
   client10:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
     env_file: env_files/client10.env
+    restart: always
   client11:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
     env_file: env_files/client11.env
+    restart: always
   client12:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
     env_file: env_files/client12.env
+    restart: always
   client13:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
     env_file: env_files/client13.env
+    restart: always
   client14:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
     env_file: env_files/client14.env
+    restart: always
   client15:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
     env_file: env_files/client15.env
+    restart: always
   client16:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
     env_file: env_files/client16.env
+    restart: always
   client17:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
     env_file: env_files/client17.env
+    restart: always
