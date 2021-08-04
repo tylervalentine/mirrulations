@@ -312,3 +312,91 @@ def test_client_returns_404_error_to_server(mock_requests, mocker):
 
         response = mock_requests.request_history[-1]
         assert 'errors' in response.json()
+
+
+def test_client_returns_400_error_to_server(mock_requests, mocker):
+
+    mocker.patch('time.sleep')
+    client = Client()
+    mock_client_id = 9
+    read_mock_client_id(mocker, mock_client_id)
+
+    with mock_requests:
+        mock_requests.get(
+            f'{BASE_URL}/get_client_id',
+            json={'client_id': mock_client_id},
+            status_code=200
+        )
+        mock_requests.get(
+            f'{BASE_URL}/get_job',
+            json={'job': {'1': 'http://test.com'}},
+            status_code=200
+        )
+        mock_requests.put(
+            f'{BASE_URL}/put_results',
+            json={'success': 'The job was successfully completed'},
+            status_code=200
+        )
+
+        regulation_response = {"errors": [{
+            "status": "400",
+            "title": "The document ID could not be found."}]}
+
+        mock_requests.get(
+            'http://test.com',
+            json=regulation_response,
+            status_code=400
+        )
+
+        try:
+            execute_client_task(client)
+        except requests.exceptions.HTTPError as exception:
+            assert False, f'Raised an exception: {exception}'
+
+        response = mock_requests.request_history[-1]
+        assert 'errors' in response.json()
+
+
+def test_client_returns_403_error_to_server(mock_requests, mocker):
+
+    mocker.patch('time.sleep')
+    client = Client()
+    mock_client_id = 9
+    read_mock_client_id(mocker, mock_client_id)
+
+    with mock_requests:
+        mock_requests.get(
+            f'{BASE_URL}/get_client_id',
+            json={'client_id': mock_client_id},
+            status_code=200
+        )
+        mock_requests.get(
+            f'{BASE_URL}/get_job',
+            json={'job': {'1': 'http://test.com'}},
+            status_code=200
+        )
+        mock_requests.put(
+            f'{BASE_URL}/put_results',
+            json={'success': 'The job was successfully completed'},
+            status_code=200
+        )
+
+        regulation_response = {"errors": [{
+            "status": "403",
+            "title": "The document ID could not be found."}],
+            "error": "API limit reached."
+        }
+
+        mock_requests.get(
+            'http://test.com',
+            json=regulation_response,
+            status_code=403
+        )
+
+        try:
+            execute_client_task(client)
+        except requests.exceptions.HTTPError as exception:
+            assert False, f'Raised an exception: {exception}'
+
+        response = mock_requests.request_history[-1]
+        assert 'errors' in response.json()
