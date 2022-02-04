@@ -12,7 +12,8 @@ def test_process_results():
     dir_path = os.path.dirname(os.path.realpath(__file__))
 
     processor = ResultsProcessor(JobQueue(database), MockDataStorage())
-    with open(f'{dir_path}/data/dockets_listing.json', encoding='utf8') as listings:
+    with open(f'{dir_path}/data/dockets_listing.json',
+              encoding='utf8') as listings:
         data = listings.read()
         processor.process_results(json.loads(data))
 
