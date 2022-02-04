@@ -74,6 +74,9 @@ The image below shows the overview of the architecture for our system. Right now
 ![Architecture](Architecture.png)
 
 ## Contributors
+
+#### 2022
+
 * Ben Coleman (colemanb@moravian.edu)
 * Abdullah Alramyan (abdullaha@moravian.edu)
 * Valeria Aguilar (aguilarv@moravian.edu)
@@ -93,6 +96,8 @@ The image below shows the overview of the architecture for our system. Right now
 * Kimberly Wolf (wolfk@moravian.edu)
 * Isaac Wood (woodi@moravian.edu)
 
+#### 2021
+
 * Abdullah Alharbi (alharbia02@moravian.edu)
 * Alex Meci (mecia@moravian.edu)
 * Ben Coleman (colemanb@moravian.edu)
@@ -109,3 +114,38 @@ The image below shows the overview of the architecture for our system. Right now
 * Riley Kirkpatrick (kirkpatrickr@moravian.edu)
 * Trae Freeman (freemant02@moravian.edu)
 * William Brandes (brandesw@moravian.edu)
+
+#### 2020
+
+* Alghamdi Riyad (alghamdir@moravian.edu)
+* Anderson Ben (andersonb03@moravian.edu)
+* Dahdoh Sara (stsad05@moravian.edu)
+* Estephan Anthony (estephana02@moravian.edu)
+* Faux Timothy (fauxt@moravian.edu)
+* Hilal Abrar (stanh17@moravian.edu)
+* Ives Elijah (ivese@moravian.edu)
+* McCool Caelin (mccoolc@moravian.edu)
+* Piya Nischal (piyan@moravian.edu)
+* Rajhi Somaya (stsar04@moravian.edu)
+* Schmall Kiersten (schmallk@moravian.edu)
+* Wang Yuwen (wang@moravian.edu)
+
+#### 2019
+
+* Balga Zachary (stzlb01@moravian.edu)
+* Carr Andrew (stajc06@moravian.edu)
+* Durski David (stdnd19@moravian.edu)
+* Edwards Manasseh (stmde03@moravian.edu)
+* Fatuova Rocco (stewh01@moravian.edu)
+* Harbison Ed (stewh01@moravian.edu)
+* Harris Devon (stdsh07@moravian.edu)
+* Haug Alex (stahh02@moravian.edu)
+* Luciano Jordan (lucianoj@moravian.edu)
+* Madilia Justin (stjpm09@moravian.edu)
+* Mateo Lauren (stlem04@moravian.edu)
+* Murphy Timothy (sttam09@moravian.edu)
+* Peeke Charles (stcdp03@moravian.edu)
+* Polich John (stjnp20@moravian.edu)
+* Spirk John (stjfs03@moravian.edu)
+* Stocker Daniel (stdrs02@moravian.edu)
+* Zambelli Nick (stnvz01@moravian.edu)
