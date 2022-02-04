@@ -10,6 +10,7 @@ from requests.exceptions import HTTPError, RequestException
 class Client:
 
     def __init__(self):
+
         load_dotenv()
         work_server_hostname = os.getenv('WORK_SERVER_HOSTNAME')
         work_server_port = os.getenv('WORK_SERVER_PORT')
