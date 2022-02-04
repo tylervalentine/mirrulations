@@ -145,8 +145,11 @@ def get_output_path(results):
 
 
 if __name__ == '__main__':
-    client = Client()
-    client.get_client_id()
-    print('Your ID is: ', client.client_id)
-    while True:
-        execute_client_task(client)
+    if os.path.exists('.env'):
+        client = Client()
+        client.get_client_id()
+        print('Your ID is: ', client.client_id)
+        while True:
+            execute_client_task(client)
+    else:
+        print("Need .env file")
