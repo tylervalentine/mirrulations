@@ -10,6 +10,7 @@ from requests.exceptions import HTTPError, RequestException
 class Client:
 
     def __init__(self):
+
         load_dotenv()
         work_server_hostname = os.getenv('WORK_SERVER_HOSTNAME')
         work_server_port = os.getenv('WORK_SERVER_PORT')
@@ -112,14 +113,14 @@ def check_status_code(response):
 
 def read_client_id(filename):
     try:
-        with open(filename, 'r') as file:
+        with open(filename, 'r', encoding='utf8') as file:
             return int(file.readline())
     except FileNotFoundError:
         return -1
 
 
 def write_client_id(filename, client_id):
-    with open(filename, 'w') as file:
+    with open(filename, 'w', encoding='utf8') as file:
         file.write(str(client_id))
 
 
@@ -145,8 +146,11 @@ def get_output_path(results):
 
 
 if __name__ == '__main__':
-    client = Client()
-    client.get_client_id()
-    print('Your ID is: ', client.client_id)
-    while True:
-        execute_client_task(client)
+    if os.path.exists('.env'):
+        client = Client()
+        client.get_client_id()
+        print('Your ID is: ', client.client_id)
+        while True:
+            execute_client_task(client)
+    else:
+        print("Need .env file")
