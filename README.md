@@ -74,6 +74,9 @@ The image below shows the overview of the architecture for our system. Right now
 ![Architecture](Architecture.png)
 
 ## Contributors
+
+#### 2022
+
 * Ben Coleman (colemanb@moravian.edu)
 * Abdullah Alramyan (abdullaha@moravian.edu)
 * Valeria Aguilar (aguilarv@moravian.edu)
@@ -93,6 +96,8 @@ The image below shows the overview of the architecture for our system. Right now
 * Kimberly Wolf (wolfk@moravian.edu)
 * Isaac Wood (woodi@moravian.edu)
 
+#### 2021
+
 * Abdullah Alharbi (alharbia02@moravian.edu)
 * Alex Meci (mecia@moravian.edu)
 * Ben Coleman (colemanb@moravian.edu)
@@ -110,6 +115,8 @@ The image below shows the overview of the architecture for our system. Right now
 * Trae Freeman (freemant02@moravian.edu)
 * William Brandes (brandesw@moravian.edu)
 
+#### 2020
+
 * Alghamdi Riyad (alghamdir@moravian.edu)
 * Anderson Ben (andersonb03@moravian.edu)
 * Dahdoh Sara (stsad05@moravian.edu)
@@ -122,6 +129,8 @@ The image below shows the overview of the architecture for our system. Right now
 * Rajhi Somaya (stsar04@moravian.edu)
 * Schmall Kiersten (schmallk@moravian.edu)
 * Wang Yuwen (wang@moravian.edu)
+
+#### 2019
 
 * Balga Zachary (stzlb01@moravian.edu)
 * Carr Andrew (stajc06@moravian.edu)
