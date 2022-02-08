@@ -1,6 +1,6 @@
 # Capstone2021
 
-A client/server application to ownload [`Regulations.gov`](https://www.regulations.gov/).
+A client/server application to download [`Regulations.gov`](https://www.regulations.gov/).
 
 ## Setup
 
