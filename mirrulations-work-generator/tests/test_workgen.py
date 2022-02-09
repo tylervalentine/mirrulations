@@ -54,3 +54,6 @@ def test_work_generator_retries_after_500(requests_mock, mocker):
     generator.download('documents')
 
     assert len(requests_mock.request_history) == 2
+
+def test_work_generator_retries_redis_connection():
+    database = FakeRedis()
