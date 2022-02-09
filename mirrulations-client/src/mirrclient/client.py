@@ -1,5 +1,5 @@
 import time
-import os
+import os, sys
 from json import dumps, loads
 from dotenv import load_dotenv
 import requests
@@ -147,7 +147,7 @@ if __name__ == '__main__':
     load_dotenv()
     if not os.getenv('WORK_SERVER_HOSTNAME'):
         print('Need client environment variables')
-        exit(1)
+        sys.exit(1)
     client = Client()
     client.get_client_id()
     print('Your ID is: ', client.client_id)
