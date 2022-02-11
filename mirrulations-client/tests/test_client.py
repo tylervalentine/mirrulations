@@ -177,6 +177,11 @@ def test_check_no_env_values():
     assert is_environment_variables_present() is False
 
 
+def test_check_no_hostname():
+    del os.environ['WORK_SERVER_HOSTNAME']
+    assert is_environment_variables_present() is False
+
+
 def mock_assure_request(mocker):
     mocker.patch(
         'mirrclient.client.Client.get_job',
