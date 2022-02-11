@@ -144,9 +144,15 @@ def get_output_path(results):
     return output_path
 
 
-if __name__ == '__main__':
+def is_environment_variables_present():
     load_dotenv()
-    if not os.getenv('WORK_SERVER_HOSTNAME'):
+    return (os.getenv('WORK_SERVER_HOSTNAME') is not None
+            and os.getenv('WORK_SERVER_PORT') is not None
+            and os.getenv('API_KEY') is not None)
+
+
+if __name__ == '__main__':
+    if not is_environment_variables_present():
         print('Need client environment variables')
         sys.exit(1)
     client = Client()
