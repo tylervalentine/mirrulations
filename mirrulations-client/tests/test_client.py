@@ -5,6 +5,7 @@ import requests
 import requests_mock
 import mirrclient.client
 from mirrclient.client import Client, attempt_request
+from mirrclient.client import is_environment_variables_present
 from mirrclient.client import execute_client_task
 from mirrclient.client import read_client_id, write_client_id
 
@@ -163,6 +164,36 @@ def test_write_client_id(tmpdir):
     file = tmpdir.join('test_write.txt')
     write_client_id(str(file), '1')
     assert file.read() == '1'
+
+
+def test_check_all_env_values():
+    assert is_environment_variables_present() is True
+
+
+def test_check_no_env_values():
+    # Need to delete env variables set by mock_env fixture
+    del os.environ['WORK_SERVER_HOSTNAME']
+    del os.environ['WORK_SERVER_PORT']
+    del os.environ['API_KEY']
+    assert is_environment_variables_present() is False
+
+
+def test_check_no_hostname():
+    # Need to delete hostname env variable set by mock_env fixture
+    del os.environ['WORK_SERVER_HOSTNAME']
+    assert is_environment_variables_present() is False
+
+
+def test_check_no_server_port():
+    # Need to delete server port env variable set by mock_env fixture
+    del os.environ['WORK_SERVER_PORT']
+    assert is_environment_variables_present() is False
+
+
+def test_check_no_api_key():
+    # Need to delete api key env variable set by mock_env fixture
+    del os.environ['API_KEY']
+    assert is_environment_variables_present() is False
 
 
 def mock_assure_request(mocker):

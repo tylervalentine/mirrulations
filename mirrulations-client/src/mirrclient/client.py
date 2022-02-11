@@ -1,5 +1,6 @@
 import time
 import os
+import sys
 from json import dumps, loads
 from dotenv import load_dotenv
 import requests
@@ -10,8 +11,6 @@ from requests.exceptions import HTTPError, RequestException
 class Client:
 
     def __init__(self):
-
-        load_dotenv()
         work_server_hostname = os.getenv('WORK_SERVER_HOSTNAME')
         work_server_port = os.getenv('WORK_SERVER_PORT')
         self.url = f'http://{work_server_hostname}:{work_server_port}'
@@ -145,12 +144,19 @@ def get_output_path(results):
     return output_path
 
 
+def is_environment_variables_present():
+    load_dotenv()
+    return (os.getenv('WORK_SERVER_HOSTNAME') is not None
+            and os.getenv('WORK_SERVER_PORT') is not None
+            and os.getenv('API_KEY') is not None)
+
+
 if __name__ == '__main__':
-    if os.path.exists('.env'):
-        client = Client()
-        client.get_client_id()
-        print('Your ID is: ', client.client_id)
-        while True:
-            execute_client_task(client)
-    else:
-        print("Need .env file")
+    if not is_environment_variables_present():
+        print('Need client environment variables')
+        sys.exit(1)
+    client = Client()
+    client.get_client_id()
+    print('Your ID is: ', client.client_id)
+    while True:
+        execute_client_task(client)
