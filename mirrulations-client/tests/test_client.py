@@ -171,6 +171,7 @@ def test_check_all_env_values():
 
 
 def test_check_no_env_values():
+    # Need to delete env variables set by mock_env fixture
     del os.environ['WORK_SERVER_HOSTNAME']
     del os.environ['WORK_SERVER_PORT']
     del os.environ['API_KEY']
@@ -178,16 +179,19 @@ def test_check_no_env_values():
 
 
 def test_check_no_hostname():
+    # Need to delete hostname env variable set by mock_env fixture
     del os.environ['WORK_SERVER_HOSTNAME']
     assert is_environment_variables_present() is False
 
 
 def test_check_no_server_port():
+    # Need to delete server port env variable set by mock_env fixture
     del os.environ['WORK_SERVER_PORT']
     assert is_environment_variables_present() is False
 
 
 def test_check_no_api_key():
+    # Need to delete api key env variable set by mock_env fixture
     del os.environ['API_KEY']
     assert is_environment_variables_present() is False
 
