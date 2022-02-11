@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
         database = redis.Redis('redis')
         while not is_redis_available(database):
-            print("error")
+            print("Redis database is busy loading")
             time.sleep(30)
 
         job_queue = JobQueue(database)
