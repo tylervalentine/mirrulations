@@ -5,6 +5,7 @@ import requests
 import requests_mock
 import mirrclient.client
 from mirrclient.client import Client, attempt_request
+from mirrclient.client import is_environment_variables_present
 from mirrclient.client import execute_client_task
 from mirrclient.client import read_client_id, write_client_id
 
@@ -163,6 +164,10 @@ def test_write_client_id(tmpdir):
     file = tmpdir.join('test_write.txt')
     write_client_id(str(file), '1')
     assert file.read() == '1'
+
+
+def test_check_all_env_values():
+    assert is_environment_variables_present() is True
 
 
 def mock_assure_request(mocker):
