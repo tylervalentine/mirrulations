@@ -27,15 +27,27 @@ class WorkGenerator:
 
 
 if __name__ == '__main__':
+
+    def is_redis_available(database):
+        try:
+            # return fakeredis.FakeRedis('localhost').ping() # Not sure if the database is at localhost or 'redis'
+            return database.ping() # Not sure if the database is at localhost or 'redis'
+        except (ConnectionRefusedError, redis.BusyLoadingError) as error:
+            return False
+
     # I wrapped the code in a function to avoid pylint errors
     # about shadowing api and job_queue
     def generate_work():
         dotenv.load_dotenv()
         api = RegulationsAPI(os.getenv('API_KEY'))
 
-        # Sleep to allow Redis to come online
-        time.sleep(10)
         database = redis.Redis('redis')
+        
+        while not is_redis_available(database):
+            print("error")
+            time.sleep(30)
+
+
         job_queue = JobQueue(database)
 
         storage = DataStorage()
