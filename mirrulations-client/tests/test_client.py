@@ -187,6 +187,11 @@ def test_check_no_server_port():
     assert is_environment_variables_present() is False
 
 
+def test_check_no_api_key():
+    del os.environ['API_KEY']
+    assert is_environment_variables_present() is False
+
+
 def mock_assure_request(mocker):
     mocker.patch(
         'mirrclient.client.Client.get_job',
