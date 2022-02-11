@@ -182,6 +182,11 @@ def test_check_no_hostname():
     assert is_environment_variables_present() is False
 
 
+def test_check_no_server_port():
+    del os.environ['WORK_SERVER_PORT']
+    assert is_environment_variables_present() is False
+
+
 def mock_assure_request(mocker):
     mocker.patch(
         'mirrclient.client.Client.get_job',
