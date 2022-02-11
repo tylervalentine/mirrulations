@@ -55,5 +55,22 @@ def test_work_generator_retries_after_500(requests_mock, mocker):
 
     assert len(requests_mock.request_history) == 2
 
-def test_work_generator_retries_redis_connection():
+def test_when_redis_loading_is_unavailable():
     database = FakeRedis()
+    api = RegulationsAPI('FAKE_KEY')
+    job_queue = JobQueue(database)
+    storage = MockDataStorage()
+    # Missing some kind of way to put fake redis in the loading state
+    generator = WorkGenerator(job_queue, api, storage)
+    is_available = generator.is_redis_available()
+    assert is_available is False
+
+
+def test_when_redis_done_loading_is_available():
+    database = FakeRedis()
+    api = RegulationsAPI('FAKE_KEY')
+    job_queue = JobQueue(database)
+    storage = MockDataStorage()
+    generator = WorkGenerator(job_queue, api, storage)
+    is_available = generator.is_redis_available()
+    assert is_available is True
