@@ -173,7 +173,7 @@ def test_check_all_env_values():
 def test_check_no_env_values():
     del os.environ['WORK_SERVER_HOSTNAME']
     del os.environ['WORK_SERVER_PORT']
-    del os.environ['API_KEY'] 
+    del os.environ['API_KEY']
     assert is_environment_variables_present() is False
 
 
