@@ -1,7 +1,9 @@
 import os
+import time
 from flask import Flask, json, jsonify, request
 import redis
 from mirrcore.data_storage import DataStorage
+from mirrgen.work_generator import is_redis_available
 
 
 class WorkServer:
@@ -150,7 +152,11 @@ def create_server(database):
 
 
 if __name__ == '__main__':
-    server = create_server(redis.Redis('redis'))
+    database = redis.Redis('redis')
+    while not is_redis_available(database):
+        print("Redis database is busy loading")
+        time.sleep(30)
+    server = create_server(database)
     if server is None:
         print('There is no Redis database to connect to.')
     else:

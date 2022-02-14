@@ -1,5 +1,11 @@
-from redis import Redis
+import time
+import redis
 from mirrserver.work_server import create_server
+from mirrgen.work_generator import is_redis_available
 
-server = create_server(Redis('redis'))
+database = redis.Redis('redis')
+while not is_redis_available(database):
+    print("Redis database is busy loading")
+    time.sleep(30)
+server = create_server(database)
 app = server.app
