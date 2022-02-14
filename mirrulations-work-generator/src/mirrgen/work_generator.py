@@ -9,6 +9,13 @@ from mirrcore.job_queue import JobQueue
 from mirrcore.data_storage import DataStorage
 
 
+def is_redis_available(database):
+    try:
+        return database.ping()
+    except (ConnectionRefusedError, redis.BusyLoadingError):
+        return False
+
+
 class WorkGenerator:
 
     def __init__(self, job_queue, api, datastorage):
@@ -33,9 +40,11 @@ if __name__ == '__main__':
         dotenv.load_dotenv()
         api = RegulationsAPI(os.getenv('API_KEY'))
 
-        # Sleep to allow Redis to come online
-        time.sleep(10)
         database = redis.Redis('redis')
+        while not is_redis_available(database):
+            print("Redis database is busy loading")
+            time.sleep(30)
+
         job_queue = JobQueue(database)
 
         storage = DataStorage()
