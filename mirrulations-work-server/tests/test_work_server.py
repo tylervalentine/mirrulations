@@ -5,6 +5,8 @@ from mirrserver.work_server import create_server
 from mirrmock.mock_flask_server import mock_work_server
 from mirrmock.mock_redis import BusyRedis, ReadyRedis
 from mirrgen.work_generator import is_redis_available
+from mirrmock.mock_redis import BusyRedis, ReadyRedis
+from mirrgen.work_generator import is_redis_available
 
 
 @fixture(name='mock_server')
@@ -282,3 +284,14 @@ def mock_write_results(mocker):
         'mirrserver.work_server.write_results',
         return_value=None
     )
+
+def test_when_redis_loading_is_unavailable():
+    database = BusyRedis()
+    is_available = is_redis_available(database)
+    assert is_available is False
+
+
+def test_when_redis_done_loading_is_available():
+    database = ReadyRedis()
+    is_available = is_redis_available(database)
+    assert is_available is True
