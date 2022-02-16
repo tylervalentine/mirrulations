@@ -294,4 +294,3 @@ def test_when_redis_done_loading_is_available():
     database = ReadyRedis()
     is_available = is_redis_available(database)
     assert is_available is True
-
