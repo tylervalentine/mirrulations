@@ -47,7 +47,7 @@ class Client:
                     'job_id': job_id,
                     'results': job_result}
         params = {'client_id': self.client_id}
-        print(dumps(data))
+        # print(dumps(data))
         assure_request(requests.put, endpoint, json=dumps(data), params=params)
 
 
