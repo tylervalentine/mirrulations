@@ -63,6 +63,14 @@ def test_client_gets_job(mock_requests):
         )
         assert ('1', 1) == client.get_job()
 
+def test_client_throws_exception_when_no_jobs(mock_requests):
+    client = Client()
+    with mock_requests:
+        mock_requests.get(
+            
+        )
+
+
 
 def test_client_sleeps_when_no_jobs_available(mock_requests, mocker):
     client = Client()
