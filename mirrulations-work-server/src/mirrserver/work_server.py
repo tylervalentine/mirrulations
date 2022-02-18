@@ -156,4 +156,8 @@ if __name__ == '__main__':
     while not is_redis_available(redis_database):
         print("Redis database is busy loading")
         time.sleep(30)
-    redis_database.app.run(host='0.0.0.0', port=8080, debug=False)
+    server = create_server(redis_database)
+    if server is None:
+        print('There is no Redis database to connect to.')
+    else:
+        server.app.run(host='0.0.0.0', port=8080, debug=False)
