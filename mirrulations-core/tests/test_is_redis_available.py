@@ -1,4 +1,4 @@
-import pytest
+
 from mirrcore.redis_check import is_redis_available
 from mirrmock.mock_redis import BusyRedis, ReadyRedis
 

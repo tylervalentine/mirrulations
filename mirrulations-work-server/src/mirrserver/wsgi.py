@@ -1,7 +1,7 @@
 import time
 import redis
 from mirrserver.work_server import create_server
-from mirrgen.work_generator import is_redis_available
+from mirrcore.redis_check import is_redis_available
 
 database = redis.Redis('redis')
 while not is_redis_available(database):
