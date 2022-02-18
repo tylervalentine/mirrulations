@@ -3,9 +3,7 @@ from mirrcore.job_queue import JobQueue
 from mirrcore.regulations_api import RegulationsAPI
 from mirrmock.mock_dataset import MockDataSet
 from mirrmock.mock_data_storage import MockDataStorage
-from mirrmock.mock_redis import BusyRedis, ReadyRedis
 from mirrgen.work_generator import WorkGenerator
-from mirrcore.redis_check import is_redis_available
 
 
 def test_work_generator_single_page(requests_mock, mocker):
@@ -56,15 +54,3 @@ def test_work_generator_retries_after_500(requests_mock, mocker):
     generator.download('documents')
 
     assert len(requests_mock.request_history) == 2
-
-
-def test_when_redis_loading_is_unavailable():
-    database = BusyRedis()
-    is_available = is_redis_available(database)
-    assert is_available is False
-
-
-def test_when_redis_done_loading_is_available():
-    database = ReadyRedis()
-    is_available = is_redis_available(database)
-    assert is_available is True
