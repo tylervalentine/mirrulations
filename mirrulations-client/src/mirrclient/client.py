@@ -7,10 +7,10 @@ import requests
 from requests.exceptions import ConnectionError as RequestConnectionError
 from requests.exceptions import HTTPError, RequestException
 
-class NoJobsAvailableException(Exception):
 
-    def __init__(self, *args: object) -> None:
-        super().__init__(*args)
+class NoJobsAvailableException(Exception):
+    pass
+
 
 class Client:
 
@@ -79,7 +79,7 @@ def request_job(endpoint, data, params):
     response_text = loads(response.text)
     if 'job' not in response_text:
         raise NoJobsAvailableException()
-    job = loads(response.text)['job']
+    job = response_text['job']
     job_id = list(job.keys())[0]
     value = job[job_id]
     return job_id, value
@@ -170,4 +170,3 @@ if __name__ == '__main__':
         except NoJobsAvailableException:
             print("No Jobs Available")
         time.sleep(3.6)
-
