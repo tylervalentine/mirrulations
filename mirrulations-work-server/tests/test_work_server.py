@@ -285,12 +285,10 @@ def mock_write_results(mocker):
 
 
 def test_when_redis_loading_is_unavailable():
-    database = BusyRedis()
-    is_available = is_redis_available(database)
+    is_available = is_redis_available(BusyRedis())
     assert is_available is False
 
 
 def test_when_redis_done_loading_is_available():
-    database = ReadyRedis()
-    is_available = is_redis_available(database)
+    is_available = is_redis_available(ReadyRedis())
     assert is_available is True
