@@ -152,8 +152,8 @@ def create_server(database):
 
 
 if __name__ == '__main__':
-    database = redis.Redis('redis')
-    while not is_redis_available(database):
+    redis_database = redis.Redis('redis')
+    while not is_redis_available(redis_database):
         print("Redis database is busy loading")
         time.sleep(30)
-    database.app.run(host='0.0.0.0', port=8080, debug=False)
+    redis_database.app.run(host='0.0.0.0', port=8080, debug=False)
