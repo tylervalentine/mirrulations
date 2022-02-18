@@ -1,5 +1,4 @@
 import os
-import time
 from flask import Flask, json, jsonify, request
 import redis
 from mirrcore.data_storage import DataStorage
