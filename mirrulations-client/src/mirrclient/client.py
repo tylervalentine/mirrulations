@@ -8,6 +8,10 @@ from requests.exceptions import ConnectionError as RequestConnectionError
 from requests.exceptions import HTTPError, RequestException
 
 
+class NoJobsAvailableException(Exception):
+    pass
+
+
 class Client:
 
     def __init__(self):
@@ -59,7 +63,6 @@ def execute_client_task(_client):
     print('Sending result back to server...')
     _client.send_job_results(job_id, result)
     print('Job complete!\n')
-    time.sleep(3.6)
 
 
 def perform_job(url, api_key):
@@ -73,7 +76,10 @@ def perform_job(url, api_key):
 def request_job(endpoint, data, params):
     response = assure_request(requests.get, endpoint,
                               json=dumps(data), params=params)
-    job = loads(response.text)['job']
+    response_text = loads(response.text)
+    if 'job' not in response_text:
+        raise NoJobsAvailableException()
+    job = response_text['job']
     job_id = list(job.keys())[0]
     value = job[job_id]
     return job_id, value
@@ -159,4 +165,8 @@ if __name__ == '__main__':
     client.get_client_id()
     print('Your ID is: ', client.client_id)
     while True:
-        execute_client_task(client)
+        try:
+            execute_client_task(client)
+        except NoJobsAvailableException:
+            print("No Jobs Available")
+        time.sleep(3.6)
