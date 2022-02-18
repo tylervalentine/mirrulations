@@ -1,10 +1,11 @@
+from decimal import DivisionByZero
 import os
 from functools import partial
-from pytest import fixture
+from pytest import fixture, raises
 import requests
 import requests_mock
 import mirrclient.client
-from mirrclient.client import Client, attempt_request
+from mirrclient.client import Client, NoJobsAvailableException, attempt_request
 from mirrclient.client import is_environment_variables_present
 from mirrclient.client import execute_client_task
 from mirrclient.client import read_client_id, write_client_id
@@ -63,13 +64,18 @@ def test_client_gets_job(mock_requests):
         )
         assert ('1', 1) == client.get_job()
 
-def test_client_throws_exception_when_no_jobs(mock_requests):
+
+def test_client_throws_exception_when_no_jobs(mock_requests, mocker):
     client = Client()
     with mock_requests:
         mock_requests.get(
-            
+            f'{BASE_URL}/get_job',
+            json={'error': 'No jobs available'},
+            status_code=403
         )
-
+        
+        with raises(NoJobsAvailableException):
+            client.get_job()
 
 
 def test_client_sleeps_when_no_jobs_available(mock_requests, mocker):
