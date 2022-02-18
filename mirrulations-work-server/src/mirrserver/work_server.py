@@ -3,7 +3,7 @@ import time
 from flask import Flask, json, jsonify, request
 import redis
 from mirrcore.data_storage import DataStorage
-from mirrgen.work_generator import is_redis_available
+from mirrcore.redis_check import is_redis_available
 
 
 class WorkServer:

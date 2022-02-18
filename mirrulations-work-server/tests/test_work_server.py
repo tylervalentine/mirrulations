@@ -4,7 +4,7 @@ from pytest import fixture
 from mirrserver.work_server import create_server
 from mirrmock.mock_flask_server import mock_work_server
 from mirrmock.mock_redis import BusyRedis, ReadyRedis
-from mirrgen.work_generator import is_redis_available
+from mirrcore.redis_check import is_redis_available
 
 
 @fixture(name='mock_server')

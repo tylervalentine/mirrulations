@@ -5,7 +5,7 @@ from mirrmock.mock_dataset import MockDataSet
 from mirrmock.mock_data_storage import MockDataStorage
 from mirrmock.mock_redis import BusyRedis, ReadyRedis
 from mirrgen.work_generator import WorkGenerator
-from mirrgen.work_generator import is_redis_available
+from mirrcore.redis_check import is_redis_available
 
 
 def test_work_generator_single_page(requests_mock, mocker):

@@ -7,13 +7,7 @@ from mirrgen.results_processor import ResultsProcessor
 from mirrcore.regulations_api import RegulationsAPI
 from mirrcore.job_queue import JobQueue
 from mirrcore.data_storage import DataStorage
-
-
-def is_redis_available(database):
-    try:
-        return database.ping()
-    except (ConnectionRefusedError, redis.BusyLoadingError):
-        return False
+from mirrcore.redis_check import is_redis_available
 
 
 class WorkGenerator:
