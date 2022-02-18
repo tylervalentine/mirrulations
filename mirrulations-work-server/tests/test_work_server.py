@@ -3,8 +3,6 @@ from fakeredis import FakeRedis, FakeServer
 from pytest import fixture
 from mirrserver.work_server import create_server
 from mirrmock.mock_flask_server import mock_work_server
-from mirrmock.mock_redis import BusyRedis, ReadyRedis
-from mirrcore.redis_check import is_redis_available
 
 
 @fixture(name='mock_server')
@@ -283,12 +281,3 @@ def mock_write_results(mocker):
         return_value=None
     )
 
-
-def test_when_redis_loading_is_unavailable():
-    is_available = is_redis_available(BusyRedis())
-    assert is_available is False
-
-
-def test_when_redis_done_loading_is_available():
-    is_available = is_redis_available(ReadyRedis())
-    assert is_available is True
