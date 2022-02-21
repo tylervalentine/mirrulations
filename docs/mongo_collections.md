@@ -2,7 +2,7 @@
 Mongo database collections includes a table for the following: Comments, Dockets, and Documents. 
 
 ## Comments 
-This collection contains the comments made on documents and the total size is 8,198,471,680. This collection is nested with multuple dictionaries. Below is an example of a comment: 
+This collection contains the comments made on documents. This collection is nested with multuple dictionaries. Below is an example of a comment: 
 
 ```
 {
@@ -82,7 +82,7 @@ This collection contains the comments made on documents and the total size is 8,
 
  
 ## Dockets
-This collection contains the dockets filed by the court and the total size is 109,187,072. This collection is nested with multuple dictionaries. Below is an example of a docket: 
+This collection contains the dockets filed by the court. This collection is nested with multuple dictionaries. Below is an example of a docket: 
 
 ```
 {
@@ -131,7 +131,7 @@ This collection contains the dockets filed by the court and the total size is 10
 ```
 
 ## Documents
-This collection contains the documents associated with dockets and the total size is 701,939,712. This collection is nested with multuple dictionaries.  
+This collection contains the documents associated with dockets. This collection is nested with multuple dictionaries.  
 Below is an example of a docket: 
 
 ```
