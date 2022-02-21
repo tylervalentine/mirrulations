@@ -59,14 +59,13 @@ def execute_client_task(_client):
     print('Requesting new job from server...')
     job_id, url = _client.get_job()
     print('Received job!')
-    result = perform_job(url, _client.api_key)
+    result = perform_job(url)
     print('Sending result back to server...')
     _client.send_job_results(job_id, result)
     print('Job complete!\n')
 
 
-def perform_job(url, api_key):
-    url = url + f'?api_key={api_key}'
+def perform_job(url):
     print(f'Getting docket at {url}')
     json = assure_request(requests.get, url).json()
     print('Done with current job!')
