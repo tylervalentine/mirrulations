@@ -1,6 +1,6 @@
-# .env Files
+# `.env Files`
 ## Description
-For clients to make calls to the Regulations.gov API, they each need a unique API key. The API key is sensitive information which SHOULD NOT be posted in the GitHub repository. Each client has a corresponding .env file in the `/env_files` directory on the server in this format:
+For clients to make calls to the Regulations.gov API, they each need a unique API key. The API key is sensitive information which SHOULD NOT be posted in the GitHub repository. Each client has a corresponding `.env` file in the `/env_files` directory on the server in this format:
 
 	WORK_SERVER_HOSTNAME=___________
 	WORK_SERVER_PORT=____
