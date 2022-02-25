@@ -24,7 +24,11 @@ class Client:
     def get_client_id(self):
         client_id = read_client_id('client.cfg')
         if client_id == -1:
-            client_id = self.request_client_id()
+            # client_id = self.request_client_id()
+            endpoint = f'{self.url}/get_client_id'
+            response = assure_request(requests.get, endpoint)
+            client_id = int(response.json()['client_id'])
+            write_client_id('client.cfg', client_id)
         self.client_id = client_id
 
     def request_client_id(self):
