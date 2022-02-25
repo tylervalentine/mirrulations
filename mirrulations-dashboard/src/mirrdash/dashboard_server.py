@@ -11,7 +11,7 @@ from flask import Flask, jsonify, render_template
 from flask_cors import CORS
 from redis import Redis
 from pymongo import MongoClient
-from sum_mongo_counts import connect_mongo_db, get_done_counts
+from mirrdash.sum_mongo_counts import connect_mongo_db, get_done_counts
 from dotenv import load_dotenv
 import os
 import docker
