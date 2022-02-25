@@ -4,7 +4,8 @@ from pytest import fixture, raises
 import requests
 import requests_mock
 import mirrclient.client
-from mirrclient.client import Client, NoJobsAvailableException, attempt_request
+from mirrclient.client import Client, NoJobsAvailableException, \
+    attempt_request, perform_job
 from mirrclient.client import is_environment_variables_present
 from mirrclient.client import execute_client_task
 from mirrclient.client import read_client_id, write_client_id
@@ -444,3 +445,17 @@ def test_client_returns_403_error_to_server(mock_requests, mocker):
 
         response = mock_requests.request_history[-1]
         assert 'errors' in response.json()
+
+
+def test_api_call_has_api_key(mock_requests):
+
+    with mock_requests:
+        mock_requests.get(
+            'http://regulations.gov/job',
+            json={'data': {'foo': 'bar'}},
+            status_code=200
+        )
+
+        perform_job('http://regulations.gov/job', 'KEY12345')
+
+        assert '?api_key=KEY12345' in mock_requests.request_history[0].url
