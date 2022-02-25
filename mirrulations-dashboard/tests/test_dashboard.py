@@ -1,7 +1,8 @@
 from collections import namedtuple
 from unittest.mock import Mock, MagicMock
 from pytest import fixture
-from mirrdash.dashboard_server import create_server, get_container_stats
+from mirrdash.dashboard_server import create_server, get_container_stats, \
+    get_container_name
 from mirrmock.mock_flask_server import mock_dashboard_server
 
 
@@ -72,3 +73,8 @@ def test_get_container_stats():
                 'work_server': 'running'}
 
     assert stats == expected
+
+
+def test_docker_name_formatted():
+    name = '_capstone2022-work_generator-1_'
+    assert get_container_name(name) == 'capstone2022_work_generator_1'
