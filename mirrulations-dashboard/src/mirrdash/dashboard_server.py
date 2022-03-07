@@ -28,12 +28,12 @@ def get_jobs_stats(database):
     }
 
 
-def get_container_name(container):
+def get_container_name(container_name):
     """
     Docker container names may be created with hyphens,
     so we replace them with underscores.
     """
-    name = container.name.replace('-', '_')
+    name = container_name.replace('-', '_')
     long_name_lst = name.split('_')
     long_name_lst.pop(0)
     long_name_lst.pop(-1)
@@ -43,7 +43,7 @@ def get_container_name(container):
 def get_container_stats(client):
     stats = {}
     for container in client.containers.list():
-        name = get_container_name(container)
+        name = get_container_name(container.name)
         status = container.status
         stats[name] = status
     return stats
