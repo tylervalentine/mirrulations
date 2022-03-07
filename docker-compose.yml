@@ -35,7 +35,7 @@ services:
     build:
       context: .
       dockerfile: mirrulations-dashboard/Dockerfile
-      env_file: env_files/dashboard.env
+    env_file: env_files/dashboard.env
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock'
   client1:
