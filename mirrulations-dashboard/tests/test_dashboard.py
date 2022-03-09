@@ -81,3 +81,8 @@ def test_get_container_stats():
                 'work_server': 'running'}
 
     assert stats == expected
+
+
+def test_docker_name_formatted():
+    name = '_capstone2022-work_generator-1_'
+    assert get_container_name(name) == 'capstone2022_work_generator_1'

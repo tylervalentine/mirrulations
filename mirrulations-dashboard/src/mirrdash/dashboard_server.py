@@ -51,8 +51,18 @@ def get_container_stats(client):
         name = '_'.join(long_name_lst)
         status = container.status
         stats[name] = status
-    return stats
-
+        return stats
+      
+def get_container_name(container_name):
+    """
+    Docker container names may be created with hyphens,
+    so we replace them with underscores.
+    """
+    name = container_name.replace('-', '_')
+    long_name_lst = name.split('_')
+    long_name_lst.pop(0)
+    long_name_lst.pop(-1)
+    return '_'.join(long_name_lst)
 
 def create_server(database, docker_server, mongo_client):
     dashboard = Dashboard(database, docker_server, mongo_client)
