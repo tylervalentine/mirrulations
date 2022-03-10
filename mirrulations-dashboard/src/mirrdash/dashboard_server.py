@@ -53,6 +53,7 @@ def get_container_stats(client):
         stats[name] = status
         return stats
       
+
 def get_container_name(container_name):
     """
     Docker container names may be created with hyphens,
@@ -63,6 +64,7 @@ def get_container_name(container_name):
     long_name_lst.pop(0)
     long_name_lst.pop(-1)
     return '_'.join(long_name_lst)
+
 
 def create_server(database, docker_server, mongo_client):
     dashboard = Dashboard(database, docker_server, mongo_client)
