@@ -460,5 +460,4 @@ def test_api_call_has_api_key(mock_requests):
         # client.perform_job('http://regulations.gov/job', 'KEY12345')
         client.perform_job('http://regulations.gov/job')
 
-
         assert '?api_key=KEY12345' in mock_requests.request_history[0].url
