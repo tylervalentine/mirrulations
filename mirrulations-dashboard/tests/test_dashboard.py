@@ -1,11 +1,11 @@
 from collections import namedtuple
 from unittest.mock import Mock, MagicMock
 from pytest import fixture
-from mirrdash.dashboard_server import create_server, get_container_stats
+from mirrdash.dashboard_server import create_server, get_container_stats, get_container_name
 from fakeredis import FakeRedis, FakeServer
 from mirrmock.mock_data_storage import MockDataStorage
 from mirrmock.mock_document_count import create_mock_mongodb
-import pytest
+
 
 @fixture(name='mock_server')
 def fixture_mock_server():
@@ -80,7 +80,7 @@ def test_get_container_stats():
 
     assert stats == expected
 
-@pytest.mark.skip()
+
 def test_docker_name_formatted():
     name = '_capstone2022-work_generator-1_'
     assert get_container_name(name) == 'capstone2022_work_generator_1'
