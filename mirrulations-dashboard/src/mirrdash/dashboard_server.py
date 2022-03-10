@@ -51,7 +51,7 @@ def get_container_stats(client):
         name = '_'.join(long_name_lst)
         status = container.status
         stats[name] = status
-        return stats
+    return stats
       
 
 def get_container_name(container_name):
