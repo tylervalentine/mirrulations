@@ -58,14 +58,14 @@ class Client:
         print('Requesting new job from server...')
         job_id, url = self.get_job()
         print('Received job!')
-        result = self.perform_job(url, self.api_key)
+        result = self.perform_job(url)
         print('Sending result back to server...')
         self.send_job_results(job_id, result)
         print('Job complete!\n')
 
-    def perform_job(self, url, api_key):
+    def perform_job(self, url):
         print(f'Getting docket at {url}')
-        url = url + f'?api_key={api_key}'
+        url = url + f'?api_key={self.api_key}'
         json = assure_request(requests.get, url).json()
         print('Done with current job!')
         return json

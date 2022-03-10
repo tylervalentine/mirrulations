@@ -449,6 +449,7 @@ def test_client_returns_403_error_to_server(mock_requests, mocker):
 
 def test_api_call_has_api_key(mock_requests):
     client = Client()
+    client.api_key = 'KEY12345'
     with mock_requests:
         mock_requests.get(
             'http://regulations.gov/job',
@@ -456,6 +457,8 @@ def test_api_call_has_api_key(mock_requests):
             status_code=200
         )
 
-        client.perform_job('http://regulations.gov/job', 'KEY12345')
+        # client.perform_job('http://regulations.gov/job', 'KEY12345')
+        client.perform_job('http://regulations.gov/job')
+
 
         assert '?api_key=KEY12345' in mock_requests.request_history[0].url
