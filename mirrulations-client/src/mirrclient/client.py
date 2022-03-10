@@ -54,6 +54,7 @@ class Client:
         # print(dumps(data))
         assure_request(requests.put, endpoint, json=dumps(data), params=params)
 
+
     def execute_task(self):
         print('Requesting new job from server...')
         job_id, url = self.get_job()
@@ -105,6 +106,7 @@ def assure_request(request, url, sleep_time=60, **kwargs):
         response = attempt_request(request, url, sleep_time, **kwargs)
         if response is not None:
             return response
+
 
 
 def attempt_request(request, url, sleep_time, **kwargs):
