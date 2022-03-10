@@ -13,7 +13,7 @@ from mirrclient.client import read_client_id, write_client_id
 
 BASE_URL = 'http://work_server:8080'
 
-# autouse=True
+
 @fixture(autouse=True)
 def mock_env():
     os.environ['WORK_SERVER_HOSTNAME'] = 'work_server'
@@ -118,7 +118,6 @@ def test_client_sends_job_results(mock_requests, mocker):
 
 
 def test_client_completes_job_requested(mock_requests, mocker):
-
     mocker.patch('time.sleep')
     client = Client()
     mock_client_id = 9
@@ -309,7 +308,6 @@ def test_client_returns_500_error_to_server(mock_requests, mocker):
         )
 
         try:
-            # execute_client_task(client)
             client.execute_task()
         except requests.exceptions.HTTPError as exception:
             assert False, f'Raised an exception: {exception}'
@@ -353,7 +351,6 @@ def test_client_returns_404_error_to_server(mock_requests, mocker):
         )
 
         try:
-             # execute_client_task(client)
             client.execute_task()
         except requests.exceptions.HTTPError as exception:
             assert False, f'Raised an exception: {exception}'
@@ -397,7 +394,6 @@ def test_client_returns_400_error_to_server(mock_requests, mocker):
         )
 
         try:
-            # execute_client_task(client)
             client.execute_task()
         except requests.exceptions.HTTPError as exception:
             assert False, f'Raised an exception: {exception}'
@@ -443,7 +439,6 @@ def test_client_returns_403_error_to_server(mock_requests, mocker):
         )
 
         try:
-            # execute_client_task(client)
             client.execute_task()
         except requests.exceptions.HTTPError as exception:
             assert False, f'Raised an exception: {exception}'

@@ -54,7 +54,6 @@ class Client:
         # print(dumps(data))
         assure_request(requests.put, endpoint, json=dumps(data), params=params)
 
-
     def execute_task(self):
         print('Requesting new job from server...')
         job_id, url = self.get_job()
@@ -106,7 +105,6 @@ def assure_request(request, url, sleep_time=60, **kwargs):
         response = attempt_request(request, url, sleep_time, **kwargs)
         if response is not None:
             return response
-
 
 
 def attempt_request(request, url, sleep_time, **kwargs):
@@ -188,31 +186,24 @@ if __name__ == '__main__':
             print("No Jobs Available")
         time.sleep(3.6)
 
-'''
+# '''
 
-GET JOB (functions being executed)
-- attempt_request
-- write_client_id
-- get_client_id
-- request_client_id
-- request_job
-- get_job
+# GET JOB (functions being executed)
+# - attempt_request
+# - write_client_id
+# - get_client_id
+# - request_client_id
+# - request_job
+# - get_job
 
-PERFORM JOB (functions being executed)
-- read_client_id
-- execute_client_task
-- perform_job
+# PERFORM JOB (functions being executed)
+# - read_client_id
+# - execute_client_task
+# - perform_job
 
-RETURN JOB / INFORMATION (functions being executed)
-- send_job_results
-- get_output_path
-- is_environment_variables_present
+# RETURN JOB / INFORMATION (functions being executed)
+# - send_job_results
+# - get_output_path
+# - is_environment_variables_present
 
-'''
-
-
-
-
-
-
-
+# '''
