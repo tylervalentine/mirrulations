@@ -24,11 +24,7 @@ class Client:
     def get_client_id(self):
         client_id = read_client_id('client.cfg')
         if client_id == -1:
-            # client_id = self.request_client_id()
-            endpoint = f'{self.url}/get_client_id'
-            response = assure_request(requests.get, endpoint)
-            client_id = int(response.json()['client_id'])
-            write_client_id('client.cfg', client_id)
+            client_id = self.request_client_id()
         self.client_id = client_id
 
     def request_client_id(self):
@@ -189,3 +185,32 @@ if __name__ == '__main__':
         except NoJobsAvailableException:
             print("No Jobs Available")
         time.sleep(3.6)
+
+'''
+
+GET JOB (functions being executed)
+- attempt_request
+- write_client_id
+- get_client_id
+- request_client_id
+- request_job
+- get_job
+
+PERFORM JOB (functions being executed)
+- read_client_id
+- execute_client_task
+- perform_job
+
+RETURN JOB / INFORMATION (functions being executed)
+- send_job_results
+- get_output_path
+- is_environment_variables_present
+
+'''
+
+
+
+
+
+
+
