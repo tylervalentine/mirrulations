@@ -58,23 +58,38 @@ class Client:
         # print(dumps(data))
         assure_request(requests.put, endpoint, json=dumps(data), params=params)
 
+    def execute_task(self):
+        print('Requesting new job from server...')
+        job_id, url = self.get_job()
+        print('Received job!')
+        result = self.perform_job(url, self.api_key)
+        print('Sending result back to server...')
+        self.send_job_results(job_id, result)
+        print('Job complete!\n')
 
-def execute_client_task(_client):
-    print('Requesting new job from server...')
-    job_id, url = _client.get_job()
-    print('Received job!')
-    result = perform_job(url, _client.api_key)
-    print('Sending result back to server...')
-    _client.send_job_results(job_id, result)
-    print('Job complete!\n')
+    def perform_job(self, url, api_key):
+        print(f'Getting docket at {url}')
+        url = url + f'?api_key={api_key}'
+        json = assure_request(requests.get, url).json()
+        print('Done with current job!')
+        return json
+
+# def execute_client_task(_client):
+#     print('Requesting new job from server...')
+#     job_id, url = _client.get_job()
+#     print('Received job!')
+#     result = perform_job(url, _client.api_key)
+#     print('Sending result back to server...')
+#     _client.send_job_results(job_id, result)
+#     print('Job complete!\n')
 
 
-def perform_job(url, api_key):
-    print(f'Getting docket at {url}')
-    url = url + f'?api_key={api_key}'
-    json = assure_request(requests.get, url).json()
-    print('Done with current job!')
-    return json
+# def perform_job(url, api_key):
+#     print(f'Getting docket at {url}')
+#     url = url + f'?api_key={api_key}'
+#     json = assure_request(requests.get, url).json()
+#     print('Done with current job!')
+#     return json
 
 
 def request_job(endpoint, data, params):
@@ -170,7 +185,7 @@ if __name__ == '__main__':
     print('Your ID is: ', client.client_id)
     while True:
         try:
-            execute_client_task(client)
+            client.execute_task()
         except NoJobsAvailableException:
             print("No Jobs Available")
         time.sleep(3.6)
