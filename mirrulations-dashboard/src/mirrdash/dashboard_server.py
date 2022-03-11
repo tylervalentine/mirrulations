@@ -44,10 +44,7 @@ def get_jobs_stats(database):
 def get_container_stats(client):
     stats = {}
     for container in client.containers.list():
-        long_name_lst = container.name.split('_')
-        long_name_lst.pop(0)
-        long_name_lst.pop(-1)
-        name = '_'.join(long_name_lst)
+        name = get_container_name(container.name)
         status = container.status
         stats[name] = status
     return stats
