@@ -89,9 +89,7 @@ def put_results(workserver, data):
     if not success:
         return (success, *results)
     job_id = data.get('job_id')
-    result = workserver.redis.hget('jobs_in_progress', job_id)
     workserver.redis.hdel('jobs_in_progress', job_id)
-    workserver.redis.hset('jobs_done', job_id, result)
     write_results(results[0], data.get('directory'), data.get('results'))
     workserver.data.add(data.get('results'))
     return (True,)

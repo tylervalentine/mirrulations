@@ -179,7 +179,6 @@ def test_put_results_returns_correct_job(mock_server, mocker):
     params = {'client_id': 1}
     response = mock_server.client.put('/put_results',
                                       json=data, query_string=params)
-    assert mock_server.redis.hget('jobs_done', 2).decode() == '3'
     assert response.status_code == 200
     expected = {'success': 'The job was successfully completed'}
     assert response.get_json() == expected

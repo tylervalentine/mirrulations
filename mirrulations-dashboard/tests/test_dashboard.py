@@ -1,14 +1,25 @@
 from collections import namedtuple
 from unittest.mock import Mock, MagicMock
 from pytest import fixture
-from mirrdash.dashboard_server import create_server, get_container_stats, \
-    get_container_name
-from mirrmock.mock_flask_server import mock_dashboard_server
+from mirrdash.dashboard_server import create_server, \
+    get_container_stats, get_container_name
+from fakeredis import FakeRedis, FakeServer
+from mirrmock.mock_data_storage import MockDataStorage
+from mirrmock.mock_document_count import create_mock_mongodb
 
 
 @fixture(name='mock_server')
 def fixture_mock_server():
-    return mock_dashboard_server(create_server)
+    redis_server = FakeServer()
+    mock_redis_db = FakeRedis(server=redis_server)
+    mock_docker = MagicMock()
+    mock_mongo_db = create_mock_mongodb(1, 2, 3)
+    server = create_server(mock_redis_db, mock_docker, mock_mongo_db)
+    server.redis_server = redis_server
+    server.app.config['TESTING'] = True
+    server.client = server.app.test_client()
+    server.data = MockDataStorage()
+    return server
 
 
 def add_mock_data_to_database(database):
@@ -36,16 +47,12 @@ def test_dashboard_returns_job_information(mock_server):
     response = mock_server.client.get('/data')
 
     assert response.status_code == 200
-    expected = {
-        'client1': 'running',
-        'work_server': 'running',
-        'num_jobs_waiting': 5,
-        'num_jobs_in_progress': 4,
-        'num_jobs_done': 3,
-        'jobs_total': 12,
-        'clients_total': 2
-    }
-    assert response.get_json() == expected
+    results = response.get_json()
+
+    assert results['num_jobs_waiting'] == 5
+    assert results['num_jobs_in_progress'] == 4
+    assert results['num_jobs_done'] == 6
+    assert results['jobs_total'] == 15
 
 
 def test_dashboard_returns_html(mock_server):
