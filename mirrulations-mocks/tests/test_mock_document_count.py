@@ -1,6 +1,7 @@
 
 from mirrmock.mock_document_count import create_mock_mongodb
 
+
 def test_mock_document_count():
     mock_db = create_mock_mongodb(1, 2, 3)
 
