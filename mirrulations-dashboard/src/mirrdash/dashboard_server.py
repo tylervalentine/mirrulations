@@ -1,5 +1,5 @@
 """
-This module creates the dashboard application that queries 
+This module creates the dashboard application that queries
     the redis and mongo databases to return stats about
     the number of jobs in progress/complete and the status
     of the containers.
@@ -7,13 +7,12 @@ This module creates the dashboard application that queries
 Dependencies:
     docker, dotenv, flask, flask_cors, os, pymongo, redis
 """
+import os
 from flask import Flask, jsonify, render_template
 from flask_cors import CORS
 from redis import Redis
-from pymongo import MongoClient
 from mirrdash.sum_mongo_counts import connect_mongo_db, get_done_counts
 from dotenv import load_dotenv
-import os
 import docker
 
 
@@ -52,7 +51,7 @@ def get_container_stats(client):
         status = container.status
         stats[name] = status
     return stats
-      
+
 
 def get_container_name(container_name):
     """
@@ -80,7 +79,7 @@ def create_server(database, docker_server, mongo_client):
         """ returns data as json and request status code """
         # Get the jobs stats in the redis db
         data = get_jobs_stats(dashboard.redis)
-        
+
         # Get the number of jobs done from the mongo db and add it to the data
         jobs_done = get_done_counts(dashboard.mongo, 'mirrulations')
         data.update({'num_jobs_done': jobs_done})
@@ -99,8 +98,8 @@ def create_server(database, docker_server, mongo_client):
 
 if __name__ == '__main__':
     load_dotenv()
-    # TODO: this should probably have some exception handling here
-    server = create_server(Redis(os.getenv('REDIS_HOSTNAME')), 
-                          docker.from_env(), 
-                          connect_mongo_db(os.getenv('MONGO_HOSTNAME'),27017))
+    mongo_host = os.getenv('MONGO_HOSTNAME')
+    server = create_server(Redis(os.getenv('REDIS_HOSTNAME')),
+                           docker.from_env(),
+                           connect_mongo_db(mongo_host, 27017))
     server.app.run(port=5000)

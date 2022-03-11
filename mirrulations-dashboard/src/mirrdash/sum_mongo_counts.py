@@ -5,6 +5,7 @@ Dependencies:
     pymongo
 """
 from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
 
 
 def connect_mongo_db(host_name, port_number):
@@ -14,9 +15,8 @@ def connect_mongo_db(host_name, port_number):
         port_number = int(27017)
     client = MongoClient(host_name, port_number)
     try:
-       print(client.server_info())
-
-    except Exception:
+        print(client.server_info())
+    except ConnectionFailure:
         print("Unable to connect to the server.")
 
     return client

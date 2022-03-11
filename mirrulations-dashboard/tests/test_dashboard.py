@@ -1,7 +1,8 @@
 from collections import namedtuple
 from unittest.mock import Mock, MagicMock
 from pytest import fixture
-from mirrdash.dashboard_server import create_server, get_container_stats, get_container_name
+from mirrdash.dashboard_server import create_server, \
+    get_container_stats, get_container_name
 from fakeredis import FakeRedis, FakeServer
 from mirrmock.mock_data_storage import MockDataStorage
 from mirrmock.mock_document_count import create_mock_mongodb
