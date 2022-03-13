@@ -95,7 +95,18 @@ def request_job(endpoint, data, params):
 
 def assure_request(request, url, sleep_time=60, **kwargs):
     while True:
-        response = attempt_request(request, url, sleep_time, **kwargs)
+        try:
+            response = request(url, **kwargs)
+            check_status_code(response)
+            response.raise_for_status()
+        except RequestConnectionError:
+            print('Unable to connect to the server. '
+                'Trying again in a minute...')
+            time.sleep(sleep_time)
+        except HTTPError:
+            print('An HTTP Error occured.')
+        except RequestException:
+            print('A Request Error occured.')
         if response is not None:
             return response
 
@@ -122,19 +133,6 @@ def check_status_code(response):
         print(response.json()['error'])
     elif status_code > 400:
         print('Server error. Trying again in a minute...')
-
-
-# def read_client_id(filename):
-#     try:
-#         with open(filename, 'r', encoding='utf8') as file:
-#             return int(file.readline())
-#     except FileNotFoundError:
-#         return -1
-
-
-# def write_client_id(filename, client_id):
-#     with open(filename, 'w', encoding='utf8') as file:
-#         file.write(str(client_id))
 
 
 def get_key_path_string(results, key):
