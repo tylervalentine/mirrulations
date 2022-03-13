@@ -74,7 +74,7 @@ class Client:
         with open(filename, 'w', encoding='utf8') as file:
             file.write(str(self.client_id))
 
-    def read_client_id(filename):
+    def read_client_id(self, filename):
         try:
             with open(filename, 'r', encoding='utf8') as file:
                 return int(file.readline())

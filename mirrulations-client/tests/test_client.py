@@ -166,13 +166,15 @@ def test_attempt_request_raises_connection_exception(mock_requests, mocker):
 
 
 def test_read_client_id_success(tmpdir):
+    client = Client()
     file = tmpdir.join('test_read.txt')
     file.write('1')
-    assert int(file.read()) == Client.read_client_id(str(file))
+    assert int(file.read()) == client.read_client_id(str(file))
 
 
 def test_read_client_id_file_not_found():
-    assert Client.read_client_id('nonexistent.txt') == -1
+    client = Client()
+    assert client.read_client_id('nonexistent.txt') == -1
 
 
 def test_write_client_id(tmpdir):
