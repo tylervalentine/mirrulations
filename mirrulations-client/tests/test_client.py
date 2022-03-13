@@ -1,15 +1,13 @@
 import os
 from functools import partial
-from pydoc import cli
 from pytest import fixture, raises
 import requests
 import requests_mock
 import mirrclient.client
-from mirrclient.client import Client, NoJobsAvailableException 
-    # attempt_request
+from mirrclient.client import Client, NoJobsAvailableException
 from mirrclient.client import is_environment_variables_present
 # from mirrclient.client import execute_client_task
-# from mirrclient.client import read_client_id, write_client_id
+from mirrclient.client import read_client_id
 
 
 BASE_URL = 'http://work_server:8080'
@@ -153,7 +151,8 @@ def test_client_completes_job_requested(mock_requests, mocker):
             assert False, f'Raised an exception: {exception}'
 
 
-def test_attempt_request_raises_connection_exception(mock_requests, mocker): ###This needs to be reviewed IS THIS A BAD TEST?
+def test_attempt_request_raises_connection_exception(mock_requests, mocker):
+    # This needs to be reviewed IS THIS A BAD TEST?
     mock_raise_connection_error(mocker)
     with mock_requests:
         mock_requests.get(
@@ -162,22 +161,21 @@ def test_attempt_request_raises_connection_exception(mock_requests, mocker): ###
 
         )
         try:
-            mirrclient.client.assure_request(requests.get, f'{BASE_URL}/get_job', 0)
+            mirrclient.client.assure_request(requests.get,
+                                             f'{BASE_URL}/get_job', 0)
         except requests.exceptions.ConnectionError as exception:
             assert True, f'raised an exception: {exception}'
         # assert response is None
 
 
 def test_read_client_id_success(tmpdir):
-    client = Client()
     file = tmpdir.join('test_read.txt')
     file.write('1')
-    assert int(file.read()) == client.read_client_id(str(file))
+    assert int(file.read()) == read_client_id(str(file))
 
 
 def test_read_client_id_file_not_found():
-    client = Client()
-    assert client.read_client_id('nonexistent.txt') == -1
+    assert read_client_id('nonexistent.txt') == -1
 
 
 def test_write_client_id(tmpdir):
@@ -240,7 +238,7 @@ def mock_raise_connection_error(mocker):
 
 def read_mock_client_id(mocker, value):
     mocker.patch(
-        'mirrclient.client.Client.read_client_id',
+        'mirrclient.client.read_client_id',
         return_value=value
     )
 

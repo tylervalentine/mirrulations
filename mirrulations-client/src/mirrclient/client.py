@@ -22,7 +22,7 @@ class Client:
         self.client_id = -1
 
     def get_client_id(self):
-        client_id = self.read_client_id('client.cfg')
+        client_id = read_client_id('client.cfg')
         if client_id == -1:
             client_id = self.request_client_id()
         self.client_id = client_id
@@ -74,12 +74,14 @@ class Client:
         with open(filename, 'w', encoding='utf8') as file:
             file.write(str(self.client_id))
 
-    def read_client_id(self, filename):
-        try:
-            with open(filename, 'r', encoding='utf8') as file:
-                return int(file.readline())
-        except FileNotFoundError:
-            return -1
+
+def read_client_id(filename):
+    try:
+        with open(filename, 'r', encoding='utf8') as file:
+            return int(file.readline())
+    except FileNotFoundError:
+        return -1
+
 
 def request_job(endpoint, data, params):
     response = assure_request(requests.get, endpoint,
@@ -101,7 +103,7 @@ def assure_request(request, url, sleep_time=60, **kwargs):
             response.raise_for_status()
         except RequestConnectionError:
             print('Unable to connect to the server. '
-                'Trying again in a minute...')
+                  'Trying again in a minute...')
             time.sleep(sleep_time)
         except HTTPError:
             print('An HTTP Error occured.')
@@ -109,22 +111,6 @@ def assure_request(request, url, sleep_time=60, **kwargs):
             print('A Request Error occured.')
         if response is not None:
             return response
-
-
-# def attempt_request(request, url, sleep_time, **kwargs):
-#     try:
-#         response = request(url, **kwargs)
-#         check_status_code(response)
-#         response.raise_for_status()
-#     except RequestConnectionError:
-#         print('Unable to connect to the server. '
-#               'Trying again in a minute...')
-#         time.sleep(sleep_time)
-#     except (HTTPError, RequestException):
-#         return response
-#     else:
-#         return response
-#     return None
 
 
 def check_status_code(response):
