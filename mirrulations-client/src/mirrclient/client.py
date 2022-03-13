@@ -22,7 +22,7 @@ class Client:
         self.client_id = -1
 
     def get_client_id(self):
-        client_id = read_client_id('client.cfg')
+        client_id = self.read_client_id('client.cfg')
         if client_id == -1:
             client_id = self.request_client_id()
         self.client_id = client_id
@@ -31,7 +31,7 @@ class Client:
         endpoint = f'{self.url}/get_client_id'
         response = assure_request(requests.get, endpoint)
         client_id = int(response.json()['client_id'])
-        write_client_id('client.cfg', client_id)
+        self.write_client_id('client.cfg')
         return client_id
 
     def get_job(self):
@@ -70,23 +70,16 @@ class Client:
         print('Done with current job!')
         return json
 
-# def execute_client_task(_client):
-#     print('Requesting new job from server...')
-#     job_id, url = _client.get_job()
-#     print('Received job!')
-#     result = perform_job(url, _client.api_key)
-#     print('Sending result back to server...')
-#     _client.send_job_results(job_id, result)
-#     print('Job complete!\n')
+    def write_client_id(self, filename):
+        with open(filename, 'w', encoding='utf8') as file:
+            file.write(str(self.client_id))
 
-
-# def perform_job(url, api_key):
-#     print(f'Getting docket at {url}')
-#     url = url + f'?api_key={api_key}'
-#     json = assure_request(requests.get, url).json()
-#     print('Done with current job!')
-#     return json
-
+    def read_client_id(filename):
+        try:
+            with open(filename, 'r', encoding='utf8') as file:
+                return int(file.readline())
+        except FileNotFoundError:
+            return -1
 
 def request_job(endpoint, data, params):
     response = assure_request(requests.get, endpoint,
@@ -131,17 +124,17 @@ def check_status_code(response):
         print('Server error. Trying again in a minute...')
 
 
-def read_client_id(filename):
-    try:
-        with open(filename, 'r', encoding='utf8') as file:
-            return int(file.readline())
-    except FileNotFoundError:
-        return -1
+# def read_client_id(filename):
+#     try:
+#         with open(filename, 'r', encoding='utf8') as file:
+#             return int(file.readline())
+#     except FileNotFoundError:
+#         return -1
 
 
-def write_client_id(filename, client_id):
-    with open(filename, 'w', encoding='utf8') as file:
-        file.write(str(client_id))
+# def write_client_id(filename, client_id):
+#     with open(filename, 'w', encoding='utf8') as file:
+#         file.write(str(client_id))
 
 
 def get_key_path_string(results, key):

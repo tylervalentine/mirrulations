@@ -1,5 +1,6 @@
 import os
 from functools import partial
+from pydoc import cli
 from pytest import fixture, raises
 import requests
 import requests_mock
@@ -8,7 +9,7 @@ from mirrclient.client import Client, NoJobsAvailableException, \
     attempt_request
 from mirrclient.client import is_environment_variables_present
 # from mirrclient.client import execute_client_task
-from mirrclient.client import read_client_id, write_client_id
+# from mirrclient.client import read_client_id, write_client_id
 
 
 BASE_URL = 'http://work_server:8080'
@@ -167,17 +168,18 @@ def test_attempt_request_raises_connection_exception(mock_requests, mocker):
 def test_read_client_id_success(tmpdir):
     file = tmpdir.join('test_read.txt')
     file.write('1')
-    assert int(file.read()) == read_client_id(str(file))
+    assert int(file.read()) == Client.read_client_id(str(file))
 
 
 def test_read_client_id_file_not_found():
-    assert read_client_id('nonexistent.txt') == -1
+    assert Client.read_client_id('nonexistent.txt') == -1
 
 
 def test_write_client_id(tmpdir):
     file = tmpdir.join('test_write.txt')
-    write_client_id(str(file), '1')
-    assert file.read() == '1'
+    client = Client()
+    client.write_client_id(str(file))
+    assert file.read() == '-1'
 
 
 def test_check_all_env_values():
@@ -233,14 +235,14 @@ def mock_raise_connection_error(mocker):
 
 def read_mock_client_id(mocker, value):
     mocker.patch(
-        'mirrclient.client.read_client_id',
+        'mirrclient.client.Client.read_client_id',
         return_value=value
     )
 
 
 def write_mock_client_id(mocker):
     mocker.patch(
-        'mirrclient.client.write_client_id',
+        'mirrclient.client.Client.write_client_id',
         return_value=''
     )
 
