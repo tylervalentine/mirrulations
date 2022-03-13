@@ -95,8 +95,8 @@ def request_job(endpoint, data, params):
 
 def assure_request(request, url, sleep_time=60, **kwargs):
     while True:
+        response = request(url, **kwargs)
         try:
-            response = request(url, **kwargs)
             check_status_code(response)
             response.raise_for_status()
         except RequestConnectionError:
@@ -111,20 +111,20 @@ def assure_request(request, url, sleep_time=60, **kwargs):
             return response
 
 
-def attempt_request(request, url, sleep_time, **kwargs):
-    try:
-        response = request(url, **kwargs)
-        check_status_code(response)
-        response.raise_for_status()
-    except RequestConnectionError:
-        print('Unable to connect to the server. '
-              'Trying again in a minute...')
-        time.sleep(sleep_time)
-    except (HTTPError, RequestException):
-        return response
-    else:
-        return response
-    return None
+# def attempt_request(request, url, sleep_time, **kwargs):
+#     try:
+#         response = request(url, **kwargs)
+#         check_status_code(response)
+#         response.raise_for_status()
+#     except RequestConnectionError:
+#         print('Unable to connect to the server. '
+#               'Trying again in a minute...')
+#         time.sleep(sleep_time)
+#     except (HTTPError, RequestException):
+#         return response
+#     else:
+#         return response
+#     return None
 
 
 def check_status_code(response):
