@@ -31,12 +31,12 @@ def get_done_counts(client, db_name):
 
 
 def get_dockets_count(client, db_name):
-    return int(client[db_name]['dockets'].count_documents({}))
+    return int(client[db_name]['dockets'].estimated_document_count())
 
 
 def get_documents_count(client, db_name):
-    return int(client[db_name]['documents'].count_documents({}))
+    return int(client[db_name]['documents'].estimated_document_count())
 
 
 def get_comments_count(client, db_name):
-    return int(client[db_name]['comments'].count_documents({}))
+    return int(client[db_name]['comments'].estimated_document_count())

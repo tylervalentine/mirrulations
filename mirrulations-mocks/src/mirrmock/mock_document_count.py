@@ -5,9 +5,9 @@ class MockDocumentCount:
     def __init__(self, count_to_return):
         self.count = count_to_return
 
-    def count_documents(self, dummy):
-        assert dummy == {}
+    def estimated_document_count(self):
         return self.count
+
 
 def create_mock_mongodb(docket_count, document_count, comment_count):
     # needs:
