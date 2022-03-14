@@ -162,4 +162,3 @@ if __name__ == '__main__':
         except NoJobsAvailableException:
             print("No Jobs Available")
         time.sleep(3.6)
-
