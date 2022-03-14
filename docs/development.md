@@ -78,7 +78,7 @@ To get an api key, visit [here](https://open.gsa.gov/api/regulationsgov/).
   
   ```
   MONGO_HOSTNAME=mongo
-	REDIS_HOSTNAME=redis
+  REDIS_HOSTNAME=redis
   ```
 
 * All data is stored in subfolders of `~/data`.  You must create this folder before launching:
