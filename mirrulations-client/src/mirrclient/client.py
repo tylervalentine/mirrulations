@@ -93,9 +93,9 @@ def request_job(endpoint, data, params):
         raise NoJobsAvailableException()
     job = response_text['job']
     job_id = list(job.keys())[0]
-    value = job[job_id]
+    url = job[job_id]
     job_type = job['attachment_type']
-    return job_id, value, job_type
+    return job_id, url, job_type
 
 
 def assure_request(request, url, sleep_time=60, **kwargs):
