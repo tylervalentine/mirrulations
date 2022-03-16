@@ -140,9 +140,10 @@ def create_server(database):
     @workserver.app.route('/post_attachment_results', methods=['post'])
     def _post_attachment_results():
         """
-        This endpoint is hit by a client when it is done with an attachment downloading task.
-        When fully implemented, this function needs to handle the functionallity 
-        of the put_results endpoint (remove job from jobs_in_progress hash and client_jobs) 
+        This endpoint is hit by a client when it is done with an attachment
+        downloading task. When fully implemented, this function needs to
+        handle the functionality of the put_results endpoint
+        (remove job from jobs_in_progress hash and client_jobs)
         and also save the attachments somewhere.
         """
         pass
