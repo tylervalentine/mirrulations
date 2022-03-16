@@ -96,6 +96,28 @@ def put_results(workserver, data):
 
 
 @check_for_database
+def post_attachments(workserver, data):
+    client_id = request.args.get('client_id')
+    success, *values = check_request_had_valid_client_id(workserver, client_id)
+    if not success:
+        return False, values[0], values[1]
+    if 'error' in data['results'] or 'errors' in data['results']:
+        job_id = data['job_id']
+        result = workserver.redis.hget('jobs_in_progress', job_id)
+        workserver.redis.hdel('jobs_in_progress', job_id)
+        workserver.redis.hset('invalid_jobs', job_id, result)
+        return (True,)
+    success, *results = check_results(workserver, data, int(client_id))
+    if not success:
+        return (success, *results)
+    job_id = data.get('job_id')
+    workserver.redis.hdel('jobs_in_progress', job_id)
+    write_results(results[0], data.get('directory'), data.get('results'))
+    workserver.data.add(data.get('results'))
+    return (True,)
+
+
+@check_for_database
 def get_client_id(workserver):
     workserver.redis.incr('total_num_client_ids')
     return True, int(workserver.redis.get('total_num_client_ids'))
@@ -146,7 +168,13 @@ def create_server(database):
         (remove job from jobs_in_progress hash and client_jobs)
         and also save the attachments somewhere.
         """
-        pass
+        data = json.loads(request.get_json())
+        if data is None or data.get('results') is None:
+            body = {'error': 'The body does not contain the results'}
+            return jsonify(body), 403
+        
+        return jsonify({'success': 'The job was successfully completed'}), 200
+
 
     @workserver.app.route('/get_client_id', methods=['GET'])
     def _get_client_id():
