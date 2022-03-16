@@ -66,6 +66,7 @@ class Client:
     def perform_job(self, url):
         print(f'Getting docket at {url}')
         url = url + f'?api_key={self.api_key}'
+        #If attachement do somthing here?
         json = assure_request(requests.get, url).json()
         print('Done with current job!')
         return json
