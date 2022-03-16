@@ -17,6 +17,7 @@ const updateHtmlValues = (id, value, total) => {
     document.getElementById(id+'-circle-front').style.strokeDasharray = `${percent}, 100`;
 }
 
+
 const updateStatus = (container, status) => {
         let status_span = document.getElementById(container)
         if (status == "running") {
@@ -53,19 +54,23 @@ const updateDashboardData = () => {
             client15,
             client16,
             client17,
-            clients_total,
+            clients_total, // TODO: is this still used?
             jobs_total,
             nginx,
+            num_attachments_done, // TODO: add these in
+            num_comments_done,
+            num_dockets_done,
+            num_documents_done,
             num_jobs_done, 
-            num_jobs_in_progress, 
+            num_jobs_in_progress, // TODO: is this still used? 
             num_jobs_waiting,
             mongo,
             redis,
             work_generator,
             work_server
         } = jobInformation;
-
         updateHtmlValues('jobs-waiting', num_jobs_waiting, jobs_total);
+        updateHtmlValues('jobs-done', num_jobs_done, jobs_total);
         updateHtmlValues('jobs-done', num_jobs_done, jobs_total);
         updateStatus('client1-status', client1)
         updateStatus('client2-status', client2)
@@ -89,6 +94,13 @@ const updateDashboardData = () => {
         updateStatus('redis-status', redis);
         updateStatus('work-generator-status', work_generator);
         updateStatus('work-server-status', work_server);
+        // Counts
+        console.log("attachments: "+num_attachments_done+'\n');
+        console.log("comments: "+num_comments_done+'\n');
+        console.log("dockets: "+num_dockets_done+'\n');
+        console.log("documents: "+num_documents_done+'\n');
+        console.log("total jobs done:"+num_jobs_done+'\n');
+        console.log("jobs total:"+jobs_total);
     })
     .catch((err) => console.log(err));
 }
