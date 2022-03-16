@@ -37,8 +37,8 @@ class Client:
     def get_job(self):
         endpoint = f'{self.url}/get_job'
         params = {'client_id': self.client_id}
-        job_id, url = request_job(endpoint, dumps({}), params)
-        return job_id, url
+        job_id, url, job_type = request_job(endpoint, dumps({}), params)
+        return job_id, url, job_type
 
     def send_job_results(self, job_id, job_result):
         endpoint = f'{self.url}/put_results'
@@ -57,7 +57,7 @@ class Client:
 
     def execute_task(self):
         print('Requesting new job from server...')
-        job_id, url = self.get_job()
+        job_id, url, job_type = self.get_job()
         print('Received job!')
         result = self.perform_job(url)
         print('Sending result back to server...')
