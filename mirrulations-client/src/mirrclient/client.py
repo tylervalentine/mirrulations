@@ -43,7 +43,8 @@ class Client:
     def send_job_results(self, job_id, job_result):
         endpoint = f'{self.url}/put_results'
         if 'errors' in job_result:
-            data = {'job_id': job_id,
+            data = {
+                    'job_id': job_id,
                     'results': job_result
                     }
         else:
@@ -93,7 +94,8 @@ def request_job(endpoint, data, params):
     job = response_text['job']
     job_id = list(job.keys())[0]
     value = job[job_id]
-    return job_id, value
+    job_type = job['attachment_type']
+    return job_id, value, job_type
 
 
 def assure_request(request, url, sleep_time=60, **kwargs):
