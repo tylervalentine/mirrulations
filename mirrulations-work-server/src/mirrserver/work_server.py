@@ -137,6 +137,16 @@ def create_server(database):
             return tuple(values)
         return jsonify({'success': 'The job was successfully completed'}), 200
 
+    @workserver.app.route('/post_attachment_results', methods=['post'])
+    def _post_attachment_results():
+        """
+        This endpoint is hit by a client when it is done with an attachment downloading task.
+        When fully implemented, this function needs to handle the functionallity 
+        of the put_results endpoint (remove job from jobs_in_progress hash and client_jobs) 
+        and also save the attachments somewhere.
+        """
+        pass
+
     @workserver.app.route('/get_client_id', methods=['GET'])
     def _get_client_id():
         success, *values = get_client_id(workserver)
