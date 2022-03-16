@@ -71,7 +71,6 @@ const updateDashboardData = () => {
         } = jobInformation;
         updateHtmlValues('jobs-waiting', num_jobs_waiting, jobs_total);
         updateHtmlValues('jobs-done', num_jobs_done, jobs_total);
-        updateHtmlValues('jobs-done', num_jobs_done, jobs_total);
         updateStatus('client1-status', client1)
         updateStatus('client2-status', client2)
         updateStatus('client3-status', client3)
