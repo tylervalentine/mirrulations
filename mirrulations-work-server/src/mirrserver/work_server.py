@@ -112,7 +112,9 @@ def post_attachments(workserver, data):
         return (success, *results)
     job_id = data.get('job_id')
     workserver.redis.hdel('jobs_in_progress', job_id)
-    write_results(results[0], data.get('directory'), data.get('results'))
+    # Code for getting attachment data and saving to mongo goes here
+    # Save data to mongo
+    print(data.get('results'))
     workserver.data.add(data.get('results'))
     return (True,)
 
@@ -172,7 +174,9 @@ def create_server(database):
         if data is None or data.get('results') is None:
             body = {'error': 'The body does not contain the results'}
             return jsonify(body), 403
-        
+        success, *values = post_attachments(workserver, data)
+        if not success:
+            return tuple(values)
         return jsonify({'success': 'The job was successfully completed'}), 200
 
 
