@@ -58,10 +58,11 @@ def test_client_gets_job(mock_requests):
     with mock_requests:
         mock_requests.get(
             f'{BASE_URL}/get_job',
-            json={'job': {'1': 1}},
+            json={'job': {'1': 1, 
+                        'job_type': 'attachments'}},
             status_code=200
         )
-        assert ('1', 1) == client.get_job()
+        assert ('1', 1, 'attachments') == client.get_job()
 
 
 def test_client_throws_exception_when_no_jobs(mock_requests):
@@ -130,7 +131,8 @@ def test_client_completes_job_requested(mock_requests, mocker):
         )
         mock_requests.get(
             f'{BASE_URL}/get_job',
-            json={'job': {'1': 'http://test.com'}},
+            json={'job': {'1': 'http://test.com',
+                        'job_type': 'documents'}},
             status_code=200
         )
         mock_requests.put(
@@ -140,7 +142,8 @@ def test_client_completes_job_requested(mock_requests, mocker):
         )
         mock_requests.get(
             'http://test.com',
-            json={'data': {'id': '1', 'attributes': {'agencyId': 'NOAA'}}},
+            json={'data': {'id': '1', 'attributes': {'agencyId': 'NOAA'},
+                        'job_type': 'documents'}},
             status_code=200
         )
 
@@ -291,7 +294,8 @@ def test_client_returns_500_error_to_server(mock_requests, mocker):
         )
         mock_requests.get(
             f'{BASE_URL}/get_job',
-            json={'job': {'1': 'http://test.com'}},
+            json={'job': {'1': 'http://test.com', 
+                        'job_type': 'attachments'}},
             status_code=200
         )
         mock_requests.put(
@@ -336,7 +340,8 @@ def test_client_returns_404_error_to_server(mock_requests, mocker):
         )
         mock_requests.get(
             f'{BASE_URL}/get_job',
-            json={'job': {'1': 'http://test.com'}},
+            json={'job': {'1': 'http://test.com',
+                        'job_type': 'attachments'}},
             status_code=200
         )
         mock_requests.put(
@@ -379,7 +384,8 @@ def test_client_returns_400_error_to_server(mock_requests, mocker):
         )
         mock_requests.get(
             f'{BASE_URL}/get_job',
-            json={'job': {'1': 'http://test.com'}},
+            json={'job': {'1': 'http://test.com', 
+                        'job_type': 'attachments'}},
             status_code=200
         )
         mock_requests.put(
@@ -422,7 +428,8 @@ def test_client_returns_403_error_to_server(mock_requests, mocker):
         )
         mock_requests.get(
             f'{BASE_URL}/get_job',
-            json={'job': {'1': 'http://test.com'}},
+            json={'job': {'1': 'http://test.com',
+                'job_type': 'attachments'}},
             status_code=200
         )
         mock_requests.put(
