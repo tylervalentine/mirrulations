@@ -88,10 +88,10 @@ def put_results(workserver, data):
     success, *results = check_results(workserver, data, int(client_id))
     if not success:
         return (success, *results)
-    job_id = data.get('job_id')
+    job_id = data['job_id']
     workserver.redis.hdel('jobs_in_progress', job_id)
-    write_results(results[0], data.get('directory'), data.get('results'))
-    workserver.data.add(data.get('results'))
+    write_results(results[0], data['directory'], data['results'])
+    workserver.data.add(data['results'])
     return (True,)
 
 
@@ -110,12 +110,12 @@ def post_attachments(workserver, data):
     success, *results = check_results(workserver, data, int(client_id))
     if not success:
         return (success, *results)
-    job_id = data.get('job_id')
+    job_id = data['job_id']
     workserver.redis.hdel('jobs_in_progress', job_id)
     # Code for getting attachment data and saving to mongo goes here
     # Save data to mongo
-    print(data.get('results'))
-    workserver.data.add(data.get('results'))
+    print(data['attachments'])
+    workserver.data.add(data['results'])
     return (True,)
 
 
@@ -171,14 +171,13 @@ def create_server(database):
         and also save the attachments somewhere.
         """
         data = json.loads(request.get_json())
-        if data is None or data.get('results') is None:
+        if data is None or data['results'] is None:
             body = {'error': 'The body does not contain the results'}
             return jsonify(body), 403
         success, *values = post_attachments(workserver, data)
         if not success:
             return tuple(values)
         return jsonify({'success': 'The job was successfully completed'}), 200
-
 
     @workserver.app.route('/get_client_id', methods=['GET'])
     def _get_client_id():
