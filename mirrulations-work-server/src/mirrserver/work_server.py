@@ -90,31 +90,9 @@ def put_results(workserver, data):
         return (success, *results)
     job_id = data['job_id']
     workserver.redis.hdel('jobs_in_progress', job_id)
+    if data.get('attachments'): 
+        print(data.get('attachments'))
     write_results(results[0], data['directory'], data['results'])
-    workserver.data.add(data['results'])
-    return (True,)
-
-
-@check_for_database
-def post_attachments(workserver, data):
-    client_id = request.args.get('client_id')
-    success, *values = check_request_had_valid_client_id(workserver, client_id)
-    if not success:
-        return False, values[0], values[1]
-    if 'error' in data['results'] or 'errors' in data['results']:
-        job_id = data['job_id']
-        result = workserver.redis.hget('jobs_in_progress', job_id)
-        workserver.redis.hdel('jobs_in_progress', job_id)
-        workserver.redis.hset('invalid_jobs', job_id, result)
-        return (True,)
-    success, *results = check_results(workserver, data, int(client_id))
-    if not success:
-        return (success, *results)
-    job_id = data['job_id']
-    workserver.redis.hdel('jobs_in_progress', job_id)
-    # Code for getting attachment data and saving to mongo goes here
-    # Save data to mongo
-    print(data['attachments'])
     workserver.data.add(data['results'])
     return (True,)
 
@@ -157,24 +135,6 @@ def create_server(database):
             body = {'error': 'The body does not contain the results'}
             return jsonify(body), 403
         success, *values = put_results(workserver, data)
-        if not success:
-            return tuple(values)
-        return jsonify({'success': 'The job was successfully completed'}), 200
-
-    @workserver.app.route('/post_attachment_results', methods=['post'])
-    def _post_attachment_results():
-        """
-        This endpoint is hit by a client when it is done with an attachment
-        downloading task. When fully implemented, this function needs to
-        handle the functionality of the put_results endpoint
-        (remove job from jobs_in_progress hash and client_jobs)
-        and also save the attachments somewhere.
-        """
-        data = json.loads(request.get_json())
-        if data is None or data['results'] is None:
-            body = {'error': 'The body does not contain the results'}
-            return jsonify(body), 403
-        success, *values = post_attachments(workserver, data)
         if not success:
             return tuple(values)
         return jsonify({'success': 'The job was successfully completed'}), 200
