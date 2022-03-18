@@ -3,11 +3,8 @@
 * Generate attachment jobs
 * When jobs generate they also need to generate the attachments
 
-
-## Data/Redis
-* attachment_generator goes to port 6379
-
-# Program
-* Write a program that will generate jobs and put it into a redis database
+## Redis
+* Redis in new docker container will point to port 6379
+* attachment_generator mapped to port 6379 in order to interact with the redis DB
 
 
