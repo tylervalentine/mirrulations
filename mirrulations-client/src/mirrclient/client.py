@@ -94,7 +94,7 @@ def request_job(endpoint, data, params):
     job = response_text['job']
     job_id = list(job.keys())[0]
     url = job[job_id]
-    job_type = job['attachment_type']
+    job_type = job['job_type']
     return job_id, url, job_type
 
 
