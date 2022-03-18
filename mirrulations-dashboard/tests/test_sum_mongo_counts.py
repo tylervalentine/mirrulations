@@ -18,9 +18,11 @@ def test_comment_counts():
     mock_db = create_mock_mongodb(1, 2, 3, 4)
     assert get_comments_count(mock_db, 'mirrulations') == 3
 
+
 def test_attachment_counts():
     mock_db = create_mock_mongodb(1, 2, 3, 4)
     assert get_attachments_count(mock_db, 'mirrulations') == 4
+
 
 def test_done_counts():
     mock_db = create_mock_mongodb(1, 2, 3, 4)
