@@ -30,7 +30,8 @@ def get_done_counts(client, db_name):
     attachments_count = get_attachments_count(client, db_name)
 
     return {
-        'num_jobs_done': dockets_count + documents_count + comments_count + attachments_count,
+        'num_jobs_done': dockets_count + documents_count
+        + comments_count + attachments_count,
         'num_dockets_done': dockets_count,
         'num_documents_done': documents_count,
         'num_comments_done': comments_count,
@@ -51,6 +52,5 @@ def get_comments_count(client, db_name):
 
 
 def get_attachments_count(client, db_name):
-    #return int(client[db_name]['attachments'].estimated_document_count())
+    # return int(client[db_name]['attachments'].estimated_document_count())
     return int(4)
-
