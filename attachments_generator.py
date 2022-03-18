@@ -1,14 +1,19 @@
 import redis
+import time
 from mirrcore.job_queue import JobQueue
 from mirrcore.redis_check import is_redis_available
 import random
 import json
 
 
-class WorkGenerator:
+class AttachmentsGenerator:
 
     if __name__ == '__main__':
         database = redis.Redis('redis')
+        while not is_redis_available(database):
+            print("Redis database is busy loading")
+            time.sleep(30)
+        database.flushdb
         job_queue = JobQueue(database)
 
         def get_job_id(self):
