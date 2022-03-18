@@ -34,3 +34,10 @@ COLEMAN IDEA
 - attachment generator to port 6379 mapped to 6379
 ~/data/redis delete dump-rdb
 
+
+
+make sure that we have one of each jobtype downloading for the demo
+
+
+TODO: understand how docker will work without work generator
+TODO: for the URL wants the actually URL for the main job_type except for attachments.
