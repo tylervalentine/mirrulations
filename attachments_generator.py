@@ -32,9 +32,3 @@ class WorkGenerator:
                 job = add_job('attachments')
                 database.lpush('jobs_waiting_queue', json.dumps(job))
 
-
-
-        
-
-
-        
