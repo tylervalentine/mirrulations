@@ -31,7 +31,10 @@ const updateStatus = (container, status) => {
 
 }
 
+const updates= (id, value) => {
+    document.getElementById(id+'-number').textContent = value;
 
+}
 const updateDashboardData = () => {
     fetch(`${BASE_URL}data`)
     .then(response => response.json())
@@ -94,14 +97,18 @@ const updateDashboardData = () => {
         updateStatus('work-generator-status', work_generator);
         updateStatus('work-server-status', work_server);
         // Counts
-        console.log("attachments: "+num_attachments_done+'\n');
-        console.log("comments: "+num_comments_done+'\n');
-        console.log("dockets: "+num_dockets_done+'\n');
-        console.log("documents: "+num_documents_done+'\n');
-        console.log("total jobs done:"+num_jobs_done+'\n');
-        console.log("jobs total:"+jobs_total);
+        updates("attachments-done",num_attachments_done);
+        updates("comments-done",num_comments_done);
+        updates("dockets-done",num_dockets_done);
+        updates("documents-done",num_documents_done);
+        //console.log("attachments: "+num_attachments_done+'\n');
+        // console.log("comments: "+num_comments_done+'\n');
+        // console.log("dockets: "+num_dockets_done+'\n');
+        // console.log("documents: "+num_documents_done+'\n');
+        // console.log("total jobs done:"+num_jobs_done+'\n');
+        // console.log("jobs total:"+jobs_total);
     })
-    .catch((err) => console.log(err));
+    //.catch((err) => console.log(err));
 }
 
 
