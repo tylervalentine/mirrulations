@@ -25,7 +25,8 @@ class WorkGenerator:
         for result in SearchIterator(self.api, endpoint, last_timestamp):
             if result == {}:
                 continue
-            # If jobs are not in redis, add the URL to the jobs_queue (redis server)
+            # If jobs are not in redis
+            # add the URL to the jobs_queue (redis server)
             self.processor.process_results(result)
             timestamp = result['data'][-1]['attributes']['lastModifiedDate']
             self.job_queue.set_last_timestamp_string(endpoint, timestamp)
@@ -41,7 +42,7 @@ if __name__ == '__main__':
 
         # Checks if redis database is available
         database = redis.Redis('redis')
-        # If so sleep for 30 seconds to give time to load
+        # Sleep for 30 seconds to give time to load
         while not is_redis_available(database):
             print("Redis database is busy loading")
             time.sleep(30)
@@ -52,7 +53,8 @@ if __name__ == '__main__':
 
         generator = WorkGenerator(job_queue, api, storage)
 
-        # Download dockets, documents, and comments from all jobs in the job queue
+        # Download dockets, documents, and comments
+        # from all jobs in the job queue
         generator.download('dockets')
         generator.download('documents')
         generator.download('comments')
