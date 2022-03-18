@@ -29,8 +29,16 @@ class AttachmentsGenerator:
             return job
         
         for x in range(10):
+            if x % 3:
+                job = add_job('comments')
+                database.lpush('jobs_waiting_queue', json.dumps(job))
+                
             if x % 5:
                 job = add_job('documents')
+                database.lpush('jobs_waiting_queue', json.dumps(job))
+
+            if x % 7:
+                job = add_job('dockets')
                 database.lpush('jobs_waiting_queue', json.dumps(job))
 
             else:
