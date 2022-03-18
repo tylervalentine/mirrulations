@@ -13,7 +13,7 @@ def fixture_mock_server():
     redis_server = FakeServer()
     mock_redis_db = FakeRedis(server=redis_server)
     mock_docker = MagicMock()
-    mock_mongo_db = create_mock_mongodb(1, 2, 3)
+    mock_mongo_db = create_mock_mongodb(1, 2, 3, 4)
     server = create_server(mock_redis_db, mock_docker, mock_mongo_db)
     server.redis_server = redis_server
     server.app.config['TESTING'] = True
@@ -51,8 +51,8 @@ def test_dashboard_returns_job_information(mock_server):
 
     assert results['num_jobs_waiting'] == 5
     assert results['num_jobs_in_progress'] == 4
-    assert results['num_jobs_done'] == 6
-    assert results['jobs_total'] == 15
+    assert results['num_jobs_done'] == 10
+    assert results['jobs_total'] == 19
 
 
 def test_dashboard_returns_html(mock_server):

@@ -9,7 +9,7 @@ class MockDocumentCount:
         return self.count
 
 
-def create_mock_mongodb(docket_count, document_count, comment_count):
+def create_mock_mongodb(docket_count, document_count, comment_count,attachment_count):
     # needs:
     # * ['mirrulations']
     # * ['mirrulations']['dockets'] (also documents and comments)
@@ -19,7 +19,7 @@ def create_mock_mongodb(docket_count, document_count, comment_count):
     collections['dockets'] = MockDocumentCount(docket_count)
     collections['documents'] = MockDocumentCount(document_count)
     collections['comments'] = MockDocumentCount(comment_count)
-
+    collections['attachments'] = MockDocumentCount(attachment_count)
     ret = {}
     ret['mirrulations'] = collections
 
