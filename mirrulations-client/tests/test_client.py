@@ -170,6 +170,17 @@ def test_attempt_request_raises_connection_exception(mock_requests, mocker):
             assert True, f'raised an exception: {exception}'
         # assert response is None
 
+# def test_sends_attachment_results(mock_requests):
+#     # client = Client()
+#     # with mock_requests:
+#     #     mock_requests.put(
+#     #         f'{BASE_URL}/put_results',
+#     #         results={'job_id': '444',
+#     #                 }
+#     #         status_code=200
+#     #     )
+#     #     assert ('1', 1, 'attachments') == client.get_job()
+
 
 def test_read_client_id_success(tmpdir):
     file = tmpdir.join('test_read.txt')
