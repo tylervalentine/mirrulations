@@ -28,17 +28,27 @@ class AttachmentsGenerator:
                 }
             return job
         
+        dockets_lst = []
+        documents_lst = []
+        comments_lst = []
+
         for x in range(10):
             if x % 3:
                 job = add_job('comments')
+                job['url'] = comments_lst[-1]
+                comments_lst.pop()
                 database.lpush('jobs_waiting_queue', json.dumps(job))
-                
+
             if x % 5:
                 job = add_job('documents')
+                job['url'] = documents_lst[-1]
+                documents_lst.pop()
                 database.lpush('jobs_waiting_queue', json.dumps(job))
 
             if x % 7:
                 job = add_job('dockets')
+                job['url'] = dockets_lst[-1]
+                dockets_lst.pop()
                 database.lpush('jobs_waiting_queue', json.dumps(job))
 
             else:
