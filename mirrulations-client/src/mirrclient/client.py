@@ -62,8 +62,23 @@ class Client:
         # print(dumps(data))
         assure_request(requests.put, endpoint, json=dumps(data), params=params)
 
-    def send_attachment_results(): # will be similar to send_job_results. Need to collaborate with work server people...
-        pass
+    def send_attachment_results(self, job_id, job_result): # will be similar to send_job_results. Need to collaborate with work server people...
+        endpoint = f'{self.url}/put_results'
+        if 'errors' in job_result:
+            data = {
+                    'job_id': job_id,
+                    'results': job_result
+                    }
+        else:
+            data = {'directory': get_output_path(job_result),
+                    'job_id': job_id,
+                    'results': job_result}
+            data['results']['attachment_text'] = ['foo']
+            data['results']['type'] = ['attachment']
+
+
+        params = {'client_id': self.client_id}
+        assure_request(requests.put, endpoint, json=dumps(data), params=params)
 
     def execute_task(self):
         print('Requesting new job from server...')
