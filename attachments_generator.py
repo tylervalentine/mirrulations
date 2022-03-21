@@ -28,9 +28,13 @@ class AttachmentsGenerator:
                 }
             return job
         
-        dockets_lst = []
-        documents_lst = []
-        comments_lst = []
+        dockets_lst = ["https://api.regulations.gov/v4/dockets/NCUA-2021-0112"]
+        documents_lst = ["https://api.regulations.gov/v4/documents/EPA-HQ-OA-2003-0003-0003",
+                         "https://api.regulations.gov/v4/documents/APHIS-2005-0003-0008",
+                         "https://api.regulations.gov/v4/documents/EPA-HQ-OAR-2001-0006-0123"]
+        comments_lst = ["https://api.regulations.gov/v4/comments/EPA-HQ-OPP-2003-0132-0596",
+                        "https://api.regulations.gov/v4/comments/EPA-HQ-OPP-2003-0132-0274",
+                        "https://api.regulations.gov/v4/comments/EPA-HQ-OAR-2002-0056-0366"]
 
         for x in range(10):
             if x % 3:
