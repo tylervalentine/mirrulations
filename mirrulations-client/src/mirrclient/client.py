@@ -62,6 +62,9 @@ class Client:
         # print(dumps(data))
         assure_request(requests.put, endpoint, json=dumps(data), params=params)
 
+    def send_attachment_results(): # will be similar to send_job_results. Need to collaborate with work server people...
+        pass
+
     def execute_task(self):
         print('Requesting new job from server...')
         job_id, url, job_type = self.get_job()
