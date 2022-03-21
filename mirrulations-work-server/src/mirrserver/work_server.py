@@ -90,8 +90,9 @@ def put_results(workserver, data):
         return (success, *results)
     job_id = data['job_id']
     workserver.redis.hdel('jobs_in_progress', job_id)
-    if data.get('attachments'): 
-        print(data.get('attachments'))
+    if 'attachments_text' in data['results']['data'].keys(): 
+        print(data['results']['data']['attachments_text'])
+        workserver.data.add(data['results'])
     write_results(results[0], data['directory'], data['results'])
     workserver.data.add(data['results'])
     return (True,)
