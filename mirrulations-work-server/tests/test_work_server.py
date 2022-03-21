@@ -193,7 +193,7 @@ def test_put_results_returns_correct_attachment_job(mock_server, mocker):
     mock_server.redis.set('total_num_client_ids', 1)
     data = dumps({'job_id': 2, 'directory': 'dir/dir',
                   'results': {'data': {
-                      'attachment_text': ['foo'],
+                      'attachments_text': ['foo'],
                       'type': 'dockets'
                   }}})
     params = {'client_id': 1}
