@@ -81,6 +81,25 @@ def test_comment_found_others_not(monkeypatch):
     exists(storage, 'COM-2020-1234')
 
 
+def test_attachment_found_others_not(monkeypatch):
+    storage = DataStorage()
+
+    monkeypatch.setattr(storage, 'dockets', FindOnly('NOTHING'))
+    monkeypatch.setattr(storage, 'documents', FindOnly('NOTHING'))
+    monkeypatch.setattr(storage, 'comments', FindOnly('NOTHING'))
+    monkeypatch.setattr(storage, 'attachments', FindOnly('ATTCH-2020-1234'))
+
+
+    # docket does not exist
+    does_not_exist(storage, 'DOCK-2020-1234')
+
+    # document does not exist
+    does_not_exist(storage, 'DOC-2020-1234')
+
+    # attachment exists
+    exists(storage, 'ATTCH-2020-1234')
+
+
 def test_add_docket(monkeypatch):
 
     storage = DataStorage()
