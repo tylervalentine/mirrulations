@@ -74,7 +74,7 @@ class Client:
                     'job_id': job_id,
                     'results': job_result}
             data['results']['attachment_text'] = ['foo']
-            data['results']['type'] = ['attachment']
+            data['results']['type'] = 'attachment'
 
 
         params = {'client_id': self.client_id}
@@ -86,8 +86,11 @@ class Client:
         print('Received job!')
         result = self.perform_job(url)
         print('Sending result back to server...')
-        self.send_job_results(job_id, result)
-        print('Job complete!\n')
+        if job_type == 'attachments':
+            self.send_attachment_results(job_id, result)
+        else:
+            self.send_job_results(job_id, result)
+            print('Job complete!\n')
 
     def perform_job(self, url):
         print(f'Getting docket at {url}')

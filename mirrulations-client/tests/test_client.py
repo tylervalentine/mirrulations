@@ -171,15 +171,15 @@ def test_attempt_request_raises_connection_exception(mock_requests, mocker):
         # assert response is None
 
 # def test_sends_attachment_results(mock_requests):
-#     # client = Client()
-#     # with mock_requests:
-#     #     mock_requests.put(
-#     #         f'{BASE_URL}/put_results',
-#     #         results={'job_id': '444',
-#     #                 }
-#     #         status_code=200
-#     #     )
-#     #     assert ('1', 1, 'attachments') == client.get_job()
+#     client = Client()
+#     with mock_requests:
+#         mock_requests.put(
+#             f'{BASE_URL}/put_results',
+#             results={'job_id': '444',
+#                     },
+#             status_code=200
+#         )
+#         assert ('1', 1, 'attachments') == client.send_attachment_results('1')
 
 
 def test_read_client_id_success(tmpdir):
