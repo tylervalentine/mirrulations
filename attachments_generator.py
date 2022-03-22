@@ -62,9 +62,9 @@ if __name__ == '__main__':
                         "https://api.regulations.gov/v4/comments/EPA-HQ-OPP-2003-0132-0274",
                         "https://api.regulations.gov/v4/comments/EPA-HQ-OAR-2002-0056-0366"]
 
+    document_index = 0
+    comments_index = 0
     for x in range(10):
-        document_index = 0
-        comments_index = 0
         if x % 3:
             job = generator.add_job('comments', comments_lst[comments_index])
             comments_index += comments_index
