@@ -18,7 +18,7 @@ class AttachmentsGenerator:
 
         def add_job(self, job_type, url):
             job_id = self.get_job_id()
-            if job_id == 'attachments':
+            if job_type == 'attachments':
                 job = {'job_id': job_id,
                         'url': random.randint(0, 6),
                         'job_type': job_type
