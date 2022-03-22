@@ -67,12 +67,12 @@ if __name__ == '__main__':
     for x in range(10):
         if x % 3:
             job = generator.add_job('comments', comments_lst[comments_index])
-            comments_index += comments_index
+            comments_index += 1
             database.lpush('jobs_waiting_queue', json.dumps(job))
 
         if x % 5:
             job = generator.add_job('documents', documents_lst[document_index])
-            document_index += document_index
+            document_index += 1
             database.lpush('jobs_waiting_queue', json.dumps(job))
 
         if x % 7:
