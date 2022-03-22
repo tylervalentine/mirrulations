@@ -29,6 +29,21 @@ class AttachmentsGenerator:
                         'job_type': job_type
                     }
             return job
+
+        def add_job_type_counter(job, database):
+            job_count = {'num_jobs' : 0}
+            if job['job_type'] == 'attachments':
+                job_count['num_jobs'] += 1
+                database.lpush('num_jobs_attach_queue', json.dumps(job_count))
+            if job['job_type'] == 'comments':
+                job_count['num_jobs'] += 1
+                database.lpush('num_jobs_comments_queue', json.dumps(job_count))
+            if job['job_type'] == 'dockets':
+                job_count['num_jobs'] += 1
+                database.lpush('num_jobs_dockets_queue', json.dumps(job_count))
+            if job['job_type'] == 'documents':
+                job_count['num_jobs'] += 1
+                database.lpush('num_jobs_documents_queue', json.dumps(job_count))
     
     
 if __name__ == '__main__':
