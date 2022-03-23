@@ -44,7 +44,10 @@ class Client:
         job = response_text['job']
         job_id = list(job.keys())[0]
         url = job[job_id]
-        job_type = job['job_type']
+        if 'job_type' in job:
+            job_type = job['job_type']
+        else:
+            job_type = 'other'
         return job_id, url, job_type
 
     def send_job_results(self, job_id, job_result):
@@ -70,13 +73,13 @@ class Client:
                     'results': job_result
                     }
         else:
-            data = {'directory': get_output_path(job_result),
+            data = {'directory': 'path',
                     'job_id': job_id,
                     'results': job_result}
 
-
         params = {'client_id': self.client_id}
-        assure_request(requests.put, endpoint, json=dumps(data), params=params)
+        # assure_request(requests.put, endpoint, json=dumps(data), params=params)
+        requests.put(endpoint, params=params, json=dumps(data))
 
     def execute_task(self):
         print('Requesting new job from server...')
