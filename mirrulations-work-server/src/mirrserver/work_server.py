@@ -40,10 +40,7 @@ def get_job(workserver):
     job = json.loads(workserver.redis.lpop('jobs_waiting_queue'))
     job_id = job['job_id']
     url = job['url']
-    if 'job_type' in job:
-        job_type = job['job_type']
-    else:
-        job_type = "other"
+    job_type = job.get('job_type', 'other')
     workserver.redis.hset('jobs_in_progress', job_id, url)
     workserver.redis.hset('client_jobs', job_id, client_id)
     return True, job_id, url, job_type
@@ -128,7 +125,7 @@ def create_server(database):
         success, *values = get_job(workserver)
         if not success:
             return tuple(values)
-        return jsonify({'job': {values[0]: values[1],
+        return jsonify({'job': {str(values[0]): values[1],
                         'job_type': values[2]}}), 200
 
     @workserver.app.route('/put_results', methods=['PUT'])
