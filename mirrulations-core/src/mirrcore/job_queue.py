@@ -1,16 +1,21 @@
 import json
-
+from mirrcore.redis_queue_utils import change_queue_counter
 
 class JobQueue:
 
     def __init__(self, database):
         self.database = database
 
-    def add_job(self, url):
+    def add_job(self, url, job_type=None):
         job_id = self.get_job_id()
-        job = {'job_id': job_id,
-               'url': url}
+        job = {
+            'job_id': job_id,
+            'url': url,
+            'job_type': job_type
+            }
         self.database.lpush('jobs_waiting_queue', json.dumps(job))
+        # reflect change to the queue len in redis db to avoid timeouts from counting true len
+        change_queue_counter(self.database, job_type, increment=True)
 
     def get_num_jobs(self):
         return self.database.llen('jobs_waiting_queue')
