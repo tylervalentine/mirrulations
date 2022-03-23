@@ -64,26 +64,28 @@ if __name__ == '__main__':
 
     document_index = 0
     comments_index = 0
+    print(database.llen('jobs_waiting_queue'))
     for x in range(10):
-        if x % 3:
+        if x == 0 or x == 1 or x == 2:
             job = generator.add_job('comments', comments_lst[comments_index])
-            generator.add_job_type_counter(job, database)
+            #generator.add_job_type_counter(job, database)
             comments_index += 1
-            database.lpush('jobs_waiting_queue', json.dumps(job))
 
-        if x % 5:
+        elif x == 3 or x == 4 or x == 5:
             job = generator.add_job('documents', documents_lst[document_index])
-            generator.add_job_type_counter(job, database)
+            #generator.add_job_type_counter(job, database)
             document_index += 1
-            database.lpush('jobs_waiting_queue', json.dumps(job))
 
-        if x % 7:
+        elif x == 6:
             job = generator.add_job('dockets', 'https://api.regulations.gov/v4/dockets/NCUA-2021-0112')
-            generator.add_job_type_counter(job, database)
-            database.lpush('jobs_waiting_queue', json.dumps(job))
+            #generator.add_job_type_counter(job, database)
 
-        else:
+        elif x == 7 or x == 8 or x == 9:
             job = generator.add_job('attachments', 'none')
-            generator.add_job_type_counter(job, database)
-            database.lpush('jobs_waiting_queue', json.dumps(job))
+            #generator.add_job_type_counter(job, database)
+        database.lpush('jobs_waiting_queue', json.dumps(job))
+    
+
+    print(database.llen('jobs_waiting_queue'))
+        
 
