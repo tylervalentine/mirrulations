@@ -91,7 +91,7 @@ class Client:
             self.send_attachment_results(job_id, result)
         else:
             result = self.perform_job(url)
-            self.send_job_results(job_id, result)
+            self.send_job_results(job_id, result)        
         print('Job complete!\n')
 
     def perform_job(self, url):
@@ -102,7 +102,7 @@ class Client:
         return json
 
     def perform_attachment_job(self, url):
-        json = {"attachments_text": [str(url)], "type": "attachment"}
+        json = {"attachments_text": [str(url)], "type": "attachment", "id":str(url), "attributes":{}}
         return json
 
     def write_client_id(self, filename):
