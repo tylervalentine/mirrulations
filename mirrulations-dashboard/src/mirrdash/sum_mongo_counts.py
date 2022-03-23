@@ -14,11 +14,7 @@ def connect_mongo_db(host_name, port_number):
     if port_number is None:
         port_number = int(27017)
     client = MongoClient(host_name, port_number)
-    try:
-        print(client.server_info())
-    except ConnectionFailure:
-        print("Unable to connect to the server.")
-
+    
     return client
 
 
