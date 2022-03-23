@@ -73,7 +73,7 @@ class Client:
                     'results': job_result
                     }
         else:
-            data = {'directory': 'path',
+            data = {'directory': '/path',
                     'job_id': job_id,
                     'results': job_result}
 
