@@ -65,7 +65,7 @@ class Client:
         # print(dumps(data))
         assure_request(requests.put, endpoint, json=dumps(data), params=params)
 
-    def send_attachment_results(self, job_id, job_result): # will be similar to send_job_results. Need to collaborate with work server people...
+    def send_attachment_results(self, job_id, job_result):  # will be similar to send_job_results. Need to collaborate with work server people...
         endpoint = f'{self.url}/put_results'
         if 'errors' in job_result:
             data = {
@@ -73,7 +73,7 @@ class Client:
                     'results': job_result
                     }
         else:
-            data = {'directory': 'path',
+            data = {'directory': get_output_path(job_result),
                     'job_id': job_id,
                     'results': job_result}
 
@@ -91,7 +91,7 @@ class Client:
             self.send_attachment_results(job_id, result)
         else:
             result = self.perform_job(url)
-            self.send_job_results(job_id, result)        
+            self.send_job_results(job_id, result)
         print('Job complete!\n')
 
     def perform_job(self, url):
@@ -102,8 +102,13 @@ class Client:
         return json
 
     def perform_attachment_job(self, url):
-        json = {"attachments_text": [str(url)], "type": "attachment", "id":str(url), "attributes":{}}
-        return json
+        return {"attachments_text": [str(url)],
+                "type": "attachment",
+                "id": str(url),
+                "attributes": {'agencyId': None,
+                               'docketId': None,
+                               'commentOnDocumentId': None}
+                }
 
     def write_client_id(self, filename):
         with open(filename, 'w', encoding='utf8') as file:
