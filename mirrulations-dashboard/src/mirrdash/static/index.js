@@ -12,10 +12,11 @@ window.addEventListener('load', function init() {
 const updateHtmlValues = (id, value, total) => {
     let percent = (value/total) * 100;
     percent = isNaN(percent) ? 0 : Math.round(percent * 10) / 10;
-    document.getElementById(id+'-number').textContent = value;
+    document.getElementById(id+'-number').textContent = value.toLocaleString('en');
     document.getElementById(id+'-circle-percentage').textContent = `${percent}%`;
     document.getElementById(id+'-circle-front').style.strokeDasharray = `${percent}, 100`;
 }
+
 
 const updateStatus = (container, status) => {
         let status_span = document.getElementById(container)
@@ -30,7 +31,10 @@ const updateStatus = (container, status) => {
 
 }
 
+const updateCounts = (id, value) => {
+    document.getElementById(id+'-number').textContent = value.toLocaleString('en');
 
+}
 const updateDashboardData = () => {
     fetch(`${BASE_URL}data`)
     .then(response => response.json())
@@ -53,18 +57,19 @@ const updateDashboardData = () => {
             client15,
             client16,
             client17,
-            clients_total,
             jobs_total,
             nginx,
+            num_attachments_done,
+            num_comments_done,
+            num_dockets_done,
+            num_documents_done,
             num_jobs_done, 
-            num_jobs_in_progress, 
             num_jobs_waiting,
             mongo,
             redis,
             work_generator,
             work_server
         } = jobInformation;
-
         updateHtmlValues('jobs-waiting', num_jobs_waiting, jobs_total);
         updateHtmlValues('jobs-done', num_jobs_done, jobs_total);
         updateStatus('client1-status', client1)
@@ -89,11 +94,12 @@ const updateDashboardData = () => {
         updateStatus('redis-status', redis);
         updateStatus('work-generator-status', work_generator);
         updateStatus('work-server-status', work_server);
+        // Counts
+        updateCounts("attachments-done",num_attachments_done);
+        updateCounts("comments-done",num_comments_done);
+        updateCounts("dockets-done",num_dockets_done);
+        updateCounts("documents-done",num_documents_done);
+        
     })
     .catch((err) => console.log(err));
 }
-
-
-
-
-
