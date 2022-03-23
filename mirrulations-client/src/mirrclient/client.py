@@ -73,8 +73,6 @@ class Client:
             data = {'directory': get_output_path(job_result),
                     'job_id': job_id,
                     'results': job_result}
-            data['results']['attachment_text'] = ['foo']
-            data['results']['type'] = 'attachment'
 
 
         params = {'client_id': self.client_id}
@@ -84,19 +82,24 @@ class Client:
         print('Requesting new job from server...')
         job_id, url, job_type = self.get_job()
         print('Received job!')
-        result = self.perform_job(url)
         print('Sending result back to server...')
         if job_type == 'attachments':
+            result = self.perform_attachment_job(url)
             self.send_attachment_results(job_id, result)
         else:
+            result = self.perform_job(url)
             self.send_job_results(job_id, result)
-            print('Job complete!\n')
+        print('Job complete!\n')
 
     def perform_job(self, url):
         print(f'Getting docket at {url}')
         url = url + f'?api_key={self.api_key}'
         json = assure_request(requests.get, url).json()
         print('Done with current job!')
+        return json
+
+    def perform_attachment_job(self, url):
+        json = {"attachments_text": [str(url)], "type": "attachment"}
         return json
 
     def write_client_id(self, filename):
