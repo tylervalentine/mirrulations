@@ -1,4 +1,6 @@
 import os
+import json
+from json import dumps
 from functools import partial
 from pytest import fixture, raises
 import requests
@@ -7,7 +9,7 @@ import mirrclient.client
 from mirrclient.client import Client, NoJobsAvailableException
 from mirrclient.client import is_environment_variables_present
 # from mirrclient.client import execute_client_task
-from mirrclient.client import read_client_id
+from mirrclient.client import read_client_id 
 
 
 BASE_URL = 'http://work_server:8080'
@@ -173,19 +175,34 @@ def test_attempt_request_raises_connection_exception(mock_requests, mocker):
 def test_client_sends_attachment_results():
     # When we specify a requests_mock object, it will intercept
     # all calls to requests.get, requests.put, requests.post, etc.
+    client = Client()
+    client.client_id = 8
     with requests_mock.mock() as mock_requests:
         # First, we set up the mock: We know our code is supposed to call
         # put_results end point.  Here we specify the response that
         # should occur: {} with a status code of 200.  The mock
-        mock_requests.put('http://localhost/put_results', text='{}')
+        
+        mock_requests.get(
+            f'{BASE_URL}/get_job',
+            json={'job': {'1': 1, 
+                        'job_type': 'attachments'}},
+            status_code=200
+        )
+        job_id, _ ,__ = client.get_job()
+            
 
+            
         # Now we make a call to the function we want to test using
         # known data
-        data = {'directory': 'output_path',
-                    'job_id': '1',
-                    'results': {}}
-        
+    
+        mock_requests.put('http://localhost/put_results', text='{}')
 
+        data = {'directory': 'output_path',
+
+                    'data':{'attributes':{}, 'id':'0'}}
+
+        
+        client.send_attachment_results(job_id, data)
         # the mock_requests object will only respond to the call
         # we specified above, so this tests that our code made the
         # right call
@@ -207,8 +224,11 @@ def test_client_sends_attachment_results():
         # The client should send the data as the body of the message
         # The .json() method returns the data as a string
         saved_data = json.loads(request.json())
-        assert saved_data['job_id'] == 15
-        assert saved_data['results']['data']['id'] == 'EPA-HQ-OECA-2004-0024-0048'
+        # assert saved_data['job_id'] == 15
+        # assert saved_data['results']['attachments_text']['id'] == 'EPA-HQ-OECA-2004-0024-0048'
+
+        assert saved_data['results']['attachments_text'] == ['foo']
+        assert saved_data['results']['type'] == 'attachment'
 
 
 def test_read_client_id_success(tmpdir):
