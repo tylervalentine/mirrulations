@@ -67,19 +67,23 @@ if __name__ == '__main__':
     for x in range(10):
         if x % 3:
             job = generator.add_job('comments', comments_lst[comments_index])
+            generator.add_job_type_counter(job, database)
             comments_index += 1
             database.lpush('jobs_waiting_queue', json.dumps(job))
 
         if x % 5:
             job = generator.add_job('documents', documents_lst[document_index])
+            generator.add_job_type_counter(job, database)
             document_index += 1
             database.lpush('jobs_waiting_queue', json.dumps(job))
 
         if x % 7:
             job = generator.add_job('dockets', 'https://api.regulations.gov/v4/dockets/NCUA-2021-0112')
+            generator.add_job_type_counter(job, database)
             database.lpush('jobs_waiting_queue', json.dumps(job))
 
         else:
             job = generator.add_job('attachments', 'none')
+            generator.add_job_type_counter(job, database)
             database.lpush('jobs_waiting_queue', json.dumps(job))
 
