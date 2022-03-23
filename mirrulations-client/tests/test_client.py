@@ -355,7 +355,7 @@ def test_client_returns_500_error_to_server(mock_requests, mocker):
         mock_requests.get(
             f'{BASE_URL}/get_job',
             json={'job': {'1': 'http://test.com', 
-                        'job_type': 'attachments'}},
+                        }},
             status_code=200
         )
         mock_requests.put(
@@ -401,7 +401,7 @@ def test_client_returns_404_error_to_server(mock_requests, mocker):
         mock_requests.get(
             f'{BASE_URL}/get_job',
             json={'job': {'1': 'http://test.com',
-                        'job_type': 'attachments'}},
+                        }},
             status_code=200
         )
         mock_requests.put(
@@ -445,7 +445,7 @@ def test_client_returns_400_error_to_server(mock_requests, mocker):
         mock_requests.get(
             f'{BASE_URL}/get_job',
             json={'job': {'1': 'http://test.com', 
-                        'job_type': 'attachments'}},
+                        }},
             status_code=200
         )
         mock_requests.put(
@@ -489,7 +489,7 @@ def test_client_returns_403_error_to_server(mock_requests, mocker):
         mock_requests.get(
             f'{BASE_URL}/get_job',
             json={'job': {'1': 'http://test.com',
-                'job_type': 'attachments'}},
+                }},
             status_code=200
         )
         mock_requests.put(
