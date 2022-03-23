@@ -6,10 +6,11 @@ class JobQueue:
     def __init__(self, database):
         self.database = database
 
-    def add_job(self, url):
+    def add_job(self, url, job_type):
         job_id = self.get_job_id()
         job = {'job_id': job_id,
-               'url': url}
+               'url': url,
+               'job_type' : job_type}
         self.database.lpush('jobs_waiting_queue', json.dumps(job))
 
     def get_num_jobs(self):
@@ -32,3 +33,18 @@ class JobQueue:
         key = f'{endpoint}_last_timestamp'
         self.database.set(key, date_string.replace('T', ' ')
                           .replace('Z', ''))
+
+    def job_type_counter(self):
+        job_count = {'num_jobs' : 0}
+        if self['job_type'] == 'attachments':
+            job_count['num_jobs'] += 1
+            self.database.lpush('num_jobs_attach_queue', json.dumps(job_count))
+        if self['job_type'] == 'comments':
+            job_count['num_jobs'] += 1
+            self.database.lpush('num_jobs_comments_queue', json.dumps(job_count))
+        if self['job_type'] == 'dockets':
+            job_count['num_jobs'] += 1
+            self.database.lpush('num_jobs_dockets_queue', json.dumps(job_count))
+        if self['job_type'] == 'documents':
+            job_count['num_jobs'] += 1
+            self.database.lpush('num_jobs_documents_queue', json.dumps(job_count))
