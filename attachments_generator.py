@@ -51,7 +51,7 @@ if __name__ == '__main__':
     while not is_redis_available(database):
         print("Redis database is busy loading")
         time.sleep(30)
-    database.flushdb
+    
     job_queue = JobQueue(database)
     generator = AttachmentsGenerator(job_queue, database)
 
