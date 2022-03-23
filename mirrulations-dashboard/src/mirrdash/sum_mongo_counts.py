@@ -5,7 +5,6 @@ Dependencies:
     pymongo
 """
 from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure
 
 
 def connect_mongo_db(host_name, port_number):
@@ -14,7 +13,6 @@ def connect_mongo_db(host_name, port_number):
     if port_number is None:
         port_number = int(27017)
     client = MongoClient(host_name, port_number)
-    
     return client
 
 
