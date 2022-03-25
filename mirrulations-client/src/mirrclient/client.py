@@ -62,24 +62,10 @@ class Client:
                     'job_id': job_id,
                     'results': job_result}
         params = {'client_id': self.client_id}
+        # print('****\n\n\n')
         # print(dumps(data))
-        assure_request(requests.put, endpoint, json=dumps(data), params=params)
-
-    def send_attachment_results(self, job_id, job_result): # will be similar to send_job_results. Need to collaborate with work server people...
-        endpoint = f'{self.url}/put_results'
-        if 'errors' in job_result:
-            data = {
-                    'job_id': job_id,
-                    'results': job_result
-                    }
-        else:
-            data = {'directory': '/path',
-                    'job_id': job_id,
-                    'results': job_result}
-
-        params = {'client_id': self.client_id}
-        # assure_request(requests.put, endpoint, json=dumps(data), params=params)
-        requests.put(endpoint, params=params, json=dumps(data))
+        # print('****\n\n\n', flush=True)
+        requests.put(endpoint, json=dumps(data), params=params)
 
     def execute_task(self):
         print('Requesting new job from server...')
@@ -87,11 +73,13 @@ class Client:
         print('Received job!')
         print('Sending result back to server...')
         if job_type == 'attachments':
+            print("this is an attachment")
             result = self.perform_attachment_job(url)
-            self.send_attachment_results(job_id, result)
+            print("this is the result", result)
+            
         else:
             result = self.perform_job(url)
-            self.send_job_results(job_id, result)        
+        self.send_job_results(job_id, result)
         print('Job complete!\n')
 
     def perform_job(self, url):
@@ -102,8 +90,13 @@ class Client:
         return json
 
     def perform_attachment_job(self, url):
-        json = {"data":{"attachments_text": [str(url)], "type": "attachment", "id":str(url), "attributes":{}}}
-        return json
+        return {"data":{"attachments_text": [str(url)],
+                "type": "attachment",
+                "id": str(url),
+                "attributes": {'agencyId': None,
+                            'docketId': None,
+                            'commentOnDocumentId': None}
+                }}
 
     def write_client_id(self, filename):
         with open(filename, 'w', encoding='utf8') as file:
@@ -169,6 +162,7 @@ def get_output_path(results):
         return -1
     output_path = ""
     data = results["data"]["attributes"]
+    # print(data + "printing data")
     output_path += get_key_path_string(data, "agencyId")
     output_path += get_key_path_string(data, "docketId")
     output_path += get_key_path_string(data, "commentOnDocumentId")
@@ -196,4 +190,5 @@ if __name__ == '__main__':
             client.execute_task()
         except NoJobsAvailableException:
             print("No Jobs Available")
+            
         time.sleep(3.6)
