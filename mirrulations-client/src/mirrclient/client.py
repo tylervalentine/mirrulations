@@ -76,7 +76,6 @@ class Client:
             print("this is an attachment")
             result = self.perform_attachment_job(url)
             print("this is the result", result)
-            
         else:
             result = self.perform_job(url)
         self.send_job_results(job_id, result)
@@ -90,13 +89,13 @@ class Client:
         return json
 
     def perform_attachment_job(self, url):
-        return {"data":{"attachments_text": [str(url)],
-                "type": "attachment",
-                "id": str(url),
-                "attributes": {'agencyId': None,
-                            'docketId': None,
-                            'commentOnDocumentId': None}
-                }}
+        return {"data": {"attachments_text": [str(url)],
+                         "type": "attachment",
+                         "id": str(url),
+                         "attributes": {'agencyId': None,
+                                        'docketId': None,
+                                        'commentOnDocumentId': None}
+                         }}
 
     def write_client_id(self, filename):
         with open(filename, 'w', encoding='utf8') as file:
@@ -178,5 +177,4 @@ if __name__ == '__main__':
             client.execute_task()
         except NoJobsAvailableException:
             print("No Jobs Available")
-            
         time.sleep(3.6)

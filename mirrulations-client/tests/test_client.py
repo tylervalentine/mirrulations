@@ -1,6 +1,5 @@
 import os
 import json
-from json import dumps
 from functools import partial
 from pytest import fixture, raises
 import requests
@@ -9,7 +8,7 @@ import mirrclient.client
 from mirrclient.client import Client, NoJobsAvailableException
 from mirrclient.client import is_environment_variables_present
 # from mirrclient.client import execute_client_task
-from mirrclient.client import read_client_id 
+from mirrclient.client import read_client_id
 
 
 BASE_URL = 'http://work_server:8080'
@@ -60,8 +59,7 @@ def test_client_gets_job(mock_requests):
     with mock_requests:
         mock_requests.get(
             f'{BASE_URL}/get_job',
-            json={'job': {'1': 1, 
-                        'job_type': 'attachments'}},
+            json={'job': {'1': 1, 'job_type': 'attachments'}},
             status_code=200
         )
         assert ('1', 1, 'attachments') == client.get_job()
@@ -133,8 +131,7 @@ def test_client_completes_job_requested(mock_requests, mocker):
         )
         mock_requests.get(
             f'{BASE_URL}/get_job',
-            json={'job': {'1': 'http://test.com',
-                        'job_type': 'documents'}},
+            json={'job': {'1': 'http://test.com', 'job_type': 'documents'}},
             status_code=200
         )
         mock_requests.put(
@@ -145,7 +142,7 @@ def test_client_completes_job_requested(mock_requests, mocker):
         mock_requests.get(
             'http://test.com',
             json={'data': {'id': '1', 'attributes': {'agencyId': 'NOAA'},
-                        'job_type': 'documents'}},
+                           'job_type': 'documents'}},
             status_code=200
         )
 
@@ -172,6 +169,7 @@ def test_attempt_request_raises_connection_exception(mock_requests, mocker):
             assert True, f'raised an exception: {exception}'
         # assert response is None
 
+
 def test_client_sends_attachment_results(mock_requests, mocker):
     # When we specify a requests_mock object, it will intercept
     # all calls to requests.get, requests.put, requests.post, etc.
@@ -182,27 +180,16 @@ def test_client_sends_attachment_results(mock_requests, mocker):
         # First, we set up the mock: We know our code is supposed to call
         # put_results end point.  Here we specify the response that
         # should occur: {} with a status code of 200.  The mock
-        
         """getitng a job """
         mock_requests.get(
             f'{BASE_URL}/get_job',
             json={'job': {'job_id': 1,
-                    'url': 'foo', 
-                'job_type': 'attachments'}},
+                  'url': 'foo', 'job_type': 'attachments'}},
             status_code=200
         )
 
         mock_requests.put(f'{BASE_URL}/put_results', text='{}')
-
-
         client.execute_task()
-        
-        
-        data = {'directory': 'output_path',
-
-                    'data':{'attributes':{'1','2', None}, 'id':'0'}}
-
-        
         assert mock_requests.called
         assert mock_requests.call_count == 2
 
@@ -222,17 +209,17 @@ def test_client_sends_attachment_results(mock_requests, mocker):
 
         # The client should send the data as the body of the message
         # The .json() method returns the data as a string
-        saved_data = json.loads(put_request.json())
-        print(saved_data)
+        json_data = json.loads(put_request.json())
+        print(json)
         # assert saved_data['job_id'] == 15
-        # assert saved_data['results']['attachments_text']['id'] == 'EPA-HQ-OECA-2004-0024-0048'
+        saved_data = json_data['results']['data']
 
-        assert saved_data['results']['data']['attachments_text'] == ['1']
-        assert saved_data['results']['data']['type'] == 'attachment'
-        assert saved_data['results']['data']['id'] == '1'
-        assert saved_data['results']['data']['attributes']['agencyId'] == None
-        assert saved_data['results']['data']['attributes']['docketId'] == None
-        assert saved_data['results']['data']['attributes']['commentOnDocumentId'] == None
+        assert saved_data['attachments_text'] == ['1']
+        assert saved_data['type'] == 'attachment'
+        assert saved_data['id'] == '1'
+        assert saved_data['attributes']['agencyId'] is None
+        assert saved_data['attributes']['docketId'] is None
+        assert saved_data['attributes']['commentOnDocumentId'] is None
 
 
 def test_read_client_id_success(tmpdir):
@@ -358,8 +345,7 @@ def test_client_returns_500_error_to_server(mock_requests, mocker):
         )
         mock_requests.get(
             f'{BASE_URL}/get_job',
-            json={'job': {'1': 'http://test.com', 
-                        }},
+            json={'job': {'1': 'http://test.com'}},
             status_code=200
         )
         mock_requests.put(
@@ -404,8 +390,7 @@ def test_client_returns_404_error_to_server(mock_requests, mocker):
         )
         mock_requests.get(
             f'{BASE_URL}/get_job',
-            json={'job': {'1': 'http://test.com',
-                        }},
+            json={'job': {'1': 'http://test.com'}},
             status_code=200
         )
         mock_requests.put(
@@ -448,8 +433,7 @@ def test_client_returns_400_error_to_server(mock_requests, mocker):
         )
         mock_requests.get(
             f'{BASE_URL}/get_job',
-            json={'job': {'1': 'http://test.com', 
-                        }},
+            json={'job': {'1': 'http://test.com'}},
             status_code=200
         )
         mock_requests.put(
@@ -492,8 +476,8 @@ def test_client_returns_403_error_to_server(mock_requests, mocker):
         )
         mock_requests.get(
             f'{BASE_URL}/get_job',
-            json={'job': {'1': 'http://test.com',
-                }},
+            json={'job': {'1': 'http://test.com'}
+                  },
             status_code=200
         )
         mock_requests.put(
