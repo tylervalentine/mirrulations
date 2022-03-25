@@ -46,8 +46,4 @@ def get_comments_count(client, db_name):
 
 
 def get_attachments_count(client, db_name):
-    # return int(client[db_name]['attachments'].estimated_document_count())
-    # this isnt good but not our problem right now
-    if client and db_name:
-        return int(4)
-    return None
+    return int(client[db_name]['attachments'].estimated_document_count())
