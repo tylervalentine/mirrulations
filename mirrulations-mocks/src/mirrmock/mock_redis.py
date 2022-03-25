@@ -21,13 +21,13 @@ class MockRedisWithStorage():
     """
     Mock for testing in place of an active Redis server that has storage
     """
-    def __init__(self, json_like_object):
-        self.data = json_like_object
+    def __init__(self):
+        self.data = {}
 
-
+        
     def set(self, key, value):
-        self.data.update({key: value})
+        self.data[f'{key}'] = value
 
 
     def get(self, key):
-        return self.data(f'{key}')
+        return self.data[f'{key}']
