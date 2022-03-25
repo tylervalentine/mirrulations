@@ -15,3 +15,19 @@ class ReadyRedis():
     """
     def ping(self):
         return True
+
+
+class MockRedisWithStorage():
+    """
+    Mock for testing in place of an active Redis server that has storage
+    """
+    def __init__(self, json_like_object):
+        self.data = json_like_object
+
+
+    def set(self, key, value):
+        self.data.update({key: value})
+
+
+    def get(self, key):
+        return self.data(f'{key}')
