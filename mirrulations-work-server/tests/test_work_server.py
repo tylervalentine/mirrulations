@@ -76,11 +76,11 @@ def test_get_job_has_no_available_job(mock_server):
 def test_get_job_returns_single_job(mock_server):
     mock_server.redis.incr('total_num_client_ids')
     params = {'client_id': 1}
-    job = {'job_id': 1, 'url': 'url'}
+    job = {'job_id': 1, 'url': 'url', 'job_type': 'docket'}
     mock_server.redis.rpush('jobs_waiting_queue', dumps(job))
     response = mock_server.client.get('/get_job', query_string=params)
     assert response.status_code == 200
-    expected = {'job': {'1': 'url'}}
+    expected = {'job': {'1': 'url', 'job_type': 'docket'}}
     assert response.get_json() == expected
 
 
