@@ -171,16 +171,10 @@ def test_attempt_request_raises_connection_exception(mock_requests, mocker):
 
 
 def test_client_sends_attachment_results(mock_requests, mocker):
-    # When we specify a requests_mock object, it will intercept
-    # all calls to requests.get, requests.put, requests.post, etc.
     client = Client()
     client.client_id = 8
     read_mock_client_id(mocker, client.client_id)
-    with requests_mock.mock() as mock_requests:
-        # First, we set up the mock: We know our code is supposed to call
-        # put_results end point.  Here we specify the response that
-        # should occur: {} with a status code of 200.  The mock
-        """getitng a job """
+    with mock_requests:
         mock_requests.get(
             f'{BASE_URL}/get_job',
             json={'job': {'job_id': 1,
@@ -190,28 +184,8 @@ def test_client_sends_attachment_results(mock_requests, mocker):
 
         mock_requests.put(f'{BASE_URL}/put_results', text='{}')
         client.execute_task()
-        assert mock_requests.called
-        assert mock_requests.call_count == 2
-
-        # The object saved information about the request that our code
-        # made.
-        get_request = mock_requests.request_history[0]
         put_request = mock_requests.request_history[1]
-        assert get_request.method == 'GET'
-        assert put_request.method == 'PUT'
-
-        # The client id should be in the query string of the request
-        # request mocks saves this as a dict in the history
-        # NOTE: requests-mock used urllib.parse to parse the query
-        # parameters.  This method puts the values in a list!
-        # (https://docs.python.org/3/library/urllib.parse.html#urllib.parse.parse_qs)
-        assert put_request.qs['client_id'] == ['8']
-
-        # The client should send the data as the body of the message
-        # The .json() method returns the data as a string
         json_data = json.loads(put_request.json())
-        print(json)
-        # assert saved_data['job_id'] == 15
         saved_data = json_data['results']['data']
 
         assert saved_data['attachments_text'] == ['1']

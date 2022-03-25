@@ -37,8 +37,10 @@ class Client:
     def get_job(self):
         endpoint = f'{self.url}/get_job'
         params = {'client_id': self.client_id}
-        response = requests.get(endpoint, params=params)
-        response_text = loads(response.text)
+        # response = requests.get(endpoint, params=params)
+        # response_text = loads(response.text)
+
+        response_text = loads((requests.get(endpoint, params=params)).text)
         if 'job' not in response_text:
             raise NoJobsAvailableException()
         job = response_text['job']
@@ -74,7 +76,7 @@ class Client:
         print('Sending result back to server...')
         if job_type == 'attachments':
             print("this is an attachment")
-            result = self.perform_attachment_job(url)
+            result = perform_attachment_job(url)
             print("this is the result", result)
         else:
             result = self.perform_job(url)
@@ -88,18 +90,19 @@ class Client:
         print('Done with current job!')
         return json
 
-    def perform_attachment_job(self, url):
-        return {"data": {"attachments_text": [str(url)],
-                         "type": "attachment",
-                         "id": str(url),
-                         "attributes": {'agencyId': None,
-                                        'docketId': None,
-                                        'commentOnDocumentId': None}
-                         }}
-
     def write_client_id(self, filename):
         with open(filename, 'w', encoding='utf8') as file:
             file.write(str(self.client_id))
+
+
+def perform_attachment_job(url):
+    return {"data": {"attachments_text": [str(url)],
+                     "type": "attachment",
+                     "id": str(url),
+                     "attributes": {'agencyId': None,
+                                    'docketId': None,
+                                    'commentOnDocumentId': None}
+                     }}
 
 
 def read_client_id(filename):
