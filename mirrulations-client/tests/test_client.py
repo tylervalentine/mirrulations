@@ -235,8 +235,6 @@ def test_client_sends_attachment_results(mock_requests, mocker):
         assert saved_data['results']['data']['attributes']['commentOnDocumentId'] == None
 
 
-
-
 def test_read_client_id_success(tmpdir):
     file = tmpdir.join('test_read.txt')
     file.write('1')

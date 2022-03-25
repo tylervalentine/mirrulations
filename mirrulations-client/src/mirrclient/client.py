@@ -111,18 +111,6 @@ def read_client_id(filename):
         return -1
 
 
-def request_job(endpoint, data, params):
-    response = assure_request(requests.get, endpoint,
-                              json=dumps(data), params=params)
-    response_text = loads(response.text)
-    if 'job' not in response_text:
-        raise NoJobsAvailableException()
-    job = response_text['job']
-    job_id = list(job.keys())[0]
-    url = job[job_id]
-    return job_id, url
-
-
 def assure_request(request, url, sleep_time=60, **kwargs):
     while True:
         response = request(url, **kwargs)
