@@ -102,7 +102,7 @@ class Client:
         return json
 
     def perform_attachment_job(self, url):
-        json = {"attachments_text": [str(url)], "type": "attachment", "id":str(url), "attributes":{}}
+        json = {"data":{"attachments_text": [str(url)], "type": "attachment", "id":str(url), "attributes":{}}}
         return json
 
     def write_client_id(self, filename):
