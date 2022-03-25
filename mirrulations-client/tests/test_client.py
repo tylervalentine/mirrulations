@@ -223,15 +223,16 @@ def test_client_sends_attachment_results(mock_requests, mocker):
         # The client should send the data as the body of the message
         # The .json() method returns the data as a string
         saved_data = json.loads(put_request.json())
+        print(saved_data)
         # assert saved_data['job_id'] == 15
         # assert saved_data['results']['attachments_text']['id'] == 'EPA-HQ-OECA-2004-0024-0048'
 
-        assert saved_data['results']['attachments_text'] == ['foo']
-        assert saved_data['results']['type'] == 'attachment'
-        assert saved_data['results']['id'] == '0'
-        assert saved_data['results']['attributes']['agencyId'] == '1'
-        assert saved_data['results']['attributes']['docketId'] == '2'
-        assert saved_data['results']['attributes']['commentOnDocumentId'] == None
+        assert saved_data['results']['data']['attachments_text'] == ['1']
+        assert saved_data['results']['data']['type'] == 'attachment'
+        assert saved_data['results']['data']['id'] == '1'
+        assert saved_data['results']['data']['attributes']['agencyId'] == None
+        assert saved_data['results']['data']['attributes']['docketId'] == None
+        assert saved_data['results']['data']['attributes']['commentOnDocumentId'] == None
 
 
 
