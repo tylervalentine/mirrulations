@@ -27,7 +27,7 @@ class Dashboard:
 
 
 def get_jobs_stats(redis_db):
-    # jobs_waiting_queue is a list in the redis_db 
+    # jobs_waiting_queue is a list in the redis_db
     # lists may not show up in redis-cli if queue presently empty
     # this can eventually go away
     jobs_waiting = int(redis_db.llen('jobs_waiting_queue'))
