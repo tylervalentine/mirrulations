@@ -96,6 +96,10 @@ class Client:
 
 
 def perform_attachment_job(url):
+    # *** Jumping off point for getting attachments, taken from experiments ***
+    # attach_requests = requests.get(attachment_url.URL, " ")
+    # self.server_url = server_url
+    # self.content = attach_requests.content
     return {"data": {"attachments_text": [str(url)],
                      "type": "attachment",
                      "id": str(url),
