@@ -41,7 +41,8 @@ class MockDataSet:
         return {
             'id': f'ABC-2020-{self.counter}',
             'attributes': attributes,
-            'links': links
+            'links': links,
+            'type': 'job_type'
         }
 
     def make_full_pages_of_results(self, count, total_count):
