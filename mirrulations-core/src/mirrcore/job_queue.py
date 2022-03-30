@@ -38,17 +38,4 @@ class JobQueue:
         self.database.set(key, date_string.replace('T', ' ')
                           .replace('Z', ''))
 
-    def job_type_counter(self):
-        job_count = {'num_jobs' : 0}
-        if self['job_type'] == 'attachments':
-            job_count['num_jobs'] += 1
-            self.database.lpush('num_jobs_attach_queue', json.dumps(job_count))
-        if self['job_type'] == 'comments':
-            job_count['num_jobs'] += 1
-            self.database.lpush('num_jobs_comments_queue', json.dumps(job_count))
-        if self['job_type'] == 'dockets':
-            job_count['num_jobs'] += 1
-            self.database.lpush('num_jobs_dockets_queue', json.dumps(job_count))
-        if self['job_type'] == 'documents':
-            job_count['num_jobs'] += 1
-            self.database.lpush('num_jobs_documents_queue', json.dumps(job_count))
+   
