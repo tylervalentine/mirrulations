@@ -26,7 +26,7 @@ def get_job(workserver):
         if not success:
             return False, values[0], values[1]
         if workserver.redis.llen('jobs_waiting_queue') == 0:
-            return False, jsonify({'error': 'There are no jobs available'}), 403
+            return False, jsonify({'error': 'No jobs available'}), 403
         job = json.loads(workserver.redis.lpop('jobs_waiting_queue'))
         job_id = job['job_id']
         url = job['url']
