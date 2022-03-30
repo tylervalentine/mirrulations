@@ -95,19 +95,16 @@ class Client:
             file.write(str(self.client_id))
 
 
-def perform_attachment_job(url, **params): # added **params just in case needed for requests
-    # *** Jumping off point for getting attachments, taken from experiments ***
-    response_from_related = requests.get(url, params=params)
-    links = response_from_related["data"]["attributes"]["fileFormats"]
-    links = loads(links)
-    attachment_text_list = []
-    #go through each 
-    for link in links:
-        attachment_url = link["fileUrl"]
-        attach_requests = requests.get(attachment_url.URL, " ")
-        attach_content = attach_requests.content # could be condensed but just done for readability for now...
-        # extract text...
-        attachment_text_list.append("lorem ipsum")
+def perform_attachment_job(url, **params): ## NOT FUNCTIONING
+    # added **params just in case needed for requests
+    attachment_text_list = [] # where we might put attachments
+    attachment_links = get_attachment_links(url, **params)
+     
+    for link in attachment_links:
+        # go through each obj in list and download attachment
+        # extract text
+        # add to a list
+        break
 
     return {"data": {"attachments_text": attachment_text_list,
                      "type": "attachment",
@@ -116,6 +113,12 @@ def perform_attachment_job(url, **params): # added **params just in case needed 
                                     'docketId': None,
                                     'commentOnDocumentId': None}
                      }}
+
+
+def get_attachment_links(url, **params): # TEST THIS
+    response_from_related = requests.get(url, params=params)
+    file_formats = response_from_related["data"]["attributes"]["fileFormats"]
+    return loads(file_formats)
 
 
 def read_client_id(filename):
