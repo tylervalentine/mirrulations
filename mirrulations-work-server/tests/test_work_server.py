@@ -69,7 +69,7 @@ def test_get_job_has_no_available_job(mock_server):
     params = {'client_id': 1}
     response = mock_server.client.get('/get_job', query_string=params)
     assert response.status_code == 403
-    expected = {'error': 'There are no jobs available'}
+    expected = {'error': 'No jobs available'}
     assert response.get_json() == expected
 
 
