@@ -37,3 +37,5 @@ class JobQueue:
         key = f'{endpoint}_last_timestamp'
         self.database.set(key, date_string.replace('T', ' ')
                           .replace('Z', ''))
+
+   
