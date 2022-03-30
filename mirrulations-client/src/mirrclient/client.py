@@ -95,12 +95,21 @@ class Client:
             file.write(str(self.client_id))
 
 
-def perform_attachment_job(url):
+def perform_attachment_job(url, **params): # added **params just in case needed for requests
     # *** Jumping off point for getting attachments, taken from experiments ***
-    # attach_requests = requests.get(attachment_url.URL, " ")
-    # self.server_url = server_url
-    # self.content = attach_requests.content
-    return {"data": {"attachments_text": [str(url)],
+    response_from_related = requests.get(url, params=params)
+    links = response_from_related["data"]["attributes"]["fileFormats"]
+    links = loads(links)
+    attachment_text_list = []
+    #go through each 
+    for link in links:
+        attachment_url = link["fileUrl"]
+        attach_requests = requests.get(attachment_url.URL, " ")
+        attach_content = attach_requests.content # could be condensed but just done for readability for now...
+        # extract text...
+        attachment_text_list.append("lorem ipsum")
+
+    return {"data": {"attachments_text": attachment_text_list,
                      "type": "attachment",
                      "id": str(url),
                      "attributes": {'agencyId': None,
