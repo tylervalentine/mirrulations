@@ -1,7 +1,7 @@
 from mirrmock.mock_document_count import create_mock_mongodb
 from mirrdash.sum_mongo_counts import get_dockets_count, \
     get_documents_count, get_comments_count, get_done_counts,\
-    get_attachments_count
+    get_attachments_count, connect_mongo_db
 
 
 def test_docket_counts():
@@ -27,3 +27,7 @@ def test_attachment_counts():
 def test_done_counts():
     mock_db = create_mock_mongodb(1, 2, 3, 4)
     assert get_done_counts(mock_db, 'mirrulations')['num_jobs_done'] == 10
+
+
+def test_connect_mongo_db():
+    assert connect_mongo_db(None, None) == connect_mongo_db('localhost', 27017)

@@ -1,4 +1,5 @@
 import os
+import json
 from functools import partial
 from pytest import fixture, raises
 import requests
@@ -58,10 +59,10 @@ def test_client_gets_job(mock_requests):
     with mock_requests:
         mock_requests.get(
             f'{BASE_URL}/get_job',
-            json={'job': {'1': 1}},
+            json={'job': {'1': 1, 'job_type': 'attachments'}},
             status_code=200
         )
-        assert ('1', 1) == client.get_job()
+        assert ('1', 1, 'attachments') == client.get_job()
 
 
 def test_client_throws_exception_when_no_jobs(mock_requests):
@@ -130,7 +131,7 @@ def test_client_completes_job_requested(mock_requests, mocker):
         )
         mock_requests.get(
             f'{BASE_URL}/get_job',
-            json={'job': {'1': 'http://test.com'}},
+            json={'job': {'1': 'http://test.com', 'job_type': 'documents'}},
             status_code=200
         )
         mock_requests.put(
@@ -140,7 +141,8 @@ def test_client_completes_job_requested(mock_requests, mocker):
         )
         mock_requests.get(
             'http://test.com',
-            json={'data': {'id': '1', 'attributes': {'agencyId': 'NOAA'}}},
+            json={'data': {'id': '1', 'attributes': {'agencyId': 'NOAA'},
+                           'job_type': 'documents'}},
             status_code=200
         )
 
@@ -166,6 +168,32 @@ def test_attempt_request_raises_connection_exception(mock_requests, mocker):
         except requests.exceptions.ConnectionError as exception:
             assert True, f'raised an exception: {exception}'
         # assert response is None
+
+
+def test_client_sends_attachment_results(mock_requests, mocker):
+    client = Client()
+    client.client_id = 8
+    read_mock_client_id(mocker, client.client_id)
+    with mock_requests:
+        mock_requests.get(
+            f'{BASE_URL}/get_job',
+            json={'job': {'job_id': 1,
+                  'url': 'foo', 'job_type': 'attachments'}},
+            status_code=200
+        )
+
+        mock_requests.put(f'{BASE_URL}/put_results', text='{}')
+        client.execute_task()
+        put_request = mock_requests.request_history[1]
+        json_data = json.loads(put_request.json())
+        saved_data = json_data['results']['data']
+
+        assert saved_data['attachments_text'] == ['1']
+        assert saved_data['type'] == 'attachment'
+        assert saved_data['id'] == '1'
+        assert saved_data['attributes']['agencyId'] is None
+        assert saved_data['attributes']['docketId'] is None
+        assert saved_data['attributes']['commentOnDocumentId'] is None
 
 
 def test_read_client_id_success(tmpdir):
@@ -422,7 +450,8 @@ def test_client_returns_403_error_to_server(mock_requests, mocker):
         )
         mock_requests.get(
             f'{BASE_URL}/get_job',
-            json={'job': {'1': 'http://test.com'}},
+            json={'job': {'1': 'http://test.com'}
+                  },
             status_code=200
         )
         mock_requests.put(

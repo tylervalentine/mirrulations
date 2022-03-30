@@ -12,7 +12,7 @@ window.addEventListener('load', function init() {
 const updateHtmlValues = (id, value, total) => {
     let percent = (value/total) * 100;
     percent = isNaN(percent) ? 0 : Math.round(percent * 10) / 10;
-    document.getElementById(id+'-number').textContent = value;
+    document.getElementById(id+'-number').textContent = value.toLocaleString('en');
     document.getElementById(id+'-circle-percentage').textContent = `${percent}%`;
     document.getElementById(id+'-circle-front').style.strokeDasharray = `${percent}, 100`;
 }
@@ -32,7 +32,7 @@ const updateStatus = (container, status) => {
 }
 
 const updateCounts = (id, value) => {
-    document.getElementById(id+'-number').textContent = value;
+    document.getElementById(id+'-number').textContent = value.toLocaleString('en');
 
 }
 
