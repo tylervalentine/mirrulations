@@ -5,7 +5,6 @@ Dependencies:
     pymongo
 """
 from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure
 
 
 def connect_mongo_db(host_name, port_number):
@@ -14,11 +13,6 @@ def connect_mongo_db(host_name, port_number):
     if port_number is None:
         port_number = int(27017)
     client = MongoClient(host_name, port_number)
-    try:
-        print(client.server_info())
-    except ConnectionFailure:
-        print("Unable to connect to the server.")
-
     return client
 
 
@@ -52,8 +46,4 @@ def get_comments_count(client, db_name):
 
 
 def get_attachments_count(client, db_name):
-    # return int(client[db_name]['attachments'].estimated_document_count())
-    # this isnt good but not our problem right now
-    if client and db_name:
-        return int(4)
-    return None
+    return int(client[db_name]['attachments'].estimated_document_count())

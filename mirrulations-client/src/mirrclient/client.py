@@ -37,13 +37,26 @@ class Client:
     def get_job(self):
         endpoint = f'{self.url}/get_job'
         params = {'client_id': self.client_id}
-        job_id, url = request_job(endpoint, dumps({}), params)
-        return job_id, url
+        # response = requests.get(endpoint, params=params)
+        # response_text = loads(response.text)
+
+        response_text = loads((requests.get(endpoint, params=params)).text)
+        if 'job' not in response_text:
+            raise NoJobsAvailableException()
+        job = response_text['job']
+        job_id = list(job.keys())[0]
+        url = job[job_id]
+        if 'job_type' in job:
+            job_type = job['job_type']
+        else:
+            job_type = 'other'
+        return job_id, url, job_type
 
     def send_job_results(self, job_id, job_result):
         endpoint = f'{self.url}/put_results'
         if 'errors' in job_result:
-            data = {'job_id': job_id,
+            data = {
+                    'job_id': job_id,
                     'results': job_result
                     }
         else:
@@ -51,15 +64,22 @@ class Client:
                     'job_id': job_id,
                     'results': job_result}
         params = {'client_id': self.client_id}
+        # print('****\n\n\n')
         # print(dumps(data))
-        assure_request(requests.put, endpoint, json=dumps(data), params=params)
+        # print('****\n\n\n', flush=True)
+        requests.put(endpoint, json=dumps(data), params=params)
 
     def execute_task(self):
         print('Requesting new job from server...')
-        job_id, url = self.get_job()
+        job_id, url, job_type = self.get_job()
         print('Received job!')
-        result = self.perform_job(url)
         print('Sending result back to server...')
+        if job_type == 'attachments':
+            print("this is an attachment")
+            result = perform_attachment_job(url)
+            print("this is the result", result)
+        else:
+            result = self.perform_job(url)
         self.send_job_results(job_id, result)
         print('Job complete!\n')
 
@@ -75,24 +95,35 @@ class Client:
             file.write(str(self.client_id))
 
 
+def perform_attachment_job(url, **params): # added **params just in case needed for requests
+    # *** Jumping off point for getting attachments, taken from experiments ***
+    response_from_related = requests.get(url, params=params)
+    links = response_from_related["data"]["attributes"]["fileFormats"]
+    links = loads(links)
+    attachment_text_list = []
+    #go through each 
+    for link in links:
+        attachment_url = link["fileUrl"]
+        attach_requests = requests.get(attachment_url.URL, " ")
+        attach_content = attach_requests.content # could be condensed but just done for readability for now...
+        # extract text...
+        attachment_text_list.append("lorem ipsum")
+
+    return {"data": {"attachments_text": attachment_text_list,
+                     "type": "attachment",
+                     "id": str(url),
+                     "attributes": {'agencyId': None,
+                                    'docketId': None,
+                                    'commentOnDocumentId': None}
+                     }}
+
+
 def read_client_id(filename):
     try:
         with open(filename, 'r', encoding='utf8') as file:
             return int(file.readline())
     except FileNotFoundError:
         return -1
-
-
-def request_job(endpoint, data, params):
-    response = assure_request(requests.get, endpoint,
-                              json=dumps(data), params=params)
-    response_text = loads(response.text)
-    if 'job' not in response_text:
-        raise NoJobsAvailableException()
-    job = response_text['job']
-    job_id = list(job.keys())[0]
-    value = job[job_id]
-    return job_id, value
 
 
 def assure_request(request, url, sleep_time=60, **kwargs):
@@ -134,6 +165,7 @@ def get_output_path(results):
         return -1
     output_path = ""
     data = results["data"]["attributes"]
+    # print(data + "printing data")
     output_path += get_key_path_string(data, "agencyId")
     output_path += get_key_path_string(data, "docketId")
     output_path += get_key_path_string(data, "commentOnDocumentId")

@@ -40,9 +40,10 @@ def get_job(workserver):
     job = json.loads(workserver.redis.lpop('jobs_waiting_queue'))
     job_id = job['job_id']
     url = job['url']
+    job_type = job.get('job_type', 'other')
     workserver.redis.hset('jobs_in_progress', job_id, url)
     workserver.redis.hset('client_jobs', job_id, client_id)
-    return True, job_id, url
+    return True, job_id, url, job_type
 
 
 def check_results(workserver, data, client_id):
@@ -88,10 +89,13 @@ def put_results(workserver, data):
     success, *results = check_results(workserver, data, int(client_id))
     if not success:
         return (success, *results)
-    job_id = data.get('job_id')
+    job_id = data['job_id']
     workserver.redis.hdel('jobs_in_progress', job_id)
-    write_results(results[0], data.get('directory'), data.get('results'))
-    workserver.data.add(data.get('results'))
+    if 'attachments_text' in data['results']['data'].keys():
+        print(data['results']['data']['attachments_text'])
+    else:
+        write_results(results[0], data['directory'], data['results'])
+    workserver.data.add(data['results'])
     return (True,)
 
 
@@ -124,7 +128,8 @@ def create_server(database):
         success, *values = get_job(workserver)
         if not success:
             return tuple(values)
-        return jsonify({'job': {values[0]: values[1]}}), 200
+        return jsonify({'job': {str(values[0]): values[1],
+                        'job_type': values[2]}}), 200
 
     @workserver.app.route('/put_results', methods=['PUT'])
     def _put_results():
