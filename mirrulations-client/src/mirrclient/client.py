@@ -95,24 +95,25 @@ class Client:
             file.write(str(self.client_id))
 
 
-def perform_attachment_job(url, **params): ## NOT FUNCTIONING
-    # added **params just in case needed for requests
-    attachment_text_list = [] # where we might put attachments
-    attachment_links = get_attachment_links(url, **params)
-     
-    for link in attachment_links:
-        # go through each obj in list and download attachment
-        # extract text
-        # add to a list
-        break
+    def perform_attachment_job(self, url, **params): ## NOT FUNCTIONING
+        # added **params just in case needed for requests
+        attachment_text_list = [] # where we might put attachments
+        url = url + f'?api_key={self.api_key}'
+        attachment_links = get_attachment_links(url, **params)
+        
+        for link in attachment_links:
+            # go through each obj in list and download attachment
+            # extract text
+            # add to a list
+            break
 
-    return {"data": {"attachments_text": attachment_text_list,
-                     "type": "attachment",
-                     "id": str(url),
-                     "attributes": {'agencyId': None,
-                                    'docketId': None,
-                                    'commentOnDocumentId': None}
-                     }}
+        return {"data": {"attachments_text": attachment_text_list,
+                        "type": "attachment",
+                        "id": str(url),
+                        "attributes": {'agencyId': None,
+                                        'docketId': None,
+                                        'commentOnDocumentId': None}
+                        }}
 
 
 def get_attachment_links(url, **params): # TEST THIS
@@ -184,6 +185,7 @@ def is_environment_variables_present():
 
 
 if __name__ == '__main__':
+    # https://api.regulations.gov/v4/attachments/0900006480cb703d
     load_dotenv()
     if not is_environment_variables_present():
         print('Need client environment variables')
