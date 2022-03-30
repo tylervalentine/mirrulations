@@ -6,10 +6,11 @@ class JobQueue:
     def __init__(self, database):
         self.database = database
 
-    def add_job(self, url):
+    def add_job(self, url, job_type):
         job_id = self.get_job_id()
         job = {'job_id': job_id,
-               'url': url}
+               'url': url,
+               'job_type': job_type}
         self.database.lpush('jobs_waiting_queue', json.dumps(job))
 
     def get_num_jobs(self):

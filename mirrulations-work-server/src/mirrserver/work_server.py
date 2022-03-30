@@ -26,14 +26,14 @@ def get_job(workserver):
         if not success:
             return False, values[0], values[1]
         if workserver.redis.llen('jobs_waiting_queue') == 0:
-            return False, jsonify(
-                {'error': 'There are no jobs available'}), 403
+            return False, jsonify({'error': 'There are no jobs available'}), 403
         job = json.loads(workserver.redis.lpop('jobs_waiting_queue'))
         job_id = job['job_id']
         url = job['url']
+        job_type = job.get('job_type', 'other')
         workserver.redis.hset('jobs_in_progress', job_id, url)
         workserver.redis.hset('client_jobs', job_id, client_id)
-        return True, job_id, url
+        return True, job_id, url, job_type
     except redis.exceptions.ConnectionError:
         body = {'error': 'Cannot connect to the database'}
         return False, jsonify(body), 500
@@ -130,7 +130,8 @@ def create_server(database):
         success, *values = get_job(workserver)
         if not success:
             return tuple(values)
-        return jsonify({'job': {values[0]: values[1]}}), 200
+        return jsonify({'job': {str(values[0]): values[1],
+                        'job_type': values[2]}}), 200
 
     @workserver.app.route('/put_results', methods=['PUT'])
     def _put_results():

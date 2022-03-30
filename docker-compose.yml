@@ -33,8 +33,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-work-server/Dockerfile
-    depends_on:
-      - work_generator
     restart: always
     volumes:
       - ~/data/data:/data
