@@ -26,8 +26,6 @@ class DataStorage:
             elif data['data']['type'] == 'comments':
                 self.comments.insert_one(data)
         elif 'attachments_text' in data['data'].keys():
-            self.attachments.insert_one(data)
-            # Use this code maybe for inserting multiple attachments 
-            # into different mongo entries:
-            # for i, attachment in enumerate(data['data']['attachments_text']):
-            #     self.attachments.insert_one({'attachment'+str(i):attachment})
+            for attachment_text in data['data']['attachments_text']:
+                data = {'id':data['data']['id'], 'text':attachment_text}
+                self.attachments.insert_one(data)
