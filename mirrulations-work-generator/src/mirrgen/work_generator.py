@@ -58,7 +58,6 @@ if __name__ == '__main__':
         generator.download('dockets')
         generator.download('documents')
         generator.download('comments')
-        generator.download('attachments')
 
     while True:
         generate_work()
