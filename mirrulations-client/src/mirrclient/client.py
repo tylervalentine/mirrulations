@@ -68,7 +68,7 @@ class Client:
         # print(dumps(data))
         # print('****\n\n\n', flush=True)
         # if files is not None:
-            # requests.put(endpoint, json=dumps(data), files=files)
+            # requests.put(endpoint, data=data files=files)
         # else:
         requests.put(endpoint, json=dumps(data), params=params)
 
@@ -107,7 +107,7 @@ class Client:
         
         for link in attachment_links:
             # go through each obj in list and download attachment
-            attachments.append(requests.get(link)) # returns the binary file
+            attachments.append(('file', requests.get(link))) # returns the binary file
             # check if its a pdf extract text
 
         return attachments
