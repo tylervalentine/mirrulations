@@ -163,3 +163,6 @@ if __name__ == '__main__':
         server.app.run(host='0.0.0.0', port=8080, debug=False)
     except redis.exceptions.ConnectionError:
         print('There is no Redis database to connect to.')
+
+
+# Major work server refactor
