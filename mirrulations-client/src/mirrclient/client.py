@@ -52,7 +52,7 @@ class Client:
             job_type = 'other'
         return job_id, url, job_type
 
-    def send_job_results(self, job_id, job_result):
+    def send_job_results(self, job_id, job_result, files=None):
         endpoint = f'{self.url}/put_results'
         if 'errors' in job_result:
             data = {
@@ -67,8 +67,9 @@ class Client:
         # print('****\n\n\n')
         # print(dumps(data))
         # print('****\n\n\n', flush=True)
-        # if attachment job:
+        # if files is not None:
             # requests.put(endpoint, json=dumps(data), files=files)
+        # else:
         requests.put(endpoint, json=dumps(data), params=params)
 
     def execute_task(self):
