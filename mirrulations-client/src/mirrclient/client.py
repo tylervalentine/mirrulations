@@ -67,6 +67,8 @@ class Client:
         # print('****\n\n\n')
         # print(dumps(data))
         # print('****\n\n\n', flush=True)
+        # if attachment job:
+            # requests.put(endpoint, json=dumps(data), files=files)
         requests.put(endpoint, json=dumps(data), params=params)
 
     def execute_task(self):
@@ -97,23 +99,16 @@ class Client:
 
     def perform_attachment_job(self, url, **params): ## NOT FUNCTIONING
         # added **params just in case needed for requests
-        attachment_text_list = [] # where we might put attachments
+        attachments = [] # where we might put attachments
         url = url + f'?api_key={self.api_key}'
         attachment_links = get_attachment_links(url, **params)
         
         for link in attachment_links:
             # go through each obj in list and download attachment
-            # extract text
-            # add to a list
-            break
+            attachments.append(requests.get(link)) # returns the binary file
+            # check if its a pdf extract text
 
-        return {"data": {"attachments_text": attachment_text_list,
-                        "type": "attachment",
-                        "id": str(url),
-                        "attributes": {'agencyId': None,
-                                        'docketId': None,
-                                        'commentOnDocumentId': None}
-                        }}
+        return attachments
 
 
 def get_attachment_links(url, **params): # TEST THIS
