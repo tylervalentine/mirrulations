@@ -57,7 +57,7 @@ def test_get_job_without_client_id_is_unauthorized(mock_server):
 
 def test_get_job_with_invalid_client_id_is_unauthorized(mock_server):
     mock_server.redis.incr('total_num_client_ids')
-    params = {'client_id': 2}
+    params = {'client_id': 1}
     response = mock_server.client.get('/get_job', query_string=params)
     assert response.status_code == 401
     expected = {'error': 'Invalid client ID'}
@@ -127,7 +127,6 @@ def test_put_results_returns_directory_error(mock_server):
 def test_put_results_without_client_id(mock_server):
     data = dumps({'results': {'': ''}, 'directory': None})
     response = mock_server.client.put('/put_results', json=data)
-    assert response.status_code == 401
     assert response.get_json() == {'error': 'Client ID was not provided'}
 
 
@@ -162,7 +161,7 @@ def test_client_attempts_to_put_job_that_does_not_exist(mock_server):
     response = mock_server.client.put('/put_results',
                                       json=data, query_string=params)
     assert response.status_code == 403
-    expected = {'error': 'The job being completed was not in progress'}
+    expected = {'error': 'Job being completed was not in progress'}
     assert response.get_json() == expected
 
 
@@ -202,7 +201,7 @@ def test_put_results_returns_correct_job(mock_server, mocker):
     response = mock_server.client.put('/put_results',
                                       json=data, query_string=params)
     assert response.status_code == 200
-    expected = {'success': 'The job was successfully completed'}
+    expected = {'success': 'Job was successfully completed'}
     assert response.get_json() == expected
     assert len(mock_server.data.added) == 1
 
@@ -222,7 +221,7 @@ def test_put_results_returns_correct_attachment_job(mock_server, mocker):
     response = mock_server.client.put('/put_results',
                                       json=data, query_string=params)
     assert response.status_code == 200
-    expected = {'success': 'The job was successfully completed'}
+    expected = {'success': 'Job was successfully completed'}
     assert response.get_json() == expected
     assert len(mock_server.data.added) == 1
 
@@ -244,7 +243,7 @@ def test_put_results_returns_500_error_from_regulations(mock_server, mocker):
                                       json=data, query_string=params)
     assert response.status_code == 200
     # Not sure this is the best way to do this...
-    expected = {'success': 'The job was successfully completed'}
+    expected = {'success': 'Job was successfully completed'}
     assert response.get_json() == expected
 
     assert mock_server.redis.hlen('invalid_jobs') == 1
@@ -268,7 +267,7 @@ def test_put_results_returns_404_error_from_regulations(mock_server, mocker):
                                       json=data, query_string=params)
     assert response.status_code == 200
     # Not sure this is the best way to do this...
-    expected = {'success': 'The job was successfully completed'}
+    expected = {'success': 'Job was successfully completed'}
     assert response.get_json() == expected
 
     assert mock_server.redis.hlen('invalid_jobs') == 1
