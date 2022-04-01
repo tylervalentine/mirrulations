@@ -18,7 +18,6 @@ class ResultsProcessor:
                     job_type = 'attachments'
                 self.job_queue.add_job(url, job_type)
 
-
     def process_old_comments(self, results_dict):
         for item in results_dict['data']:
             if not self.data_storage.exists(item):
@@ -27,4 +26,3 @@ class ResultsProcessor:
                 url = item[relatsh][attm]['links']['related']
                 job_type = 'attachments'
                 self.job_queue.add_job(url, job_type)
-
