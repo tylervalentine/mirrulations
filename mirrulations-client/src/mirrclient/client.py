@@ -79,7 +79,7 @@ class Client:
         print('Sending result back to server...')
         if job_type == 'attachments':
             print("this is an attachment")
-            result = perform_attachment_job(url)
+            result = self.perform_attachment_job(url)
             print("this is the result", result)
         else:
             result = self.perform_job(url)
@@ -101,6 +101,7 @@ class Client:
     def perform_attachment_job(self, url, **params): ## NOT FUNCTIONING
         # added **params just in case needed for requests
         attachments = [] # where we might put attachments
+        print(url)
         url = url + f'?api_key={self.api_key}'
         attachment_links = get_attachment_links(url, **params)
         

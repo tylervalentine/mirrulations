@@ -177,7 +177,7 @@ def test_client_sends_attachment_results(mock_requests, mocker):
     with mock_requests:
         mock_requests.get(
             f'{BASE_URL}/get_job',
-            json={'job': {'job_id': 1,
+            json={'job': {'job_id': '1',
                   'url': 'foo', 'job_type': 'attachments'}},
             status_code=200
         )
