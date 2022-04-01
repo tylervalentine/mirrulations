@@ -1,5 +1,4 @@
 from json import dumps
-from fakeredis import FakeRedis, FakeServer
 from pytest import fixture
 from mirrserver.work_server import create_server
 from mirrmock.mock_flask_server import mock_work_server
@@ -8,13 +7,6 @@ from mirrmock.mock_flask_server import mock_work_server
 @fixture(name='mock_server')
 def fixture_mock_server():
     return mock_work_server(create_server)
-
-
-def test_create_server_not_connected():
-    redis_server = FakeServer()
-    mock_db = FakeRedis(server=redis_server)
-    redis_server.connected = False
-    assert create_server(mock_db) is None
 
 
 def test_create_mock_database(mock_server):
@@ -57,7 +49,7 @@ def test_get_job_without_client_id_is_unauthorized(mock_server):
 
 def test_get_job_with_invalid_client_id_is_unauthorized(mock_server):
     mock_server.redis.incr('total_num_client_ids')
-    params = {'client_id': 1}
+    params = {'client_id': 2}
     response = mock_server.client.get('/get_job', query_string=params)
     assert response.status_code == 401
     expected = {'error': 'Invalid client ID'}
@@ -161,7 +153,7 @@ def test_client_attempts_to_put_job_that_does_not_exist(mock_server):
     response = mock_server.client.put('/put_results',
                                       json=data, query_string=params)
     assert response.status_code == 403
-    expected = {'error': 'Job being completed was not in progress'}
+    expected = {'error': 'The job being completed was not in progress'}
     assert response.get_json() == expected
 
 

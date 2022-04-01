@@ -113,17 +113,15 @@ def check_client_id_is_valid(workserver, client_id):
 def create_server(database):
     '''Create server, add endpoints, and return the server'''
     workserver = WorkServer(database)
-    try:
-        workserver.redis.keys('*')
-    except redis.exceptions.ConnectionError:
-        return None
 
     @workserver.app.route('/get_job', methods=['GET'])
     def _get_job():
         try:
             success, *values = get_job(workserver)
-            return jsonify({'job': {str(values[0]): values[1], 
-                            'job_type': values[2]}}), 200  # Fix This Line
+            if not success:
+                return tuple(values)
+            return jsonify({'job': {str(values[0]): values[1],
+                            'job_type': values[2]}}), 200
         except redis.exceptions.ConnectionError:
             body = {'error': 'Cannot connect to the database'}
             return jsonify(body), 500
@@ -158,8 +156,10 @@ def create_server(database):
 
 
 if __name__ == '__main__':
-    server = create_server(redis.Redis('redis'))
-    if server is None:
-        print('There is no Redis database to connect to.')
-    else:
+    try:
+        r = redis.Redis('redis')
+        r.keys('*')
+        server = create_server(r)
         server.app.run(host='0.0.0.0', port=8080, debug=False)
+    except redis.exceptions.ConnectionError:
+        print('There is no Redis database to connect to.')
