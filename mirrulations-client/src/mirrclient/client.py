@@ -114,21 +114,19 @@ def read_client_id(filename):
 
 
 def assure_request(request, url, sleep_time=60, **kwargs):
-    while True:
-        response = request(url, **kwargs)
-        try:
-            check_status_code(response)
-            response.raise_for_status()
-        except RequestConnectionError:
-            print('Unable to connect to the server. '
-                  'Trying again in a minute...')
-            time.sleep(sleep_time)
-        except HTTPError:
-            print('An HTTP Error occured.')
-        except RequestException:
-            print('A Request Error occured.')
-        if response is not None:
-            return response
+    response = request(url, **kwargs)
+    try:
+        response.raise_for_status()
+    except RequestConnectionError:
+        print('Unable to connect to the server. '
+                'Trying again in a minute...')
+        time.sleep(sleep_time)
+    except HTTPError:
+        print('An HTTP Error occured.')
+    except RequestException:
+        print('A Request Error occured.')
+    if response is not None:
+        return response
 
 
 def check_status_code(response):
