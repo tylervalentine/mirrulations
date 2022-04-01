@@ -22,7 +22,13 @@ class Client:
         self.client_id = -1
 
     def get_client_id(self):
-        client_id = read_client_id('client.cfg')
+        # client_id = read_client_id('client.cfg')
+        try:
+            with open('client.cfg', 'r', encoding='utf8') as file:
+                client_id = (file.readline())
+        except FileNotFoundError:
+            client_id = -1
+
         if client_id == -1:
             client_id = self.request_client_id()
         self.client_id = client_id
