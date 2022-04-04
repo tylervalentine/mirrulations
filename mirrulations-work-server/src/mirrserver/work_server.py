@@ -3,6 +3,7 @@ from flask import Flask, json, jsonify, request
 import redis
 from mirrcore.data_storage import DataStorage
 from mirrcore.attachment_saver import AttachmentSaver
+from mirrserver.put_results_validator import PutResultsValidator
 
 
 class WorkServer:
@@ -11,6 +12,8 @@ class WorkServer:
         self.redis = redis_server
         self.data = DataStorage()
         self.attachment_saver = AttachmentSaver()
+        self.put_results_validator = PutResultsValidator()
+
 
 
 def check_for_database(workserver):
@@ -72,6 +75,10 @@ def write_results(directory, path, data):
 
 
 def put_results(workserver, data):
+    try:
+        workserver.put_results_validator.check_put_results(data)
+    except Exception as e:
+        print(e)
     check_for_database(workserver)
     client_id = request.args.get('client_id')
     files = request.args.get('files') # client sends attachment files in a list called files. if no files were sent this is an empty list.
