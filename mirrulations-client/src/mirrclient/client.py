@@ -101,6 +101,22 @@ class Client:
             file.write(str(self.client_id))
 
 
+class Validator:
+    """
+    This class will serve as the middle man between the client and any server or other endpoint.
+    This is to soley handle responses and handle exceptions thrown when making http requests.
+    """
+
+    def __init__(self):
+        pass
+    
+    def make_get_request():
+        pass
+
+    def make_post_request():
+        pass
+
+
 def perform_attachment_job(url):
     return {"data": {"attachments_text": [str(url)],
                      "type": "attachment",
