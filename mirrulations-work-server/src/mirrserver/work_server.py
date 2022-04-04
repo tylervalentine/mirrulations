@@ -2,6 +2,7 @@ import os
 from flask import Flask, json, jsonify, request
 import redis
 from mirrcore.data_storage import DataStorage
+from mirrcore.attachment_saver import AttachmentSaver
 
 
 class WorkServer:
@@ -9,6 +10,7 @@ class WorkServer:
         self.app = Flask(__name__)
         self.redis = redis_server
         self.data = DataStorage()
+        self.attachment_saver = AttachmentSaver()
 
 
 def check_for_database(workserver):
@@ -72,6 +74,7 @@ def write_results(directory, path, data):
 def put_results(workserver, data):
     check_for_database(workserver)
     client_id = request.args.get('client_id')
+    files = request.args.get('files') # client sends attachment files in a list called files. if no files were sent this is an empty list.
     success, *values = check_valid_request_client_id(workserver, client_id)
     if not success:
         return False, values[0], values[1]
@@ -86,11 +89,12 @@ def put_results(workserver, data):
         return (success, *results)
     job_id = data['job_id']
     workserver.redis.hdel('jobs_in_progress', job_id)
-    if 'attachments_text' in data['results']['data'].keys():
-        print(data['results']['data']['attachments_text'])
-    else:
-        write_results(results[0], data['directory'], data['results'])
-    workserver.data.add(data['results'])
+    if 'attachments_text' in data['results']['data'].keys() and files is not None: # If an attachment job and files were sent
+        for file in files: # Loop through each file from requests
+            workserver.attachment_saver.save(file) # Save the file on disk
+    else: # If not an attachment job 
+        write_results(results[0], data['directory'], data['results']) 
+    workserver.data.add(data['results']) # write json data to mongo
     return (True,)
 
 
