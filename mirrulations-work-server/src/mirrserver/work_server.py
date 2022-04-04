@@ -75,13 +75,9 @@ def write_results(directory, path, data):
 
 
 def put_results(workserver, data):
-    try:
-        workserver.put_results_validator.check_put_results(data)
-    except Exception as e:
-        print(e)
     check_for_database(workserver)
     client_id = request.args.get('client_id')
-    files = request.args.get('files') # client sends attachment files in a list called files. if no files were sent this is an empty list.
+    files = request.args.get('files')  # client sends attachment files in a list called files
     success, *values = check_valid_request_client_id(workserver, client_id)
     if not success:
         return False, values[0], values[1]
@@ -96,12 +92,12 @@ def put_results(workserver, data):
         return (success, *results)
     job_id = data['job_id']
     workserver.redis.hdel('jobs_in_progress', job_id)
-    if 'attachments_text' in data['results']['data'].keys() and files is not None: # If an attachment job and files were sent
-        for file in files: # Loop through each file from requests
-            workserver.attachment_saver.save(file) # Save the file on disk
-    else: # If not an attachment job 
-        write_results(results[0], data['directory'], data['results']) 
-    workserver.data.add(data['results']) # write json data to mongo
+    if 'attachments_text' in data['results']['data'].keys() and files is not None:
+        for file in files:  # Loop through each file from requests
+            workserver.attachment_saver.save(file)  # Save the file on disk
+    else:  # If not an attachment job
+        write_results(results[0], data['directory'], data['results'])
+    workserver.data.add(data['results'])  # write json data to mongo
     return (True,)
 
 
@@ -139,18 +135,19 @@ def create_server(database):
 
     @workserver.app.route('/put_results', methods=['PUT'])
     def _put_results():
+        data = json.loads(request.get_json())
+        client_id = request.args.get('client_id')
         try:
-            data = json.loads(request.get_json())
-            if data is None or data.get('results') is None:
-                body = {'error': 'The body does not contain the results'}
-                return jsonify(body), 403
-            success, *values = put_results(workserver, data)
-            if not success:
-                return tuple(values)
-            return jsonify({'success': 'Job was successfully completed'}), 200
-        except redis.exceptions.ConnectionError:
-            body = {'error': 'Cannot connect to the database'}
-            return jsonify(body), 500
+            workserver.put_results_validator.check_put_results(data, client_id)
+        except Exception as e:
+            print(e)
+        if data is None or data.get('results') is None:
+            body = {'error': 'The body does not contain the results'}
+            return jsonify(body), 403
+        success, *values = put_results(workserver, data)
+        if not success:
+            return tuple(values)
+        return jsonify({'success': 'Job was successfully completed'}), 200
 
     @workserver.app.route('/get_client_id', methods=['GET'])
     def _get_client_id():
@@ -174,6 +171,3 @@ if __name__ == '__main__':
         server.app.run(host='0.0.0.0', port=8080, debug=False)
     except redis.exceptions.ConnectionError:
         print('There is no Redis database to connect to.')
-
-
-# Major work server refactor
