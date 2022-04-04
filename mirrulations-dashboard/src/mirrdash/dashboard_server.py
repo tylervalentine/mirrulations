@@ -12,7 +12,7 @@ from flask import Flask, jsonify, render_template
 from flask_cors import CORS
 from redis import Redis
 from mirrdash.sum_mongo_counts import connect_mongo_db, get_done_counts
-from mirrdash.jobs_queued_utils import get_jobs_queued_stats
+#from mirrdash.jobs_queued_utils import get_jobs_queued_stats
 from dotenv import load_dotenv
 import docker
 
@@ -38,11 +38,21 @@ def get_jobs_stats(redis_db):
     client_ids = redis_db.get('total_num_client_ids')
     clients_total = int(client_ids) if client_ids is not None else 0
 
+    attachments_waiting = int(redis_db.llen('num_jobs_attachments_waiting'))
+    comments_waiting = int(redis_db.llen('num_jobs_comments_waiting'))
+    documents_waiting = int(redis_db.llen('num_jobs_documents_waiting'))
+    dockets_waiting = int(redis_db.llen('num_jobs_dockets_waiting'))
+
+
     return {
         'num_jobs_waiting': jobs_waiting,
         'num_jobs_in_progress': jobs_in_progress,
         'jobs_total': jobs_total_minus_jobs_done,
-        'clients_total': clients_total
+        'clients_total': clients_total,
+        'num_jobs_attachments_queued': attachments_waiting,
+        'num_jobs_comments_queued' : comments_waiting,
+        'num_jobs_documents_queued': documents_waiting,
+        'num_jobs_dockets_queued': dockets_waiting
     }
 
 
@@ -83,8 +93,8 @@ def create_server(database, docker_server, mongo_client):
         data = get_jobs_stats(dashboard.redis)
 
         # Get the nums of jobs queued stats
-        jobs_queued_info = get_jobs_queued_stats(dashboard.redis)
-        data.update(jobs_queued_info)
+        #jobs_queued_info = get_jobs_queued_stats(dashboard.redis)
+        #data.update(jobs_queued_info)
 
         # Get the number of jobs done from the mongo db
         # and add it to the data
