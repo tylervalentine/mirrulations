@@ -2,7 +2,8 @@ class InvalidResultsException(Exception):
     """
     Raised when no results/json data are sent
     """
-    pass
+    message = {'error': 'The body does not contain the results'}
+    status_code = 403
 
 
 class InvalidClientIDException(Exception):
@@ -10,7 +11,16 @@ class InvalidClientIDException(Exception):
     Raised when the client ID is invalid
     (not 0<=client_id<20 or not an integer)
     """
-    pass
+    message = {'error': 'Invalid client ID'}
+    status_code = 401
+
+
+class MissingClientIDException(Exception):
+    """
+    Raised when the client ID is missing
+    """
+    message = {'error': 'Client ID was not provided'}
+    status_code = 401
 
 
 class PutResultsValidator():
@@ -19,8 +29,9 @@ class PutResultsValidator():
         if data is None or data.get('results') is None:
             raise InvalidResultsException()
         if client_id is None:
-            raise InvalidClientIDException()
-        if not (isinstance(client_id, int) and client_id < 20 and client_id >= 0):
-            raise InvalidClientIDException()
-        else:
-            return True
+            raise MissingClientIDException()
+        if client_id.isdigit() or isinstance(client_id, int):
+            client_id = int(client_id)
+            if (client_id < 20 and client_id > 0):
+                return True
+        raise InvalidClientIDException()

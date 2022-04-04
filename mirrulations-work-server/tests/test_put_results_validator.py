@@ -15,7 +15,7 @@ def test_put_results_with_non_numerical_client_id():
 def test_put_results_too_high_client_id():
     validator = PutResultsValidator()
     data = {'results': {'': ''}, 'directory': None}
-    client_id = 25
+    client_id = '25'
     with pytest.raises(InvalidClientIDException):
         validator.check_put_results(data, client_id)
 
@@ -23,7 +23,7 @@ def test_put_results_too_high_client_id():
 def test_put_results_invalid_results():
     validator = PutResultsValidator()
     data = {'results': None, 'directory': None}
-    client_id = 5
+    client_id = '5'
     with pytest.raises(InvalidResultsException):
         validator.check_put_results(data, client_id)
 
@@ -31,5 +31,5 @@ def test_put_results_invalid_results():
 def test_put_results_valid_client_id_and_results():
     validator = PutResultsValidator()
     data = {'results': {'': ''}, 'directory': None}
-    client_id = 10
+    client_id = '10'
     assert validator.check_put_results(data, client_id)

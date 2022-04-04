@@ -4,6 +4,9 @@ import redis
 from mirrcore.data_storage import DataStorage
 from mirrcore.attachment_saver import AttachmentSaver
 from mirrserver.put_results_validator import PutResultsValidator
+from mirrserver.put_results_validator import InvalidClientIDException
+from mirrserver.put_results_validator import InvalidResultsException
+from mirrserver.put_results_validator import MissingClientIDException
 
 
 class WorkServer:
@@ -15,15 +18,14 @@ class WorkServer:
         self.put_results_validator = PutResultsValidator()
 
 
-
 def check_for_database(workserver):
     # This will either succeed or raise an exception
     workserver.redis.ping()
 
 
 def check_valid_request_client_id(workserver, client_id):
-    if client_id is None:
-        return False, jsonify({'error': 'Client ID was not provided'}), 401
+    # if client_id is None:
+    #     return False, jsonify({'error': 'Client ID was not provided'}), 401
     if not check_client_id_is_valid(workserver, client_id):
         return False, jsonify({'error': 'Invalid client ID'}), 401
     return (True,)
@@ -32,6 +34,8 @@ def check_valid_request_client_id(workserver, client_id):
 def get_job(workserver):
     check_for_database(workserver)
     client_id = request.args.get('client_id')
+    if client_id is None:
+        return False, jsonify({'error': 'Client ID was not provided'}), 401
     success, *values = check_valid_request_client_id(workserver, client_id)
     if not success:
         return False, values[0], values[1]
@@ -77,7 +81,8 @@ def write_results(directory, path, data):
 def put_results(workserver, data):
     check_for_database(workserver)
     client_id = request.args.get('client_id')
-    files = request.args.get('files')  # client sends attachment files in a list called files
+    # client sends attachment files in a list called files
+    files = request.args.get('files')
     success, *values = check_valid_request_client_id(workserver, client_id)
     if not success:
         return False, values[0], values[1]
@@ -92,7 +97,8 @@ def put_results(workserver, data):
         return (success, *results)
     job_id = data['job_id']
     workserver.redis.hdel('jobs_in_progress', job_id)
-    if 'attachments_text' in data['results']['data'].keys() and files is not None:
+    if 'attachments_text' in data['results']['data'].keys() \
+            and files is not None:
         for file in files:  # Loop through each file from requests
             workserver.attachment_saver.save(file)  # Save the file on disk
     else:  # If not an attachment job
@@ -139,11 +145,12 @@ def create_server(database):
         client_id = request.args.get('client_id')
         try:
             workserver.put_results_validator.check_put_results(data, client_id)
-        except Exception as e:
-            print(e)
-        if data is None or data.get('results') is None:
-            body = {'error': 'The body does not contain the results'}
-            return jsonify(body), 403
+        except InvalidResultsException as invalid_results:
+            return jsonify(invalid_results.message), invalid_results.status_code
+        except InvalidClientIDException as invalid_id:
+            return jsonify(invalid_id.message), invalid_id.status_code
+        except MissingClientIDException as missing_id:
+            return jsonify(missing_id.message), missing_id.status_code
         success, *values = put_results(workserver, data)
         if not success:
             return tuple(values)
