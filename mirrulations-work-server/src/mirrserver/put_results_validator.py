@@ -23,6 +23,14 @@ class MissingClientIDException(Exception):
     status_code = 401
 
 
+class JobCompleted(Exception):
+    """
+    Raised when when the job successfully completed
+    """
+    message = {'success': 'Job was successfully completed'}
+    status_code = 200
+
+    
 class PutResultsValidator():
     """Validates the results sent by the client"""
     def check_put_results(self, data, client_id):
@@ -35,3 +43,4 @@ class PutResultsValidator():
             if (client_id < 20 and client_id > 0):
                 return True
         raise InvalidClientIDException()
+

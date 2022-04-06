@@ -3,7 +3,7 @@ from flask import Flask, json, jsonify, request
 import redis
 from mirrcore.data_storage import DataStorage
 from mirrcore.attachment_saver import AttachmentSaver
-from mirrserver.put_results_validator import PutResultsValidator
+from mirrserver.put_results_validator import JobCompleted, PutResultsValidator
 from mirrserver.put_results_validator import InvalidClientIDException
 from mirrserver.put_results_validator import InvalidResultsException
 from mirrserver.put_results_validator import MissingClientIDException
@@ -154,7 +154,7 @@ def create_server(database):
         success, *values = put_results(workserver, data)
         if not success:
             return tuple(values)
-        return jsonify({'success': 'Job was successfully completed'}), 200
+        return JobCompleted.message, JobCompleted.status_code
 
     @workserver.app.route('/get_client_id', methods=['GET'])
     def _get_client_id():
