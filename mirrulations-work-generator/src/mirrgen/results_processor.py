@@ -9,5 +9,4 @@ class ResultsProcessor:
         for item in results_dict['data']:
             if not self.data_storage.exists(item):
                 url = item['links']['self']
-                job_type = item['type']
-                self.job_queue.add_job(url, job_type)
+                self.job_queue.add_job(url)

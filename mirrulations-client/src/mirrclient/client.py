@@ -1,7 +1,7 @@
 import time
 import os
 import sys
-from json import dumps, loads
+from json import dumps, loads, load
 from dotenv import load_dotenv
 import requests
 from requests.exceptions import ConnectionError as RequestConnectionError
@@ -22,13 +22,7 @@ class Client:
         self.client_id = -1
 
     def get_client_id(self):
-        # client_id = read_client_id('client.cfg')
-        try:
-            with open('client.cfg', 'r', encoding='utf8') as file:
-                client_id = (file.readline())
-        except FileNotFoundError:
-            client_id = -1
-
+        client_id = read_client_id('client.cfg')
         if client_id == -1:
             client_id = self.request_client_id()
         self.client_id = client_id
@@ -58,7 +52,7 @@ class Client:
             job_type = 'other'
         return job_id, url, job_type
 
-    def send_job_results(self, job_id, job_result):
+    def send_job_results(self, job_id, job_result, files=None):
         endpoint = f'{self.url}/put_results'
         if 'errors' in job_result:
             data = {
@@ -73,6 +67,9 @@ class Client:
         # print('****\n\n\n')
         # print(dumps(data))
         # print('****\n\n\n', flush=True)
+        # if files is not None:
+            # requests.put(endpoint, data=data files=files)
+        # else:
         requests.put(endpoint, json=dumps(data), params=params)
 
     def execute_task(self):
@@ -82,7 +79,7 @@ class Client:
         print('Sending result back to server...')
         if job_type == 'attachments':
             print("this is an attachment")
-            result = perform_attachment_job(url)
+            result = self.perform_attachment_job(url)
             print("this is the result", result)
         else:
             result = self.perform_job(url)
@@ -152,19 +149,21 @@ def read_client_id(filename):
 
 
 def assure_request(request, url, sleep_time=60, **kwargs):
-    response = request(url, **kwargs)
-    try:
-        response.raise_for_status()
-    except RequestConnectionError:
-        print('Unable to connect to the server. '
-                'Trying again in a minute...')
-        time.sleep(sleep_time)
-    except HTTPError:
-        print('An HTTP Error occured.')
-    except RequestException:
-        print('A Request Error occured.')
-    if response is not None:
-        return response
+    while True:
+        response = request(url, **kwargs)
+        try:
+            check_status_code(response)
+            response.raise_for_status()
+        except RequestConnectionError:
+            print('Unable to connect to the server. '
+                  'Trying again in a minute...')
+            time.sleep(sleep_time)
+        except HTTPError:
+            print('An HTTP Error occured.')
+        except RequestException:
+            print('A Request Error occured.')
+        if response is not None:
+            return response
 
 
 def check_status_code(response):
@@ -204,6 +203,7 @@ def is_environment_variables_present():
 
 
 if __name__ == '__main__':
+    # https://api.regulations.gov/v4/attachments/0900006480cb703d
     load_dotenv()
     if not is_environment_variables_present():
         print('Need client environment variables')
