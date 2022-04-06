@@ -1,7 +1,7 @@
 import time
 import os
 import sys
-from json import dumps, loads
+from json import dumps, loads, load
 from dotenv import load_dotenv
 import requests
 from requests.exceptions import ConnectionError as RequestConnectionError
@@ -98,12 +98,18 @@ class Client:
             file.write(str(self.client_id))
 
 
-    def perform_attachment_job(self, url, **params): ## NOT FUNCTIONING
+    def perform_attachment_job(self, url, **params):
         # added **params just in case needed for requests
         attachments = [] # where we might put attachments
         print(url)
         url = url + f'?api_key={self.api_key}'
-        attachment_links = get_attachment_links(url, **params)
+        # attachment_links = get_attachment_links(url, **params)
+        response_from_related = requests.get(url, params=params)
+        print(response_from_related)
+        response_from_related = load(response_from_related)
+        print(type(response_from_related))
+        file_formats = response_from_related["data"][0]["attributes"]["fileFormats"]
+        attachment_links= loads(file_formats)
         
         for link in attachment_links:
             # go through each obj in list and download attachment
@@ -111,12 +117,6 @@ class Client:
             # check if its a pdf extract text
 
         return attachments
-
-
-def get_attachment_links(url, **params): # TEST THIS
-    response_from_related = requests.get(url, params=params)
-    file_formats = response_from_related["data"]["attributes"]["fileFormats"]
-    return loads(file_formats)
 
 
 def read_client_id(filename):
