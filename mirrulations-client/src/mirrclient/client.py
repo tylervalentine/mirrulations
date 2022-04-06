@@ -123,8 +123,13 @@ class TempClient:
         self.api_key = os.getenv('API_KEY')
         self.client_id = -1
     
-    def make_get_request():
-        pass
+    def get_client_id(validator, url):
+        client_id = read_client_id('client.cfg')
+        if client_id == -1:
+            endpoint = f'{url}/get_client_id'
+            response = assure_request(requests.get, endpoint)
+            client_id = int(response.json()['client_id'])
+        
 
     def make_post_request():
         pass
