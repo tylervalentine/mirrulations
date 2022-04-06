@@ -7,6 +7,7 @@ from mirrserver.put_results_validator import PutResultsValidator
 from mirrserver.put_results_validator import InvalidClientIDException
 from mirrserver.put_results_validator import InvalidResultsException
 from mirrserver.put_results_validator import MissingClientIDException
+from mirrserver.get_client_id_validator import GetClientIDValidator
 
 
 class WorkServer:
@@ -16,6 +17,7 @@ class WorkServer:
         self.data = DataStorage()
         self.attachment_saver = AttachmentSaver()
         self.put_results_validator = PutResultsValidator()
+        self.get_client_id_validator = GetClientIDValidator()
 
 
 def check_for_database(workserver):
@@ -158,14 +160,20 @@ def create_server(database):
 
     @workserver.app.route('/get_client_id', methods=['GET'])
     def _get_client_id():
+        client_id = request.args.get('client_id')
         try:
             success, *values = get_client_id(workserver)
             if not success:
                 return tuple(values)
-            return jsonify({'client_id': values[0]}), 200
+            workserver.get_client_id_validator.check_get_job_id(client_id)
+        except InvalidClientIDException as invalid_id:
+            return jsonify(invalid_id.message), invalid_id.status_code
+        except MissingClientIDException as missing_id:
+            return jsonify(missing_id.message), missing_id.status_code
         except redis.exceptions.ConnectionError:
             body = {'error': 'Cannot connect to the database'}
             return jsonify(body), 500
+        return jsonify({'client_id': values[0]}), 200
 
     return workserver
 
