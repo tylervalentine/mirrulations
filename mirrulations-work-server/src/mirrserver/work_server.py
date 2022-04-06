@@ -3,7 +3,6 @@ from flask import Flask, json, jsonify, request
 import redis
 from mirrcore.data_storage import DataStorage
 
-
 class WorkServer:
     def __init__(self, redis_server):
         self.app = Flask(__name__)
@@ -43,7 +42,19 @@ def get_job(workserver):
     job_type = job.get('job_type', 'other')
     workserver.redis.hset('jobs_in_progress', job_id, url)
     workserver.redis.hset('client_jobs', job_id, client_id)
+
+    if job_type == 'attachments':
+        workserver.redis.lpop('num_jobs_attachments_waiting')
+    elif job_type == 'comments':
+        workserver.redis.lpop('num_jobs_comments_waiting')
+    elif job_type == 'documents':
+        workserver.redis.lpop('num_jobs_documents_waiting')
+    elif job_type == 'dockets':
+        workserver.redis.lpop('num_jobs_dockets_waiting')
+    
     return True, job_id, url, job_type
+
+    
 
 
 def check_results(workserver, data, client_id):
@@ -63,6 +74,7 @@ def check_results(workserver, data, client_id):
         error = {'error': 'The client ID was incorrect'}
         return False, jsonify(error), 403
     return (True, directory[:filename_start])
+    
 
 
 def write_results(directory, path, data):

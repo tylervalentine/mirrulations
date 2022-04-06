@@ -1,4 +1,4 @@
-from mirrdash.jobs_queued_utils import get_jobs_queued_stats, \
+'''from mirrdash.jobs_queued_utils import get_jobs_queued_stats, \
     get_jobs_queued_attachments, get_jobs_queued_comments, \
     get_jobs_queued_dockets, get_jobs_queued_documents
 from mirrmock.mock_redis import MockRedisWithStorage
@@ -36,4 +36,4 @@ def test_dockets_queued():
 def test_documents_queued():
     mock_database = MockRedisWithStorage()
     mock_database.set('num_jobs_documents_queued', 5)
-    assert get_jobs_queued_documents(mock_database) == 5
+    assert get_jobs_queued_documents(mock_database) == 5'''
