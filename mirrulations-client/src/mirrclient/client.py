@@ -110,6 +110,22 @@ class Validator:
     def __init__(self):
         pass
     
+    def make_get_request(url):
+        pass
+
+    def make_post_request():
+        pass
+
+
+class TempClient:
+    """
+    This will eventually replace the client class. This is created so that Client code can be copied into it
+    without removivng any existing code.
+    """
+    def __init__(self):
+        self.api_key = os.getenv('API_KEY')
+        self.client_id = -1
+    
     def make_get_request():
         pass
 
