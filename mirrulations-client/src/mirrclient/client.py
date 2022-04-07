@@ -3,6 +3,7 @@ import os
 import sys
 from json import dumps, loads, load
 from dotenv import load_dotenv
+from mirrserver.work_server import get_job
 import requests
 from requests.exceptions import ConnectionError as RequestConnectionError
 from requests.exceptions import HTTPError, RequestException
@@ -116,33 +117,23 @@ class Validator:
             response = requests.get(url, **kwargs)
             response.raise_for_status()
             return response
-        except HTTPError:
+        except (HTTPError, RequestConnectionError):
             print('There was an error handling this response.')
             return None
             # time.sleep(sleep_time)
+
+class ServerValidator(Validator):
+    def __init__(self, server_url):
+        self.server_url = server_url
+        super.__init__()
             
 
-    def put_request(self, url, result, params):
-        
-        endpoint = f'{url}/put_results'
-        if 'errors' in result:
-            data = {
-                    'job_id': job_id,
-                    'results': job_result
-                    }
-        else:
-            data = {'directory': get_output_path(job_result),
-                    'job_id': job_id,
-                    'results': job_result}
-        # params = {'client_id': self.client_id}
-        # params = {'client_id': self.client_id}
-        # print('****\n\n\n')
-        # print(dumps(data))
-        # print('****\n\n\n', flush=True)
-        # if files is not None:
-            # requests.put(endpoint, data=data files=files)
-        # else:
-        requests.put(endpoint, json=dumps(data), params=params)
+    def put_request(self, url, data, params):
+        try:
+            requests.put(f'{url}/put_results', json=dumps(data), params=params)
+
+        except (HTTPError, RequestConnectionError):
+            print('There was an error handling this response.')
 
 
 class TempClient:
@@ -150,9 +141,11 @@ class TempClient:
     This will eventually replace the client class. This is created so that Client code can be copied into it
     without removivng any existing code.
     """
-    def __init__(self):
+    def __init__(self, server_validator, api_validator):
         self.api_key = os.getenv('API_KEY')
         self.id = -1
+        self.server_validator = server_validator
+        self.api_validator = api_validator
     
     def get_id(self, validator, url):
         response = validator.get_request(f'{url}/get_client_id')
@@ -160,8 +153,8 @@ class TempClient:
         self.write_client_id('client.cfg')
         
 
-    def get_job(self, validator, url):
-        response = validator.get_request(url)
+    def get_job(self, get_validator, url):
+        response = get_validator.get_request(url)
         if response is None:
             raise NoJobsAvailableException()
         job = loads(response.text)
@@ -170,6 +163,21 @@ class TempClient:
         url = job[job_id]
         job_type = job['job_type']
         return job_id, url, job_type
+
+    def send_job(self, put_validator, url, job_id, job_type):
+        if 'errors' in job_result:
+            data = {
+                    'job_id': job_id,
+                    'results': job_result
+                    }
+        else:
+            data = {'directory': get_output_path(job_result),
+                    'job_id': job_id,
+                    'results': job_result}
+        params = {'client_id': self.client_id}
+
+    def job_operation(self):
+        job_id, url, job_type = get_job(self.server_validator, self.server_validator.server_url)
 
 
 
