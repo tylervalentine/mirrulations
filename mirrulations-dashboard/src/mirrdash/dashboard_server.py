@@ -1,6 +1,6 @@
 """
 This module creates the dashboard application that queries
-    the redis and mongo redis_dbs to return stats about
+    the redis and mongo databases to return stats about
     the number of jobs in progress/complete and the status
     of the containers.
 
@@ -12,7 +12,6 @@ from flask import Flask, jsonify, render_template
 from flask_cors import CORS
 from redis import Redis
 from mirrdash.sum_mongo_counts import connect_mongo_db, get_done_counts
-from mirrdash.jobs_queued_utils import get_jobs_queued_stats
 from dotenv import load_dotenv
 import docker
 
@@ -26,16 +25,12 @@ class Dashboard:
         CORS(self.app, resources={r'/data': {'origins': '*'}})
 
 
-def get_jobs_stats(redis_db):
-    # jobs_waiting_queue is a list in the redis_db 
-    # lists may not show up in redis-cli if queue presently empty
-    # this can eventually go away
-    jobs_waiting = int(redis_db.llen('jobs_waiting_queue'))
-
-    jobs_in_progress = int(redis_db.hlen('jobs_in_progress'))
+def get_jobs_stats(database):
+    jobs_waiting = int(database.llen('jobs_waiting_queue'))
+    jobs_in_progress = int(database.hlen('jobs_in_progress'))
     jobs_total_minus_jobs_done = jobs_waiting + jobs_in_progress
 
-    client_ids = redis_db.get('total_num_client_ids')
+    client_ids = database.get('total_num_client_ids')
     clients_total = int(client_ids) if client_ids is not None else 0
 
     return {
@@ -81,10 +76,6 @@ def create_server(database, docker_server, mongo_client):
         """ returns data as json and request status code """
         # Get the jobs stats in the redis db
         data = get_jobs_stats(dashboard.redis)
-
-        # Get the nums of jobs queued stats
-        jobs_queued_info = get_jobs_queued_stats(dashboard.redis)
-        data.update(jobs_queued_info)
 
         # Get the number of jobs done from the mongo db
         # and add it to the data
