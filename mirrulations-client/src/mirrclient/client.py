@@ -107,8 +107,14 @@ class Validator:
     def __init__(self):
         pass
     
-    def make_get_request(url):
-        pass
+    def get_request(request, url, sleep_time=60, **kwargs):
+        try:
+            response = requests.get(url, **kwargs)
+            response.raise_for_status()
+        except:
+            print('There was an error handling this response.')
+            time.sleep(sleep_time)
+            
 
     def make_post_request():
         pass
@@ -124,15 +130,23 @@ class TempClient:
         self.client_id = -1
     
     def get_client_id(validator, url):
-        client_id = read_client_id('client.cfg')
-        if client_id == -1:
-            endpoint = f'{url}/get_client_id'
-            response = assure_request(requests.get, endpoint)
-            client_id = int(response.json()['client_id'])
+        pass
+        # client_id = read_client_id('client.cfg')
+        # if client_id == -1:
+        #     endpoint = f'{url}/get_client_id'
+        #     response = assure_request(requests.get, endpoint)
+        #     client_id = int(response.json()['client_id'])
         
 
-    def make_post_request():
-        pass
+    def get_job(validator, url):
+        job = validator.get_request(url)
+        job = job['job']
+        job_id = list(job.keys())[0]
+        url = job[job_id]
+        job_type = job['job_type']
+        return job_id, url, job_type
+
+
 
 
 def perform_attachment_job(url):

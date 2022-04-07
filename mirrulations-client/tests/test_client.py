@@ -5,7 +5,7 @@ from pytest import fixture, raises
 import requests
 import requests_mock
 import mirrclient.client
-from mirrclient.client import Client, NoJobsAvailableException
+from mirrclient.client import Client, NoJobsAvailableException, TempClient, Validator
 from mirrclient.client import is_environment_variables_present
 # from mirrclient.client import execute_client_task
 from mirrclient.client import read_client_id
@@ -508,3 +508,14 @@ def test_api_call_has_api_key(mock_requests):
         client.perform_job('http://regulations.gov/job')
 
         assert '?api_key=KEY12345' in mock_requests.request_history[0].url
+
+
+def test_tempclient_gets_job(mock_requests):
+    client = TempClient()
+    with mock_requests:
+        mock_requests.get(
+            f'{BASE_URL}/get_job',
+            json={'job': {'1': 1, 'job_type': 'attachments'}},
+            status_code=200
+        )
+        assert ('1', 1, 'attachments') == client.get_job()
