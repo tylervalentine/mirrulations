@@ -537,24 +537,28 @@ def test_temp_client_throws_exception_when_no_jobs(mock_requests):
             client.get_job()
 
 
-def test_client_gets_existing_client_id(mocker):
-    client = TempClient()
-    mock_client_id = 99
-    write_mock_client_id(mocker)
-    read_mock_client_id(mocker, mock_client_id)
-    client.get_client_id()
-    assert mock_client_id == client.client_id
-
-
-def test_client_gets_client_id_from_server(mock_requests, mocker):
-    client = Client()
-    mock_client_id = 9
-    read_mock_client_id(mocker, -1)
-    write_mock_client_id(mocker)
+def test_temp_client_gets_existing_client_id(mock_requests):
+    server_validator = ServerValidator('http://test.com')
     with mock_requests:
         mock_requests.get(
-            f'{BASE_URL}/get_client_id',
-            json={'client_id': mock_client_id}
+            'http://test.com/get_client_id',
+            json={'client_id': 1},
+            status_code=200
         )
-        client.get_client_id()
-        assert mock_client_id == client.client_id
+        client = TempClient(server_validator, None)
+        client.get_id()
+        assert client.id == 1
+
+
+# def test_client_gets_client_id_from_server(mock_requests, mocker):
+#     client = Client()
+#     mock_client_id = 9
+#     read_mock_client_id(mocker, -1)
+#     write_mock_client_id(mocker)
+#     with mock_requests:
+#         mock_requests.get(
+#             f'{BASE_URL}/get_client_id',
+#             json={'client_id': mock_client_id}
+#         )
+#         client.get_client_id()
+#         assert mock_client_id == client.client_id

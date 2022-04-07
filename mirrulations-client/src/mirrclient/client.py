@@ -149,14 +149,15 @@ class TempClient:
     """
     def __init__(self, server_validator, api_validator):
         self.api_key = os.getenv('API_KEY')
-        self.id = -1
         self.server_validator = server_validator
         self.api_validator = api_validator
+        self.id = -1
     
     def get_id(self):
         response = self.server_validator.get_request('/get_client_id')
         self.id = int(response.json()['client_id'])
-        self.write_client_id('client.cfg')
+        with open('client.cfg', 'w', encoding='utf8') as file:
+            file.write(str(self.id))
         
 
     def get_job(self): ## TESTED
