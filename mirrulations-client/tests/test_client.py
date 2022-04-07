@@ -537,7 +537,7 @@ def test_temp_client_throws_exception_when_no_jobs(mock_requests):
             client.get_job()
 
 
-def test_temp_client_gets_existing_client_id(mock_requests):
+def test_temp_client_gets_id_from_server(mock_requests):
     server_validator = ServerValidator('http://test.com')
     with mock_requests:
         mock_requests.get(
@@ -550,15 +550,58 @@ def test_temp_client_gets_existing_client_id(mock_requests):
         assert client.id == 1
 
 
-# def test_client_gets_client_id_from_server(mock_requests, mocker):
-#     client = Client()
-#     mock_client_id = 9
-#     read_mock_client_id(mocker, -1)
-#     write_mock_client_id(mocker)
-#     with mock_requests:
-#         mock_requests.get(
-#             f'{BASE_URL}/get_client_id',
-#             json={'client_id': mock_client_id}
-#         )
-#         client.get_client_id()
-#         assert mock_client_id == client.client_id
+def test_temp_client_gets_id_from_server(mock_requests):
+    server_validator = ServerValidator('http://test.com')
+    with mock_requests:
+        mock_requests.get(
+            'http://test.com/get_client_id',
+            json={'client_id': 1},
+            status_code=200
+        )
+        client = TempClient(server_validator, None)
+        client.get_id()
+        assert client.id == 1
+
+
+def test_tempclient_performs_job(mock_requests):
+    client = TempClient()
+
+    mock_client_id = 9
+    read_mock_client_id(mocker, mock_client_id)
+
+    with mock_requests:
+        mock_requests.get(
+            f'{BASE_URL}/get_client_id',
+            json={'client_id': mock_client_id},
+            status_code=200
+        )
+        mock_requests.get(
+            f'{BASE_URL}/get_job',
+            json={'job': {'1': 'http://test.com'}},
+            status_code=200
+        )
+        mock_requests.put(
+            f'{BASE_URL}/put_results',
+            json={'success': 'The job was successfully completed'},
+            status_code=200
+        )
+
+        regulation_response = {"errors": [{
+            "status": "500",
+            "title": "INTERNAL_SERVER_ERROR",
+            "detail": "Incorrect result size: expected 1, actual 2"}]
+        }
+
+        mock_requests.get(
+            'http://test.com',
+            json=regulation_response,
+            status_code=500
+        )
+
+        try:
+            client.execute_task()
+        except requests.exceptions.HTTPError as exception:
+            assert False, f'Raised an exception: {exception}'
+
+        response = mock_requests.request_history[-1]
+        assert 'errors' in response.json()

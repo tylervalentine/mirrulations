@@ -184,13 +184,10 @@ class TempClient:
     def job_operation(self): # TODO: TEST
         job_id, job_url, job_type = get_job(self.server_validator, self.server_validator.server_url)
         if job_type == 'attachments':
-            print("this is an attachment")
             result = perform_attachment_job(job_url)
-            print("this is the result", result)
         else:
             result = self.api_validator.get_request(job_url + f'?api_key={self.api_key}').json()
         self.send_job_results(job_id, result)
-        print('Job complete!\n')
 
 
 
