@@ -9,8 +9,12 @@ from requests.exceptions import HTTPError, RequestException
 
 
 class NoJobsAvailableException(Exception):
-    pass
+    def __init__(self, message="There are no jobs available"):
+            self.message = message
+            super().__init__(self.message)
 
+    def __str__(self):
+        return f'{self.message}'
 
 class Client:
 
@@ -107,17 +111,38 @@ class Validator:
     def __init__(self):
         pass
     
-    def get_request(request, url, sleep_time=60, **kwargs):
+    def get_request(self, url, sleep_time=60, **kwargs):
         try:
             response = requests.get(url, **kwargs)
             response.raise_for_status()
-        except:
+            return response
+        except HTTPError:
             print('There was an error handling this response.')
-            time.sleep(sleep_time)
+            return None
+            # time.sleep(sleep_time)
             
 
-    def make_post_request():
-        pass
+    def put_request(self, url, result, params):
+        
+        endpoint = f'{url}/put_results'
+        if 'errors' in result:
+            data = {
+                    'job_id': job_id,
+                    'results': job_result
+                    }
+        else:
+            data = {'directory': get_output_path(job_result),
+                    'job_id': job_id,
+                    'results': job_result}
+        # params = {'client_id': self.client_id}
+        # params = {'client_id': self.client_id}
+        # print('****\n\n\n')
+        # print(dumps(data))
+        # print('****\n\n\n', flush=True)
+        # if files is not None:
+            # requests.put(endpoint, data=data files=files)
+        # else:
+        requests.put(endpoint, json=dumps(data), params=params)
 
 
 class TempClient:
@@ -127,19 +152,19 @@ class TempClient:
     """
     def __init__(self):
         self.api_key = os.getenv('API_KEY')
-        self.client_id = -1
+        self.id = -1
     
-    def get_client_id(validator, url):
-        pass
-        # client_id = read_client_id('client.cfg')
-        # if client_id == -1:
-        #     endpoint = f'{url}/get_client_id'
-        #     response = assure_request(requests.get, endpoint)
-        #     client_id = int(response.json()['client_id'])
+    def get_id(self, validator, url):
+        response = validator.get_request(f'{url}/get_client_id')
+        self.id = int(response.json()['client_id'])
+        self.write_client_id('client.cfg')
         
 
-    def get_job(validator, url):
-        job = validator.get_request(url)
+    def get_job(self, validator, url):
+        response = validator.get_request(url)
+        if response is None:
+            raise NoJobsAvailableException()
+        job = loads(response.text)
         job = job['job']
         job_id = list(job.keys())[0]
         url = job[job_id]

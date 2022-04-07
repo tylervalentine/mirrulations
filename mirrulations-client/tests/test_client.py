@@ -512,10 +512,26 @@ def test_api_call_has_api_key(mock_requests):
 
 def test_tempclient_gets_job(mock_requests):
     client = TempClient()
+    validator = Validator()
     with mock_requests:
         mock_requests.get(
-            f'{BASE_URL}/get_job',
+            'http://test.com/get_job',
             json={'job': {'1': 1, 'job_type': 'attachments'}},
             status_code=200
         )
-        assert ('1', 1, 'attachments') == client.get_job()
+        job_info = client.get_job(validator, 'http://test.com/get_job')
+        assert ('1', 1, 'attachments') == job_info
+
+
+def test_temp_client_throws_exception_when_no_jobs(mock_requests):
+    client = TempClient()
+    validator = Validator()
+    with mock_requests:
+        mock_requests.get(
+            'http://test.com/get_job',
+            json={'error': 'No jobs available'},
+            status_code=403
+        )
+
+        with raises(NoJobsAvailableException):
+            client.get_job(validator, 'http://test.com/get_job')
