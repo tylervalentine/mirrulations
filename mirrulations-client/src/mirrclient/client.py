@@ -121,19 +121,25 @@ class Validator:
             print('There was an error handling this response.')
             return None
             # time.sleep(sleep_time)
-
-class ServerValidator(Validator):
-    def __init__(self, server_url):
-        self.server_url = server_url
-        super.__init__()
             
-
     def put_request(self, url, data, params):
         try:
             requests.put(f'{url}/put_results', json=dumps(data), params=params)
 
         except (HTTPError, RequestConnectionError):
             print('There was an error handling this response.')
+
+
+class ServerValidator(Validator):
+    def __init__(self, server_url):
+        self.server_url = server_url
+        super.__init__
+
+    def get_request(self, endpoint, sleep_time=60, **kwargs):
+        return super().get_request(f'{self.server_url}' + endpoint, sleep_time, **kwargs)
+    
+    def put_request(self, endpoint, data, params):
+        return super().put_request(f'{self.server_url}' + endpoint, data, params)
 
 
 class TempClient:
@@ -147,14 +153,14 @@ class TempClient:
         self.server_validator = server_validator
         self.api_validator = api_validator
     
-    def get_id(self, validator, url):
-        response = validator.get_request(f'{url}/get_client_id')
+    def get_id(self):
+        response = self.server_validator.get_request('/get_client_id')
         self.id = int(response.json()['client_id'])
         self.write_client_id('client.cfg')
         
 
-    def get_job(self, get_validator, url):
-        response = get_validator.get_request(url)
+    def get_job(self): ## TESTED
+        response = self.server_validator.get_request('/get_job')
         if response is None:
             raise NoJobsAvailableException()
         job = loads(response.text)
@@ -164,20 +170,26 @@ class TempClient:
         job_type = job['job_type']
         return job_id, url, job_type
 
-    def send_job(self, put_validator, url, job_id, job_type):
-        if 'errors' in job_result:
-            data = {
+    def send_job(self, job_id, job_result, job_type): # TODO: TEST
+        data = {
                     'job_id': job_id,
                     'results': job_result
                     }
-        else:
-            data = {'directory': get_output_path(job_result),
-                    'job_id': job_id,
-                    'results': job_result}
-        params = {'client_id': self.client_id}
+        if 'errors' not in job_result:
+            data['directory'] = get_output_path(job_result)
 
-    def job_operation(self):
-        job_id, url, job_type = get_job(self.server_validator, self.server_validator.server_url)
+        self.server_validator.put_request(data, {'client_id': self.id})
+
+    def job_operation(self): # TODO: TEST
+        job_id, job_url, job_type = get_job(self.server_validator, self.server_validator.server_url)
+        if job_type == 'attachments':
+            print("this is an attachment")
+            result = perform_attachment_job(job_url)
+            print("this is the result", result)
+        else:
+            result = self.api_validator.get_request(job_url + f'?api_key={self.api_key}').json()
+        self.send_job_results(job_id, result)
+        print('Job complete!\n')
 
 
 

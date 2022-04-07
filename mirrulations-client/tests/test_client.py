@@ -5,7 +5,7 @@ from pytest import fixture, raises
 import requests
 import requests_mock
 import mirrclient.client
-from mirrclient.client import Client, NoJobsAvailableException, TempClient, Validator
+from mirrclient.client import Client, NoJobsAvailableException, TempClient, Validator, ServerValidator
 from mirrclient.client import is_environment_variables_present
 # from mirrclient.client import execute_client_task
 from mirrclient.client import read_client_id
@@ -511,21 +511,21 @@ def test_api_call_has_api_key(mock_requests):
 
 
 def test_tempclient_gets_job(mock_requests):
-    client = TempClient()
-    validator = Validator()
+    server_validator = ServerValidator('http://test.com')
+    client = TempClient(server_validator, None)
     with mock_requests:
         mock_requests.get(
             'http://test.com/get_job',
             json={'job': {'1': 1, 'job_type': 'attachments'}},
             status_code=200
         )
-        job_info = client.get_job(validator, 'http://test.com/get_job')
+        job_info = client.get_job()
         assert ('1', 1, 'attachments') == job_info
 
 
 def test_temp_client_throws_exception_when_no_jobs(mock_requests):
-    client = TempClient()
-    validator = Validator()
+    server_validator = ServerValidator('http://test.com')
+    client = TempClient(server_validator, None)
     with mock_requests:
         mock_requests.get(
             'http://test.com/get_job',
@@ -534,4 +534,27 @@ def test_temp_client_throws_exception_when_no_jobs(mock_requests):
         )
 
         with raises(NoJobsAvailableException):
-            client.get_job(validator, 'http://test.com/get_job')
+            client.get_job()
+
+
+def test_client_gets_existing_client_id(mocker):
+    client = TempClient()
+    mock_client_id = 99
+    write_mock_client_id(mocker)
+    read_mock_client_id(mocker, mock_client_id)
+    client.get_client_id()
+    assert mock_client_id == client.client_id
+
+
+def test_client_gets_client_id_from_server(mock_requests, mocker):
+    client = Client()
+    mock_client_id = 9
+    read_mock_client_id(mocker, -1)
+    write_mock_client_id(mocker)
+    with mock_requests:
+        mock_requests.get(
+            f'{BASE_URL}/get_client_id',
+            json={'client_id': mock_client_id}
+        )
+        client.get_client_id()
+        assert mock_client_id == client.client_id
