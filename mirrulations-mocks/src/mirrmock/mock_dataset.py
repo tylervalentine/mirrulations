@@ -5,7 +5,7 @@ import pytz
 
 class MockDataSet:
 
-    def __init__(self, num_results, start_date='2020-01-01 00:00:00'):
+    def __init__(self, num_results, job_type='any', start_date='2020-01-01 00:00:00'):
         utc = pytz.utc
 
         self.start = datetime.datetime.fromisoformat(start_date)\
@@ -14,6 +14,7 @@ class MockDataSet:
         self.counter = 1
         self.num_results = num_results
         self.results = []
+        self.type = job_type
 
     def get_results(self):
 
@@ -38,10 +39,20 @@ class MockDataSet:
         links = {
             'self': f'http://a.b.c/{self.counter}'
         }
+        relationships = {
+                "attachments" : {
+                    "links" : {
+                    "self" : "api_attachment_url",
+                    "related" : "api_attachment_url"
+	            }
+            }
+        }
         return {
             'id': f'ABC-2020-{self.counter}',
             'attributes': attributes,
-            'links': links
+            'type': self.type,
+            'links': links,
+            'relationships': relationships
         }
 
     def make_full_pages_of_results(self, count, total_count):

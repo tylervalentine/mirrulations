@@ -1,5 +1,4 @@
 from json import dumps
-from fakeredis import FakeRedis, FakeServer
 from pytest import fixture
 from mirrserver.work_server import create_server
 from mirrmock.mock_flask_server import mock_work_server
@@ -8,13 +7,6 @@ from mirrmock.mock_flask_server import mock_work_server
 @fixture(name='mock_server')
 def fixture_mock_server():
     return mock_work_server(create_server)
-
-
-def test_create_server_not_connected():
-    redis_server = FakeServer()
-    mock_db = FakeRedis(server=redis_server)
-    redis_server.connected = False
-    assert create_server(mock_db) is None
 
 
 def test_create_mock_database(mock_server):
@@ -69,7 +61,7 @@ def test_get_job_has_no_available_job(mock_server):
     params = {'client_id': 1}
     response = mock_server.client.get('/get_job', query_string=params)
     assert response.status_code == 403
-    expected = {'error': 'There are no jobs available'}
+    expected = {'error': 'No jobs available'}
     assert response.get_json() == expected
 
 
@@ -127,7 +119,6 @@ def test_put_results_returns_directory_error(mock_server):
 def test_put_results_without_client_id(mock_server):
     data = dumps({'results': {'': ''}, 'directory': None})
     response = mock_server.client.put('/put_results', json=data)
-    assert response.status_code == 401
     assert response.get_json() == {'error': 'Client ID was not provided'}
 
 
@@ -166,6 +157,28 @@ def test_client_attempts_to_put_job_that_does_not_exist(mock_server):
     assert response.get_json() == expected
 
 
+def test_put_resuts_no_database(mock_server, mocker):
+
+    mock_write_results(mocker)
+    mock_server.redis.hset('jobs_in_progress', 2, 3)
+    mock_server.redis.hset('client_jobs', 2, 1)
+    mock_server.redis.set('total_num_client_ids', 1)
+
+    data = dumps({'job_id': 2, 'results': {"errors": [{
+        "status": "500",
+        "title": "INTERNAL_SERVER_ERROR",
+        "detail": "Cannot connect to the database"}]}})
+
+    params = {'client_id': 1}
+    mock_server.redis_server.connected = False
+    response = mock_server.client.put('/put_results',
+                                      json=data, query_string=params)
+    assert response.status_code == 500
+    # Not sure this is the best way to do this...
+    expected = {'error': 'Cannot connect to the database'}
+    assert response.get_json() == expected
+
+
 def test_put_results_returns_correct_job(mock_server, mocker):
 
     mock_write_results(mocker)
@@ -180,7 +193,7 @@ def test_put_results_returns_correct_job(mock_server, mocker):
     response = mock_server.client.put('/put_results',
                                       json=data, query_string=params)
     assert response.status_code == 200
-    expected = {'success': 'The job was successfully completed'}
+    expected = {'success': 'Job was successfully completed'}
     assert response.get_json() == expected
     assert len(mock_server.data.added) == 1
 
@@ -200,7 +213,7 @@ def test_put_results_returns_correct_attachment_job(mock_server, mocker):
     response = mock_server.client.put('/put_results',
                                       json=data, query_string=params)
     assert response.status_code == 200
-    expected = {'success': 'The job was successfully completed'}
+    expected = {'success': 'Job was successfully completed'}
     assert response.get_json() == expected
     assert len(mock_server.data.added) == 1
 
@@ -222,7 +235,7 @@ def test_put_results_returns_500_error_from_regulations(mock_server, mocker):
                                       json=data, query_string=params)
     assert response.status_code == 200
     # Not sure this is the best way to do this...
-    expected = {'success': 'The job was successfully completed'}
+    expected = {'success': 'Job was successfully completed'}
     assert response.get_json() == expected
 
     assert mock_server.redis.hlen('invalid_jobs') == 1
@@ -246,7 +259,7 @@ def test_put_results_returns_404_error_from_regulations(mock_server, mocker):
                                       json=data, query_string=params)
     assert response.status_code == 200
     # Not sure this is the best way to do this...
-    expected = {'success': 'The job was successfully completed'}
+    expected = {'success': 'Job was successfully completed'}
     assert response.get_json() == expected
 
     assert mock_server.redis.hlen('invalid_jobs') == 1
