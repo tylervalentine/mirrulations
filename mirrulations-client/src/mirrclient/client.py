@@ -79,7 +79,7 @@ class Client:
         print('Sending result back to server...')
         if job_type == 'attachments':
             print("this is an attachment")
-            result = self.perform_attachment_job(url)
+            result = perform_attachment_job(url)
             print("this is the result", result)
         else:
             result = self.perform_job(url)
