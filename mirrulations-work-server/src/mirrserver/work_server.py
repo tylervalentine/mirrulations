@@ -24,6 +24,17 @@ def check_valid_request_client_id(workserver, client_id):
     return (True,)
 
 
+def decrement_count(workserver, job_type):
+    if job_type == 'attachments':
+        workserver.redis.lpop('num_jobs_attachments_waiting')
+    elif job_type == 'comments':
+        workserver.redis.lpop('num_jobs_comments_waiting')
+    elif job_type == 'documents':
+        workserver.redis.lpop('num_jobs_documents_waiting')
+    elif job_type == 'dockets':
+        workserver.redis.lpop('num_jobs_dockets_waiting')
+
+
 def get_job(workserver):
     check_for_database(workserver)
     client_id = request.args.get('client_id')
@@ -39,14 +50,7 @@ def get_job(workserver):
     workserver.redis.hset('jobs_in_progress', job_id, url)
     workserver.redis.hset('client_jobs', job_id, client_id)
 
-    if job_type == 'attachments':
-        workserver.redis.lpop('num_jobs_attachments_waiting')
-    elif job_type == 'comments':
-        workserver.redis.lpop('num_jobs_comments_waiting')
-    elif job_type == 'documents':
-        workserver.redis.lpop('num_jobs_documents_waiting')
-    elif job_type == 'dockets':
-        workserver.redis.lpop('num_jobs_dockets_waiting')
+    decrement_count(workserver, job_type)
 
     return True, job_id, url, job_type
 
