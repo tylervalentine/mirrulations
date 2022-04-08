@@ -7,9 +7,6 @@ import requests_mock
 import mirrclient.client
 from mirrclient.client import  NoJobsAvailableException, TempClient, Validator, ServerValidator
 from mirrclient.client import is_environment_variables_present
-# from mirrclient.client import execute_client_task
-#from mirrclient.client import read_client_id
-
 
 BASE_URL = 'http://work_server:8080'
 
@@ -24,11 +21,6 @@ def mock_env():
 @fixture(name='mock_requests')
 def fixture_mock_requests():
     return requests_mock.Mocker()
-
-
-# def test_client_url():
-#     client = Client()
-#     assert client.url == BASE_URL
 
 
 def test_check_all_env_values():
@@ -95,10 +87,8 @@ def write_mock_client_id(mocker):
         return_value=''
     )
 
-######################################
-# Refactoring tests
 
-def test_tempclient_gets_job(mock_requests):
+def test_client_gets_job(mock_requests):
     server_validator = ServerValidator('http://test.com')
     client = TempClient(server_validator, None)
     with mock_requests:
@@ -111,7 +101,7 @@ def test_tempclient_gets_job(mock_requests):
         assert ('1', 1, 'attachments') == job_info
 
 
-def test_temp_client_throws_exception_when_no_jobs(mock_requests):
+def test_client_throws_exception_when_no_jobs(mock_requests):
     server_validator = ServerValidator('http://test.com')
     client = TempClient(server_validator, None)
     with mock_requests:
@@ -125,7 +115,7 @@ def test_temp_client_throws_exception_when_no_jobs(mock_requests):
             client.get_job()
 
 
-def test_temp_client_gets_id_from_server(mock_requests):
+def test_client_gets_id_from_server(mock_requests):
     server_validator = ServerValidator('http://test.com')
     with mock_requests:
         mock_requests.get(
@@ -138,7 +128,7 @@ def test_temp_client_gets_id_from_server(mock_requests):
         assert client.id == 1
 
 
-def test_temp_client_gets_id_from_server(mock_requests):
+def test_client_gets_id_from_server(mock_requests):
     server_validator = ServerValidator('http://test.com')
     with mock_requests:
         mock_requests.get(
@@ -151,7 +141,7 @@ def test_temp_client_gets_id_from_server(mock_requests):
         assert client.id == 1
 
 
-def test_api_call_has_api_key2(mock_requests):
+def test_api_call_has_api_key(mock_requests):
     validator = Validator()
     client = TempClient(None, validator)
     client.api_key = 'KEY12345'
@@ -166,7 +156,7 @@ def test_api_call_has_api_key2(mock_requests):
         assert '?api_key=KEY12345' in mock_requests.request_history[0].url
 
 
-def test_tempclient_performs_job(mock_requests):
+def test_client_performs_job(mock_requests):
     api_validator = Validator()
     server_validator = ServerValidator('http://test.com')
     client = TempClient(server_validator, api_validator)
@@ -196,7 +186,7 @@ def test_tempclient_performs_job(mock_requests):
         assert saved_data['job_type'] == 'documents'
 
 
-def test_client_returns_403_error_to_server2(mock_requests):
+def test_client_returns_403_error_to_server(mock_requests):
 
     api_validator = Validator()
     server_validator = ServerValidator('http://test.com')
@@ -232,7 +222,7 @@ def test_client_returns_403_error_to_server2(mock_requests):
         assert '403' in response.json()
 
 
-def test_client_returns_400_error_to_server2(mock_requests, mocker):
+def test_client_returns_400_error_to_server(mock_requests, mocker):
     api_validator = Validator()
     server_validator = ServerValidator('http://test.com')
     client = TempClient(server_validator, api_validator)
@@ -266,9 +256,7 @@ def test_client_returns_400_error_to_server2(mock_requests, mocker):
 
 
 
-
-
-def test_client_returns_400_error_to_server2(mock_requests, mocker):
+def test_client_returns_500_error_to_server(mock_requests, mocker):
     api_validator = Validator()
     server_validator = ServerValidator('http://test.com')
     client = TempClient(server_validator, api_validator)
@@ -303,7 +291,7 @@ def test_client_returns_400_error_to_server2(mock_requests, mocker):
         assert '500' in response.json()
 
 
-def test_client_sends_attachment_results2(mock_requests, mocker):
+def test_client_sends_attachment_results(mock_requests, mocker):
     api_validator = Validator()
     server_validator = ServerValidator('http://test.com')
     client = TempClient(server_validator, api_validator)
