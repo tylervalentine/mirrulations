@@ -7,17 +7,17 @@ def test_get_client_id_with_non_numerical_client_id():
     validator = GetClientIDValidator()
     client_id = 'a'
     with pytest.raises(InvalidClientIDException):
-        validator.check_get_job_id(client_id)
+        validator.check_get_client_id(client_id)
 
 
 def test_get_client_id_too_high_client_id():
     validator = GetClientIDValidator()
     client_id = '25'
     with pytest.raises(InvalidClientIDException):
-        validator.check_get_job_id(client_id)
+        validator.check_get_client_id(client_id)
 
 
 def test_get_client_id_valid_client_id():
     validator = GetClientIDValidator()
     client_id = '10'
-    assert validator.check_get_job_id(client_id)
+    assert validator.check_get_client_id(client_id)

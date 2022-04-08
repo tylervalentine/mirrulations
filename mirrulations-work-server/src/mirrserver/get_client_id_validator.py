@@ -7,17 +7,9 @@ class InvalidClientIDException(Exception):
     status_code = 401
 
 
-class MissingClientIDException(Exception):
-    """
-    Raised when the client ID is missing
-    """
-    message = {'error': 'Client ID was not provided'}
-    status_code = 401
-
-
 class GetClientIDValidator():
-    """Validates the results sent by the client"""
-    def check_get_job_id(self, client_id):
+    """Validates the client_id sent by the client"""
+    def check_get_client_id(self, client_id):
         if client_id is None:
             client_id = '1'
             return True
