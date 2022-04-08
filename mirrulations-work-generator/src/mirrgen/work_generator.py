@@ -1,4 +1,3 @@
-from email import generator
 import os
 import time
 import dotenv
@@ -10,14 +9,13 @@ from mirrcore.job_queue import JobQueue
 from mirrcore.data_storage import DataStorage
 from mirrcore.redis_check import is_redis_available
 
+
 class WorkGenerator:
 
     def __init__(self, job_queue, api, datastorage):
         self.job_queue = job_queue
         self.api = api
         self.processor = ResultsProcessor(job_queue, datastorage)
-        
-    
 
     def download(self, endpoint):
         # Gets the timestamp of the last known job in queue
@@ -32,7 +30,6 @@ class WorkGenerator:
             self.processor.process_results(result)
             timestamp = result['data'][-1]['attributes']['lastModifiedDate']
             self.job_queue.set_last_timestamp_string(endpoint, timestamp)
-        
 
 
 if __name__ == '__main__':
@@ -61,12 +58,8 @@ if __name__ == '__main__':
         generator.download('dockets')
         generator.download('documents')
         generator.download('comments')
-        
-
 
     while True:
         generate_work()
         # Sleeps for 6 hours
         time.sleep(60 * 60 * 6)
-    
-    
