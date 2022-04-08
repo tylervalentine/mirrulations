@@ -27,4 +27,3 @@ def test_adds_two_jobs_if_is_comment():
     processor = ResultsProcessor(JobQueue(database), MockDataStorage())
     processor.process_results(json.loads(results[0]['text']))
     assert database.llen('jobs_waiting_queue') == 2
-
