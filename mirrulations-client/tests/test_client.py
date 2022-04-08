@@ -1,10 +1,8 @@
 import os
 import json
-from functools import partial
 from pytest import fixture, raises
 import requests
 import requests_mock
-import mirrclient.client
 from mirrclient.client import NoJobsAvailableException, TempClient
 from mirrclient.client import Validator, ServerValidator
 from mirrclient.client import is_environment_variables_present
@@ -52,13 +50,6 @@ def test_check_no_api_key():
     # Need to delete api key env variable set by mock_env fixture
     del os.environ['API_KEY']
     assert is_environment_variables_present() is False
-
-
-def mock_assure_request(mocker):
-    mocker.patch(
-        'mirrclient.client.Client.get_job',
-        side_effect=partial(mirrclient.client.assure_request, sleep_time=0)
-    )
 
 
 def mock_get_job(mocker):
@@ -210,7 +201,7 @@ def test_client_returns_403_error_to_server(mock_requests):
         assert '403' in response.json()
 
 
-def test_client_returns_400_error_to_server(mock_requests, mocker):
+def test_client_returns_400_error_to_server(mock_requests):
     api_validator = Validator()
     server_validator = ServerValidator('http://test.com')
     client = TempClient(server_validator, api_validator)
@@ -243,7 +234,7 @@ def test_client_returns_400_error_to_server(mock_requests, mocker):
         assert '400' in response.json()
 
 
-def test_client_returns_500_error_to_server(mock_requests, mocker):
+def test_client_returns_500_error_to_server(mock_requests):
     api_validator = Validator()
     server_validator = ServerValidator('http://test.com')
     client = TempClient(server_validator, api_validator)
@@ -278,7 +269,7 @@ def test_client_returns_500_error_to_server(mock_requests, mocker):
         assert '500' in response.json()
 
 
-def test_client_sends_attachment_results(mock_requests, mocker):
+def test_client_sends_attachment_results(mock_requests):
     api_validator = Validator()
     server_validator = ServerValidator('http://test.com')
     client = TempClient(server_validator, api_validator)
@@ -300,13 +291,12 @@ def test_client_sends_attachment_results(mock_requests, mocker):
         client.job_operation()
 
         mock_requests.put(f'{BASE_URL}/put_results', text='{}')
-        client.job_operation
+        client.job_operation()
         put_request = mock_requests.request_history[1]
         json_data = json.loads(put_request.json())
         saved_data = json_data['results']['data']
 
         assert saved_data['attachments_text'] == ['http://url.com']
-        assert saved_data['type'] == 'attachment'
         assert saved_data['id'] == 'http://url.com'
         assert saved_data['attributes']['agencyId'] is None
         assert saved_data['attributes']['docketId'] is None
