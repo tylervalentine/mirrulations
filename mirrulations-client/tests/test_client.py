@@ -296,6 +296,7 @@ def test_client_sends_attachment_results(mock_requests):
         assert saved_data['attributes']['docketId'] is None
         assert saved_data['attributes']['commentOnDocumentId'] is None
 
+
 def test_get_output_path_error():
     results = {'error': 'error'}
     output_path = get_output_path(results)
