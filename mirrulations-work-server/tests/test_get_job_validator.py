@@ -1,5 +1,4 @@
 from mirrserver.get_job_validator import GetJobValidator
-from mirrserver.get_job_validator import NoJobsException
 from mirrserver.get_job_validator import MissingClientIDException
 import pytest
 

@@ -150,7 +150,6 @@ def create_server(database):
             return jsonify(body), 500
         return jsonify({'job': {str(values[0]): values[1],
                         'job_type': values[2]}}), 200
-        
 
     @workserver.app.route('/put_results', methods=['PUT'])
     def _put_results():
@@ -159,12 +158,9 @@ def create_server(database):
         try:
             validator = workserver.put_results_validator.\
                 check_put_results(data, client_id)
-        except InvalidResultsException as invalid_result:
+        except (InvalidResultsException, InvalidClientIDException,
+                MissingClientIDException) as invalid_result:
             return jsonify(invalid_result.message), invalid_result.status_code
-        except InvalidClientIDException as invalid_id:
-            return jsonify(invalid_id.message), invalid_id.status_code
-        except MissingClientIDException as missing_id:
-            return jsonify(missing_id.message), missing_id.status_code
         success, *values = put_results(workserver, data)
         if not success:
             return tuple(values)

@@ -22,7 +22,7 @@ class MissingClientIDException(Exception):
     message = {'error': 'Client ID was not provided'}
     status_code = 401
 
-    
+
 class GetJobValidator():
     """Validates the jobs sent by the client"""
     def check_get_jobs(self, client_id):
@@ -32,7 +32,6 @@ class GetJobValidator():
             raise MissingClientIDException()
         if client_id.isdigit() or isinstance(client_id, int):
             client_id = int(client_id)
-            if (client_id < 20 and client_id > 0):
+            if 0 < client_id < 20:
                 return True
         raise InvalidClientIDException()
-
