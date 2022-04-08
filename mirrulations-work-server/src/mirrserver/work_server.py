@@ -3,12 +3,13 @@ from flask import Flask, json, jsonify, request
 import redis
 from mirrcore.data_storage import DataStorage
 from mirrcore.attachment_saver import AttachmentSaver
-from mirrserver.put_results_validator import JobCompleted, PutResultsValidator
+from mirrserver.put_results_validator import PutResultsValidator
 from mirrserver.put_results_validator import InvalidClientIDException
 from mirrserver.put_results_validator import InvalidResultsException
 from mirrserver.put_results_validator import MissingClientIDException
 from mirrserver.get_client_id_validator import GetClientIDValidator
-from mirrserver.get_job_validator import GetJobValidator, NoJobsException
+from mirrserver.get_job_validator import GetJobValidator
+from mirrserver.get_job_validator import NoJobsException
 
 
 class WorkServer:
@@ -23,19 +24,21 @@ class WorkServer:
 
 
 def check_for_database(workserver):
-    # This will either succeed or raise an exception
+    '''This will either succeed or raise an exception'''
     workserver.redis.ping()
 
 
 def check_valid_request_client_id(workserver, client_id):
-    # if client_id is None:
-    #     return False, jsonify({'error': 'Client ID was not provided'}), 401
+    '''if client_id is None:'''
+    '''     return False, jsonify({'error': 'Client ID was not provided'}), 401'''
     if not check_client_id_is_valid(workserver, client_id):
         return False, jsonify({'error': 'Invalid client ID'}), 401
     return (True,)
 
 
 def get_job(workserver):
+    '''Takes client's put endpoints validates wheter or not its a usable job...
+    if so it returns the job with an ID, URL and a Type'''
     check_for_database(workserver)
     client_id = request.args.get('client_id')
     if client_id is None:
@@ -155,8 +158,9 @@ def create_server(database):
     def _put_results():
         data = json.loads(request.get_json())
         client_id = request.args.get('client_id')
+        
         try:
-            workserver.put_results_validator.check_put_results(data, client_id)
+           validator = workserver.put_results_validator.check_put_results(data, client_id)
         except InvalidResultsException as invalid_results:
             return jsonify(invalid_results.message), invalid_results.status_code
         except InvalidClientIDException as invalid_id:
@@ -166,24 +170,18 @@ def create_server(database):
         success, *values = put_results(workserver, data)
         if not success:
             return tuple(values)
-        return JobCompleted.message, JobCompleted.status_code
+        return jsonify(validator[0]),validator[1]
 
     @workserver.app.route('/get_client_id', methods=['GET'])
     def _get_client_id():
-        client_id = request.args.get('client_id')
         try:
             success, *values = get_client_id(workserver)
             if not success:
                 return tuple(values)
-            workserver.get_client_id_validator.check_get_client_id(client_id)
-        except InvalidClientIDException as invalid_id:
-            return jsonify(invalid_id.message), invalid_id.status_code
-        except MissingClientIDException as missing_id:
-            return jsonify(missing_id.message), missing_id.status_code
+            return jsonify({'client_id': values[0]}), 200
         except redis.exceptions.ConnectionError:
             body = {'error': 'Cannot connect to the database'}
             return jsonify(body), 500
-        return jsonify({'client_id': values[0]}), 200
 
     return workserver
 
