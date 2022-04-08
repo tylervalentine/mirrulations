@@ -37,20 +37,16 @@ def get_jobs_stats(redis_db):
     client_ids = redis_db.get('total_num_client_ids')
     clients_total = int(client_ids) if client_ids is not None else 0
 
-    attachments_waiting = int(redis_db.llen('num_jobs_attachments_waiting'))
-    comments_waiting = int(redis_db.llen('num_jobs_comments_waiting'))
-    documents_waiting = int(redis_db.llen('num_jobs_documents_waiting'))
-    dockets_waiting = int(redis_db.llen('num_jobs_dockets_waiting'))
 
     return {
-        'num_jobs_waiting': jobs_waiting,
-        'num_jobs_in_progress': jobs_in_progress,
+        'num_jobs_waiting': int(redis_db.llen('jobs_waiting_queue')),
+        'num_jobs_in_progress': int(redis_db.hlen('jobs_in_progress')),
         'jobs_total': jobs_total_minus_jobs_done,
         'clients_total': clients_total,
-        'num_jobs_attachments_queued': attachments_waiting,
-        'num_jobs_comments_queued': comments_waiting,
-        'num_jobs_documents_queued': documents_waiting,
-        'num_jobs_dockets_queued': dockets_waiting
+        'num_jobs_attachments_queued': int(redis_db.llen('num_jobs_attachments_waiting')),
+        'num_jobs_comments_queued': int(redis_db.llen('num_jobs_comments_waiting')),
+        'num_jobs_documents_queued': int(redis_db.llen('num_jobs_documents_waiting')),
+        'num_jobs_dockets_queued': int(redis_db.llen('num_jobs_dockets_waiting'))
     }
 
 
