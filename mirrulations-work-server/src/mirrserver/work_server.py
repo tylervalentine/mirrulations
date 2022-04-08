@@ -165,7 +165,7 @@ def create_server(database):
             success, *values = get_client_id(workserver)
             if not success:
                 return tuple(values)
-            workserver.get_client_id_validator.check_get_job_id(client_id)
+            workserver.get_client_id_validator.check_get_client_id(client_id)
         except InvalidClientIDException as invalid_id:
             return jsonify(invalid_id.message), invalid_id.status_code
         except MissingClientIDException as missing_id:
