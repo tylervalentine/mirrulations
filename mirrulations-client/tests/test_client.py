@@ -5,11 +5,10 @@ from pytest import fixture, raises
 import requests
 import requests_mock
 import mirrclient.client
-# from mirrclient.client import Client, NoJobsAvailableException, TempClient, Validator, ServerValidator
-from mirrclient.client import NoJobsAvailableException, TempClient, Validator, ServerValidator
+from mirrclient.client import Client, NoJobsAvailableException, TempClient, Validator, ServerValidator
 from mirrclient.client import is_environment_variables_present
 # from mirrclient.client import execute_client_task
-# from mirrclient.client import read_client_id
+from mirrclient.client import read_client_id
 
 
 BASE_URL = 'http://work_server:8080'
@@ -509,7 +508,8 @@ def test_api_call_has_api_key(mock_requests):
         client.perform_job('http://regulations.gov/job')
 
         assert '?api_key=KEY12345' in mock_requests.request_history[0].url
-
+######################################
+# Refactoring tests
 
 def test_tempclient_gets_job(mock_requests):
     server_validator = ServerValidator('http://test.com')
@@ -564,6 +564,21 @@ def test_temp_client_gets_id_from_server(mock_requests):
         assert client.id == 1
 
 
+def test_api_call_has_api_key2(mock_requests):
+    validator = Validator()
+    client = TempClient(None, validator)
+    client.api_key = 'KEY12345'
+    with mock_requests:
+        mock_requests.get(
+            'http://regulations.gov/job',
+            json={'data': {'foo': 'bar'}},
+            status_code=200
+        )
+        client.perform_job('http://regulations.gov/job')
+
+        assert '?api_key=KEY12345' in mock_requests.request_history[0].url
+
+
 def test_tempclient_performs_job(mock_requests):
     api_validator = Validator()
     server_validator = ServerValidator('http://test.com')
@@ -592,3 +607,137 @@ def test_tempclient_performs_job(mock_requests):
         assert saved_data['attributes'] == {'agencyId': 'NOAA'}
         assert saved_data['id'] == '1'
         assert saved_data['job_type'] == 'documents'
+
+
+def test_client_returns_403_error_to_server2(mock_requests):
+
+    api_validator = Validator()
+    server_validator = ServerValidator('http://test.com')
+    client = TempClient(server_validator, api_validator)
+    client.api_key = 1234
+
+    with mock_requests:
+        mock_requests.get(
+            'http://test.com/get_job',
+            json={'job': {'1': 'http://url.com', 'job_type': 'documents'}},
+            status_code=200
+        )
+
+        regulation_response = {"errors": [{
+            "status": "403",
+            "title": "The document ID could not be found."}],
+            "error": "API limit reached."
+        }
+
+        mock_requests.get(
+            'http://url.com?api_key=1234',
+            json=regulation_response,
+            status_code=403
+        )
+
+        mock_requests.put(
+            'http://test.com/put_results',
+            json={'success': 'The job was successfully completed'},
+            status_code=200
+        )
+        client.job_operation()
+        response = mock_requests.request_history[-1]
+        assert '403' in response.json()
+
+
+def test_client_returns_400_error_to_server2(mock_requests, mocker):
+    api_validator = Validator()
+    server_validator = ServerValidator('http://test.com')
+    client = TempClient(server_validator, api_validator)
+    client.api_key = 1234
+
+    with mock_requests:
+        mock_requests.get(
+            'http://test.com/get_job',
+            json={'job': {'1': 'http://url.com', 'job_type': 'documents'}},
+            status_code=200
+        )
+
+        regulation_response = {"errors": [{
+            "status": "400",
+            "title": "The document ID could not be found."}]}
+
+        mock_requests.get(
+            'http://url.com?api_key=1234',
+            json=regulation_response,
+            status_code=400
+        )
+
+        mock_requests.put(
+            'http://test.com/put_results',
+            json={'success': 'The job was successfully completed'},
+            status_code=200
+        )
+        client.job_operation()
+        response = mock_requests.request_history[-1]
+        assert '400' in response.json()
+
+
+
+
+
+def test_client_returns_400_error_to_server2(mock_requests, mocker):
+    api_validator = Validator()
+    server_validator = ServerValidator('http://test.com')
+    client = TempClient(server_validator, api_validator)
+    client.api_key = 1234
+
+    with mock_requests:
+        mock_requests.get(
+            'http://test.com/get_job',
+            json={'job': {'1': 'http://url.com', 'job_type': 'documents'}},
+            status_code=200
+        )
+
+        regulation_response = {"errors": [{
+            "status": "500",
+            "title": "INTERNAL_SERVER_ERROR",
+            "detail": "Incorrect result size: expected 1, actual 2"}]
+        }
+
+        mock_requests.get(
+            'http://url.com?api_key=1234',
+            json=regulation_response,
+            status_code=500
+        )
+
+        mock_requests.put(
+            'http://test.com/put_results',
+            json={'success': 'The job was successfully completed'},
+            status_code=200
+        )
+        client.job_operation()
+        response = mock_requests.request_history[-1]
+        assert '500' in response.json()
+
+
+
+def test_client_handles_missing_docket_id2(mock_requests, mocker):
+    client = Client()
+    mock_job_id = '1'
+    mock_job_result = {'data': {'id': mock_job_id,
+                       'attributes': {'agencyId': 'NOAA',
+                                      "docketId": None}}}
+    mock_client_id = 999
+    read_mock_client_id(mocker, mock_client_id)
+
+    with mock_requests:
+        mock_requests.get(
+            f'{BASE_URL}/get_client_id',
+            json={'client_id': 999},
+            status_code=200
+        )
+        mock_requests.put(
+            f'{BASE_URL}/put_results',
+            json={'success': 'The job was successfully completed'},
+            status_code=200
+        )
+        try:
+            client.send_job_results(mock_job_id, mock_job_result)
+        except requests.exceptions.HTTPError as exception:
+            assert False, f'raised an exception: {exception}'

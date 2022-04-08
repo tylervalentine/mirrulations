@@ -1,3 +1,4 @@
+import re
 import time
 import os
 import sys
@@ -192,7 +193,7 @@ class Validator:
             return response
         except (HTTPError, RequestConnectionError):
             print('There was an error handling this response.')
-            return None
+            return response
             # time.sleep(sleep_time)
             
     def put_request(self, url, data, params):
@@ -233,18 +234,19 @@ class TempClient:
             file.write(str(self.id))
         
 
-    def get_job(self): ## TESTED
+    def get_job(self):
         response = self.server_validator.get_request('/get_job')
-        if response is None:
-            raise NoJobsAvailableException()
         job = loads(response.text)
+        if 'error' in job:
+            raise NoJobsAvailableException()
+            
         job = job['job']
         job_id = list(job.keys())[0]
         url = job[job_id]
         job_type = job['job_type']
         return job_id, url, job_type
 
-    def send_job(self, job_id, job_result): # TODO: TEST
+    def send_job(self, job_id, job_result):
         data = {
                     'job_id': job_id,
                     'results': job_result
@@ -254,12 +256,15 @@ class TempClient:
 
         self.server_validator.put_request('/put_results', data, {'client_id': self.id})
 
-    def job_operation(self): # TODO: TEST
+    def perform_job(self, job_url):
+        return self.api_validator.get_request(job_url + f'?api_key={self.api_key}').json()
+
+    def job_operation(self):
         job_id, job_url, job_type = self.get_job()
         if job_type == 'attachments':
             result = perform_attachment_job(job_url)
         else:
-            result = self.api_validator.get_request(job_url + f'?api_key={self.api_key}').json()
+            result = self.perform_job(job_url)
         self.send_job(job_id, result)
 
 
