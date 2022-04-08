@@ -6,6 +6,7 @@ import requests_mock
 from mirrclient.client import NoJobsAvailableException, TempClient
 from mirrclient.client import ServerValidator
 from mirrclient.client import is_environment_variables_present
+from mirrclient.client import get_output_path
 
 BASE_URL = 'http://work_server:8080'
 
@@ -294,3 +295,9 @@ def test_client_sends_attachment_results(mock_requests):
         assert saved_data['attributes']['agencyId'] is None
         assert saved_data['attributes']['docketId'] is None
         assert saved_data['attributes']['commentOnDocumentId'] is None
+
+def test_get_output_path_error():
+    results = {'error': 'error'}
+    output_path = get_output_path(results)
+
+    assert output_path == -1
