@@ -19,19 +19,21 @@ class WorkServer:
 
 
 def check_for_database(workserver):
-    # This will either succeed or raise an exception
+    '''This will either succeed or raise an exception'''
     workserver.redis.ping()
 
 
 def check_valid_request_client_id(workserver, client_id):
-    # if client_id is None:
-    #     return False, jsonify({'error': 'Client ID was not provided'}), 401
+    '''if client_id is None:'''
+    '''     return False, jsonify({'error': 'Client ID was not provided'}), 401'''
     if not check_client_id_is_valid(workserver, client_id):
         return False, jsonify({'error': 'Invalid client ID'}), 401
     return (True,)
 
 
 def get_job(workserver):
+    '''Takes client's put endpoints validates wheter or not its a usable job...
+    if so it returns the job with an ID, URL and a Type'''
     check_for_database(workserver)
     client_id = request.args.get('client_id')
     if client_id is None:
