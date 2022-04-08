@@ -5,15 +5,14 @@ import sys
 from json import dumps, loads
 from dotenv import load_dotenv
 # from mirrserver.work_server import get_job
-import requests
 from requests.exceptions import ConnectionError as RequestConnectionError
 from requests.exceptions import HTTPError
 
 
 class NoJobsAvailableException(Exception):
     def __init__(self, message="There are no jobs available"):
-            self.message = message
-            super().__init__(self.message)
+        self.message = message
+        super().__init__(self.message)
 
     def __str__(self):
         return f'{self.message}'
@@ -56,17 +55,19 @@ def is_environment_variables_present():
             and os.getenv('WORK_SERVER_PORT') is not None
             and os.getenv('API_KEY') is not None)
 
+
 #######################################
 # All code below is part of the refactor.
 class Validator:
     """
-    This class will serve as the middle man between the client and any server or other endpoint.
-    This is to soley handle responses and handle exceptions thrown when making http requests.
+    This class will serve as the middle man between the client and any server
+    or other endpoint. This is to solely handle responses and handle
+    exceptions thrown when making http requests.
     """
 
     def __init__(self):
         pass
-    
+
     def get_request(self, url, sleep_time=60, **kwargs):
         try:
             response = requests.get(url, **kwargs)
@@ -76,7 +77,7 @@ class Validator:
             print('There was an error handling this response.')
             return response
             # time.sleep(sleep_time)
-            
+
     def put_request(self, url, data, params):
         try:
             requests.put(url, json=dumps(data), params=params)
@@ -91,23 +92,26 @@ class ServerValidator(Validator):
         super.__init__
 
     def get_request(self, endpoint, sleep_time=60, **kwargs):
-        return super().get_request(f'{self.server_url}' + endpoint, sleep_time, **kwargs)
-    
+        return super().get_request(
+            f'{self.server_url}' + endpoint, sleep_time, **kwargs)
+
     def put_request(self, endpoint, data, params):
-        return super().put_request(f'{self.server_url}' + endpoint, data, params)
+        return super().put_request(
+            f'{self.server_url}' + endpoint, data, params)
 
 
 class TempClient:
     """
-    This will eventually replace the client class. This is created so that Client code can be copied into it
-    without removivng any existing code.
+    This will eventually replace the client class.
+    This is created so that Client code can be copied into it
+    without removing any existing code.
     """
     def __init__(self, server_validator, api_validator):
         self.api_key = os.getenv('API_KEY')
         self.server_validator = server_validator
         self.api_validator = api_validator
         self.id = -1
-    
+
     def get_id(self):
         response = self.server_validator.get_request('/get_client_id')
         self.id = int(response.json()['client_id'])
@@ -116,11 +120,12 @@ class TempClient:
 
     def get_job(self):
         print('performing job')
-        response = self.server_validator.get_request('/get_job', params={'client_id': self.id})
+        response = self.server_validator.get_request(
+            '/get_job', params={'client_id': self.id})
         job = loads(response.text)
         if 'error' in job:
             raise NoJobsAvailableException()
-            
+
         job = job['job']
         job_id = list(job.keys())[0]
         url = job[job_id]
@@ -134,10 +139,12 @@ class TempClient:
                     }
         if 'errors' not in job_result:
             data['directory'] = get_output_path(job_result)
-        self.server_validator.put_request('/put_results', data, {'client_id': self.id})
+        self.server_validator.put_request(
+            '/put_results', data, {'client_id': self.id})
 
     def perform_job(self, job_url):
-        return self.api_validator.get_request(job_url + f'?api_key={self.api_key}').json()
+        return self.api_validator.get_request(
+            job_url + f'?api_key={self.api_key}').json()
 
     def job_operation(self):
         job_id, job_url, job_type = self.get_job()
@@ -146,7 +153,6 @@ class TempClient:
         else:
             result = self.perform_job(job_url)
         self.send_job(job_id, result)
-
 
 
 if __name__ == '__main__':
@@ -158,7 +164,8 @@ if __name__ == '__main__':
     work_server_port = os.getenv('WORK_SERVER_PORT')
 
     api_validator = Validator()
-    server_validator = ServerValidator(f'http://{work_server_hostname}:{work_server_port}')
+    server_validator = ServerValidator(
+                       f'http://{work_server_hostname}:{work_server_port}')
     client = TempClient(server_validator, api_validator)
     client.get_id()
 

@@ -17,4 +17,3 @@ class ResultsProcessor:
                     url = item[relatsh][attm]['links']['related']
                     job_type = 'attachments'
                 self.job_queue.add_job(url, job_type)
-
