@@ -8,7 +8,6 @@ import pandas as pd
 
 class AttachmentsGenerator:
     '''
-    TODO:
     * Need attachments in a csv file. --> This will be a mongoexport command once the system is taken down
     mongoexport --db=mirrulations --collection=comments --type=csv --fields=data.id,data.relationships.attachments.links.related --out=/home/cs334/capstone2022/attachments_list.csv
 
@@ -16,28 +15,28 @@ class AttachmentsGenerator:
 
     * Create a new job with those links
     '''
-        def read_attachments_csv():
-            data_frame = pd.read_csv('/home/cs334/capstone2022/attachments_list.csv', usecols=['commentId',
-                    'attachments'], dtype={'commentId':'str','attachments':'str'})
-            return data_frame
+    def read_attachments_csv():
+        data_frame = pd.read_csv('/home/cs334/capstone2022/attachments_list.csv', usecols=['commentId',
+                'attachments'], dtype={'commentId':'str','attachments':'str'})
+        return data_frame
 
-        def __init__(self, job_queue, database):
-            self.job_queue = job_queue
-            self.database = database
+    def __init__(self, job_queue, database):
+        self.job_queue = job_queue
+        self.database = database
 
-        def get_job_id(self):
-            job_id = self.database.incr('last_job_id')
-            return job_id
+    def get_job_id(self):
+        job_id = self.database.incr('last_job_id')
+        return job_id
 
-        def add_job(self, job_type, url):
-            job_id = self.get_job_id()
-            if job_type == 'attachments':
-                job = {'job_id': job_id,
-                        'url': url,
-                        'job_type': job_type
-                    }
+    def add_job(self, job_type, url):
+        job_id = self.get_job_id()
+        if job_type == 'attachments':
+            job = {'job_id': job_id,
+                    'url': url,
+                    'job_type': job_type
+                }
 
-    if __name__ == '__main__':
+if __name__ == '__main__':
     database = redis.Redis()
     while not is_redis_available(database):
         print("Redis database is busy loading")
@@ -51,13 +50,13 @@ class AttachmentsGenerator:
     attachments_list = []
 
     # This is how the attachments generator was working during the last sprint
-    data_frame = read_attachments_csv()
+    data_frame = generator.read_attachments_csv()
     for link in data_frame['attachments']:
         attachments_list.append(link)
 
     for i in attachments_list:
         job = generator.add_job('attachments', i)
-            attachments_index += 1
+        attachments_index += 1
 
     '''
     # Would this work???
