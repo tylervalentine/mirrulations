@@ -16,8 +16,9 @@ class AttachmentsGenerator:
     * Create a new job with those links
     '''
     def read_attachments_csv():
-        data_frame = pd.read_csv('/home/cs334/capstone2022/attachments_list.csv', usecols=['commentId',
-                'attachments'], dtype={'commentId':'str','attachments':'str'})
+        data_frame = pd.read_csv('/home/cs334/capstone2022/attachments_list.csv', usecols=['data.id',
+                'data.relationships.attachments.links.related'], dtype={'data.id':'str',
+                'data.relationships.attachments.links.related':'str'})
         return data_frame
 
     def __init__(self, job_queue, database):
@@ -51,16 +52,17 @@ if __name__ == '__main__':
 
     # This is how the attachments generator was working during the last sprint
     data_frame = generator.read_attachments_csv()
-    for link in data_frame['attachments']:
+
+    for link in data_frame['data.relationships.attachments.links.related']:
         attachments_list.append(link)
 
-    for i in attachments_list:
-        job = generator.add_job('attachments', i)
+    for link in attachments_list:
+        job = generator.add_job('data.relationships.attachments.links.related', link)
         attachments_index += 1
 
     '''
     # Would this work???
-    for link in data_frame['attachments']:
+    for link in data_frame['data.relationships.attachments.links.related']:
         job = generator.add_job('attachments', link)
     '''
 
