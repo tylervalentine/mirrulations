@@ -24,8 +24,6 @@ def check_for_database(workserver):
 
 
 def check_valid_request_client_id(workserver, client_id):
-    '''if client_id is None:'''
-    '''     return False, jsonify({'error': 'Client ID was not provided'}), 401'''
     if not check_client_id_is_valid(workserver, client_id):
         return False, jsonify({'error': 'Invalid client ID'}), 401
     return (True,)
@@ -145,11 +143,11 @@ def create_server(database):
     def _put_results():
         data = json.loads(request.get_json())
         client_id = request.args.get('client_id')
-        
         try:
-           validator = workserver.put_results_validator.check_put_results(data, client_id)
-        except InvalidResultsException as invalid_results:
-            return jsonify(invalid_results.message), invalid_results.status_code
+            validator = workserver.put_results_validator.\
+                check_put_results(data, client_id)
+        except InvalidResultsException as invalid_result:
+            return jsonify(invalid_result.message), invalid_result.status_code
         except InvalidClientIDException as invalid_id:
             return jsonify(invalid_id.message), invalid_id.status_code
         except MissingClientIDException as missing_id:
@@ -157,7 +155,7 @@ def create_server(database):
         success, *values = put_results(workserver, data)
         if not success:
             return tuple(values)
-        return jsonify(validator[0]),validator[1]
+        return jsonify(validator[0]), validator[1]
 
     @workserver.app.route('/get_client_id', methods=['GET'])
     def _get_client_id():
