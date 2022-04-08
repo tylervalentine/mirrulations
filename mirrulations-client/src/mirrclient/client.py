@@ -70,6 +70,7 @@ def get_request(url, **kwargs):
         return response
         # time.sleep(sleep_time)
 
+
 def put_request(url, data, params):
     try:
         requests.put(url, json=dumps(data), params=params)
@@ -81,7 +82,6 @@ def put_request(url, data, params):
 class ServerValidator:
     def __init__(self, server_url):
         self.server_url = server_url
-        
 
     def get_request(self, endpoint, **kwargs):
         return get_request(
@@ -101,18 +101,18 @@ class TempClient:
     def __init__(self, server_validator):
         self.api_key = os.getenv('API_KEY')
         self.server_validator = server_validator
-        self.id = -1
+        self.client_id = -1
 
     def get_id(self):
         response = self.server_validator.get_request('/get_client_id')
-        self.id = int(response.json()['client_id'])
+        self.client_id = int(response.json()['client_id'])
         with open('client.cfg', 'w', encoding='utf8') as file:
-            file.write(str(self.id))
+            file.write(str(self.client_id))
 
     def get_job(self):
         print('performing job')
         response = self.server_validator.get_request(
-            '/get_job', params={'client_id': self.id})
+            '/get_job', params={'client_id': self.client_id})
         job = loads(response.text)
         if 'error' in job:
             raise NoJobsAvailableException()
@@ -131,7 +131,7 @@ class TempClient:
         if 'errors' not in job_result:
             data['directory'] = get_output_path(job_result)
         self.server_validator.put_request(
-            '/put_results', data, {'client_id': self.id})
+            '/put_results', data, {'client_id': self.client_id})
 
     def perform_job(self, job_url):
         return get_request(

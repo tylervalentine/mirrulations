@@ -117,7 +117,7 @@ def test_client_gets_id_from_server(mock_requests):
         )
         client = TempClient(server_validator)
         client.get_id()
-        assert client.id == 1
+        assert client.client_id == 1
 
 
 def test_api_call_has_api_key(mock_requests):
