@@ -103,95 +103,6 @@ class Client:
             file.write(str(self.client_id))
 
 
-class Validator:
-    """
-    This class will serve as the middle man between the client and any server or other endpoint.
-    This is to soley handle responses and handle exceptions thrown when making http requests.
-    """
-
-    def __init__(self):
-        pass
-    
-    def get_request(self, url, sleep_time=60, **kwargs):
-        try:
-            response = requests.get(url, **kwargs)
-            response.raise_for_status()
-            return response
-        except (HTTPError, RequestConnectionError):
-            print('There was an error handling this response.')
-            return None
-            # time.sleep(sleep_time)
-            
-    def put_request(self, url, data, params):
-        try:
-            requests.put(f'{url}/put_results', json=dumps(data), params=params)
-
-        except (HTTPError, RequestConnectionError):
-            print('There was an error handling this response.')
-
-
-class ServerValidator(Validator):
-    def __init__(self, server_url):
-        self.server_url = server_url
-        super.__init__
-
-    def get_request(self, endpoint, sleep_time=60, **kwargs):
-        return super().get_request(f'{self.server_url}' + endpoint, sleep_time, **kwargs)
-    
-    def put_request(self, endpoint, data, params):
-        return super().put_request(f'{self.server_url}' + endpoint, data, params)
-
-
-class TempClient:
-    """
-    This will eventually replace the client class. This is created so that Client code can be copied into it
-    without removivng any existing code.
-    """
-    def __init__(self, server_validator, api_validator):
-        self.api_key = os.getenv('API_KEY')
-        self.server_validator = server_validator
-        self.api_validator = api_validator
-        self.id = -1
-    
-    def get_id(self):
-        response = self.server_validator.get_request('/get_client_id')
-        self.id = int(response.json()['client_id'])
-        with open('client.cfg', 'w', encoding='utf8') as file:
-            file.write(str(self.id))
-        
-
-    def get_job(self): ## TESTED
-        response = self.server_validator.get_request('/get_job')
-        if response is None:
-            raise NoJobsAvailableException()
-        job = loads(response.text)
-        job = job['job']
-        job_id = list(job.keys())[0]
-        url = job[job_id]
-        job_type = job['job_type']
-        return job_id, url, job_type
-
-    def send_job(self, job_id, job_result, job_type): # TODO: TEST
-        data = {
-                    'job_id': job_id,
-                    'results': job_result
-                    }
-        if 'errors' not in job_result:
-            data['directory'] = get_output_path(job_result)
-
-        self.server_validator.put_request(data, {'client_id': self.id})
-
-    def job_operation(self): # TODO: TEST
-        job_id, job_url, job_type = get_job(self.server_validator, self.server_validator.server_url)
-        if job_type == 'attachments':
-            result = perform_attachment_job(job_url)
-        else:
-            result = self.api_validator.get_request(job_url + f'?api_key={self.api_key}').json()
-        self.send_job_results(job_id, result)
-
-
-
-
 def perform_attachment_job(url):
     return {"data": {"attachments_text": [str(url)],
                      "type": "attachment",
@@ -262,6 +173,95 @@ def is_environment_variables_present():
     return (os.getenv('WORK_SERVER_HOSTNAME') is not None
             and os.getenv('WORK_SERVER_PORT') is not None
             and os.getenv('API_KEY') is not None)
+
+#######################################
+# All code below is part of the refactor.
+class Validator:
+    """
+    This class will serve as the middle man between the client and any server or other endpoint.
+    This is to soley handle responses and handle exceptions thrown when making http requests.
+    """
+
+    def __init__(self):
+        pass
+    
+    def get_request(self, url, sleep_time=60, **kwargs):
+        try:
+            response = requests.get(url, **kwargs)
+            response.raise_for_status()
+            return response
+        except (HTTPError, RequestConnectionError):
+            print('There was an error handling this response.')
+            return None
+            # time.sleep(sleep_time)
+            
+    def put_request(self, url, data, params):
+        try:
+            requests.put(url, json=dumps(data), params=params)
+
+        except (HTTPError, RequestConnectionError):
+            print('There was an error handling this response.')
+
+
+class ServerValidator(Validator):
+    def __init__(self, server_url):
+        self.server_url = server_url
+        super.__init__
+
+    def get_request(self, endpoint, sleep_time=60, **kwargs):
+        return super().get_request(f'{self.server_url}' + endpoint, sleep_time, **kwargs)
+    
+    def put_request(self, endpoint, data, params):
+        return super().put_request(f'{self.server_url}' + endpoint, data, params)
+
+
+class TempClient:
+    """
+    This will eventually replace the client class. This is created so that Client code can be copied into it
+    without removivng any existing code.
+    """
+    def __init__(self, server_validator, api_validator):
+        self.api_key = os.getenv('API_KEY')
+        self.server_validator = server_validator
+        self.api_validator = api_validator
+        self.id = -1
+    
+    def get_id(self):
+        response = self.server_validator.get_request('/get_client_id')
+        self.id = int(response.json()['client_id'])
+        with open('client.cfg', 'w', encoding='utf8') as file:
+            file.write(str(self.id))
+        
+
+    def get_job(self): ## TESTED
+        response = self.server_validator.get_request('/get_job')
+        if response is None:
+            raise NoJobsAvailableException()
+        job = loads(response.text)
+        job = job['job']
+        job_id = list(job.keys())[0]
+        url = job[job_id]
+        job_type = job['job_type']
+        return job_id, url, job_type
+
+    def send_job(self, job_id, job_result): # TODO: TEST
+        data = {
+                    'job_id': job_id,
+                    'results': job_result
+                    }
+        if 'errors' not in job_result:
+            data['directory'] = get_output_path(job_result)
+
+        self.server_validator.put_request('/put_results', data, {'client_id': self.id})
+
+    def job_operation(self): # TODO: TEST
+        job_id, job_url, job_type = self.get_job()
+        if job_type == 'attachments':
+            result = perform_attachment_job(job_url)
+        else:
+            result = self.api_validator.get_request(job_url + f'?api_key={self.api_key}').json()
+        self.send_job(job_id, result)
+
 
 
 if __name__ == '__main__':
