@@ -154,9 +154,9 @@ if __name__ == '__main__':
     work_server_hostname = os.getenv('WORK_SERVER_HOSTNAME')
     work_server_port = os.getenv('WORK_SERVER_PORT')
 
-    server_validator = ServerValidator(
+    validator_for_server = ServerValidator(
                        f'http://{work_server_hostname}:{work_server_port}')
-    client = TempClient(server_validator)
+    client = TempClient(validator_for_server)
     client.get_id()
 
     print('Your ID is: ', client.id)
