@@ -4,7 +4,7 @@ from pytest import fixture, raises
 import requests
 import requests_mock
 from mirrclient.client import NoJobsAvailableException, TempClient
-from mirrclient.client import Validator, ServerValidator
+from mirrclient.client import ServerValidator
 from mirrclient.client import is_environment_variables_present
 
 BASE_URL = 'http://work_server:8080'
@@ -82,7 +82,7 @@ def write_mock_client_id(mocker):
 
 def test_client_gets_job(mock_requests):
     server_validator = ServerValidator('http://test.com')
-    client = TempClient(server_validator, None)
+    client = TempClient(server_validator)
     with mock_requests:
         mock_requests.get(
             'http://test.com/get_job',
@@ -95,7 +95,7 @@ def test_client_gets_job(mock_requests):
 
 def test_client_throws_exception_when_no_jobs(mock_requests):
     server_validator = ServerValidator('http://test.com')
-    client = TempClient(server_validator, None)
+    client = TempClient(server_validator)
     with mock_requests:
         mock_requests.get(
             'http://test.com/get_job',
@@ -115,14 +115,13 @@ def test_client_gets_id_from_server(mock_requests):
             json={'client_id': 1},
             status_code=200
         )
-        client = TempClient(server_validator, None)
+        client = TempClient(server_validator)
         client.get_id()
         assert client.id == 1
 
 
 def test_api_call_has_api_key(mock_requests):
-    validator = Validator()
-    client = TempClient(None, validator)
+    client = TempClient(None)
     client.api_key = 'KEY12345'
     with mock_requests:
         mock_requests.get(
@@ -136,9 +135,8 @@ def test_api_call_has_api_key(mock_requests):
 
 
 def test_client_performs_job(mock_requests):
-    api_validator = Validator()
     server_validator = ServerValidator('http://test.com')
-    client = TempClient(server_validator, api_validator)
+    client = TempClient(server_validator)
     client.api_key = 1234
 
     with mock_requests:
@@ -166,10 +164,8 @@ def test_client_performs_job(mock_requests):
 
 
 def test_client_returns_403_error_to_server(mock_requests):
-
-    api_validator = Validator()
     server_validator = ServerValidator('http://test.com')
-    client = TempClient(server_validator, api_validator)
+    client = TempClient(server_validator)
     client.api_key = 1234
 
     with mock_requests:
@@ -202,9 +198,8 @@ def test_client_returns_403_error_to_server(mock_requests):
 
 
 def test_client_returns_400_error_to_server(mock_requests):
-    api_validator = Validator()
     server_validator = ServerValidator('http://test.com')
-    client = TempClient(server_validator, api_validator)
+    client = TempClient(server_validator)
     client.api_key = 1234
 
     with mock_requests:
@@ -235,9 +230,8 @@ def test_client_returns_400_error_to_server(mock_requests):
 
 
 def test_client_returns_500_error_to_server(mock_requests):
-    api_validator = Validator()
     server_validator = ServerValidator('http://test.com')
-    client = TempClient(server_validator, api_validator)
+    client = TempClient(server_validator)
     client.api_key = 1234
 
     with mock_requests:
@@ -270,9 +264,8 @@ def test_client_returns_500_error_to_server(mock_requests):
 
 
 def test_client_sends_attachment_results(mock_requests):
-    api_validator = Validator()
     server_validator = ServerValidator('http://test.com')
-    client = TempClient(server_validator, api_validator)
+    client = TempClient(server_validator)
     client.api_key = 1234
 
     with mock_requests:

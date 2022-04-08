@@ -58,45 +58,37 @@ def is_environment_variables_present():
 
 #######################################
 # All code below is part of the refactor.
-class Validator:
-    """
-    This class will serve as the middle man between the client and any server
-    or other endpoint. This is to solely handle responses and handle
-    exceptions thrown when making http requests.
-    """
-
-    def __init__(self):
-        pass
-
-    def get_request(self, url, **kwargs):
-        try:
-            response = requests.get(url, **kwargs)
-            response.raise_for_status()
-            return response
-        except (HTTPError, RequestConnectionError):
-            print('There was an error handling this response.')
-            return response
-            # time.sleep(sleep_time)
-
-    def put_request(self, url, data, params):
-        try:
-            requests.put(url, json=dumps(data), params=params)
-
-        except (HTTPError, RequestConnectionError):
-            print('There was an error handling this response.')
 
 
-class ServerValidator(Validator):
+def get_request(url, **kwargs):
+    try:
+        response = requests.get(url, **kwargs)
+        response.raise_for_status()
+        return response
+    except (HTTPError, RequestConnectionError):
+        print('There was an error handling this response.')
+        return response
+        # time.sleep(sleep_time)
+
+def put_request(url, data, params):
+    try:
+        requests.put(url, json=dumps(data), params=params)
+
+    except (HTTPError, RequestConnectionError):
+        print('There was an error handling this response.')
+
+
+class ServerValidator:
     def __init__(self, server_url):
         self.server_url = server_url
-        super.__init__
+        
 
-    def get_request(self, endpoint, sleep_time=60, **kwargs):
-        return super().get_request(
-            f'{self.server_url}' + endpoint, sleep_time, **kwargs)
+    def get_request(self, endpoint, **kwargs):
+        return get_request(
+            f'{self.server_url}' + endpoint, **kwargs)
 
     def put_request(self, endpoint, data, params):
-        return super().put_request(
+        return put_request(
             f'{self.server_url}' + endpoint, data, params)
 
 
@@ -106,10 +98,9 @@ class TempClient:
     This is created so that Client code can be copied into it
     without removing any existing code.
     """
-    def __init__(self, server_validator, api_validator):
+    def __init__(self, server_validator):
         self.api_key = os.getenv('API_KEY')
         self.server_validator = server_validator
-        self.api_validator = api_validator
         self.id = -1
 
     def get_id(self):
@@ -143,7 +134,7 @@ class TempClient:
             '/put_results', data, {'client_id': self.id})
 
     def perform_job(self, job_url):
-        return self.api_validator.get_request(
+        return get_request(
             job_url + f'?api_key={self.api_key}').json()
 
     def job_operation(self):
@@ -163,10 +154,9 @@ if __name__ == '__main__':
     work_server_hostname = os.getenv('WORK_SERVER_HOSTNAME')
     work_server_port = os.getenv('WORK_SERVER_PORT')
 
-    api_validator = Validator()
     server_validator = ServerValidator(
                        f'http://{work_server_hostname}:{work_server_port}')
-    client = TempClient(server_validator, api_validator)
+    client = TempClient(server_validator)
     client.get_id()
 
     print('Your ID is: ', client.id)
