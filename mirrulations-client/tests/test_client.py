@@ -5,7 +5,8 @@ from pytest import fixture, raises
 import requests
 import requests_mock
 import mirrclient.client
-from mirrclient.client import  NoJobsAvailableException, TempClient, Validator, ServerValidator
+from mirrclient.client import NoJobsAvailableException, TempClient
+from mirrclient.client import Validator, ServerValidator
 from mirrclient.client import is_environment_variables_present
 
 BASE_URL = 'http://work_server:8080'
@@ -128,19 +129,6 @@ def test_client_gets_id_from_server(mock_requests):
         assert client.id == 1
 
 
-def test_client_gets_id_from_server(mock_requests):
-    server_validator = ServerValidator('http://test.com')
-    with mock_requests:
-        mock_requests.get(
-            'http://test.com/get_client_id',
-            json={'client_id': 1},
-            status_code=200
-        )
-        client = TempClient(server_validator, None)
-        client.get_id()
-        assert client.id == 1
-
-
 def test_api_call_has_api_key(mock_requests):
     validator = Validator()
     client = TempClient(None, validator)
@@ -161,7 +149,7 @@ def test_client_performs_job(mock_requests):
     server_validator = ServerValidator('http://test.com')
     client = TempClient(server_validator, api_validator)
     client.api_key = 1234
-    
+
     with mock_requests:
         mock_requests.get(
             'http://test.com/get_job',
@@ -253,7 +241,6 @@ def test_client_returns_400_error_to_server(mock_requests, mocker):
         client.job_operation()
         response = mock_requests.request_history[-1]
         assert '400' in response.json()
-
 
 
 def test_client_returns_500_error_to_server(mock_requests, mocker):
