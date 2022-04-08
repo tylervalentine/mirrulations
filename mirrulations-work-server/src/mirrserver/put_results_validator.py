@@ -33,5 +33,5 @@ class PutResultsValidator():
         if client_id.isdigit() or isinstance(client_id, int):
             client_id = int(client_id)
             if (client_id < 20 and client_id > 0):
-                 return {'success': 'Job was successfully completed'},200
+                return {'success': 'Job was successfully completed'}, 200
         raise InvalidClientIDException()
