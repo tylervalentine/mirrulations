@@ -1,8 +1,8 @@
-import requests
 import time
 import os
 import sys
 from json import dumps, loads
+import requests
 from dotenv import load_dotenv
 # from mirrserver.work_server import get_job
 from requests.exceptions import ConnectionError as RequestConnectionError
@@ -68,7 +68,7 @@ class Validator:
     def __init__(self):
         pass
 
-    def get_request(self, url, sleep_time=60, **kwargs):
+    def get_request(self, url, **kwargs):
         try:
             response = requests.get(url, **kwargs)
             response.raise_for_status()
