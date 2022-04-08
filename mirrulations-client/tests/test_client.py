@@ -195,20 +195,7 @@ def test_client_sends_attachment_results(mock_requests, mocker):
         assert saved_data['attributes']['docketId'] is None
         assert saved_data['attributes']['commentOnDocumentId'] is None
 
-{
-    "data": [
-    {
-            "attributes": {
-                "fileFormats": [
-                    {
-                        "fileUrl": "https://downloads.doc",
-                        "format": "doc",
-                        "size": 43008},
-                    ],
-                        }
-                        }
-                ]
-            }
+
 def test_read_client_id_success(tmpdir):
     file = tmpdir.join('test_read.txt')
     file.write('1')
@@ -716,28 +703,36 @@ def test_client_returns_400_error_to_server2(mock_requests, mocker):
         assert '500' in response.json()
 
 
-
-def test_client_handles_missing_docket_id2(mock_requests, mocker):
-    client = Client()
-    mock_job_id = '1'
-    mock_job_result = {'data': {'id': mock_job_id,
-                       'attributes': {'agencyId': 'NOAA',
-                                      "docketId": None}}}
-    mock_client_id = 999
-    read_mock_client_id(mocker, mock_client_id)
+def test_client_sends_attachment_results2(mock_requests, mocker):
+    api_validator = Validator()
+    server_validator = ServerValidator('http://test.com')
+    client = TempClient(server_validator, api_validator)
+    client.api_key = 1234
 
     with mock_requests:
         mock_requests.get(
-            f'{BASE_URL}/get_client_id',
-            json={'client_id': 999},
+            'http://test.com/get_job',
+            json={'job': {'1': 'http://url.com', 'job_type': 'attachments'}},
             status_code=200
         )
-        mock_requests.put(
-            f'{BASE_URL}/put_results',
-            json={'success': 'The job was successfully completed'},
+        mock_requests.get(
+            'http://url.com?api_key=1234',
+            json={'data': {'id': '1', 'attributes': {'agencyId': 'NOAA'},
+                           'job_type': 'documents'}},
             status_code=200
         )
-        try:
-            client.send_job_results(mock_job_id, mock_job_result)
-        except requests.exceptions.HTTPError as exception:
-            assert False, f'raised an exception: {exception}'
+        mock_requests.put('http://test.com/put_results', text='{}')
+        client.job_operation()
+
+        mock_requests.put(f'{BASE_URL}/put_results', text='{}')
+        client.job_operation
+        put_request = mock_requests.request_history[1]
+        json_data = json.loads(put_request.json())
+        saved_data = json_data['results']['data']
+
+        assert saved_data['attachments_text'] == ['http://url.com']
+        assert saved_data['type'] == 'attachment'
+        assert saved_data['id'] == 'http://url.com'
+        assert saved_data['attributes']['agencyId'] is None
+        assert saved_data['attributes']['docketId'] is None
+        assert saved_data['attributes']['commentOnDocumentId'] is None
