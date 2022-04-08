@@ -92,12 +92,8 @@ class ServerValidator:
             f'{self.server_url}' + endpoint, data, params)
 
 
-class TempClient:
-    """
-    This will eventually replace the client class.
-    This is created so that Client code can be copied into it
-    without removing any existing code.
-    """
+class Client:
+
     def __init__(self, server_validator):
         self.api_key = os.getenv('API_KEY')
         self.server_validator = server_validator
@@ -156,7 +152,7 @@ if __name__ == '__main__':
 
     validator_for_server = ServerValidator(
                        f'http://{work_server_hostname}:{work_server_port}')
-    client = TempClient(validator_for_server)
+    client = Client(validator_for_server)
     client.get_id()
 
     print('Your ID is: ', client.id)
