@@ -8,7 +8,6 @@ import pandas as pd
 
 class AttachmentsGenerator:
     '''
-    TODO:
     * Need attachments in a csv file. --> This will be a mongoexport command once the system is taken down
     mongoexport --db=mirrulations --collection=comments --type=csv --fields=data.id,data.relationships.attachments.links.related --out=/home/cs334/capstone2022/attachments_list.csv
 
@@ -53,6 +52,7 @@ if __name__ == '__main__':
 
     # This is how the attachments generator was working during the last sprint
     data_frame = generator.read_attachments_csv()
+
     for link in data_frame['data.relationships.attachments.links.related']:
         attachments_list.append(link)
 
