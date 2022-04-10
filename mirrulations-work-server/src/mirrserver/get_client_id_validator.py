@@ -1,10 +1,4 @@
-class InvalidClientIDException(Exception):
-    """
-    Raised when the client ID is invalid
-    (not 0<=client_id<20 or not an integer)
-    """
-    message = {'error': 'Invalid client ID'}
-    status_code = 401
+from mirrserver.exceptions import InvalidClientIDException
 
 
 class GetClientIDValidator():

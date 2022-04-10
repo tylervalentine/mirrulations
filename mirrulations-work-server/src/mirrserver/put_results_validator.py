@@ -1,26 +1,6 @@
-class InvalidResultsException(Exception):
-    """
-    Raised when no results/json data are sent
-    """
-    message = {'error': 'The body does not contain the results'}
-    status_code = 403
-
-
-class InvalidClientIDException(Exception):
-    """
-    Raised when the client ID is invalid
-    (not 0<=client_id<20 or not an integer)
-    """
-    message = {'error': 'Invalid client ID'}
-    status_code = 401
-
-
-class MissingClientIDException(Exception):
-    """
-    Raised when the client ID is missing
-    """
-    message = {'error': 'Client ID was not provided'}
-    status_code = 401
+from mirrserver.exceptions import InvalidResultsException
+from mirrserver.exceptions import InvalidClientIDException
+from mirrserver.exceptions import MissingClientIDException
 
 
 class PutResultsValidator():
@@ -32,6 +12,6 @@ class PutResultsValidator():
             raise MissingClientIDException()
         if client_id.isdigit() or isinstance(client_id, int):
             client_id = int(client_id)
-            if 0 < client_id < 20:
+            if 0 < client_id < 21:
                 return {'success': 'Job was successfully completed'}, 200
         raise InvalidClientIDException()

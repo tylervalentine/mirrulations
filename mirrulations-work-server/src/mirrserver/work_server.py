@@ -4,12 +4,13 @@ import redis
 from mirrcore.data_storage import DataStorage
 from mirrcore.attachment_saver import AttachmentSaver
 from mirrserver.put_results_validator import PutResultsValidator
-from mirrserver.put_results_validator import InvalidClientIDException
-from mirrserver.put_results_validator import InvalidResultsException
-from mirrserver.put_results_validator import MissingClientIDException
+from mirrserver.exceptions import InvalidResultsException
+from mirrserver.exceptions import InvalidClientIDException
+from mirrserver.exceptions import MissingClientIDException
+from mirrserver.exceptions import NoJobsException
 from mirrserver.get_client_id_validator import GetClientIDValidator
 from mirrserver.get_job_validator import GetJobValidator
-from mirrserver.get_job_validator import NoJobsException
+# from mirrcore.redis_connector import RedisConnector
 
 
 class WorkServer:
@@ -21,6 +22,7 @@ class WorkServer:
         self.put_results_validator = PutResultsValidator()
         self.get_client_id_validator = GetClientIDValidator()
         self.get_job_validator = GetJobValidator()
+        # self.redisConnector = RedisConnector()
 
 
 def check_for_database(workserver):
@@ -87,7 +89,7 @@ def put_results(workserver, data):
     check_for_database(workserver)
     client_id = request.args.get('client_id')
     # client sends attachment files in a list called files
-    files = request.args.get('files')
+    # files = request.args.get('files')
     success, *values = check_valid_request_client_id(workserver, client_id)
     if not success:
         return False, values[0], values[1]
@@ -102,10 +104,12 @@ def put_results(workserver, data):
         return (success, *results)
     job_id = data['job_id']
     workserver.redis.hdel('jobs_in_progress', job_id)
-    if 'attachments_text' in data['results']['data'].keys() \
-            and files is not None:
-        for file in files:  # Loop through each file from requests
-            workserver.attachment_saver.save(file)  # Save the file on disk
+    # add  and files is not None to check if files were sent
+    # once we're adding this functionality
+    if 'attachments_text' in data['results']['data'].keys():
+        pass
+        # for file in files:  # Loop through each file from requests
+        #     workserver.attachment_saver.save(file)  # Save the file on disk
     else:  # If not an attachment job
         write_results(results[0], data['directory'], data['results'])
     workserver.data.add(data['results'])  # write json data to mongo
@@ -138,16 +142,12 @@ def create_server(database):
             success, *values = get_job(workserver)
             if not success:
                 return tuple(values)
-            # data = json.loads(request.get_json())
             client_id = request.args.get('client_id')
             workserver.get_job_validator.check_get_jobs(client_id)
-        except MissingClientIDException as missing_id:
-            return jsonify(missing_id.message), missing_id.status_code
-        except NoJobsException as no_jobs:
-            return jsonify(no_jobs.message), no_jobs.status_code
+        except (MissingClientIDException, NoJobsException) as error:
+            return jsonify(error.message), error.status_code
         except redis.exceptions.ConnectionError:
-            body = {'error': 'Cannot connect to the database'}
-            return jsonify(body), 500
+            return jsonify({'error': 'Cannot connect to the database'}), 500
         return jsonify({'job': {str(values[0]): values[1],
                         'job_type': values[2]}}), 200
 
