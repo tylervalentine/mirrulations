@@ -24,19 +24,43 @@ class NoJobsAvailableException(Exception):
 
 def download_attachments(urls, file_types, job_id):
     """
+    Downloads attachments from regulations.gov.
+
+    Parameters
+    ----------
+    urls : str
+        urls of attachments
+
+    file_types : str
+        file formats of attachments
+
+    job_id : str
+        id of the job
+
+    Returns
+    -------
+    a dict of encoded files
     """
     attachments = {}
 
     for i, (url, file_type) in enumerate(zip(urls, file_types)):
         attachment = requests.get(url)
-        file_name = f'{job_id}_{i}.{file_type}'
-        attachments[file_name] = b64encode(attachment.content).decode('ascii')
+        attachments[f'{job_id}_{i}.{file_type}'] = b64encode(
+            attachment.content).decode('ascii')
 
     return attachments
 
 
 def get_urls_and_formats(file_info):
     """
+    Parameters
+    ----------
+    file_info : dict
+        a json of file formats and urls
+
+    Returns
+    -------
+    two lists of urls and file formats
     """
     urls = []
     formats = []
