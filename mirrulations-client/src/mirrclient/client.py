@@ -21,7 +21,7 @@ class NoJobsAvailableException(Exception):
         return f'{self.message}'
 
 
-def perform_attachment_job(url):
+def perform_attachment_job(url, job_id):
     """
     Performs an attachment job via get_request function by giving
     it the job_url combined with the Client api_key for validation.
@@ -297,7 +297,7 @@ class Client:
         """
         job_id, job_url, job_type = self.get_job()
         if job_type == 'attachments':
-            result = perform_attachment_job(job_url)
+            result = perform_attachment_job(job_url, job_id)
         else:
             result = self.perform_job(job_url)
         self.send_job(job_id, result)
