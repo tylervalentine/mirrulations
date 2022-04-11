@@ -103,7 +103,7 @@ def put_results(workserver, data):
     check_for_database(workserver)
     client_id = request.args.get('client_id')
     # client sends attachment files in a list called files
-    # files = request.args.get('files')
+    files = request.args.get('files')
     success, *values = check_valid_request_client_id(workserver, client_id)
     if not success:
         return False, values[0], values[1]
@@ -121,9 +121,9 @@ def put_results(workserver, data):
     # add  and files is not None to check if files were sent
     # once we're adding this functionality
     if 'attachments_text' in data['results']['data'].keys():
-        pass
-        # for file in files:  # Loop through each file from requests
-        #     workserver.attachment_saver.save(file)  # Save the file on disk
+        if files is not None:
+            for file in files:  # Loop through each file from requests
+                workserver.attachment_saver.save(file)  # Save the file on disk
     else:  # If not an attachment job
         write_results(results[0], data['directory'], data['results'])
     workserver.data.add(data['results'])  # write json data to mongo

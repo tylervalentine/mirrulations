@@ -316,7 +316,7 @@ if __name__ == '__main__':
     client = Client(validator_for_server)
     client.get_id()
 
-    print('Your ID is: ', client.id)
+    print('Your ID is: ', client.client_id)
     while True:
         try:
             client.job_operation()
