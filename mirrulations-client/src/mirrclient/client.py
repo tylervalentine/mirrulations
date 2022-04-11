@@ -1,6 +1,7 @@
 import time
 import os
 import sys
+import base64
 from json import dumps, loads
 import requests
 from dotenv import load_dotenv
@@ -21,7 +22,7 @@ class NoJobsAvailableException(Exception):
         return f'{self.message}'
 
 
-def perform_attachment_job(url, job_id):
+def perform_attachment_job(url, api_key, job_id):
     """
     Performs an attachment job via get_request function by giving
     it the job_url combined with the Client api_key for validation.
@@ -35,13 +36,24 @@ def perform_attachment_job(url, job_id):
     -------
     json results of the performed attachment job
     """
-    return {"data": {"attachments_text": [str(url)],
-                     "type": "attachment",
-                     "id": str(url),
-                     "attributes": {'agencyId': None,
-                                    'docketId': None,
-                                    'commentOnDocumentId': None}
-                     }}
+    attachments = {} # attachment_name : encoded_file
+    url = url + f'?api_key={api_key}'
+    response_from_related = requests.get(url)
+
+    response_from_related = response_from_related.json()
+
+    file_info = response_from_related["data"][0]["attributes"]["fileFormats"]
+    file_urls = []
+    file_types = []
+    for link in file_info:
+        file_urls.append(link["fileUrl"])
+        file_types.append(link["format"])
+
+    for i, (link, file_type) in enumerate(zip(file_urls, file_types)):
+        attachment = requests.get(link)
+        attachments[f'{job_id}_{i}.{file_type}'] = base64.b64encode(attachment.content).decode('ascii')
+
+    return attachments
 
 
 def get_key_path_string(results, key):
