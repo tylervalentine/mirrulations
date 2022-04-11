@@ -29,12 +29,18 @@ def perform_attachment_job(url, api_key, job_id):
 
     Parameters
     ----------
-    job_url : str
+    url : str
         url from a job
+
+    api_key : str
+        api_key for the client
+
+    job_id : str
+        id of the job
 
     Returns
     -------
-    json results of the performed attachment job
+    a dict of encoded files
     """
     attachments = {} # attachment_name : encoded_file
     url = url + f'?api_key={api_key}'
