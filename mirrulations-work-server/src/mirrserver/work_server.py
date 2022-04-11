@@ -154,10 +154,9 @@ def create_server(database):
     @workserver.app.route('/put_results', methods=['PUT'])
     def _put_results():
         data = json.loads(request.get_json())
-        client_id = request.args.get('client_id')
         try:
             validator = workserver.put_results_validator.\
-                check_put_results(data, client_id)
+                check_put_results(data, request.args.get('client_id'))
         except (InvalidResultsException, InvalidClientIDException,
                 MissingClientIDException) as invalid_result:
             return jsonify(invalid_result.message), invalid_result.status_code
@@ -174,8 +173,7 @@ def create_server(database):
                 return tuple(values)
             return jsonify({'client_id': values[0]}), 200
         except redis.exceptions.ConnectionError:
-            body = {'error': 'Cannot connect to the database'}
-            return jsonify(body), 500
+            return jsonify({'error': 'Cannot connect to the database'}), 500
 
     return workserver
 

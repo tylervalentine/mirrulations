@@ -5,7 +5,8 @@ from mirrserver.exceptions import MissingClientIDException
 
 class PutResultsValidator():
     """Validates the results sent by the client"""
-    def check_put_results(self, data, client_id):
+    @classmethod
+    def check_put_results(cls, data, client_id):
         if data is None or data.get('results') is None:
             raise InvalidResultsException()
         if client_id is None:
