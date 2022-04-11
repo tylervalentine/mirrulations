@@ -12,14 +12,6 @@ def test_put_results_with_non_numerical_client_id():
         validator.check_put_results(data, client_id)
 
 
-def test_put_results_too_high_client_id():
-    validator = PutResultsValidator()
-    data = {'results': {'': ''}, 'directory': None}
-    client_id = '25'
-    with pytest.raises(InvalidClientIDException):
-        validator.check_put_results(data, client_id)
-
-
 def test_put_results_invalid_results():
     validator = PutResultsValidator()
     data = {'results': None, 'directory': None}
