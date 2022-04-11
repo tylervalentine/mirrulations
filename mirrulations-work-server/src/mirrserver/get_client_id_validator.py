@@ -10,6 +10,6 @@ class GetClientIDValidator():
             return True
         if client_id.isdigit() or isinstance(client_id, int):
             client_id = int(client_id)
-            if 0 < client_id < 20:
+            if 0 < client_id:
                 return True
         raise InvalidClientIDException()
