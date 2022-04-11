@@ -1,7 +1,7 @@
 import time
 import os
 import sys
-import base64
+from base64 import b64encode
 from json import dumps, loads
 import requests
 from dotenv import load_dotenv
@@ -22,10 +22,43 @@ class NoJobsAvailableException(Exception):
         return f'{self.message}'
 
 
+def download_attachments(urls, file_types, job_id):
+    """
+    """
+    attachments = {}
+
+    for i, (url, file_type) in enumerate(zip(urls, file_types)):
+        attachment = requests.get(url)
+        file_name = f'{job_id}_{i}.{file_type}'
+        attachments[file_name] = b64encode(attachment.content).decode('ascii')
+
+    return attachments
+
+
+def get_urls_and_formats(file_info):
+    """
+    """
+    urls = []
+    formats = []
+
+    for link in file_info:
+        urls.append(link["fileUrl"])
+        formats.append(link["format"])
+
+    return urls, formats
+
+
 def perform_attachment_job(url, api_key, job_id):
     """
     Performs an attachment job via get_request function by giving
     it the job_url combined with the Client api_key for validation.
+
+    The attachments are encoded and saved to a dictionary. The name is
+    created from the job_id and the file extension is the same as the
+    file type.
+
+    The files are encoded in order to send them to the workserver as part of
+    a json.
 
     Parameters
     ----------
@@ -42,22 +75,13 @@ def perform_attachment_job(url, api_key, job_id):
     -------
     a dict of encoded files
     """
-    attachments = {} # attachment_name : encoded_file
     url = url + f'?api_key={api_key}'
-    response_from_related = requests.get(url)
-
-    response_from_related = response_from_related.json()
+    response_from_related = requests.get(url).json()
 
     file_info = response_from_related["data"][0]["attributes"]["fileFormats"]
-    file_urls = []
-    file_types = []
-    for link in file_info:
-        file_urls.append(link["fileUrl"])
-        file_types.append(link["format"])
+    file_urls, file_types = get_urls_and_formats(file_info)
 
-    for i, (link, file_type) in enumerate(zip(file_urls, file_types)):
-        attachment = requests.get(link)
-        attachments[f'{job_id}_{i}.{file_type}'] = base64.b64encode(attachment.content).decode('ascii')
+    attachments = download_attachments(file_urls, file_types, job_id)
 
     return attachments
 
@@ -315,7 +339,7 @@ class Client:
         """
         job_id, job_url, job_type = self.get_job()
         if job_type == 'attachments':
-            result = perform_attachment_job(job_url, job_id)
+            result = perform_attachment_job(job_url, self.api_key, job_id)
         else:
             result = self.perform_job(job_url)
         self.send_job(job_id, result)
