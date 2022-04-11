@@ -302,3 +302,21 @@ def test_get_output_path_error():
     output_path = get_output_path(results)
 
     assert output_path == -1
+
+
+'''
+Example result json:
+{ "data": [
+    {
+        "id": "0900006480cb703d", 
+        "type": "attachments", 
+        "links": {
+            "attributes": { 
+                "fileFormats": [
+                    {
+                        "fileUrl": "https://downloads.regulations.gov/EPA-HQ-OECA-2004-0024-0048/attachment_1.doc", 
+                        "format": "doc"}], 
+                    }
+                ]
+            }
+'''
