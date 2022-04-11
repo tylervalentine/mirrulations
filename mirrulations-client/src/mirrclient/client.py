@@ -100,7 +100,7 @@ def perform_attachment_job(url, api_key, job_id):
     a dict of encoded files
     """
     url = url + f'?api_key={api_key}'
-    response_from_related = requests.get(url).json()
+    response_from_related = get_request(url).json() # would work?
 
     file_info = response_from_related["data"][0]["attributes"]["fileFormats"]
     file_urls, file_types = get_urls_and_formats(file_info)
@@ -179,6 +179,10 @@ def get_request(url, **kwargs):
     ----------
     url : str
         the url for the request
+
+    Returns
+    -------
+        str response
     """
     try:
         response = requests.get(url, **kwargs)
