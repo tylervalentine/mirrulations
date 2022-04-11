@@ -2,6 +2,15 @@ import os
 from flask import Flask, json, jsonify, request
 import redis
 from mirrcore.data_storage import DataStorage
+from mirrcore.attachment_saver import AttachmentSaver
+from mirrserver.put_results_validator import PutResultsValidator
+from mirrserver.exceptions import InvalidResultsException
+from mirrserver.exceptions import InvalidClientIDException
+from mirrserver.exceptions import MissingClientIDException
+from mirrserver.exceptions import NoJobsException
+from mirrserver.get_client_id_validator import GetClientIDValidator
+from mirrserver.get_job_validator import GetJobValidator
+# from mirrcore.redis_connector import RedisConnector
 
 
 class WorkServer:
@@ -9,16 +18,19 @@ class WorkServer:
         self.app = Flask(__name__)
         self.redis = redis_server
         self.data = DataStorage()
+        self.attachment_saver = AttachmentSaver()
+        self.put_results_validator = PutResultsValidator()
+        self.get_client_id_validator = GetClientIDValidator()
+        self.get_job_validator = GetJobValidator()
+        # self.redisConnector = RedisConnector()
 
 
 def check_for_database(workserver):
-    # This will either succeed or raise an exception
+    '''This will either succeed or raise an exception'''
     workserver.redis.ping()
 
 
 def check_valid_request_client_id(workserver, client_id):
-    if client_id is None:
-        return False, jsonify({'error': 'Client ID was not provided'}), 401
     if not check_client_id_is_valid(workserver, client_id):
         return False, jsonify({'error': 'Invalid client ID'}), 401
     return (True,)
@@ -36,8 +48,12 @@ def decrement_count(workserver, job_type):
 
 
 def get_job(workserver):
+    '''Takes client's put endpoints validates wheter or not its a usable job...
+    if so it returns the job with an ID, URL and a Type'''
     check_for_database(workserver)
     client_id = request.args.get('client_id')
+    if client_id is None:
+        return False, jsonify({'error': 'Client ID was not provided'}), 401
     success, *values = check_valid_request_client_id(workserver, client_id)
     if not success:
         return False, values[0], values[1]
@@ -86,6 +102,8 @@ def write_results(directory, path, data):
 def put_results(workserver, data):
     check_for_database(workserver)
     client_id = request.args.get('client_id')
+    # client sends attachment files in a list called files
+    # files = request.args.get('files')
     success, *values = check_valid_request_client_id(workserver, client_id)
     if not success:
         return False, values[0], values[1]
@@ -100,11 +118,15 @@ def put_results(workserver, data):
         return (success, *results)
     job_id = data['job_id']
     workserver.redis.hdel('jobs_in_progress', job_id)
+    # add  and files is not None to check if files were sent
+    # once we're adding this functionality
     if 'attachments_text' in data['results']['data'].keys():
-        print(data['results']['data']['attachments_text'])
-    else:
+        pass
+        # for file in files:  # Loop through each file from requests
+        #     workserver.attachment_saver.save(file)  # Save the file on disk
+    else:  # If not an attachment job
         write_results(results[0], data['directory'], data['results'])
-    workserver.data.add(data['results'])
+    workserver.data.add(data['results'])  # write json data to mongo
     return (True,)
 
 
@@ -134,26 +156,28 @@ def create_server(database):
             success, *values = get_job(workserver)
             if not success:
                 return tuple(values)
-            return jsonify({'job': {str(values[0]): values[1],
-                            'job_type': values[2]}}), 200
+            client_id = request.args.get('client_id')
+            workserver.get_job_validator.check_get_jobs(client_id)
+        except (MissingClientIDException, NoJobsException) as error:
+            return jsonify(error.message), error.status_code
         except redis.exceptions.ConnectionError:
-            body = {'error': 'Cannot connect to the database'}
-            return jsonify(body), 500
+            return jsonify({'error': 'Cannot connect to the database'}), 500
+        return jsonify({'job': {str(values[0]): values[1],
+                        'job_type': values[2]}}), 200
 
     @workserver.app.route('/put_results', methods=['PUT'])
     def _put_results():
+        data = json.loads(request.get_json())
         try:
-            data = json.loads(request.get_json())
-            if data is None or data.get('results') is None:
-                body = {'error': 'The body does not contain the results'}
-                return jsonify(body), 403
-            success, *values = put_results(workserver, data)
-            if not success:
-                return tuple(values)
-            return jsonify({'success': 'Job was successfully completed'}), 200
-        except redis.exceptions.ConnectionError:
-            body = {'error': 'Cannot connect to the database'}
-            return jsonify(body), 500
+            validator = workserver.put_results_validator.\
+                check_put_results(data, request.args.get('client_id'))
+        except (InvalidResultsException, InvalidClientIDException,
+                MissingClientIDException) as invalid_result:
+            return jsonify(invalid_result.message), invalid_result.status_code
+        success, *values = put_results(workserver, data)
+        if not success:
+            return tuple(values)
+        return jsonify(validator[0]), validator[1]
 
     @workserver.app.route('/get_client_id', methods=['GET'])
     def _get_client_id():
@@ -163,8 +187,7 @@ def create_server(database):
                 return tuple(values)
             return jsonify({'client_id': values[0]}), 200
         except redis.exceptions.ConnectionError:
-            body = {'error': 'Cannot connect to the database'}
-            return jsonify(body), 500
+            return jsonify({'error': 'Cannot connect to the database'}), 500
 
     return workserver
 
