@@ -4,17 +4,10 @@ from mirrcore.job_queue import JobQueue
 from mirrcore.redis_check import is_redis_available
 import json
 import pandas as pd
+import sys
 
 
 class AttachmentsGenerator:
-    '''
-    * Need attachments in a csv file. --> This will be a mongoexport command once the system is taken down
-    mongoexport --db=mirrulations --collection=comments --type=csv --fields=data.id,data.relationships.attachments.links.related --out=/home/cs334/capstone2022/attachments_list.csv
-
-    * Iterate over that csv file to get the links from the entry
-
-    * Create a new job with those links
-    '''
     def read_attachments_csv():
         data_frame = pd.read_csv('/home/cs334/capstone2022/attachments_list.csv', usecols=['data.id',
                 'data.relationships.attachments.links.related'], dtype={'data.id':'str',
@@ -47,8 +40,9 @@ if __name__ == '__main__':
     generator = AttachmentsGenerator(job_queue, database)
 
 
-    attachments_index = 0
+    limit = 5
     attachments_list = []
+    counter = 0
 
     # This is how the attachments generator was working during the last sprint
     data_frame = generator.read_attachments_csv()
@@ -56,14 +50,24 @@ if __name__ == '__main__':
     for link in data_frame['data.relationships.attachments.links.related']:
         attachments_list.append(link)
 
-    for link in attachments_list:
-        job = generator.add_job('data.relationships.attachments.links.related', link)
-        attachments_index += 1
+    with open("last_index.txt", "r") as file:
+        last_link_index = file.readline()
 
-    '''
-    # Would this work???
-    for link in data_frame['data.relationships.attachments.links.related']:
-        job = generator.add_job('attachments', link)
-    '''
+    with open("last_index.txt", "w") as file:
+        for link in attachments_list[int(last_link_index): ]:
+           
+            if counter > limit:
+                sys.exit()
+
+            elif counter < limit:
+                job = generator.add_job('data.relationships.attachments.links.related', link)
+                counter += 1
+                if link == attachments_list[-1]:
+                    file.write(str(0))
+
+            elif counter == limit:
+                file.write(str(attachments_list.index(link)))
+                counter += 1
+    
 
     database.lpush('jobs_waiting_queue', json.dumps(job))
