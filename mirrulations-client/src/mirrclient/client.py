@@ -72,44 +72,6 @@ def get_urls_and_formats(file_info):
     return urls, formats
 
 
-def perform_attachment_job(url, api_key, job_id):
-    """
-    Performs an attachment job via get_request function by giving
-    it the job_url combined with the Client api_key for validation.
-
-    The attachments are encoded and saved to a dictionary. The name is
-    created from the job_id and the file extension is the same as the
-    file type.
-
-    The files are encoded in order to send them to the workserver as part of
-    a json.
-
-    Parameters
-    ----------
-    url : str
-        url from a job
-
-    api_key : str
-        api_key for the client
-
-    job_id : str
-        id of the job
-
-    Returns
-    -------
-    a dict of encoded files
-    """
-    url = url + f'?api_key={api_key}'
-    response_from_related = get_request(url).json() # would work?
-
-    file_info = response_from_related["data"][0]["attributes"]["fileFormats"]
-    file_urls, file_types = get_urls_and_formats(file_info)
-
-    attachments = download_attachments(file_urls, file_types, job_id)
-
-    return attachments
-
-
 def get_key_path_string(results, key):
     """
     Creates path for keys in results
@@ -358,6 +320,46 @@ class Client:
         return get_request(
             job_url + f'?api_key={self.api_key}').json()
 
+
+    def perform_attachment_job(self, url):
+        """
+        Performs an attachment job via get_request function by giving
+        it the job_url combined with the Client api_key for validation.
+
+        The attachments are encoded and saved to a dictionary. The name is
+        created from the job_id and the file extension is the same as the
+        file type.
+
+        The files are encoded in order to send them to the workserver as part of
+        a json.
+
+        Parameters
+        ----------
+        url : str
+            url from a job
+
+        api_key : str
+            api_key for the client
+
+        job_id : str
+            id of the job
+
+        Returns
+        -------
+        a dict of encoded files
+        """
+        url = url + f'?api_key={self.api_key}'
+        response_from_related = get_request(url).json() # would work?
+
+        file_info = response_from_related["data"][0]["attributes"]["fileFormats"]
+        file_urls, file_types = get_urls_and_formats(file_info)
+
+        attachments = download_attachments(file_urls, file_types, self.client_id)
+
+        return attachments
+
+
+
     def job_operation(self):
         """
         Processes a job.
@@ -367,7 +369,7 @@ class Client:
         """
         job_id, job_url, job_type = self.get_job()
         if job_type == 'attachments':
-            result = perform_attachment_job(job_url, self.api_key, job_id)
+            result = self.perform_attachment_job(job_url)
         else:
             result = self.perform_job(job_url)
         self.send_job(job_id, result)
