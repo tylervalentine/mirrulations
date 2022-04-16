@@ -205,13 +205,13 @@ def test_put_results_returns_correct_attachment_job(mock_server, mocker):
     mock_server.redis.hset('jobs_in_progress', 2, 3)
     mock_server.redis.hset('client_jobs', 2, 1)
     mock_server.redis.set('total_num_client_ids', 1)
-    data = dumps({'job_id': 2,
-                  'results': {'1234_0': base64.b64encode(
-                      open('mirrulations-core/tests/test_files/test.pdf',
-                           'rb').read()).decode('ascii')}})
-    params = {'client_id': 1}
-    response = mock_server.client.put('/put_results',
-                                      json=data, query_string=params)
+    with open('mirrulations-core/tests/test_files/test.pdf', 'rb') as file:
+        data = dumps({'job_id': 2,
+                      'results': {'1234_0': base64.b64encode(
+                        file.read()).decode('ascii')}})
+        params = {'client_id': 1}
+        response = mock_server.client.put('/put_results',
+                                          json=data, query_string=params)
     assert response.status_code == 200
     expected = {'success': 'Job was successfully completed'}
     assert response.get_json() == expected
@@ -246,12 +246,12 @@ def test_put_results_with_invalid_client_id(mock_server):
 def test_put_results_attachment_with_invalid_client_id(mock_server):
     mock_server.redis.incr('total_num_client_ids')
     params = {'client_id': 2}
-    data = dumps({'job_id': 2,
-                  'results': {'1234_0': base64.b64encode(
-                      open('mirrulations-core/tests/test_files/test.pdf',
-                           'rb').read()).decode('ascii')}})
-    response = mock_server.client.put('/put_results',
-                                      json=data, query_string=params)
+    with open('mirrulations-core/tests/test_files/test.pdf', 'rb') as file:
+        data = dumps({'job_id': 2,
+                      'results': {'1234_0': base64.b64encode(
+                        file.read()).decode('ascii')}})
+        response = mock_server.client.put('/put_results',
+                                          json=data, query_string=params)
     assert response.status_code == 401
     expected = {'error': 'Invalid client ID'}
     assert response.get_json() == expected
