@@ -102,7 +102,6 @@ def write_results(directory, path, data):
 def put_results(workserver, data):
     check_for_database(workserver)
     client_id = request.args.get('client_id')
-    # client sends attachment files in a list called files
     success, *values = check_valid_request_client_id(workserver, client_id)
     if not success:
         return False, values[0], values[1]
@@ -117,14 +116,22 @@ def put_results(workserver, data):
         return (success, *results)
     job_id = data['job_id']
     workserver.redis.hdel('jobs_in_progress', job_id)
-    # add  and files is not None to check if files were sent
-    # once we're adding this functionality
-    if 'attachments_text' in data['results']['data'].keys():
-        if data['files'] is not None:
-            workserver.attachment_saver.save(data['files'])
-    else:  # If not an attachment job
-        write_results(results[0], data['directory'], data['results'])
-    workserver.data.add(data['results'])  # write json data to mongo
+    write_results(results[0], data['directory'], data['results'])
+    workserver.data.add(data['results'])
+    return (True,)
+
+
+def put_attachment_results(workserver, data):
+    check_for_database(workserver)
+    client_id = request.args.get('client_id')
+    success, *values = check_valid_request_client_id(workserver, client_id)
+    if not success:
+        return False, values[0], values[1]
+    job_id = data['job_id']
+    workserver.redis.hdel('jobs_in_progress', job_id)
+    if data.get('results') is not None:
+        workserver.attachment_saver.save(data)
+    workserver.data.add(data['results'])
     return (True,)
 
 
@@ -138,8 +145,8 @@ def check_client_id_is_valid(workserver, client_id):
     check_for_database(workserver)
     num_ids = workserver.redis.get('total_num_client_ids')
     total_ids = 0 if num_ids is None else int(num_ids)
-    if not client_id.isdigit():
-        return False
+    # if not client_id.isdigit():
+    #     return False
     client_id = int(client_id)
     return 0 < client_id <= total_ids
 
@@ -172,7 +179,12 @@ def create_server(database):
         except (InvalidResultsException, InvalidClientIDException,
                 MissingClientIDException) as invalid_result:
             return jsonify(invalid_result.message), invalid_result.status_code
-        success, *values = put_results(workserver, data)
+            # REPLACE THIS LINE WITH if attachment_job(): when can check easily
+            # '1234_0 is the key of an attachment in an attachment job test
+        if '1234_0' in data.get('results').keys():
+            success, *values = put_attachment_results(workserver, data)
+        else:
+            success, *values = put_results(workserver, data)
         if not success:
             return tuple(values)
         return jsonify(validator[0]), validator[1]

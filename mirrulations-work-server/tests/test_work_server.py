@@ -1,4 +1,5 @@
 from json import dumps
+import base64
 from pytest import fixture
 from mirrserver.work_server import create_server
 from mirrmock.mock_flask_server import mock_work_server
@@ -204,11 +205,10 @@ def test_put_results_returns_correct_attachment_job(mock_server, mocker):
     mock_server.redis.hset('jobs_in_progress', 2, 3)
     mock_server.redis.hset('client_jobs', 2, 1)
     mock_server.redis.set('total_num_client_ids', 1)
-    data = dumps({'job_id': 2, 'directory': 'dir/dir',
-                  'results': {'data': {
-                      'attachments_text': ['foo'],
-                      'type': 'dockets'
-                  }}})
+    data = dumps({'job_id': 2,
+                  'results': {'1234_0': base64.b64encode(
+                      open('mirrulations-core/tests/test_files/test.pdf',
+                           'rb').read()).decode('ascii')}})
     params = {'client_id': 1}
     response = mock_server.client.put('/put_results',
                                       json=data, query_string=params)
@@ -216,6 +216,45 @@ def test_put_results_returns_correct_attachment_job(mock_server, mocker):
     expected = {'success': 'Job was successfully completed'}
     assert response.get_json() == expected
     assert len(mock_server.data.added) == 1
+
+
+def test_client_id_not_digit(mock_server):
+    mock_server.redis.set('total_num_client_ids', 1)
+    data = dumps({'job_id': 2, 'directory': 'dir/dir',
+                  'results': {2: 3}})
+    params = {'client_id': 'a'}
+    response = mock_server.client.put('/put_results',
+                                      json=data, query_string=params)
+    assert response.status_code == 401
+    assert response.get_json() == {'error': 'Invalid client ID'}
+
+
+def test_put_results_with_invalid_client_id(mock_server):
+    mock_server.redis.incr('total_num_client_ids')
+    params = {'client_id': 2}
+    data = dumps({'job_id': 2, 'directory': 'dir/dir',
+                  'results': {'data': {
+                      'type': 'dockets'
+                  }}})
+    response = mock_server.client.put('/put_results',
+                                      json=data, query_string=params)
+    assert response.status_code == 401
+    expected = {'error': 'Invalid client ID'}
+    assert response.get_json() == expected
+
+
+def test_put_results_attachment_with_invalid_client_id(mock_server):
+    mock_server.redis.incr('total_num_client_ids')
+    params = {'client_id': 2}
+    data = dumps({'job_id': 2,
+                  'results': {'1234_0': base64.b64encode(
+                      open('mirrulations-core/tests/test_files/test.pdf',
+                           'rb').read()).decode('ascii')}})
+    response = mock_server.client.put('/put_results',
+                                      json=data, query_string=params)
+    assert response.status_code == 401
+    expected = {'error': 'Invalid client ID'}
+    assert response.get_json() == expected
 
 
 def test_put_results_returns_500_error_from_regulations(mock_server, mocker):
