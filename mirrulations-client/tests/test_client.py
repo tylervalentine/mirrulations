@@ -278,11 +278,17 @@ def test_client_sends_attachment_results(mock_requests):
         mock_requests.get(
             'http://url.com?api_key=1234',
             json={"data": [ {"id": "0900006480cb703d", "type": "attachments", "links": { "attributes": { "fileFormats": [{
-                        "fileUrl": "https://downloads.regulations.gov/EPA-HQ-OECA-2004-0024-0048/attachment_1.doc", 
+                        "fileUrl": "https://downloads.regulations.gov", 
                         "format": "doc"}], 
                     }}}
                 ]
             },
+            status_code=200
+        )
+
+        mock_requests.get(
+            "https://downloads.regulations.gov",
+            json={"data": 'foobar'},
             status_code=200
         )
         mock_requests.put('http://test.com/put_results', text='{}')
@@ -292,11 +298,12 @@ def test_client_sends_attachment_results(mock_requests):
         client.job_operation()
         put_request = mock_requests.request_history[1]
         json_data = json.loads(put_request.json())
-        saved_data = json_data['results']['data']
+        saved_data = json_data['results']['data'][0]
+        attributes = saved_data['links']['attributes']
 
-        assert saved_data['attachments_text'] == ['http://url.com']
-        assert saved_data['id'] == 'http://url.com'
-        assert saved_data['attributes']['agencyId'] is None
+        assert saved_data['id'] == ["0900006480cb703d"]
+        assert saved_data['type'] == "attachments"
+        assert attributes['attributes']['fileFormats'][0] 
         assert saved_data['attributes']['docketId'] is None
         assert saved_data['attributes']['commentOnDocumentId'] is None
 

@@ -44,7 +44,7 @@ def download_attachments(urls, file_types, job_id):
     attachments = {}
 
     for i, (url, file_type) in enumerate(zip(urls, file_types)):
-        attachment = requests.get(url)
+        attachment = get_request(url)
         attachments[f'{job_id}_{i}.{file_type}'] = b64encode(
             attachment.content).decode('ascii')
 
@@ -109,8 +109,8 @@ def get_output_path(results):
     if 'error' in results:
         return -1
     output_path = ""
+    print(results)
     data = results["data"]["attributes"]
-    # print(data + "printing data")
     output_path += get_key_path_string(data, "agencyId")
     output_path += get_key_path_string(data, "docketId")
     output_path += get_key_path_string(data, "commentOnDocumentId")
@@ -351,7 +351,7 @@ class Client:
         url = url + f'?api_key={self.api_key}'
         response_from_related = get_request(url).json() # would work?
 
-        file_info = response_from_related["data"][0]["attributes"]["fileFormats"]
+        file_info = response_from_related["data"][0]["links"]["attributes"]["fileFormats"]
         file_urls, file_types = get_urls_and_formats(file_info)
 
         attachments = download_attachments(file_urls, file_types, self.client_id)
