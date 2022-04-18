@@ -276,7 +276,7 @@ class Client:
         job_type = job['job_type']
         return job_id, url, job_type
 
-    def send_job(self, job_id, job_result):
+    def send_job(self, job_id, job_result, job_type):
         """
         Returns the job results to the workserver via the server_validator.
         If there are any errors in the job_result, the data json is returned
@@ -294,6 +294,7 @@ class Client:
             results from a performed job
         """
         data = {
+            'job_type': job_type,
             'job_id': job_id,
             'results': job_result
         }
@@ -372,7 +373,7 @@ class Client:
             result = self.perform_attachment_job(job_url)
         else:
             result = self.perform_job(job_url)
-        self.send_job(job_id, result)
+        self.send_job(job_id, result, job_type)
 
 
 if __name__ == '__main__':
