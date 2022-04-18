@@ -278,9 +278,9 @@ def test_client_sends_attachment_results(mock_requests):
         mock_requests.get(
             'http://url.com?api_key=1234',
             json={"data": [{"id": "0900006480cb703d", "type": "attachments",
-                           "links": {"attributes": {"fileFormats": [
+                           "attributes": {"fileFormats": [
                                {"fileUrl": "https://downloads.regulations.gov",
-                                "format": "doc"}]}}}]
+                                "format": "doc"}]}}]
                   },
             status_code=200
         )
