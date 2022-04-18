@@ -329,8 +329,8 @@ class Client:
         created from the job_id and the file extension is the same as the
         file type.
 
-        The files are encoded in order to send them to the workserver as part
-        of a json.
+        The files are encoded in order to send them to the workserver
+        as part of a json.
 
         Parameters
         ----------
@@ -348,14 +348,16 @@ class Client:
         a dict of encoded files
         """
         url = url + f'?api_key={self.api_key}'
-        response_from_related = get_request(url).json() # would work?
+        response_from_related = get_request(url).json()
 
-        file_info = response_from_related["data"][0]["links"]["attributes"]["fileFormats"]
+        response_data = response_from_related["data"][0]
+        file_info = response_data["links"]["attributes"]["fileFormats"]
         file_urls, file_types = get_urls_and_formats(file_info)
 
-        attachments = download_attachments(file_urls, file_types, self.client_id)
-        return attachments
+        attachments = download_attachments(
+            file_urls, file_types, self.client_id)
 
+        return attachments
 
     def job_operation(self):
         """
