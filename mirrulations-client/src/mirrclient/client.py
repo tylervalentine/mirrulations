@@ -47,7 +47,6 @@ def download_attachments(urls, file_types, job_id):
         attachment = get_request(url)
         attachments[f'{job_id}_{i}.{file_type}'] = b64encode(
             attachment.content).decode('ascii')
-
     return attachments
 
 
@@ -109,7 +108,6 @@ def get_output_path(results):
     if 'error' in results:
         return -1
     output_path = ""
-    print(results)
     data = results["data"]["attributes"]
     output_path += get_key_path_string(data, "agencyId")
     output_path += get_key_path_string(data, "docketId")
@@ -322,7 +320,6 @@ class Client:
         return get_request(
             job_url + f'?api_key={self.api_key}').json()
 
-
     def perform_attachment_job(self, url):
         """
         Performs an attachment job via get_request function by giving
@@ -332,8 +329,8 @@ class Client:
         created from the job_id and the file extension is the same as the
         file type.
 
-        The files are encoded in order to send them to the workserver as part of
-        a json.
+        The files are encoded in order to send them to the workserver as part
+        of a json.
 
         Parameters
         ----------
@@ -357,7 +354,6 @@ class Client:
         file_urls, file_types = get_urls_and_formats(file_info)
 
         attachments = download_attachments(file_urls, file_types, self.client_id)
-
         return attachments
 
 

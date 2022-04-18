@@ -277,12 +277,11 @@ def test_client_sends_attachment_results(mock_requests):
         )
         mock_requests.get(
             'http://url.com?api_key=1234',
-            json={"data": [ {"id": "0900006480cb703d", "type": "attachments", "links": { "attributes": { "fileFormats": [{
-                        "fileUrl": "https://downloads.regulations.gov", 
-                        "format": "doc"}], 
-                    }}}
-                ]
-            },
+            json={"data": [{"id": "0900006480cb703d", "type": "attachments",
+                           "links": {"attributes": {"fileFormats": [
+                               {"fileUrl": "https://downloads.regulations.gov",
+                                "format": "doc"}]}}}]
+                  },
             status_code=200
         )
 
@@ -296,16 +295,12 @@ def test_client_sends_attachment_results(mock_requests):
 
         mock_requests.put(f'{BASE_URL}/put_results', text='{}')
         client.job_operation()
-        put_request = mock_requests.request_history[1]
+        put_request = mock_requests.request_history[3]
+        print(put_request)
         json_data = json.loads(put_request.json())
-        saved_data = json_data['results']['data'][0]
-        attributes = saved_data['links']['attributes']
-
-        assert saved_data['id'] == ["0900006480cb703d"]
-        assert saved_data['type'] == "attachments"
-        assert attributes['attributes']['fileFormats'][0] 
-        assert saved_data['attributes']['docketId'] is None
-        assert saved_data['attributes']['commentOnDocumentId'] is None
+        assert json_data['job_id'] == "1"
+        assert json_data['job_type'] == "attachments"
+        assert json_data['results'] == {'-1_0.doc': 'eyJkYXRhIjogImZvb2JhciJ9'}
 
 
 def test_get_output_path_error():
@@ -313,21 +308,3 @@ def test_get_output_path_error():
     output_path = get_output_path(results)
 
     assert output_path == -1
-
-
-'''
-Example result json:
-{ "data": [
-    {
-        "id": "0900006480cb703d", 
-        "type": "attachments", 
-        "links": {
-            "attributes": { 
-                "fileFormats": [
-                    {
-                        "fileUrl": "https://downloads.regulations.gov/EPA-HQ-OECA-2004-0024-0048/attachment_1.doc", 
-                        "format": "doc"}], 
-                    }
-                ]
-            }
-'''
