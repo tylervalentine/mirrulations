@@ -47,7 +47,6 @@ if __name__ == '__main__':
     document_index = 0
     comment_index = 0
     attachment_index = 0
-    print(database.llen('jobs_waiting_queue'))
     for x in range(11):
         if x == 0 or x == 1 or x == 2:
             job = generator.add_job('comments', comments_lst[comment_index])
@@ -63,9 +62,5 @@ if __name__ == '__main__':
         elif x == 7 or x == 8 or x == 9 or x == 10:
             job = generator.add_job('attachments', attachments_lst[attachment_index])
             attachment_index += 1
-        database.lpush('jobs_waiting_queue', json.dumps(job))
-    
-
-    print(database.llen('jobs_waiting_queue'))
-        
+        database.lpush('jobs_waiting_queue', json.dumps(job))    
 
