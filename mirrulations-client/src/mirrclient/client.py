@@ -47,7 +47,6 @@ def download_attachments(urls, file_types, job_id):
         attachment = get_request(url)
         attachments[f'{job_id}_{i}.{file_type}'] = b64encode(
             attachment.content).decode('ascii')
-
     return attachments
 
 
@@ -109,7 +108,6 @@ def get_output_path(results):
     if 'error' in results:
         return -1
     output_path = ""
-    print(results)
     data = results["data"]["attributes"]
     output_path += get_key_path_string(data, "agencyId")
     output_path += get_key_path_string(data, "docketId")
@@ -358,6 +356,7 @@ class Client:
 
         attachments = download_attachments(
             file_urls, file_types, self.client_id)
+
         return attachments
 
     def job_operation(self):
