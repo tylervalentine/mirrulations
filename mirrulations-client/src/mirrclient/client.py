@@ -351,7 +351,7 @@ class Client:
         response_from_related = get_request(url).json()
 
         response_data = response_from_related["data"][0]
-        file_info = response_data["attributes"]["fileFormats"]
+        file_info = response_data["links"]["attributes"]["fileFormats"]
         file_urls, file_types = get_urls_and_formats(file_info)
 
         attachments = download_attachments(
