@@ -14,15 +14,14 @@ class JobQueue:
             }
         self.database.lpush('jobs_waiting_queue', json.dumps(job))
         # reflect change to the queue len in redis db to avoid timeouts from counting true len
-        #redis_queue_utils.change_queue_counter(self.database, job_type, True)
         if job_type == 'attachments':
-            self.database.lpush('num_jobs_attachments_waiting', json.dumps(job))
+            self.database.incr('num_jobs_attachments_waiting')
         elif job_type == 'comments':
-            self.database.lpush('num_jobs_comments_waiting', json.dumps(job))
+            self.database.incr('num_jobs_comments_waiting')
         elif job_type == 'documents':
-            self.database.lpush('num_jobs_documents_waiting', json.dumps(job))
+            self.database.incr('num_jobs_documents_waiting')
         elif job_type == 'dockets':
-            self.database.lpush('num_jobs_dockets_waiting', json.dumps(job))
+            self.database.incr('num_jobs_dockets_waiting')
         
         
 

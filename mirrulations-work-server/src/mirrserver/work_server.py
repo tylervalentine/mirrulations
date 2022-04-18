@@ -38,13 +38,13 @@ def check_valid_request_client_id(workserver, client_id):
 
 def decrement_count(workserver, job_type):
     if job_type == 'attachments':
-        workserver.redis.lpop('num_jobs_attachments_waiting')
+        workserver.redis.decr('num_jobs_attachments_waiting')
     elif job_type == 'comments':
-        workserver.redis.lpop('num_jobs_comments_waiting')
+        workserver.redis.decr('num_jobs_comments_waiting')
     elif job_type == 'documents':
-        workserver.redis.lpop('num_jobs_documents_waiting')
+        workserver.redis.decr('num_jobs_documents_waiting')
     elif job_type == 'dockets':
-        workserver.redis.lpop('num_jobs_dockets_waiting')
+        workserver.redis.decr('num_jobs_dockets_waiting')
 
 
 def get_job(workserver):
