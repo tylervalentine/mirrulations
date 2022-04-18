@@ -207,13 +207,34 @@ def test_put_results_returns_correct_attachment_job(mock_server, mocker):
     mock_server.redis.set('total_num_client_ids', 1)
     with open('mirrulations-core/tests/test_files/test.pdf', 'rb') as file:
         data = dumps({'job_id': 2,
+                      'job_type': 'attachments',
                       'results': {'1234_0': base64.b64encode(
                         file.read()).decode('ascii')}})
         params = {'client_id': 1}
         response = mock_server.client.put('/put_results',
                                           json=data, query_string=params)
-    assert response.status_code == 200
     expected = {'success': 'Job was successfully completed'}
+    assert response.get_json() == expected
+    assert response.status_code == 200
+    assert response.get_json() == expected
+    assert len(mock_server.data.added) == 1
+
+
+def test_put_results_correct_attachment_job_no_files(mock_server, mocker):
+
+    mock_write_results(mocker)
+    mock_server.redis.hset('jobs_in_progress', 2, 3)
+    mock_server.redis.hset('client_jobs', 2, 1)
+    mock_server.redis.set('total_num_client_ids', 1)
+    data = dumps({'job_id': 2,
+                  'job_type': 'attachments',
+                  'results': {}})
+    params = {'client_id': 1}
+    response = mock_server.client.put('/put_results',
+                                      json=data, query_string=params)
+    expected = {'success': 'Job was successfully completed'}
+    assert response.get_json() == expected
+    assert response.status_code == 200
     assert response.get_json() == expected
     assert len(mock_server.data.added) == 1
 
@@ -248,6 +269,7 @@ def test_put_results_attachment_with_invalid_client_id(mock_server):
     params = {'client_id': 2}
     with open('mirrulations-core/tests/test_files/test.pdf', 'rb') as file:
         data = dumps({'job_id': 2,
+                      'job_type': 'attachments',
                       'results': {'1234_0': base64.b64encode(
                         file.read()).decode('ascii')}})
         response = mock_server.client.put('/put_results',

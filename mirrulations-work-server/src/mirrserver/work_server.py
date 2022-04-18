@@ -177,12 +177,10 @@ def create_server(database):
         except (InvalidResultsException, InvalidClientIDException,
                 MissingClientIDException) as invalid_result:
             return jsonify(invalid_result.message), invalid_result.status_code
-            # REPLACE THIS LINE WITH if attachment_job(): when can check easily
-            # '1234_0 is the key of an attachment in an attachment job test
-        if '1234_0' in data.get('results').keys():
-            success, *values = put_attachment_results(workserver, data)
-        else:
-            success, *values = put_results(workserver, data)
+        # Added ternary instead of if/else to apease pylint too many statements
+        success, *values = put_attachment_results(workserver, data) if \
+            data.get('job_type') == 'attachments' else \
+            put_results(workserver, data)
         if not success:
             return tuple(values)
         return jsonify(validator[0]), validator[1]
