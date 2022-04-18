@@ -298,7 +298,8 @@ class Client:
             'job_id': job_id,
             'results': job_result
         }
-        if 'errors' not in job_result:
+        # If the job is not an attachment job we need to add an output path
+        if ('errors' not in job_result) and (job_type != 'attachments'):
             data['directory'] = get_output_path(job_result)
         self.server_validator.put_request(
             '/put_results', data, {'client_id': self.client_id})
@@ -358,7 +359,6 @@ class Client:
         attachments = download_attachments(file_urls, file_types, self.client_id)
 
         return attachments
-
 
 
     def job_operation(self):
