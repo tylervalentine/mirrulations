@@ -223,19 +223,26 @@ def write_results(directory, path, data):
         file.write(json.dumps(data))
 
 
-def put_results(workserver, data):
+def check_received_result(workserver):
     check_for_database(workserver)
     client_id = request.args.get('client_id')
     success, *values = check_valid_request_client_id(workserver, client_id)
     if not success:
         return False, values[0], values[1]
+    return True, client_id
+
+
+def put_results(workserver, data):
+    success, *values = check_received_result(workserver)
+    if not success:
+        return success, values[0], values[1]
     if 'error' in data['results'] or 'errors' in data['results']:
         job_id = data['job_id']
         result = workserver.redis.hget('jobs_in_progress', job_id)
         workserver.redis.hdel('jobs_in_progress', job_id)
         workserver.redis.hset('invalid_jobs', job_id, result)
         return (True,)
-    success, *results = check_results(workserver, data, int(client_id))
+    success, *results = check_results(workserver, data, int(values[0]))
     if not success:
         return (success, *results)
     job_id = data['job_id']
@@ -266,11 +273,9 @@ def put_attachment_results(workserver, data):
     else:
         {'error': 'The client ID was incorrect'}, 401
     """
-    check_for_database(workserver)
-    client_id = request.args.get('client_id')
-    success, *values = check_valid_request_client_id(workserver, client_id)
+    success, *values = check_received_result(workserver)
     if not success:
-        return False, values[0], values[1]
+        return success, values[0], values[1]
     job_id = data['job_id']
     workserver.redis.hdel('jobs_in_progress', job_id)
     if data.get('results') is not None:
