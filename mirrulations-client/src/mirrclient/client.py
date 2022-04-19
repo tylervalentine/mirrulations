@@ -1,6 +1,7 @@
 import time
 import os
 import sys
+from base64 import b64encode
 from json import dumps, loads
 import requests
 from dotenv import load_dotenv
@@ -21,27 +22,53 @@ class NoJobsAvailableException(Exception):
         return f'{self.message}'
 
 
-def perform_attachment_job(url):
+def download_attachments(urls, file_types, job_id):
     """
-    Performs an attachment job via get_request function by giving
-    it the job_url combined with the Client api_key for validation.
+    Downloads attachments from regulations.gov.
 
     Parameters
     ----------
-    job_url : str
-        url from a job
+    urls : str
+        urls of attachments
+
+    file_types : str
+        file formats of attachments
+
+    job_id : str
+        id of the job
 
     Returns
     -------
-    json results of the performed attachment job
+    a dict of encoded files
     """
-    return {"data": {"attachments_text": [str(url)],
-                     "type": "attachment",
-                     "id": str(url),
-                     "attributes": {'agencyId': None,
-                                    'docketId': None,
-                                    'commentOnDocumentId': None}
-                     }}
+    attachments = {}
+
+    for i, (url, file_type) in enumerate(zip(urls, file_types)):
+        attachment = get_request(url)
+        attachments[f'{job_id}_{i}.{file_type}'] = b64encode(
+            attachment.content).decode('ascii')
+    return attachments
+
+
+def get_urls_and_formats(file_info):
+    """
+    Parameters
+    ----------
+    file_info : dict
+        a json of file formats and urls
+
+    Returns
+    -------
+    two lists of urls and file formats
+    """
+    urls = []
+    formats = []
+
+    for link in file_info:
+        urls.append(link["fileUrl"])
+        formats.append(link["format"])
+
+    return urls, formats
 
 
 def get_key_path_string(results, key):
@@ -82,7 +109,6 @@ def get_output_path(results):
         return -1
     output_path = ""
     data = results["data"]["attributes"]
-    # print(data + "printing data")
     output_path += get_key_path_string(data, "agencyId")
     output_path += get_key_path_string(data, "docketId")
     output_path += get_key_path_string(data, "commentOnDocumentId")
@@ -113,6 +139,10 @@ def get_request(url, **kwargs):
     ----------
     url : str
         the url for the request
+
+    Returns
+    -------
+        str response
     """
     try:
         response = requests.get(url, **kwargs)
@@ -244,7 +274,7 @@ class Client:
         job_type = job['job_type']
         return job_id, url, job_type
 
-    def send_job(self, job_id, job_result):
+    def send_job(self, job_id, job_result, job_type):
         """
         Returns the job results to the workserver via the server_validator.
         If there are any errors in the job_result, the data json is returned
@@ -262,10 +292,12 @@ class Client:
             results from a performed job
         """
         data = {
+            'job_type': job_type,
             'job_id': job_id,
             'results': job_result
         }
-        if 'errors' not in job_result:
+        # If the job is not an attachment job we need to add an output path
+        if ('errors' not in job_result) and (job_type != 'attachments'):
             data['directory'] = get_output_path(job_result)
         self.server_validator.put_request(
             '/put_results', data, {'client_id': self.client_id})
@@ -288,6 +320,45 @@ class Client:
         return get_request(
             job_url + f'?api_key={self.api_key}').json()
 
+    def perform_attachment_job(self, url):
+        """
+        Performs an attachment job via get_request function by giving
+        it the job_url combined with the Client api_key for validation.
+
+        The attachments are encoded and saved to a dictionary. The name is
+        created from the job_id and the file extension is the same as the
+        file type.
+
+        The files are encoded in order to send them to the workserver
+        as part of a json.
+
+        Parameters
+        ----------
+        url : str
+            url from a job
+
+        api_key : str
+            api_key for the client
+
+        job_id : str
+            id of the job
+
+        Returns
+        -------
+        a dict of encoded files
+        """
+        url = url + f'?api_key={self.api_key}'
+        response_from_related = get_request(url).json()
+
+        response_data = response_from_related["data"][0]
+        file_info = response_data["attributes"]["fileFormats"]
+        file_urls, file_types = get_urls_and_formats(file_info)
+
+        attachments = download_attachments(
+            file_urls, file_types, self.client_id)
+
+        return attachments
+
     def job_operation(self):
         """
         Processes a job.
@@ -297,10 +368,10 @@ class Client:
         """
         job_id, job_url, job_type = self.get_job()
         if job_type == 'attachments':
-            result = perform_attachment_job(job_url)
+            result = self.perform_attachment_job(job_url)
         else:
             result = self.perform_job(job_url)
-        self.send_job(job_id, result)
+        self.send_job(job_id, result, job_type)
 
 
 if __name__ == '__main__':
