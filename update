@@ -1,7 +1,0 @@
-#!/bin/bash
-docker-compose build
-docker-compose up -d 
-docker-compose ps
-open http://localhost
-sleep 15s
-docker-compose down
