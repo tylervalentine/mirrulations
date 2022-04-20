@@ -10,10 +10,17 @@ class ResultsProcessor:
             if not self.data_storage.exists(item):
                 url = item['links']['self']
                 job_type = item['type']
+
+                # If job type is comment
                 if job_type == 'comments':
+                    # add new comment job
                     self.job_queue.add_job(url, job_type)
                     relatsh = 'relationships'
                     attm = 'attachments'
+                    # grab api call for attachments of that comments
                     url = item[relatsh][attm]['links']['related']
                     job_type = 'attachments'
+                    # aqd new attachment job
+                    # self.job_queue.add_job(url, job_type)
+                # add new attachment job
                 self.job_queue.add_job(url, job_type)
