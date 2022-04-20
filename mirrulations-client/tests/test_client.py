@@ -300,7 +300,7 @@ def test_client_sends_attachment_results(mock_requests):
         json_data = json.loads(put_request.json())
         assert json_data['job_id'] == "1"
         assert json_data['job_type'] == "attachments"
-        assert json_data['results'] == {'-1_0.doc': 'eyJkYXRhIjogImZvb2JhciJ9'}
+        assert json_data['results'] == {'1_0.doc': 'eyJkYXRhIjogImZvb2JhciJ9'}
 
 
 def test_get_output_path_error():
