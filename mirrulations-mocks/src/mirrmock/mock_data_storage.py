@@ -10,3 +10,6 @@ class MockDataStorage:
 
     def add(self, data):
         self.added.append(data)
+    
+    def add_attachment(self, data):
+        self.added.append(data)

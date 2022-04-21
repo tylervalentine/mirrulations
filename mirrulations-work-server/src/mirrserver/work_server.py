@@ -280,7 +280,7 @@ def put_attachment_results(workserver, data):
     workserver.redis.hdel('jobs_in_progress', job_id)
     if data.get('results') is not None:
         workserver.attachment_saver.save(data)
-    workserver.data.add(data['results'])
+    workserver.data.add_attachment(data['results'])
     return (True,)
 
 

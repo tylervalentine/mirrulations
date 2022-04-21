@@ -216,8 +216,8 @@ def test_put_results_returns_correct_attachment_job(mock_server, mocker):
     expected = {'success': 'Job was successfully completed'}
     assert response.get_json() == expected
     assert response.status_code == 200
-    assert response.get_json() == expected
     assert len(mock_server.data.added) == 1
+    assert mock_server.attachment_saver.num_attachments == 1
 
 
 def test_put_results_correct_attachment_job_no_files(mock_server, mocker):

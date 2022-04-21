@@ -320,7 +320,7 @@ class Client:
         return get_request(
             job_url + f'?api_key={self.api_key}').json()
 
-    def perform_attachment_job(self, url):
+    def perform_attachment_job(self, url, job_id):
         """
         Performs an attachment job via get_request function by giving
         it the job_url combined with the Client api_key for validation.
@@ -354,10 +354,8 @@ class Client:
         file_info = response_data["attributes"]["fileFormats"]
         file_urls, file_types = get_urls_and_formats(file_info)
 
-        attachments = download_attachments(
-            file_urls, file_types, self.client_id)
-
-        return attachments
+        return download_attachments(
+            file_urls, file_types, job_id)
 
     def job_operation(self):
         """
@@ -368,7 +366,7 @@ class Client:
         """
         job_id, job_url, job_type = self.get_job()
         if job_type == 'attachments':
-            result = self.perform_attachment_job(job_url)
+            result = self.perform_attachment_job(job_url, job_id)
         else:
             result = self.perform_job(job_url)
         self.send_job(job_id, result, job_type)
