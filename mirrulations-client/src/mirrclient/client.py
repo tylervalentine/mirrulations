@@ -174,6 +174,21 @@ def put_request(url, data, params):
         print('There was an error handling this response.')
 
 
+def get_attachment_directory(data):
+    """
+    Returns the directory for attachments.
+
+    Returns
+    -------
+    str
+        the directory for attachments
+    """
+    agencyId = data["agencyId"]
+    docketId = data["docketId"]
+    commentOnDocumentId = data["commentOnDocumentId"]
+
+    return f'{agencyId}/{docketId}/{commentOnDocumentId}/'
+
 class ServerValidator:
     """
     Validates requests made for the workserver.
@@ -274,7 +289,7 @@ class Client:
         job_type = job['job_type']
         return job_id, url, job_type
 
-    def send_job(self, job_id, job_result, job_type):
+    def send_job(self, job_id, job_result, job_type, directory):
         """
         Returns the job results to the workserver via the server_validator.
         If there are any errors in the job_result, the data json is returned
@@ -298,7 +313,9 @@ class Client:
         }
         # If the job is not an attachment job we need to add an output path
         if ('errors' not in job_result) and (job_type != 'attachments'):
-            data['directory'] = get_output_path(job_result)
+            data['directory'] = get_output_path(job_result, job_type)
+        if job_type == 'attachments':
+            data['directory'] = directory
         self.server_validator.put_request(
             '/put_results', data, {'client_id': self.client_id})
 
@@ -350,12 +367,17 @@ class Client:
         url = url + f'?api_key={self.api_key}'
         response_from_related = get_request(url).json()
 
+        # Get directory information
+        directory_data = response_from_related["attributes"]
+        directory = get_attachment_directory(directory_data)
+
+        # Get attachments
         response_data = response_from_related["data"][0]
         file_info = response_data["attributes"]["fileFormats"]
         file_urls, file_types = get_urls_and_formats(file_info)
+        attachments = download_attachments(file_urls, file_types, job_id)
 
-        return download_attachments(
-            file_urls, file_types, job_id)
+        return directory, attachments
 
     def job_operation(self):
         """
@@ -366,10 +388,10 @@ class Client:
         """
         job_id, job_url, job_type = self.get_job()
         if job_type == 'attachments':
-            result = self.perform_attachment_job(job_url, job_id)
+            directory, result = self.perform_attachment_job(job_url, job_id)
         else:
             result = self.perform_job(job_url)
-        self.send_job(job_id, result, job_type)
+        self.send_job(job_id, result, job_type, directory)
 
 
 if __name__ == '__main__':
