@@ -1,9 +1,13 @@
 import json
-#from mirrcore import redis_queue_utils
+from re import S
 class JobQueue:
 
     def __init__(self, database):
         self.database = database
+        self.database.set('num_jobs_attachments_waiting', 0)
+        self.database.set('num_jobs_comments_waiting', 0)
+        self.database.set('num_jobs_documents_waiting', 0)
+        self.database.set('num_jobs_dockets_waiting', 0)
 
     def add_job(self, url, job_type=None):
         job_id = self.get_job_id()
@@ -14,14 +18,15 @@ class JobQueue:
             }
         self.database.lpush('jobs_waiting_queue', json.dumps(job))
         # reflect change to the queue len in redis db to avoid timeouts from counting true len
+
         if job_type == 'attachments':
-            self.get_attachment_counter
+            self.database.incr('num_jobs_attachments_waiting')
         elif job_type == 'comments':
-            self.get_comment_counter
+            self.database.incr('num_jobs_comments_waiting')
         elif job_type == 'documents':
-            self.get_document_counter
+            self.database.incr('num_jobs_documents_waiting')
         elif job_type == 'dockets':
-            self.get_docket_counter
+            self.database.incr('num_jobs_dockets_waiting')
         
         
 
@@ -34,22 +39,6 @@ class JobQueue:
     def get_job_id(self):
         job_id = self.database.incr('last_job_id')
         return job_id
-
-    def get_attachment_counter(self):
-        counter = self.database.incr('num_jobs_attachments_waiting')
-        return counter
-    
-    def get_comment_counter(self):
-        counter = self.database.incr('num_jobs_comments_waiting')
-        return counter
-
-    def get_document_counter(self):
-        counter = self.database.incr('num_jobs_documents_waiting')
-        return counter
-
-    def get_docket_counter(self):
-        counter = self.database.incr('num_jobs_dockets_waiting')
-        return counter
 
     def get_last_timestamp_string(self, endpoint):
         key = f'{endpoint}_last_timestamp'
