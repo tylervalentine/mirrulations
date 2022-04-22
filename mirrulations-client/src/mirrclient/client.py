@@ -183,11 +183,12 @@ def get_attachment_directory(data):
     str
         the directory for attachments
     """
-    agencyId = data["agencyId"]
-    docketId = data["docketId"]
-    commentOnDocumentId = data["commentOnDocumentId"]
+    agency_id = data["agencyId"]
+    docket_id = data["docketId"]
+    comment_on_document_id = data["commentOnDocumentId"]
 
-    return f'{agencyId}/{docketId}/{commentOnDocumentId}/'
+    return f'{agency_id}/{docket_id}/{comment_on_document_id}/'
+
 
 class ServerValidator:
     """
@@ -313,7 +314,7 @@ class Client:
         }
         # If the job is not an attachment job we need to add an output path
         if ('errors' not in job_result) and (job_type != 'attachments'):
-            data['directory'] = get_output_path(job_result, job_type)
+            data['directory'] = get_output_path(job_result)
         if job_type == 'attachments':
             data['directory'] = directory
         self.server_validator.put_request(
@@ -364,17 +365,18 @@ class Client:
         -------
         a dict of encoded files
         """
-        url = url + f'?api_key={self.api_key}'
-        response_from_related = get_request(url).json()
+        # This looks bad because I must appease the linter, I'm sorry
+        response_from_related = \
+            get_request(url + f'?api_key={self.api_key}').json()
 
         # Get directory information
-        directory_data = response_from_related["attributes"]
-        directory = get_attachment_directory(directory_data)
+        directory = \
+            get_attachment_directory(response_from_related["attributes"])
 
         # Get attachments
-        response_data = response_from_related["data"][0]
-        file_info = response_data["attributes"]["fileFormats"]
-        file_urls, file_types = get_urls_and_formats(file_info)
+        file_urls, file_types = \
+            get_urls_and_formats(
+                response_from_related["data"][0]["attributes"]["fileFormats"])
         attachments = download_attachments(file_urls, file_types, job_id)
 
         return directory, attachments
