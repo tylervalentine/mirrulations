@@ -15,13 +15,13 @@ class JobQueue:
         self.database.lpush('jobs_waiting_queue', json.dumps(job))
         # reflect change to the queue len in redis db to avoid timeouts from counting true len
         if job_type == 'attachments':
-            self.database.incr('num_jobs_attachments_waiting')
+            self.get_attachment_counter
         elif job_type == 'comments':
-            self.database.incr('num_jobs_comments_waiting')
+            self.get_comment_counter
         elif job_type == 'documents':
-            self.database.incr('num_jobs_documents_waiting')
+            self.get_document_counter
         elif job_type == 'dockets':
-            self.database.incr('num_jobs_dockets_waiting')
+            self.get_docket_counter
         
         
 
@@ -34,6 +34,22 @@ class JobQueue:
     def get_job_id(self):
         job_id = self.database.incr('last_job_id')
         return job_id
+
+    def get_attachment_counter(self):
+        counter = self.database.incr('num_jobs_attachments_waiting')
+        return counter
+    
+    def get_comment_counter(self):
+        counter = self.database.incr('num_jobs_comments_waiting')
+        return counter
+
+    def get_document_counter(self):
+        counter = self.database.incr('num_jobs_documents_waiting')
+        return counter
+
+    def get_docket_counter(self):
+        counter = self.database.incr('num_jobs_dockets_waiting')
+        return counter
 
     def get_last_timestamp_string(self, endpoint):
         key = f'{endpoint}_last_timestamp'
