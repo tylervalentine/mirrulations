@@ -10,7 +10,8 @@ class ResultsProcessor:
             if not self.data_storage.exists(item):
                 url = item['links']['self']
                 job_type = item['type']
-                if job_type == 'comments':
+                has_attachment = 'relationships' in item
+                if job_type == 'comments' and has_attachment == True:
                     self.job_queue.add_job(url, job_type)
                     relatsh = 'relationships'
                     attm = 'attachments'
