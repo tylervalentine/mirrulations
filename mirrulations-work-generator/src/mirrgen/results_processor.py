@@ -11,9 +11,8 @@ class ResultsProcessor:
                 url = item['links']['self']
                 job_type = item['type']
 
-                # If job type is comment
-                if job_type == 'comments':
-                    # add new comment job
+                has_attachment = 'relationships' in item
+                if job_type == 'comments' and has_attachment is True:
                     self.job_queue.add_job(url, job_type)
                     relatsh = 'relationships'
                     attm = 'attachments'

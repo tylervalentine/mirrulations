@@ -29,6 +29,7 @@ class AttachmentsGenerator:
                     'url': url,
                     'job_type': job_type
                 }
+            return job
 
 if __name__ == '__main__':
     database = redis.Redis()
