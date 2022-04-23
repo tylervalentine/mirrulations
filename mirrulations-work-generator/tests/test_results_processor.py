@@ -4,6 +4,7 @@ from fakeredis import FakeRedis
 from mirrgen.results_processor import ResultsProcessor
 from mirrcore.job_queue import JobQueue
 from mirrmock.mock_data_storage import MockDataStorage
+from mirrmock.mock_dataset import MockDataSet
 
 
 def test_process_results():
