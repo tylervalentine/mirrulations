@@ -40,7 +40,6 @@ if __name__ == '__main__':
     job_queue = JobQueue(database)
     generator = AttachmentsGenerator(job_queue, database)
 
-
     limit = 5
     attachments_list = []
     counter = 0
@@ -69,6 +68,5 @@ if __name__ == '__main__':
             elif counter == limit:
                 file.write(str(attachments_list.index(link)))
                 counter += 1
-    
 
     database.lpush('jobs_waiting_queue', json.dumps(job))

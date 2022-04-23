@@ -18,14 +18,18 @@ class DataStorage:
             self.attachments.count_documents({'id': result_id}) > 0
 
     def add(self, data):
-        if 'type' in data['data'].keys() and 'attachments_text' not in data['data'].keys():
+        if 'type' in data['data'].keys():
             if data['data']['type'] == 'dockets':
                 self.dockets.insert_one(data)
             elif data['data']['type'] == 'documents':
                 self.documents.insert_one(data)
             elif data['data']['type'] == 'comments':
                 self.comments.insert_one(data)
-        elif 'attachments_text' in data['data'].keys():
+
+    def add_attachment(self, data):
+        if 'attachments_text' in data.keys():
             for attachment_text in data['data']['attachments_text']:
-                data = {'id':data['data']['id'], 'text':attachment_text}
-                self.attachments.insert_one(data)
+                    data = {'id':data['data']['id'], 'text':attachment_text}
+                    self.attachments.insert_one(data)
+        self.attachments.insert_one(data)
+

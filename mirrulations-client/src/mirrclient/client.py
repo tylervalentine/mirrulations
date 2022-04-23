@@ -1,145 +1,88 @@
 import time
 import os
 import sys
+from base64 import b64encode
 from json import dumps, loads
-from dotenv import load_dotenv
 import requests
+from dotenv import load_dotenv
 from requests.exceptions import ConnectionError as RequestConnectionError
-from requests.exceptions import HTTPError, RequestException
+from requests.exceptions import HTTPError
 
 
 class NoJobsAvailableException(Exception):
-    pass
+    """
+    Raises an Exception when there are no jobs available in the workserver.
+    """
+
+    def __init__(self, message="There are no jobs available"):
+        self.message = message
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f'{self.message}'
 
 
-class Client:
+def download_attachments(urls, file_types, job_id):
+    """
+    Downloads attachments from regulations.gov.
 
-    def __init__(self):
-        work_server_hostname = os.getenv('WORK_SERVER_HOSTNAME')
-        work_server_port = os.getenv('WORK_SERVER_PORT')
-        self.url = f'http://{work_server_hostname}:{work_server_port}'
-        self.api_key = os.getenv('API_KEY')
-        self.client_id = -1
+    Parameters
+    ----------
+    urls : str
+        urls of attachments
 
-    def get_client_id(self):
-        client_id = read_client_id('client.cfg')
-        if client_id == -1:
-            client_id = self.request_client_id()
-        self.client_id = client_id
+    file_types : str
+        file formats of attachments
 
-    def request_client_id(self):
-        endpoint = f'{self.url}/get_client_id'
-        response = assure_request(requests.get, endpoint)
-        client_id = int(response.json()['client_id'])
-        self.write_client_id('client.cfg')
-        return client_id
+    job_id : str
+        id of the job
 
-    def get_job(self):
-        endpoint = f'{self.url}/get_job'
-        params = {'client_id': self.client_id}
-        # response = requests.get(endpoint, params=params)
-        # response_text = loads(response.text)
+    Returns
+    -------
+    a dict of encoded files
+    """
+    attachments = {}
 
-        response_text = loads((requests.get(endpoint, params=params)).text)
-        if 'job' not in response_text:
-            raise NoJobsAvailableException()
-        job = response_text['job']
-        job_id = list(job.keys())[0]
-        url = job[job_id]
-        if 'job_type' in job:
-            job_type = job['job_type']
-        else:
-            job_type = 'other'
-        return job_id, url, job_type
-
-    def send_job_results(self, job_id, job_result):
-        endpoint = f'{self.url}/put_results'
-        if 'errors' in job_result:
-            data = {
-                    'job_id': job_id,
-                    'results': job_result
-                    }
-        else:
-            data = {'directory': get_output_path(job_result),
-                    'job_id': job_id,
-                    'results': job_result}
-        params = {'client_id': self.client_id}
-        # print('****\n\n\n')
-        # print(dumps(data))
-        # print('****\n\n\n', flush=True)
-        requests.put(endpoint, json=dumps(data), params=params)
-
-    def execute_task(self):
-        print('Requesting new job from server...')
-        job_id, url, job_type = self.get_job()
-        print('Received job!')
-        print('Sending result back to server...')
-        if job_type == 'attachments':
-            print("this is an attachment")
-            result = perform_attachment_job(url)
-            print("this is the result", result)
-        else:
-            result = self.perform_job(url)
-        self.send_job_results(job_id, result)
-        print('Job complete!\n')
-
-    def perform_job(self, url):
-        print(f'Getting docket at {url}')
-        url = url + f'?api_key={self.api_key}'
-        json = assure_request(requests.get, url).json()
-        print('Done with current job!')
-        return json
-
-    def write_client_id(self, filename):
-        with open(filename, 'w', encoding='utf8') as file:
-            file.write(str(self.client_id))
+    for i, (url, file_type) in enumerate(zip(urls, file_types)):
+        attachment = get_request(url)
+        attachments[f'{job_id}_{i}.{file_type}'] = b64encode(
+            attachment.content).decode('ascii')
+    return attachments
 
 
-def perform_attachment_job(url):
-    return {"data": {"attachments_text": [str(url)],
-                     "type": "attachment",
-                     "id": str(url),
-                     "attributes": {'agencyId': None,
-                                    'docketId': None,
-                                    'commentOnDocumentId': None}
-                     }}
+def get_urls_and_formats(file_info):
+    """
+    Parameters
+    ----------
+    file_info : dict
+        a json of file formats and urls
 
+    Returns
+    -------
+    two lists of urls and file formats
+    """
+    urls = []
+    formats = []
 
-def read_client_id(filename):
-    try:
-        with open(filename, 'r', encoding='utf8') as file:
-            return int(file.readline())
-    except FileNotFoundError:
-        return -1
+    for link in file_info:
+        urls.append(link["fileUrl"])
+        formats.append(link["format"])
 
-
-def assure_request(request, url, sleep_time=60, **kwargs):
-    while True:
-        response = request(url, **kwargs)
-        try:
-            check_status_code(response)
-            response.raise_for_status()
-        except RequestConnectionError:
-            print('Unable to connect to the server. '
-                  'Trying again in a minute...')
-            time.sleep(sleep_time)
-        except HTTPError:
-            print('An HTTP Error occured.')
-        except RequestException:
-            print('A Request Error occured.')
-        if response is not None:
-            return response
-
-
-def check_status_code(response):
-    status_code = response.status_code
-    if status_code == 403:
-        print(response.json()['error'])
-    elif status_code > 400:
-        print('Server error. Trying again in a minute...')
+    return urls, formats
 
 
 def get_key_path_string(results, key):
+    """
+    Creates path for keys in results
+
+    Parameters
+    ----------
+    results : dict
+        The results of a performed job
+
+    key : str
+        A key in the result
+    """
     if key in results.keys():
         if results[key] is None:
             return 'None/'
@@ -148,11 +91,24 @@ def get_key_path_string(results, key):
 
 
 def get_output_path(results):
+    """
+    Takes results from a performed job and creates an output
+    path for a directory.
+
+    Parameters
+    ----------
+    results : dict
+        the results from a performed job
+
+    Returns
+    -------
+    str
+        the output path for the job
+    """
     if 'error' in results:
         return -1
     output_path = ""
     data = results["data"]["attributes"]
-    # print(data + "printing data")
     output_path += get_key_path_string(data, "agencyId")
     output_path += get_key_path_string(data, "docketId")
     output_path += get_key_path_string(data, "commentOnDocumentId")
@@ -162,9 +118,258 @@ def get_output_path(results):
 
 
 def is_environment_variables_present():
+    """
+    A boolean function that returns whether environment variables are
+    present for performing jobs.
+
+    Returns
+    -------
+    Boolean
+    """
     return (os.getenv('WORK_SERVER_HOSTNAME') is not None
             and os.getenv('WORK_SERVER_PORT') is not None
             and os.getenv('API_KEY') is not None)
+
+
+def get_request(url, **kwargs):
+    """
+    Requests and handles exceptions for GET request.
+
+    Parameters
+    ----------
+    url : str
+        the url for the request
+
+    Returns
+    -------
+        str response
+    """
+    try:
+        response = requests.get(url, **kwargs)
+        response.raise_for_status()
+        return response
+    except (HTTPError, RequestConnectionError):
+        print('There was an error handling this response.')
+        return response
+        # time.sleep(sleep_time)
+
+
+def put_request(url, data, params):
+    """
+    Requests and handles exceptions for PUT request.
+
+    Parameters
+    ----------
+    url : str
+        the url for the request
+    data : dict
+        data sent to the endpoint
+    params : dict
+        additional arguments sent to the endpoint
+    """
+    try:
+        requests.put(url, json=dumps(data), params=params)
+
+    except (HTTPError, RequestConnectionError):
+        print('There was an error handling this response.')
+
+
+class ServerValidator:
+    """
+    Validates requests made for the workserver.
+    It's main purpose is to deal with HTTP requests and handle request
+    exceptions.
+
+    Attributes
+    ----------
+    server_url : str
+        The url for the workserver
+    """
+
+    def __init__(self, server_url):
+        self.server_url = server_url
+
+    def get_request(self, endpoint, **kwargs):
+        """
+        Appends the given endpoint to the server url and makes a get request.
+
+        Returns
+        -------
+        Response
+            Json response from request
+        """
+        return get_request(
+            f'{self.server_url}' + endpoint, **kwargs)
+
+    def put_request(self, endpoint, data, params):
+        return put_request(
+            f'{self.server_url}' + endpoint, data, params)
+
+
+class Client:
+    """
+    The Client class performs jobs given to it by a workserver
+    It recieves a job, performs it depending on the job type.
+    A job is performed by calling an api endpoint to request
+    a json obect. The Client sends back the results back
+    to the workserver.
+
+    Attributes
+    ----------
+    api_key : str
+        Api key used to authenticate requests made to api
+    server_validator : ServerValidator
+        This is used to validate requests made between the
+        workserver and the Client
+    client_id : int
+        An id that defaults to -1 but is eventually replaced by a
+        value from the workserver.
+    """
+
+    def __init__(self, server_validator):
+        self.api_key = os.getenv('API_KEY')
+        self.server_validator = server_validator
+        self.client_id = -1
+
+    def get_id(self):
+        """
+        Retrieves an id for the Client from the workserver.
+        That value is saved to client_id then written to
+        a client.cfg file.
+        """
+        response = self.server_validator.get_request('/get_client_id')
+        self.client_id = int(response.json()['client_id'])
+        with open('client.cfg', 'w', encoding='utf8') as file:
+            file.write(str(self.client_id))
+
+    def get_job(self):
+        """
+       The client will use its server validator to request a job
+       from its workserver.
+       This receives a json in this format:
+           {'job': {id: url, 'job_type': job_type}}
+       then pulls the job_id, url and job_type from the json.
+
+       Raises
+       ------
+       NoJobsAvailableException()
+           If no job is available from the work server
+           requested by the validator.
+
+       Returns
+       -------
+        tuple
+            a tuple containing job_id, url, and job_type
+       """
+        print('performing job')
+        response = self.server_validator.get_request(
+            '/get_job', params={'client_id': self.client_id})
+        job = loads(response.text)
+        if 'error' in job:
+            raise NoJobsAvailableException()
+
+        job = job['job']
+        job_id = list(job.keys())[0]
+        url = job[job_id]
+        job_type = job['job_type']
+        return job_id, url, job_type
+
+    def send_job(self, job_id, job_result, job_type):
+        """
+        Returns the job results to the workserver via the server_validator.
+        If there are any errors in the job_result, the data json is returned
+        as  {'job_id': job_id, 'results': job_result}
+        else {
+            'job_id': job_id, 'results': job_result,
+            'directory': output_path
+            }
+
+        Parameters
+        ----------
+        job_id : str
+            id for current job
+        job_result : dict
+            results from a performed job
+        """
+        data = {
+            'job_type': job_type,
+            'job_id': job_id,
+            'results': job_result
+        }
+        # If the job is not an attachment job we need to add an output path
+        if ('errors' not in job_result) and (job_type != 'attachments'):
+            data['directory'] = get_output_path(job_result)
+        self.server_validator.put_request(
+            '/put_results', data, {'client_id': self.client_id})
+
+    def perform_job(self, job_url):
+        """
+        Performs job via get_request function by giving it the job_url combined
+        with the Client api_key for validation.
+
+        Parameters
+        ----------
+        job_url : str
+            url from a job
+
+        Returns
+        -------
+        dict
+            json results of the performed job
+        """
+        return get_request(
+            job_url + f'?api_key={self.api_key}').json()
+
+    def perform_attachment_job(self, url, job_id):
+        """
+        Performs an attachment job via get_request function by giving
+        it the job_url combined with the Client api_key for validation.
+
+        The attachments are encoded and saved to a dictionary. The name is
+        created from the job_id and the file extension is the same as the
+        file type.
+
+        The files are encoded in order to send them to the workserver
+        as part of a json.
+
+        Parameters
+        ----------
+        url : str
+            url from a job
+
+        api_key : str
+            api_key for the client
+
+        job_id : str
+            id of the job
+
+        Returns
+        -------
+        a dict of encoded files
+        """
+        url = url + f'?api_key={self.api_key}'
+        response_from_related = get_request(url).json()
+
+        response_data = response_from_related["data"][0]
+        file_info = response_data["attributes"]["fileFormats"]
+        file_urls, file_types = get_urls_and_formats(file_info)
+
+        return download_attachments(
+            file_urls, file_types, job_id)
+
+    def job_operation(self):
+        """
+        Processes a job.
+        The Client gets the job from the workserver, performs the job
+        based on job_type, then sends back the job results to
+        the workserver.
+        """
+        job_id, job_url, job_type = self.get_job()
+        if job_type == 'attachments':
+            result = self.perform_attachment_job(job_url, job_id)
+        else:
+            result = self.perform_job(job_url)
+        self.send_job(job_id, result, job_type)
 
 
 if __name__ == '__main__':
@@ -172,12 +377,18 @@ if __name__ == '__main__':
     if not is_environment_variables_present():
         print('Need client environment variables')
         sys.exit(1)
-    client = Client()
-    client.get_client_id()
+    work_server_hostname = os.getenv('WORK_SERVER_HOSTNAME')
+    work_server_port = os.getenv('WORK_SERVER_PORT')
+
+    validator_for_server = ServerValidator(
+        f'http://{work_server_hostname}:{work_server_port}')
+    client = Client(validator_for_server)
+    client.get_id()
+
     print('Your ID is: ', client.client_id)
     while True:
         try:
-            client.execute_task()
+            client.job_operation()
         except NoJobsAvailableException:
             print("No Jobs Available")
         time.sleep(3.6)

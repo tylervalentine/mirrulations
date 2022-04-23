@@ -11,15 +11,17 @@ class ResultsProcessor:
                 url = item['links']['self']
                 job_type = item['type']
 
+
                 has_attachment = 'relationships' in item
                 if job_type == 'comments' and has_attachment is True:
+                    # add new comment job
                     self.job_queue.add_job(url, job_type)
                     relatsh = 'relationships'
                     attm = 'attachments'
                     # grab api call for attachments of that comments
                     url = item[relatsh][attm]['links']['related']
                     job_type = 'attachments'
-                    # aqd new attachment job
-                    # self.job_queue.add_job(url, job_type)
-                # add new attachment job
+                    # add new attachment job
+                    self.job_queue.add_job(url, job_type)
+                # add new attachment or other noncomment job
                 self.job_queue.add_job(url, job_type)
