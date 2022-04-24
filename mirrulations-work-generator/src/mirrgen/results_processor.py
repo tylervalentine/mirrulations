@@ -23,5 +23,6 @@ class ResultsProcessor:
                     job_type = 'attachments'
                     # add new attachment job
                     self.job_queue.add_job(url, job_type)
-                # add new attachment or other noncomment job
-                self.job_queue.add_job(url, job_type)
+                else:
+                    # add new attachment or other noncomment job
+                    self.job_queue.add_job(url, job_type)
