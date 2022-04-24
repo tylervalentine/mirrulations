@@ -11,7 +11,6 @@ class ResultsProcessor:
                 url = item['links']['self']
                 job_type = item['type']
 
-
                 has_attachment = 'relationships' in item
                 if job_type == 'comments' and has_attachment is True:
                     # add new comment job
