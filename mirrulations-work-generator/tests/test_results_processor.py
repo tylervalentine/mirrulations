@@ -21,6 +21,13 @@ def test_process_results():
     assert database.llen('jobs_waiting_queue') == 10
 
 
+def test_one_job_is_added_if_not_a_comment():
+    database = FakeRedis()
+    results = MockDataSet(1, job_type='dockets').get_results()
+    processor = ResultsProcessor(JobQueue(database), MockDataStorage())
+    processor.process_results(json.loads(results[0]['text']))
+    assert database.llen('jobs_waiting_queue') == 1
+
 def test_adds_two_jobs_if_is_comment():
     database = FakeRedis()
     results = MockDataSet(1, job_type='comments').get_results()
