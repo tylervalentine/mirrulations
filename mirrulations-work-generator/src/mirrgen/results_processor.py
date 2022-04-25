@@ -15,7 +15,7 @@ class ResultsProcessor:
                 self.job_queue.add_job(url, job_type)
                 if job_type == 'comments':
                     # updates the url and job_type
-                    url = url + "/attachments"
+                    url = url + '/attachments'
                     job_type = 'attachments'
                     # adds new attachment job to jobs_waiting_queue
                     self.job_queue.add_job(url, job_type)
