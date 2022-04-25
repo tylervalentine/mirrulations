@@ -32,7 +32,6 @@ def get_jobs_stats(database):
 
     client_ids = database.get('total_num_client_ids')
     clients_total = int(client_ids) if client_ids is not None else 0
-    
 
     return {
         'num_jobs_waiting':
