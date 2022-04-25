@@ -277,8 +277,17 @@ def test_client_sends_attachment_results(mock_requests):
         )
         mock_requests.get(
             'http://url.com?api_key=1234',
-            json={'data': {'id': '1', 'attributes': {'agencyId': 'NOAA'},
-                           'job_type': 'documents'}},
+            json={"data": [{"id": "0900006480cb703d", "type": "attachments",
+                           "attributes": {"fileFormats": [
+                               {"fileUrl": "https://downloads.regulations.gov",
+                                "format": "doc"}]}}]
+                  },
+            status_code=200
+        )
+
+        mock_requests.get(
+            "https://downloads.regulations.gov",
+            json={"data": 'foobar'},
             status_code=200
         )
         mock_requests.put('http://test.com/put_results', text='{}')
@@ -286,15 +295,12 @@ def test_client_sends_attachment_results(mock_requests):
 
         mock_requests.put(f'{BASE_URL}/put_results', text='{}')
         client.job_operation()
-        put_request = mock_requests.request_history[1]
+        put_request = mock_requests.request_history[3]
+        print(put_request)
         json_data = json.loads(put_request.json())
-        saved_data = json_data['results']['data']
-
-        assert saved_data['attachments_text'] == ['http://url.com']
-        assert saved_data['id'] == 'http://url.com'
-        assert saved_data['attributes']['agencyId'] is None
-        assert saved_data['attributes']['docketId'] is None
-        assert saved_data['attributes']['commentOnDocumentId'] is None
+        assert json_data['job_id'] == "1"
+        assert json_data['job_type'] == "attachments"
+        assert json_data['results'] == {'1_0.doc': 'eyJkYXRhIjogImZvb2JhciJ9'}
 
 
 def test_get_output_path_error():

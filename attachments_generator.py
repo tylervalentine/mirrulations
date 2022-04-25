@@ -2,7 +2,6 @@ import redis
 import time
 from mirrcore.job_queue import JobQueue
 from mirrcore.redis_check import is_redis_available
-import random
 import json
 
 
@@ -18,32 +17,11 @@ class AttachmentsGenerator:
 
         def add_job(self, job_type, url):
             job_id = self.get_job_id()
-            if job_type == 'attachments':
-                job = {'job_id': job_id,
-                        'url': random.randint(0, 6),
-                        'job_type': job_type
-                    }
-            else:
-                job = {'job_id': job_id,
-                        'url': url,
-                        'job_type': job_type
-                    }
+            job = {'job_id': job_id,
+                    'url': url,
+                    'job_type': job_type
+                }
             return job
-
-        def add_job_type_counter(job, database):
-            job_count = {'num_jobs' : 0}
-            if job['job_type'] == 'attachments':
-                job_count['num_jobs'] += 1
-                database.lpush('num_jobs_attach_queue', json.dumps(job_count))
-            if job['job_type'] == 'comments':
-                job_count['num_jobs'] += 1
-                database.lpush('num_jobs_comments_queue', json.dumps(job_count))
-            if job['job_type'] == 'dockets':
-                job_count['num_jobs'] += 1
-                database.lpush('num_jobs_dockets_queue', json.dumps(job_count))
-            if job['job_type'] == 'documents':
-                job_count['num_jobs'] += 1
-                database.lpush('num_jobs_documents_queue', json.dumps(job_count))
     
     
 if __name__ == '__main__':
@@ -61,31 +39,28 @@ if __name__ == '__main__':
     comments_lst = ["https://api.regulations.gov/v4/comments/EPA-HQ-OPP-2003-0132-0596",
                         "https://api.regulations.gov/v4/comments/EPA-HQ-OPP-2003-0132-0274",
                         "https://api.regulations.gov/v4/comments/EPA-HQ-OAR-2002-0056-0366"]
+    attachments_lst = ["https://api.regulations.gov/v4/comments/EPA-HQ-OPP-2003-0101-0035/attachments",
+                        "https://api.regulations.gov/v4/comments/EPA-HQ-OPP-2003-0360-0022/attachments",
+                        "https://api.regulations.gov/v4/comments/EPA-HQ-OECA-2004-0024-0052/attachments",
+                        "https://api.regulations.gov/v4/comments/EPA-HQ-OAR-2002-0024-0264/attachments"]
 
     document_index = 0
-    comments_index = 0
-    print(database.llen('jobs_waiting_queue'))
-    for x in range(10):
+    comment_index = 0
+    attachment_index = 0
+    for x in range(11):
         if x == 0 or x == 1 or x == 2:
-            job = generator.add_job('comments', comments_lst[comments_index])
-            #generator.add_job_type_counter(job, database)
-            comments_index += 1
+            job = generator.add_job('comments', comments_lst[comment_index])
+            comment_index += 1
 
         elif x == 3 or x == 4 or x == 5:
             job = generator.add_job('documents', documents_lst[document_index])
-            #generator.add_job_type_counter(job, database)
             document_index += 1
 
         elif x == 6:
             job = generator.add_job('dockets', 'https://api.regulations.gov/v4/dockets/NCUA-2021-0112')
-            #generator.add_job_type_counter(job, database)
 
-        elif x == 7 or x == 8 or x == 9:
-            job = generator.add_job('attachments', 'none')
-            #generator.add_job_type_counter(job, database)
-        database.lpush('jobs_waiting_queue', json.dumps(job))
-    
-
-    print(database.llen('jobs_waiting_queue'))
-        
+        elif x == 7 or x == 8 or x == 9 or x == 10:
+            job = generator.add_job('attachments', attachments_lst[attachment_index])
+            attachment_index += 1
+        database.lpush('jobs_waiting_queue', json.dumps(job))    
 

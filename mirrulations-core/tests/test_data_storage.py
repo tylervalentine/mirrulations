@@ -191,7 +191,7 @@ def test_add_attachment(monkeypatch):
         }
     }
 
-    storage.add(to_insert)
+    storage.add_attachment(to_insert)
 
     assert len(storage.dockets.saved) == 0
     assert len(storage.documents.saved) == 0
