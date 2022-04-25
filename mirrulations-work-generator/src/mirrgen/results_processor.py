@@ -13,13 +13,9 @@ class ResultsProcessor:
                 job_type = item['type']
                 # adds current job to jobs_waiting_queue
                 self.job_queue.add_job(url, job_type)
-                # checks to see if it has an attachment
-                has_attachment = 'relationships' in item
-                if job_type == 'comments' and has_attachment is True:
-                    relatsh = 'relationships'
-                    attm = 'attachments'
+                if job_type == 'comments':
                     # updates the url and job_type
-                    url = item[relatsh][attm]['links']['related']
+                    url = url + "/attachments"
                     job_type = 'attachments'
                     # adds new attachment job to jobs_waiting_queue
                     self.job_queue.add_job(url, job_type)
