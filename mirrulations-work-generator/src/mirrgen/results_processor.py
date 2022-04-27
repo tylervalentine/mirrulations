@@ -13,4 +13,3 @@ class ResultsProcessor:
                 reg_id = item['id']
                 agency = reg_id.split('-')[0]
                 self.job_queue.add_job(url, job_type, reg_id, agency)
-                
