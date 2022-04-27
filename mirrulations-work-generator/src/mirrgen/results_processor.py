@@ -22,4 +22,5 @@ class ResultsProcessor:
                     regulation_id = item['id']
                     agency = regulation_id.split('-')[0]
                     # adds new attachment job to jobs_waiting_queue
-                    self.job_queue.add_job(url, job_type, regulation_id, agency)
+                    self.job_queue.add_job(url, job_type, 
+                        regulation_id, agency)
