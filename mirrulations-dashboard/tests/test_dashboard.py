@@ -52,7 +52,6 @@ def test_dashboard_returns_job_information(mock_server):
 
     assert response.status_code == 200
     results = response.get_json()
-
     assert results['num_jobs_waiting'] == 5
     assert results['num_jobs_in_progress'] == 4
     assert results['num_jobs_done'] == 10
