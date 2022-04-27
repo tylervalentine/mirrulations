@@ -369,8 +369,9 @@ def create_server(database):
             return jsonify(error.message), error.status_code
         except redis.exceptions.ConnectionError:
             return jsonify({'error': 'Cannot connect to the database'}), 500
-        return jsonify({'job': {str(values[0]): values[1],
-                        'job_type': values[2]}}), 200
+        return jsonify({'job_id': str(values[0]),
+                        'url':  values[1],
+                        'job_type': values[2]}), 200
 
     @workserver.app.route('/put_results', methods=['PUT'])
     def _put_results():

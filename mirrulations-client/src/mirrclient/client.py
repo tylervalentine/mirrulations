@@ -268,9 +268,8 @@ class Client:
         if 'error' in job:
             raise NoJobsAvailableException()
 
-        job = job['job']
-        job_id = list(job.keys())[0]
-        url = job[job_id]
+        job_id = job['job_id']
+        url = job['url']
         job_type = job['job_type']
         return job_id, url, job_type
 
