@@ -11,15 +11,15 @@ class ResultsProcessor:
                 # sets url and job_type
                 url = item['links']['self']
                 job_type = item['type']
-                regulation_id = item['id']
-                agency = regulation_id.split('-')[0]
+                reg_id = item['id']
+                agency = reg_id.split('-')[0]
                 # adds current job to jobs_waiting_queue
-                self.job_queue.add_job(url, job_type, regulation_id, agency)
+                self.job_queue.add_job(url, job_type, reg_id, agency)
                 if job_type == 'comments':
                     # updates the url and job_type
                     url = url + '/attachments'
                     job_type = 'attachments'
-                    regulation_id = item['id']
-                    agency = regulation_id.split('-')[0]
+                    reg_id = item['id']
+                    agency = reg_id.split('-')[0]
                     # adds new attachment job to jobs_waiting_queue
-                    self.job_queue.add_job(url, job_type,regulation_id, agency)
+                    self.job_queue.add_job(url, job_type, reg_id, agency)
