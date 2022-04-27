@@ -174,22 +174,6 @@ def put_request(url, data, params):
         print('There was an error handling this response.')
 
 
-def get_attachment_directory(data):
-    """
-    Returns the directory for attachments.
-
-    Returns
-    -------
-    str
-        the directory for attachments
-    """
-    agency_id = data["agencyId"]
-    docket_id = data["docketId"]
-    comment_on_document_id = data["commentOnDocumentId"]
-
-    return f'{agency_id}/{docket_id}/{comment_on_document_id}/'
-
-
 class ServerValidator:
     """
     Validates requests made for the workserver.
@@ -260,23 +244,23 @@ class Client:
 
     def get_job(self):
         """
-       The client will use its server validator to request a job
-       from its workserver.
-       This receives a json in this format:
-           {'job': {id: url, 'job_type': job_type}}
-       then pulls the job_id, url and job_type from the json.
+        The client will use its server validator to request a job
+        from its workserver.
+        This receives a json in this format:
+            {'job': {id: url, 'job_type': job_type}}
+        then pulls the job_id, url and job_type from the json.
 
-       Raises
-       ------
-       NoJobsAvailableException()
-           If no job is available from the work server
-           requested by the validator.
+        Raises
+        ------
+        NoJobsAvailableException()
+            If no job is available from the work server
+            requested by the validator.
 
-       Returns
-       -------
-        tuple
-            a tuple containing job_id, url, and job_type
-       """
+        Returns
+        -------
+            tuple
+                a tuple containing job_id, url, and job_type
+        """
         print('performing job')
         response = self.server_validator.get_request(
             '/get_job', params={'client_id': self.client_id})
@@ -290,7 +274,7 @@ class Client:
         job_type = job['job_type']
         return job_id, url, job_type
 
-    def send_job(self, job_id, job_result, job_type, directory):
+    def send_job(self, job_id, job_result, job_type):
         """
         Returns the job results to the workserver via the server_validator.
         If there are any errors in the job_result, the data json is returned
@@ -315,8 +299,6 @@ class Client:
         # If the job is not an attachment job we need to add an output path
         if ('errors' not in job_result) and (job_type != 'attachments'):
             data['directory'] = get_output_path(job_result)
-        if job_type == 'attachments':
-            data['directory'] = directory
         self.server_validator.put_request(
             '/put_results', data, {'client_id': self.client_id})
 
@@ -369,17 +351,13 @@ class Client:
         response_from_related = \
             get_request(url + f'?api_key={self.api_key}').json()
 
-        # Get directory information
-        directory = \
-            get_attachment_directory(response_from_related["attributes"])
-
         # Get attachments
         file_urls, file_types = \
             get_urls_and_formats(
                 response_from_related["data"][0]["attributes"]["fileFormats"])
         attachments = download_attachments(file_urls, file_types, job_id)
 
-        return directory, attachments
+        return attachments
 
     def job_operation(self):
         """
@@ -390,10 +368,10 @@ class Client:
         """
         job_id, job_url, job_type = self.get_job()
         if job_type == 'attachments':
-            directory, result = self.perform_attachment_job(job_url, job_id)
+            result = self.perform_attachment_job(job_url, job_id)
         else:
             result = self.perform_job(job_url)
-        self.send_job(job_id, result, job_type, directory)
+        self.send_job(job_id, result, job_type)
 
 
 if __name__ == '__main__':
