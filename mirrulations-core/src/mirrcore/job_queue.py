@@ -5,14 +5,12 @@ class JobQueue:
     def __init__(self, database):
         self.database = database
 
-    def add_job(self, url, job_type=None, regulation_id=None, agency=None):
+    def add_job(self, url, job_type=None):
         job_id = self.get_job_id()
         job = {
             'job_id': job_id,
             'url': url,
-            'job_type': job_type,
-            'regulation_id': regulation_id,
-            'agency_id': agency
+            'job_type': job_type
             }
         self.database.lpush('jobs_waiting_queue', json.dumps(job))
         # reflect change to the queue len in redis db to avoid timeouts from counting true len
