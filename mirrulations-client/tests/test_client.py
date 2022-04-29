@@ -87,11 +87,16 @@ def test_client_gets_job(mock_requests):
     with mock_requests:
         mock_requests.get(
             'http://test.com/get_job',
-            json={'job_id': '1', 'url': 1, 'job_type': 'attachments'},
+            json={'job_id': '1', 'url': 1, 'job_type': 'attachments',
+                  'reg_id': '1', 'agency': 'foo'},
             status_code=200
         )
         job_info = client.get_job()
-        assert ('1', 1, 'attachments') == job_info
+        assert {'job_id': '1',
+                'url': 1,
+                'job_type': 'attachments',
+                'reg_id': '1',
+                'agency': 'foo'} == job_info
 
 
 def test_client_throws_exception_when_no_jobs(mock_requests):
@@ -145,7 +150,9 @@ def test_client_performs_job(mock_requests):
             'http://test.com/get_job',
             json={'job_id': '1',
                   'url': 'http://url.com',
-                  'job_type': 'documents'},
+                  'job_type': 'documents',
+                  'reg_id': '1',
+                  'agency': 'foo'},
             status_code=200
         )
         mock_requests.get(
@@ -176,7 +183,9 @@ def test_client_returns_403_error_to_server(mock_requests):
             'http://test.com/get_job',
             json={'job_id': '1',
                   'url': 'http://url.com',
-                  'job_type': 'documents'},
+                  'job_type': 'documents',
+                  'reg_id': '1',
+                  'agency': 'foo'},
             status_code=200
         )
 
@@ -212,7 +221,9 @@ def test_client_returns_400_error_to_server(mock_requests):
             'http://test.com/get_job',
             json={'job_id': '1',
                   'url': 'http://url.com',
-                  'job_type': 'documents'},
+                  'job_type': 'documents',
+                  'reg_id': '1',
+                  'agency': 'foo'},
             status_code=200
         )
 
@@ -246,7 +257,9 @@ def test_client_returns_500_error_to_server(mock_requests):
             'http://test.com/get_job',
             json={'job_id': '1',
                   'url': 'http://url.com',
-                  'job_type': 'documents'},
+                  'job_type': 'documents',
+                  'reg_id': '1',
+                  'agency': 'foo'},
             status_code=200
         )
 
@@ -282,7 +295,9 @@ def test_client_sends_attachment_results(mock_requests):
             'http://test.com/get_job',
             json={'job_id': '1',
                   'url': 'http://url.com',
-                  'job_type': 'attachments'},
+                  'job_type': 'attachments',
+                  'reg_id': '1',
+                  'agency': 'foo'},
             status_code=200
         )
         mock_requests.get(

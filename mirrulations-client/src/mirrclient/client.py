@@ -268,12 +268,9 @@ class Client:
         if 'error' in job:
             raise NoJobsAvailableException()
 
-        job_id = job['job_id']
-        url = job['url']
-        job_type = job['job_type']
-        return job_id, url, job_type
+        return job
 
-    def send_job(self, job_id, job_result, job_type):
+    def send_job(self, job, job_result):
         """
         Returns the job results to the workserver via the server_validator.
         If there are any errors in the job_result, the data json is returned
@@ -291,12 +288,14 @@ class Client:
             results from a performed job
         """
         data = {
-            'job_type': job_type,
-            'job_id': job_id,
-            'results': job_result
+            'job_type': job['job_type'],
+            'job_id': job['job_id'],
+            'results': job_result,
+            'reg_id': job['reg_id'],
+            'agency': job['agency']
         }
         # If the job is not an attachment job we need to add an output path
-        if ('errors' not in job_result) and (job_type != 'attachments'):
+        if ('errors' not in job_result) and (job['job_type'] != 'attachments'):
             data['directory'] = get_output_path(job_result)
         self.server_validator.put_request(
             '/put_results', data, {'client_id': self.client_id})
@@ -365,12 +364,12 @@ class Client:
         based on job_type, then sends back the job results to
         the workserver.
         """
-        job_id, job_url, job_type = self.get_job()
-        if job_type == 'attachments':
-            result = self.perform_attachment_job(job_url, job_id)
+        job = self.get_job()
+        if job['job_type'] == 'attachments':
+            result = self.perform_attachment_job(job['url'], job['job_id'])
         else:
-            result = self.perform_job(job_url)
-        self.send_job(job_id, result, job_type)
+            result = self.perform_job(job['url'])
+        self.send_job(job, result)
 
 
 if __name__ == '__main__':
