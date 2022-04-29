@@ -194,7 +194,7 @@ def test_put_results_returns_correct_job(mock_server, mocker):
     mock_server.redis.hset('jobs_in_progress', 2, 3)
     mock_server.redis.hset('client_jobs', 2, 1)
     mock_server.redis.set('total_num_client_ids', 1)
-    data = dumps({'job_id': 2, 'directory': 'dir/dir',
+    data = dumps({'job_id': 2, 'directory': 'dir/dir', 'job_type': 'dockets',
                   'results': {'data': {
                       'type': 'dockets'
                   }}})
@@ -216,6 +216,8 @@ def test_put_results_returns_correct_attachment_job(mock_server, mocker):
     with open('mirrulations-core/tests/test_files/test.pdf', 'rb') as file:
         data = dumps({'job_id': 2,
                       'job_type': 'attachments',
+                      'agency': 'EPA',
+                      'reg_id': 'AAAAA',
                       'results': {'1234_0': base64.b64encode(
                         file.read()).decode('ascii')}})
         params = {'client_id': 1}
@@ -236,7 +238,9 @@ def test_put_results_correct_attachment_job_no_files(mock_server, mocker):
     mock_server.redis.set('total_num_client_ids', 1)
     data = dumps({'job_id': 2,
                   'job_type': 'attachments',
-                  'results': {}})
+                  'results': {},
+                  'reg_id': 'AAAA',
+                  'agency': 'EPA'})
     params = {'client_id': 1}
     response = mock_server.client.put('/put_results',
                                       json=data, query_string=params)

@@ -188,7 +188,10 @@ def test_add_attachment(monkeypatch):
         'data': {
             'id': 'COMM-2020-1234',
             'attachments_text': ['foo']
-        }
+        },
+        'agency': 'EPA',
+        'reg_id': 'AAAA',
+        'results': {'file', 'file'}
     }
 
     storage.add_attachment(to_insert)

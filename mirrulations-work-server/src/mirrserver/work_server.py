@@ -283,8 +283,11 @@ def put_attachment_results(workserver, data):
     job_id = data['job_id']
     workserver.redis.hdel('jobs_in_progress', job_id)
     if data.get('results') is not None:
-        workserver.attachment_saver.save(data)
-    workserver.data.add_attachment(data['results'])
+        print('agency', data['agency'])
+        print('reg_id', data['reg_id'])
+        workserver.attachment_saver.save(
+            data, f"/data/{data['agency']}/{data['reg_id']}")
+    workserver.data.add_attachment(data)
     return (True,)
 
 
