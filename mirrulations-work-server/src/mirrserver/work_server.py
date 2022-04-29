@@ -121,6 +121,7 @@ def decrement_count(workserver, job_type):
 
 
 def get_job(workserver):
+    # pylint: disable=R0914
     """
     Takes client's put endpoints validates wheter or not its a usable job
     if so it returns the job with the job ID, URL job_type and
