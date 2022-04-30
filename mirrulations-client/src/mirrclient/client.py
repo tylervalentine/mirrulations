@@ -198,12 +198,20 @@ class Validator:
         Response
             Json response from request
         """
-        return get_request(
-            f'{self.server_url}' + endpoint, **kwargs)
+        try:
+            response = requests.get(endpoint, **kwargs)
+            response.raise_for_status()
+            return response
+        except (HTTPError, RequestConnectionError):
+            print('There was an error handling this response.')
+            return response
 
     def put_request(self, endpoint, data, params):
-        return put_request(
-            f'{self.server_url}' + endpoint, data, params)
+        try:
+            requests.put(endpoint, json=dumps(data), params=params)
+
+        except (HTTPError, RequestConnectionError):
+            print('There was an error handling this response.')
 
 
 class Client:
