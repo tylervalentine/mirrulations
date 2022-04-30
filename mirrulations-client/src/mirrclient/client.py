@@ -131,49 +131,6 @@ def is_environment_variables_present():
             and os.getenv('API_KEY') is not None)
 
 
-def get_request(url, **kwargs):
-    """
-    Requests and handles exceptions for GET request.
-
-    Parameters
-    ----------
-    url : str
-        the url for the request
-
-    Returns
-    -------
-        str response
-    """
-    try:
-        response = requests.get(url, **kwargs)
-        response.raise_for_status()
-        return response
-    except (HTTPError, RequestConnectionError):
-        print('There was an error handling this response.')
-        return response
-        # time.sleep(sleep_time)
-
-
-def put_request(url, data, params):
-    """
-    Requests and handles exceptions for PUT request.
-
-    Parameters
-    ----------
-    url : str
-        the url for the request
-    data : dict
-        data sent to the endpoint
-    params : dict
-        additional arguments sent to the endpoint
-    """
-    try:
-        requests.put(url, json=dumps(data), params=params)
-
-    except (HTTPError, RequestConnectionError):
-        print('There was an error handling this response.')
-
-
 class Validator:
     """
     Validates requests made for the workserver.
@@ -191,12 +148,16 @@ class Validator:
 
     def get_request(self, endpoint, **kwargs):
         """
-        Appends the given endpoint to the server url and makes a get request.
+        Requests and handles exceptions for GET request.
+
+        Parameters
+        ----------
+        endpoint : str
+            the url for the request
 
         Returns
         -------
-        Response
-            Json response from request
+            str response
         """
         try:
             response = requests.get(endpoint, **kwargs)
@@ -207,6 +168,18 @@ class Validator:
             return response
 
     def put_request(self, endpoint, data, params):
+        """
+        Requests and handles exceptions for PUT request.
+
+        Parameters
+        ----------
+        endpoint : str
+            the url for the request
+        data : dict
+            data sent to the endpoint
+        params : dict
+            additional arguments sent to the endpoint
+        """
         try:
             requests.put(endpoint, json=dumps(data), params=params)
 
