@@ -174,7 +174,7 @@ def put_request(url, data, params):
         print('There was an error handling this response.')
 
 
-class ServerValidator:
+class Validator:
     """
     Validates requests made for the workserver.
     It's main purpose is to deal with HTTP requests and handle request
@@ -186,7 +186,7 @@ class ServerValidator:
         The url for the workserver
     """
 
-    def __init__(self, server_url):
+    def __init__(self, server_url=""):
         self.server_url = server_url
 
     def get_request(self, endpoint, **kwargs):
@@ -226,9 +226,10 @@ class Client:
         value from the workserver.
     """
 
-    def __init__(self, server_validator):
+    def __init__(self, server_validator, api_validator):
         self.api_key = os.getenv('API_KEY')
         self.server_validator = server_validator
+        self.api_validator = api_validator
         self.client_id = -1
 
     def get_id(self):
@@ -380,9 +381,9 @@ if __name__ == '__main__':
     work_server_hostname = os.getenv('WORK_SERVER_HOSTNAME')
     work_server_port = os.getenv('WORK_SERVER_PORT')
 
-    validator_for_server = ServerValidator(
+    validator_for_server = Validator(
         f'http://{work_server_hostname}:{work_server_port}')
-    client = Client(validator_for_server)
+    client = Client(validator_for_server, Validator())
     client.get_id()
 
     print('Your ID is: ', client.client_id)
