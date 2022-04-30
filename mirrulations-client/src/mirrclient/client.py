@@ -199,23 +199,23 @@ class Client:
 
     def get_job(self):
         """
-       The client will use its server validator to request a job
-       from its workserver.
-       This receives a json in this format:
-           {'job': {id: url, 'job_type': job_type}}
-       then pulls the job_id, url and job_type from the json.
+        The client will use its server validator to request a job
+        from its workserver.
+        This receives a json in this format:
+            {'job': {id: url, 'job_type': job_type}}
+        then pulls the job_id, url and job_type from the json.
 
-       Raises
-       ------
-       NoJobsAvailableException()
-           If no job is available from the work server
-           requested by the validator.
+        Raises
+        ------
+        NoJobsAvailableException()
+            If no job is available from the work server
+            requested by the validator.
 
-       Returns
-       -------
-        tuple
-            a tuple containing job_id, url, and job_type
-       """
+        Returns
+        -------
+            tuple
+                a tuple containing job_id, url, and job_type
+        """
         print('performing job')
         response = self.server_validator.get_request(
             '/get_job', params={'client_id': self.client_id})
@@ -223,13 +223,9 @@ class Client:
         if 'error' in job:
             raise NoJobsAvailableException()
 
-        job = job['job']
-        job_id = list(job.keys())[0]
-        url = job[job_id]
-        job_type = job['job_type']
-        return job_id, url, job_type
+        return job
 
-    def send_job(self, job_id, job_result, job_type):
+    def send_job(self, job, job_result):
         """
         Returns the job results to the workserver via the server_validator.
         If there are any errors in the job_result, the data json is returned
@@ -247,12 +243,14 @@ class Client:
             results from a performed job
         """
         data = {
-            'job_type': job_type,
-            'job_id': job_id,
-            'results': job_result
+            'job_type': job['job_type'],
+            'job_id': job['job_id'],
+            'results': job_result,
+            'reg_id': job['reg_id'],
+            'agency': job['agency']
         }
         # If the job is not an attachment job we need to add an output path
-        if ('errors' not in job_result) and (job_type != 'attachments'):
+        if ('errors' not in job_result) and (job['job_type'] != 'attachments'):
             data['directory'] = get_output_path(job_result)
         self.server_validator.put_request(
             '/put_results', data, {'client_id': self.client_id})
@@ -305,12 +303,11 @@ class Client:
         url = url + f'?api_key={self.api_key}'
         response_from_related = self.api_validator.get_request(url).json()
 
-        response_data = response_from_related["data"][0]
-        file_info = response_data["attributes"]["fileFormats"]
-        file_urls, file_types = get_urls_and_formats(file_info)
-
-        return self.download_attachments(
-            file_urls, file_types, job_id)
+        # Get attachments
+        file_urls, file_types = \
+            get_urls_and_formats(
+                response_from_related["data"][0]["attributes"]["fileFormats"])
+        return self.download_attachments(file_urls, file_types, job_id)
 
     def download_attachments(self, urls, file_types, job_id):
         """
@@ -345,12 +342,12 @@ class Client:
         based on job_type, then sends back the job results to
         the workserver.
         """
-        job_id, job_url, job_type = self.get_job()
-        if job_type == 'attachments':
-            result = self.perform_attachment_job(job_url, job_id)
+        job = self.get_job()
+        if job['job_type'] == 'attachments':
+            result = self.perform_attachment_job(job['url'], job['job_id'])
         else:
-            result = self.perform_job(job_url)
-        self.send_job(job_id, result, job_type)
+            result = self.perform_job(job['url'])
+        self.send_job(job, result)
 
 
 if __name__ == '__main__':

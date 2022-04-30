@@ -8,7 +8,7 @@ class mockAttachmentSaver():
         self.num_attachments = 0
         self.data = None
     
-    def save(self, data):
+    def save(self, data, path=None):
         self.num_attachments += 1
         self.data = data
 
