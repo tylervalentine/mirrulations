@@ -115,8 +115,8 @@ class Validator:
         The url for the workserver
     """
 
-    def __init__(self, server_url=""):
-        self.server_url = server_url
+    def __init__(self, url=""):
+        self.url = url
 
     def get_request(self, endpoint, **kwargs):
         """
@@ -132,7 +132,7 @@ class Validator:
             str response
         """
         try:
-            response = requests.get(endpoint, **kwargs)
+            response = requests.get(f'{self.url}' + endpoint, **kwargs)
             response.raise_for_status()
             return response
         except (HTTPError, RequestConnectionError):
@@ -153,7 +153,7 @@ class Validator:
             additional arguments sent to the endpoint
         """
         try:
-            requests.put(endpoint, json=dumps(data), params=params)
+            requests.put(f'{self.url}' + endpoint, json=dumps(data), params=params)
 
         except (HTTPError, RequestConnectionError):
             print('There was an error handling this response.')
