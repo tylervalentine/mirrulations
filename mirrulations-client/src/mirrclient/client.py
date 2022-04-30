@@ -105,8 +105,7 @@ def is_environment_variables_present():
 
 class Validator:
     """
-    Validates requests made for the workserver.
-    It's main purpose is to deal with HTTP requests and handle request
+    For validating HTTP requests and handling request
     exceptions.
 
     Attributes
