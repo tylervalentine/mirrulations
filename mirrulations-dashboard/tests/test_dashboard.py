@@ -30,6 +30,10 @@ def add_mock_data_to_database(database):
     jobs_done = {i: i for i in range(10, 13)}
     database.hset('jobs_done', mapping=jobs_done)
     database.set('total_num_client_ids', 2)
+    database.set('num_jobs_attachments_waiting', 1)
+    database.set('num_jobs_comments_waiting', 2)
+    database.set('num_jobs_documents_waiting', 2)
+    database.set('num_jobs_dockets_waiting', 1)
 
 
 def test_dashboard_returns_job_information(mock_server):
@@ -48,11 +52,14 @@ def test_dashboard_returns_job_information(mock_server):
 
     assert response.status_code == 200
     results = response.get_json()
-
     assert results['num_jobs_waiting'] == 5
     assert results['num_jobs_in_progress'] == 4
     assert results['num_jobs_done'] == 10
     assert results['jobs_total'] == 19
+    assert results['num_jobs_attachments_queued'] == 1
+    assert results['num_jobs_comments_queued'] == 2
+    assert results['num_jobs_documents_queued'] == 2
+    assert results['num_jobs_dockets_queued'] == 1
 
 
 def test_dashboard_returns_html(mock_server):

@@ -1,3 +1,4 @@
+# pylint: disable=too-many-locals
 import time
 import os
 import sys
@@ -20,34 +21,6 @@ class NoJobsAvailableException(Exception):
 
     def __str__(self):
         return f'{self.message}'
-
-
-def download_attachments(urls, file_types, job_id):
-    """
-    Downloads attachments from regulations.gov.
-
-    Parameters
-    ----------
-    urls : str
-        urls of attachments
-
-    file_types : str
-        file formats of attachments
-
-    job_id : str
-        id of the job
-
-    Returns
-    -------
-    a dict of encoded files
-    """
-    attachments = {}
-
-    for i, (url, file_type) in enumerate(zip(urls, file_types)):
-        attachment = get_request(url)
-        attachments[f'{job_id}_{i}.{file_type}'] = b64encode(
-            attachment.content).decode('ascii')
-    return attachments
 
 
 def get_urls_and_formats(file_info):
@@ -131,53 +104,9 @@ def is_environment_variables_present():
             and os.getenv('API_KEY') is not None)
 
 
-def get_request(url, **kwargs):
+class Validator:
     """
-    Requests and handles exceptions for GET request.
-
-    Parameters
-    ----------
-    url : str
-        the url for the request
-
-    Returns
-    -------
-        str response
-    """
-    try:
-        response = requests.get(url, **kwargs)
-        response.raise_for_status()
-        return response
-    except (HTTPError, RequestConnectionError):
-        print('There was an error handling this response.')
-        return response
-        # time.sleep(sleep_time)
-
-
-def put_request(url, data, params):
-    """
-    Requests and handles exceptions for PUT request.
-
-    Parameters
-    ----------
-    url : str
-        the url for the request
-    data : dict
-        data sent to the endpoint
-    params : dict
-        additional arguments sent to the endpoint
-    """
-    try:
-        requests.put(url, json=dumps(data), params=params)
-
-    except (HTTPError, RequestConnectionError):
-        print('There was an error handling this response.')
-
-
-class ServerValidator:
-    """
-    Validates requests made for the workserver.
-    It's main purpose is to deal with HTTP requests and handle request
+    For validating HTTP requests and handling request
     exceptions.
 
     Attributes
@@ -186,24 +115,49 @@ class ServerValidator:
         The url for the workserver
     """
 
-    def __init__(self, server_url):
-        self.server_url = server_url
+    def __init__(self, url=""):
+        self.url = url
 
     def get_request(self, endpoint, **kwargs):
         """
-        Appends the given endpoint to the server url and makes a get request.
+        Requests and handles exceptions for GET request.
+
+        Parameters
+        ----------
+        endpoint : str
+            the url for the request
 
         Returns
         -------
-        Response
-            Json response from request
+            str response
         """
-        return get_request(
-            f'{self.server_url}' + endpoint, **kwargs)
+        try:
+            response = requests.get(f'{self.url}' + endpoint, **kwargs)
+            response.raise_for_status()
+            return response
+        except (HTTPError, RequestConnectionError):
+            print('There was an error handling this response.')
+            return response
 
     def put_request(self, endpoint, data, params):
-        return put_request(
-            f'{self.server_url}' + endpoint, data, params)
+        """
+        Requests and handles exceptions for PUT request.
+
+        Parameters
+        ----------
+        endpoint : str
+            the url for the request
+        data : dict
+            data sent to the endpoint
+        params : dict
+            additional arguments sent to the endpoint
+        """
+        try:
+            requests.put(f'{self.url}' + endpoint,
+                         json=dumps(data), params=params)
+
+        except (HTTPError, RequestConnectionError):
+            print('There was an error handling this response.')
 
 
 class Client:
@@ -226,9 +180,10 @@ class Client:
         value from the workserver.
     """
 
-    def __init__(self, server_validator):
+    def __init__(self, server_validator, api_validator):
         self.api_key = os.getenv('API_KEY')
         self.server_validator = server_validator
+        self.api_validator = api_validator
         self.client_id = -1
 
     def get_id(self):
@@ -315,7 +270,7 @@ class Client:
         dict
             json results of the performed job
         """
-        return get_request(
+        return self.api_validator.get_request(
             job_url + f'?api_key={self.api_key}').json()
 
     def perform_attachment_job(self, url, job_id):
@@ -345,16 +300,39 @@ class Client:
         -------
         a dict of encoded files
         """
-        # This looks bad because I must appease the linter, I'm sorry
-        response_from_related = \
-            get_request(url + f'?api_key={self.api_key}').json()
+        url = url + f'?api_key={self.api_key}'
+        response_from_related = self.api_validator.get_request(url).json()
 
         # Get attachments
         file_urls, file_types = \
             get_urls_and_formats(
                 response_from_related["data"][0]["attributes"]["fileFormats"])
-        attachments = download_attachments(file_urls, file_types, job_id)
+        return self.download_attachments(file_urls, file_types, job_id)
 
+    def download_attachments(self, urls, file_types, job_id):
+        """
+        Downloads attachments from regulations.gov.
+
+        Parameters
+        ----------
+        urls : str
+            urls of attachments
+
+        file_types : str
+            file formats of attachments
+
+        job_id : str
+            id of the job
+
+        Returns
+        -------
+        a dict of encoded files
+        """
+        attachments = {}
+        for i, (url, file_type) in enumerate(zip(urls, file_types)):
+            attachment = self.api_validator.get_request(url)
+            attachments[f'{job_id}_{i}.{file_type}'] = b64encode(
+                attachment.content).decode('ascii')
         return attachments
 
     def job_operation(self):
@@ -380,9 +358,9 @@ if __name__ == '__main__':
     work_server_hostname = os.getenv('WORK_SERVER_HOSTNAME')
     work_server_port = os.getenv('WORK_SERVER_PORT')
 
-    validator_for_server = ServerValidator(
+    validator_for_server = Validator(
         f'http://{work_server_hostname}:{work_server_port}')
-    client = Client(validator_for_server)
+    client = Client(validator_for_server, Validator())
     client.get_id()
 
     print('Your ID is: ', client.client_id)
