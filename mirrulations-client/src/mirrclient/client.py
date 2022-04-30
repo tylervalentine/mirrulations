@@ -1,3 +1,4 @@
+# pylint: disable=too-many-locals
 import time
 import os
 import sys
@@ -152,7 +153,8 @@ class Validator:
             additional arguments sent to the endpoint
         """
         try:
-            requests.put(f'{self.url}' + endpoint, json=dumps(data), params=params)
+            requests.put(f'{self.url}' + endpoint,
+                         json=dumps(data), params=params)
 
         except (HTTPError, RequestConnectionError):
             print('There was an error handling this response.')
@@ -330,7 +332,6 @@ class Client:
         a dict of encoded files
         """
         attachments = {}
-
         for i, (url, file_type) in enumerate(zip(urls, file_types)):
             attachment = self.api_validator.get_request(url)
             attachments[f'{job_id}_{i}.{file_type}'] = b64encode(
