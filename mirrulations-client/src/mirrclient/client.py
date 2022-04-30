@@ -22,34 +22,6 @@ class NoJobsAvailableException(Exception):
         return f'{self.message}'
 
 
-def download_attachments(urls, file_types, job_id):
-    """
-    Downloads attachments from regulations.gov.
-
-    Parameters
-    ----------
-    urls : str
-        urls of attachments
-
-    file_types : str
-        file formats of attachments
-
-    job_id : str
-        id of the job
-
-    Returns
-    -------
-    a dict of encoded files
-    """
-    attachments = {}
-
-    for i, (url, file_type) in enumerate(zip(urls, file_types)):
-        attachment = get_request(url)
-        attachments[f'{job_id}_{i}.{file_type}'] = b64encode(
-            attachment.content).decode('ascii')
-    return attachments
-
-
 def get_urls_and_formats(file_info):
     """
     Parameters
@@ -299,7 +271,7 @@ class Client:
         dict
             json results of the performed job
         """
-        return get_request(
+        return self.api_validator.get_request(
             job_url + f'?api_key={self.api_key}').json()
 
     def perform_attachment_job(self, url, job_id):
@@ -330,14 +302,41 @@ class Client:
         a dict of encoded files
         """
         url = url + f'?api_key={self.api_key}'
-        response_from_related = get_request(url).json()
+        response_from_related = self.api_validator.get_request(url).json()
 
         response_data = response_from_related["data"][0]
         file_info = response_data["attributes"]["fileFormats"]
         file_urls, file_types = get_urls_and_formats(file_info)
 
-        return download_attachments(
+        return self.download_attachments(
             file_urls, file_types, job_id)
+
+    def download_attachments(self, urls, file_types, job_id):
+        """
+        Downloads attachments from regulations.gov.
+
+        Parameters
+        ----------
+        urls : str
+            urls of attachments
+
+        file_types : str
+            file formats of attachments
+
+        job_id : str
+            id of the job
+
+        Returns
+        -------
+        a dict of encoded files
+        """
+        attachments = {}
+
+        for i, (url, file_type) in enumerate(zip(urls, file_types)):
+            attachment = self.api_validator.get_request(url)
+            attachments[f'{job_id}_{i}.{file_type}'] = b64encode(
+                attachment.content).decode('ascii')
+        return attachments
 
     def job_operation(self):
         """
