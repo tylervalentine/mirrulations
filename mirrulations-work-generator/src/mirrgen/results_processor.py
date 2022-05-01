@@ -18,7 +18,6 @@ class ResultsProcessor:
                     url = url + '/attachments'
                     job_type = 'attachments'
                     # adds new attachment job to jobs_waiting_queue
-                    self.job_queue.add_job(url, job_type)
-                reg_id = item['id']
-                agency = reg_id.split('-')[0]
-                self.job_queue.add_job(url, job_type, reg_id, agency)
+                    reg_id = item['id']
+                    agency = reg_id.split('-')[0]
+                    self.job_queue.add_job(url, job_type, reg_id, agency)
