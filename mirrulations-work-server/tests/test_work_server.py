@@ -69,11 +69,19 @@ def test_get_job_has_no_available_job(mock_server):
 def test_get_job_returns_single_job(mock_server):
     mock_server.redis.incr('total_num_client_ids')
     params = {'client_id': 1}
-    job = {'job_id': 1, 'url': 'url', 'job_type': 'docket'}
+    job = {'job_id': 1,
+           'url': 'url',
+           'job_type': 'docket',
+           'reg_id': 3,
+           'agency': 'EPA'}
     mock_server.redis.rpush('jobs_waiting_queue', dumps(job))
     response = mock_server.client.get('/get_job', query_string=params)
     assert response.status_code == 200
-    expected = {'job': {'1': 'url', 'job_type': 'docket'}}
+    expected = {'job_id': '1',
+                'url': 'url',
+                'job_type': 'docket',
+                'reg_id': 3,
+                'agency': 'EPA'}
     assert response.get_json() == expected
 
 
@@ -186,7 +194,7 @@ def test_put_results_returns_correct_job(mock_server, mocker):
     mock_server.redis.hset('jobs_in_progress', 2, 3)
     mock_server.redis.hset('client_jobs', 2, 1)
     mock_server.redis.set('total_num_client_ids', 1)
-    data = dumps({'job_id': 2, 'directory': 'dir/dir',
+    data = dumps({'job_id': 2, 'directory': 'dir/dir', 'job_type': 'dockets',
                   'results': {'data': {
                       'type': 'dockets'
                   }}})
@@ -208,6 +216,8 @@ def test_put_results_returns_correct_attachment_job(mock_server, mocker):
     with open('mirrulations-core/tests/test_files/test.pdf', 'rb') as file:
         data = dumps({'job_id': 2,
                       'job_type': 'attachments',
+                      'agency': 'EPA',
+                      'reg_id': 'AAAAA',
                       'results': {'1234_0': base64.b64encode(
                         file.read()).decode('ascii')}})
         params = {'client_id': 1}
@@ -228,7 +238,9 @@ def test_put_results_correct_attachment_job_no_files(mock_server, mocker):
     mock_server.redis.set('total_num_client_ids', 1)
     data = dumps({'job_id': 2,
                   'job_type': 'attachments',
-                  'results': {}})
+                  'results': {},
+                  'reg_id': 'AAAA',
+                  'agency': 'EPA'})
     params = {'client_id': 1}
     response = mock_server.client.put('/put_results',
                                       json=data, query_string=params)

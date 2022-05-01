@@ -111,19 +111,22 @@ def decrement_count(workserver, job_type):
 
     """
     if job_type == 'attachments':
-        workserver.redis.lpop('num_jobs_attachments_waiting')
+        workserver.redis.decr('num_jobs_attachments_waiting')
     elif job_type == 'comments':
-        workserver.redis.lpop('num_jobs_comments_waiting')
+        workserver.redis.decr('num_jobs_comments_waiting')
     elif job_type == 'documents':
-        workserver.redis.lpop('num_jobs_documents_waiting')
+        workserver.redis.decr('num_jobs_documents_waiting')
     elif job_type == 'dockets':
-        workserver.redis.lpop('num_jobs_dockets_waiting')
+        workserver.redis.decr('num_jobs_dockets_waiting')
 
 
 def get_job(workserver):
+    # pylint: disable=R0914
     """
     Takes client's put endpoints validates wheter or not its a usable job
-    if so it returns the job with an ID, URL and a Type
+    if so it returns the job with the job ID, URL job_type and
+    regulations id and agency so the job can be linked to related data
+    in the databases
 
     Parameters
     ----------
@@ -133,15 +136,13 @@ def get_job(workserver):
     Returns
     -------
     if valid job:
-        True, job_id, url, job_type
+        True, job_id, url, job_type, reg_id, agency
     else:
         {'error': 'Client ID was not provided'}, 401
         {'error': 'No jobs available'}, 403
     """
     check_for_database(workserver)
     client_id = request.args.get('client_id')
-    if client_id is None:
-        return False, jsonify({'error': 'Client ID was not provided'}), 401
     success, *values = check_valid_request_client_id(workserver, client_id)
     if not success:
         return False, values[0], values[1]
@@ -150,13 +151,16 @@ def get_job(workserver):
     job = json.loads(workserver.redis.lpop('jobs_waiting_queue'))
     job_id = job['job_id']
     url = job['url']
+    agency = job['agency'] if job.get('agency') else "other_agency"
+    reg_id = job['reg_id'] if job.get('reg_id') else "other_reg_id"
+
     job_type = job.get('job_type', 'other')
     workserver.redis.hset('jobs_in_progress', job_id, url)
     workserver.redis.hset('client_jobs', job_id, client_id)
 
     decrement_count(workserver, job_type)
 
-    return True, job_id, url, job_type
+    return True, job_id, url, job_type, reg_id, agency
 
 
 def check_results(workserver, data, client_id):
@@ -279,8 +283,11 @@ def put_attachment_results(workserver, data):
     job_id = data['job_id']
     workserver.redis.hdel('jobs_in_progress', job_id)
     if data.get('results') is not None:
-        workserver.attachment_saver.save(data)
-    workserver.data.add_attachment(data['results'])
+        print('agency', data['agency'])
+        print('reg_id', data['reg_id'])
+        workserver.attachment_saver.save(
+            data, f"/data/{data['agency']}/{data['reg_id']}")
+    workserver.data.add_attachment(data)
     return (True,)
 
 
@@ -325,8 +332,6 @@ def check_client_id_is_valid(workserver, client_id):
     check_for_database(workserver)
     num_ids = workserver.redis.get('total_num_client_ids')
     total_ids = 0 if num_ids is None else int(num_ids)
-    # if not client_id.isdigit():
-    #     return False
     client_id = int(client_id)
     return 0 < client_id <= total_ids
 
@@ -360,17 +365,20 @@ def create_server(database):
             {'job': {job_id: url, 'job_type': job_type}}
         """
         try:
+            client_id = request.args.get('client_id')
+            workserver.get_job_validator.check_get_jobs(client_id)
             success, *values = get_job(workserver)
             if not success:
                 return tuple(values)
-            client_id = request.args.get('client_id')
-            workserver.get_job_validator.check_get_jobs(client_id)
         except (MissingClientIDException, NoJobsException) as error:
             return jsonify(error.message), error.status_code
         except redis.exceptions.ConnectionError:
             return jsonify({'error': 'Cannot connect to the database'}), 500
-        return jsonify({'job': {str(values[0]): values[1],
-                        'job_type': values[2]}}), 200
+        return jsonify({'job_id': str(values[0]),
+                        'url':  values[1],
+                        'job_type': values[2],
+                        'reg_id': values[3],
+                        'agency': values[4]}), 200
 
     @workserver.app.route('/put_results', methods=['PUT'])
     def _put_results():

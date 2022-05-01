@@ -4,7 +4,7 @@ from pytest import fixture, raises
 import requests
 import requests_mock
 from mirrclient.client import NoJobsAvailableException, Client
-from mirrclient.client import ServerValidator
+from mirrclient.client import Validator
 from mirrclient.client import is_environment_variables_present
 from mirrclient.client import get_output_path
 
@@ -82,21 +82,26 @@ def write_mock_client_id(mocker):
 
 
 def test_client_gets_job(mock_requests):
-    server_validator = ServerValidator('http://test.com')
-    client = Client(server_validator)
+    server_validator = Validator('http://test.com')
+    client = Client(server_validator, Validator())
     with mock_requests:
         mock_requests.get(
             'http://test.com/get_job',
-            json={'job': {'1': 1, 'job_type': 'attachments'}},
+            json={'job_id': '1', 'url': 1, 'job_type': 'attachments',
+                  'reg_id': '1', 'agency': 'foo'},
             status_code=200
         )
         job_info = client.get_job()
-        assert ('1', 1, 'attachments') == job_info
+        assert {'job_id': '1',
+                'url': 1,
+                'job_type': 'attachments',
+                'reg_id': '1',
+                'agency': 'foo'} == job_info
 
 
 def test_client_throws_exception_when_no_jobs(mock_requests):
-    server_validator = ServerValidator('http://test.com')
-    client = Client(server_validator)
+    server_validator = Validator('http://test.com')
+    client = Client(server_validator, Validator())
     with mock_requests:
         mock_requests.get(
             'http://test.com/get_job',
@@ -109,20 +114,20 @@ def test_client_throws_exception_when_no_jobs(mock_requests):
 
 
 def test_client_gets_id_from_server(mock_requests):
-    server_validator = ServerValidator('http://test.com')
+    server_validator = Validator('http://test.com')
     with mock_requests:
         mock_requests.get(
             'http://test.com/get_client_id',
             json={'client_id': 1},
             status_code=200
         )
-        client = Client(server_validator)
+        client = Client(server_validator, Validator())
         client.get_id()
         assert client.client_id == 1
 
 
 def test_api_call_has_api_key(mock_requests):
-    client = Client(None)
+    client = Client(None, Validator())
     client.api_key = 'KEY12345'
     with mock_requests:
         mock_requests.get(
@@ -136,14 +141,18 @@ def test_api_call_has_api_key(mock_requests):
 
 
 def test_client_performs_job(mock_requests):
-    server_validator = ServerValidator('http://test.com')
-    client = Client(server_validator)
+    server_validator = Validator('http://test.com')
+    client = Client(server_validator, Validator())
     client.api_key = 1234
 
     with mock_requests:
         mock_requests.get(
             'http://test.com/get_job',
-            json={'job': {'1': 'http://url.com', 'job_type': 'documents'}},
+            json={'job_id': '1',
+                  'url': 'http://url.com',
+                  'job_type': 'documents',
+                  'reg_id': '1',
+                  'agency': 'foo'},
             status_code=200
         )
         mock_requests.get(
@@ -165,14 +174,18 @@ def test_client_performs_job(mock_requests):
 
 
 def test_client_returns_403_error_to_server(mock_requests):
-    server_validator = ServerValidator('http://test.com')
-    client = Client(server_validator)
+    server_validator = Validator('http://test.com')
+    client = Client(server_validator, Validator())
     client.api_key = 1234
 
     with mock_requests:
         mock_requests.get(
             'http://test.com/get_job',
-            json={'job': {'1': 'http://url.com', 'job_type': 'documents'}},
+            json={'job_id': '1',
+                  'url': 'http://url.com',
+                  'job_type': 'documents',
+                  'reg_id': '1',
+                  'agency': 'foo'},
             status_code=200
         )
 
@@ -199,14 +212,18 @@ def test_client_returns_403_error_to_server(mock_requests):
 
 
 def test_client_returns_400_error_to_server(mock_requests):
-    server_validator = ServerValidator('http://test.com')
-    client = Client(server_validator)
+    server_validator = Validator('http://test.com')
+    client = Client(server_validator, Validator())
     client.api_key = 1234
 
     with mock_requests:
         mock_requests.get(
             'http://test.com/get_job',
-            json={'job': {'1': 'http://url.com', 'job_type': 'documents'}},
+            json={'job_id': '1',
+                  'url': 'http://url.com',
+                  'job_type': 'documents',
+                  'reg_id': '1',
+                  'agency': 'foo'},
             status_code=200
         )
 
@@ -231,14 +248,18 @@ def test_client_returns_400_error_to_server(mock_requests):
 
 
 def test_client_returns_500_error_to_server(mock_requests):
-    server_validator = ServerValidator('http://test.com')
-    client = Client(server_validator)
+    server_validator = Validator('http://test.com')
+    client = Client(server_validator, Validator())
     client.api_key = 1234
 
     with mock_requests:
         mock_requests.get(
             'http://test.com/get_job',
-            json={'job': {'1': 'http://url.com', 'job_type': 'documents'}},
+            json={'job_id': '1',
+                  'url': 'http://url.com',
+                  'job_type': 'documents',
+                  'reg_id': '1',
+                  'agency': 'foo'},
             status_code=200
         )
 
@@ -265,14 +286,18 @@ def test_client_returns_500_error_to_server(mock_requests):
 
 
 def test_client_sends_attachment_results(mock_requests):
-    server_validator = ServerValidator('http://test.com')
-    client = Client(server_validator)
+    server_validator = Validator('http://test.com')
+    client = Client(server_validator, Validator())
     client.api_key = 1234
 
     with mock_requests:
         mock_requests.get(
             'http://test.com/get_job',
-            json={'job': {'1': 'http://url.com', 'job_type': 'attachments'}},
+            json={'job_id': '1',
+                  'url': 'http://url.com',
+                  'job_type': 'attachments',
+                  'reg_id': '1',
+                  'agency': 'foo'},
             status_code=200
         )
         mock_requests.get(

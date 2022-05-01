@@ -35,7 +35,24 @@ class MockRedisWithStorage():
         return self.data[f'{key}']
 
     def incr(self, key):
-        self.data[key] += 1
+        try:
+            self.data[key] += 1
+        except KeyError as e:
+            # self.data.set(key, 0)
+            self.data[key] = 0
+            self.data[key] += 1
 
     def decr(self, key):
-        self.data[key] -= 1
+        try:
+            self.data[key] -= 1
+        except KeyError as e:
+            # self.data.set(key, 0)
+            self.data[key] = 0
+            self.data[key] -= 1
+
+    def lpush(self, key, val):
+        try:
+            self.data[key] = [val]+self.data[key]
+        except KeyError as e:
+            self.data[key] = []
+            self.data[key] = [val]+self.data[key]

@@ -41,13 +41,13 @@ def get_jobs_stats(database):
         'jobs_total': jobs_total_minus_jobs_done,
         'clients_total': clients_total,
         'num_jobs_attachments_queued':
-        int(database.llen('num_jobs_attachments_waiting')),
+        int(database.get('num_jobs_attachments_waiting')),
         'num_jobs_comments_queued':
-        int(database.llen('num_jobs_comments_waiting')),
+        int(database.get('num_jobs_comments_waiting')),
         'num_jobs_documents_queued':
-        int(database.llen('num_jobs_documents_waiting')),
+        int(database.get('num_jobs_documents_waiting')),
         'num_jobs_dockets_queued':
-        int(database.llen('num_jobs_dockets_waiting'))
+        int(database.get('num_jobs_dockets_waiting'))
     }
 
 

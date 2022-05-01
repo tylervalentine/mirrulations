@@ -1,8 +1,12 @@
 
+from this import d
 from fakeredis import FakeRedis
+from mirrmock import mock_redis
+from mirrmock.mock_redis import MockRedisWithStorage
+from pytest import fixture
 from mirrcore.job_queue import JobQueue
 
-
+    
 def test_first_job_added_with_id_0():
     database = FakeRedis()
     queue = JobQueue(database)
@@ -13,7 +17,7 @@ def test_first_job_added_with_id_0():
     job = queue.get_job()
     assert job['job_id'] == 1
     assert job['url'] == 'http://a.b.c'
-
+    
 
 def test_job_added_with_next_id():
     database = FakeRedis()
@@ -26,7 +30,7 @@ def test_job_added_with_next_id():
     job = queue.get_job()
     assert job['job_id'] == 43
     assert job['url'] == 'http://a.b.c'
-
+    
 
 def test_last_timestamp():
 
@@ -46,3 +50,29 @@ def test_last_timestamp():
     assert queue.get_last_timestamp_string('documents') == \
            '2015-06-10 20:49:03'
     assert queue.get_last_timestamp_string('comments') == '2020-06-10 20:49:03'
+
+# @fixture(name='mock_redis')
+# def fixture_MockRedisWithStorage():
+#     return mock_redis.MockRedisWithStorage()
+
+def test_increment_function():
+    # with mock_redis:
+    database = MockRedisWithStorage()
+    queue = JobQueue(database)
+
+    database.set('num_jobs_attachments_waiting', 0)
+    database.set('num_jobs_comments_waiting', 0)
+    print(database.data['num_jobs_comments_waiting'])
+    database.set('num_jobs_documents_waiting', 0)
+    database.set('num_jobs_dockets_waiting', 0)
+
+    queue.add_job('http://a.b.c', 'comments')
+    queue.add_job('http://a.b.c', 'documents')
+    queue.add_job('http://a.b.c', 'dockets')
+    queue.add_job('http://a.b.c', 'attachments')
+    # database increments in add_job function
+    assert database.get('num_jobs_comments_waiting') == 1
+    assert database.get('num_jobs_documents_waiting') == 1
+    assert database.get('num_jobs_dockets_waiting') == 1
+    assert database.get('num_jobs_attachments_waiting') == 1
+
