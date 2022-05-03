@@ -30,6 +30,8 @@ class MockRedisWithStorage():
             self.data[key] = int(0)
         self.data[f'{key}'] = value
 
+    def exists(self, key):
+        return key in self.data
 
     def get(self, key):
         return self.data[f'{key}']

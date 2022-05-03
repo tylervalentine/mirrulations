@@ -1,0 +1,4 @@
+data.id, data.attributes.agencyId, data.relationships.attachments.links.related
+EPA-HQ-OECA-2004-0024-0048,EPA,https://api.regulations.gov/v4/comments/EPA-HQ-OECA-2004-0024-0048/attachments
+EPA-HQ-OECA-2004-0024-0052,EPA,https://api.regulations.gov/v4/comments/EPA-HQ-OECA-2004-0024-0052/attachments
+EPA-HQ-OECA-2004-0024-0051,EPA,https://api.regulations.gov/v4/comments/EPA-HQ-OECA-2004-0024-0051/attachments
