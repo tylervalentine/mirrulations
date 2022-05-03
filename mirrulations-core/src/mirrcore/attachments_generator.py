@@ -1,7 +1,7 @@
 import redis
 import time
-from job_queue import JobQueue
-from redis_check import is_redis_available
+from mirrcore.job_queue import JobQueue
+from mirrcore.redis_check import is_redis_available
 import pandas as pd
 
 '''
@@ -12,7 +12,7 @@ mongoexport --db=mirrulations --collection=comments --type=csv --fields=data.id,
 
 class AttachmentsGenerator:
     def read_attachments_csv(self):
-        data_frame = pd.read_csv('users/richie/home/cs334/capstone2022/attachments_list.csv', usecols=['data.id',
+        data_frame = pd.read_csv('/home/cs334/capstone2022/mirrulations-core/tests/test_put_files', usecols=['data.id',
                 'data.attributes.agencyId', 'data.relationships.attachments.links.related'], 
                 dtype={'data.id':'str', 'data.attributes.agency_id':'str',
                 'data.relationships.attachments.links.related':'str'})
