@@ -4,10 +4,14 @@ class JobQueue:
 
     def __init__(self, database):
         self.database = database
-        self.database.set('num_jobs_attachments_waiting', 0)
-        self.database.set('num_jobs_comments_waiting', 0)
-        self.database.set('num_jobs_documents_waiting', 0)
-        self.database.set('num_jobs_dockets_waiting', 0)
+        if not self.database.exists('num_jobs_attachments_waiting'):
+            self.database.set('num_jobs_attachments_waiting', 0)
+        if not self.database.exists('num_jobs_comments_waiting'):
+            self.database.set('num_jobs_comments_waiting', 0)
+        if not self.database.exists('num_jobs_documents_waiting'):
+            self.database.set('num_jobs_documents_waiting', 0)
+        if not self.database.exists('num_jobs_dockets_waiting'):
+            self.database.set('num_jobs_dockets_waiting', 0)
 
     def add_job(self, url, job_type=None, reg_id=None, agency=None):
         job_id = self.get_job_id()
@@ -20,7 +24,7 @@ class JobQueue:
             }
         self.database.lpush('jobs_waiting_queue', json.dumps(job))
         # reflect change to the queue len in redis db to avoid timeouts from counting true len
-
+        print(job_type)
         if job_type == 'attachments':
             self.database.incr('num_jobs_attachments_waiting')
         elif job_type == 'comments':
