@@ -304,9 +304,13 @@ class Client:
         response_from_related = self.api_validator.get_request(url).json()
 
         # Get attachments
-        file_urls, file_types = \
-            get_urls_and_formats(
-                response_from_related["data"][0]["attributes"]["fileFormats"])
+        try:
+            file_urls, file_types = \
+                get_urls_and_formats(
+                    response_from_related["data"][0]
+                    ["attributes"]["fileFormats"])
+        except IndexError:
+            return {}
         return self.download_attachments(file_urls, file_types, job_id)
 
     def download_attachments(self, urls, file_types, job_id):
