@@ -26,6 +26,6 @@ jobs:
           .venv/bin/pip install -e mirrulations-work-generator
           .venv/bin/pip install -e mirrulations-work-server
 
-      - name: Execute Makefile Unit Tests
+      - name: Execute Makefile Static Tests
         run: make static
 
