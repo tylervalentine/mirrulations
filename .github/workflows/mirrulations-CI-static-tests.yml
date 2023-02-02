@@ -27,5 +27,5 @@ jobs:
           .venv/bin/pip install -e mirrulations-work-server
 
       - name: Execute Makefile Unit Tests
-        run: make test
+        run: make test  #this works without .venv because the Makefile modifies the path to use the venv - see Makefile line 4
 
