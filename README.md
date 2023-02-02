@@ -1,7 +1,5 @@
 # Mirrulations
 
-![](https://healthchecks.io/badge/1f6c74dc-b07d-44fd-a752-0a61ea/Hqd-_HXp/mirrulation.svg)
-
 Software to create and maintain a mirror of regulations.gov
 
 #### Regulations.gov
@@ -50,7 +48,7 @@ In other words, "once the data has been downloaded from Regulations.gov, the U.S
 This product uses the Regulations.gov Data API but is neither endorsed nor certified by Regulations.gov.
 
 --------
-This project is currently being developed by a student research team at Moravian College in association with Careset under Fred Trotter.
+This project is currently being developed by a student research team at Moravian University
 
 ## Contributors
 
