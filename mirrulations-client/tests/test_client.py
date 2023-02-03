@@ -82,7 +82,7 @@ def write_mock_client_id(mocker):
 
 
 def test_client_gets_job(mock_requests):
-    server_validator = Validator('http://test.com')
+    server_validator = Validator('http://work_server:8080')
     client = Client(server_validator, Validator())
     with mock_requests:
         mock_requests.get(
@@ -100,7 +100,7 @@ def test_client_gets_job(mock_requests):
 
 
 def test_client_throws_exception_when_no_jobs(mock_requests):
-    server_validator = Validator('http://test.com')
+    server_validator = Validator('http://work_server:8080')
     client = Client(server_validator, Validator())
     with mock_requests:
         mock_requests.get(
@@ -114,10 +114,10 @@ def test_client_throws_exception_when_no_jobs(mock_requests):
 
 
 def test_client_gets_id_from_server(mock_requests):
-    server_validator = Validator('http://test.com')
+    server_validator = Validator('http://work_server:8080')
     with mock_requests:
         mock_requests.get(
-            'http://test.com/get_client_id',
+            'http://work_server:8080/get_client_id',
             json={'client_id': 1},
             status_code=200
         )
@@ -141,7 +141,7 @@ def test_api_call_has_api_key(mock_requests):
 
 
 def test_client_performs_job(mock_requests):
-    server_validator = Validator('http://test.com')
+    server_validator = Validator('http://work_server:8080')
     client = Client(server_validator, Validator())
     client.api_key = 1234
 
@@ -161,7 +161,7 @@ def test_client_performs_job(mock_requests):
                            'job_type': 'documents'}},
             status_code=200
         )
-        mock_requests.put('http://test.com/put_results', text='{}')
+        mock_requests.put('http://work_server:8080/put_results', text='{}')
         client.job_operation()
 
         put_request = mock_requests.request_history[2]
@@ -174,7 +174,7 @@ def test_client_performs_job(mock_requests):
 
 
 def test_client_returns_403_error_to_server(mock_requests):
-    server_validator = Validator('http://test.com')
+    server_validator = Validator('http://work_server:8080')
     client = Client(server_validator, Validator())
     client.api_key = 1234
 
@@ -202,7 +202,7 @@ def test_client_returns_403_error_to_server(mock_requests):
         )
 
         mock_requests.put(
-            'http://test.com/put_results',
+            'http://work_server:8080/put_results',
             json={'success': 'The job was successfully completed'},
             status_code=200
         )
@@ -212,7 +212,7 @@ def test_client_returns_403_error_to_server(mock_requests):
 
 
 def test_client_returns_400_error_to_server(mock_requests):
-    server_validator = Validator('http://test.com')
+    server_validator = Validator('http://work_server:8080')
     client = Client(server_validator, Validator())
     client.api_key = 1234
 
@@ -238,7 +238,7 @@ def test_client_returns_400_error_to_server(mock_requests):
         )
 
         mock_requests.put(
-            'http://test.com/put_results',
+            'http://work_server:8080/put_results',
             json={'success': 'The job was successfully completed'},
             status_code=200
         )
@@ -248,7 +248,7 @@ def test_client_returns_400_error_to_server(mock_requests):
 
 
 def test_client_returns_500_error_to_server(mock_requests):
-    server_validator = Validator('http://test.com')
+    server_validator = Validator('http://work_server:8080')
     client = Client(server_validator, Validator())
     client.api_key = 1234
 
@@ -276,7 +276,7 @@ def test_client_returns_500_error_to_server(mock_requests):
         )
 
         mock_requests.put(
-            'http://test.com/put_results',
+            'http://work_server:8080/put_results',
             json={'success': 'The job was successfully completed'},
             status_code=200
         )
@@ -286,7 +286,7 @@ def test_client_returns_500_error_to_server(mock_requests):
 
 
 def test_client_sends_attachment_results(mock_requests):
-    server_validator = Validator('http://test.com')
+    server_validator = Validator('http://work_server:8080')
     client = Client(server_validator, Validator())
     client.api_key = 1234
 
@@ -315,7 +315,7 @@ def test_client_sends_attachment_results(mock_requests):
             json={"data": 'foobar'},
             status_code=200
         )
-        mock_requests.put('http://test.com/put_results', text='{}')
+        mock_requests.put('http://work_server:8080/put_results', text='{}')
         client.job_operation()
 
         mock_requests.put(f'{BASE_URL}/put_results', text='{}')
@@ -329,7 +329,7 @@ def test_client_sends_attachment_results(mock_requests):
 
 
 def test_client_handles_empty_json_from_regulations(mock_requests):
-    server_validator = Validator('http://test.com')
+    server_validator = Validator('http://work_server:8080')
     client = Client(server_validator, Validator())
     client.api_key = 1234
 
@@ -355,7 +355,7 @@ def test_client_handles_empty_json_from_regulations(mock_requests):
             json={"data": 'foobar'},
             status_code=200
         )
-        mock_requests.put('http://test.com/put_results', text='{}')
+        mock_requests.put('http://work_server:8080/put_results', text='{}')
         client.job_operation()
 
         mock_requests.put(f'{BASE_URL}/put_results', text='{}')
