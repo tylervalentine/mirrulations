@@ -217,8 +217,17 @@ class Client:
                 a tuple containing job_id, url, and job_type
         """
         print('performing job')
-        response = self.server_validator.get_request(
-            '/get_job', params={'client_id': self.client_id})
+
+        try:
+            work_server_hostname = os.getenv('WORK_SERVER_HOSTNAME')
+            work_server_port = os.getenv('WORK_SERVER_PORT')
+            url = f'http://{work_server_hostname}:{work_server_port}'
+
+            response = requests.get(f'{url}/get_job', params={'client_id': self.client_id})
+            response.raise_for_status()
+        except (HTTPError, RequestConnectionError):
+            print('There was an error handling this response.')
+
         job = loads(response.text)
         if 'error' in job:
             raise NoJobsAvailableException()

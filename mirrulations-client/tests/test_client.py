@@ -86,7 +86,7 @@ def test_client_gets_job(mock_requests):
     client = Client(server_validator, Validator())
     with mock_requests:
         mock_requests.get(
-            'http://test.com/get_job',
+            'http://work_server:8080/get_job?client_id=-1',
             json={'job_id': '1', 'url': 1, 'job_type': 'attachments',
                   'reg_id': '1', 'agency': 'foo'},
             status_code=200
@@ -104,7 +104,7 @@ def test_client_throws_exception_when_no_jobs(mock_requests):
     client = Client(server_validator, Validator())
     with mock_requests:
         mock_requests.get(
-            'http://test.com/get_job',
+            'http://work_server:8080/get_job?client_id=-1',
             json={'error': 'No jobs available'},
             status_code=403
         )
@@ -147,7 +147,7 @@ def test_client_performs_job(mock_requests):
 
     with mock_requests:
         mock_requests.get(
-            'http://test.com/get_job',
+            'http://work_server:8080/get_job?client_id=-1',
             json={'job_id': '1',
                   'url': 'http://url.com',
                   'job_type': 'documents',
@@ -180,7 +180,7 @@ def test_client_returns_403_error_to_server(mock_requests):
 
     with mock_requests:
         mock_requests.get(
-            'http://test.com/get_job',
+            'http://work_server:8080/get_job?client_id=-1',
             json={'job_id': '1',
                   'url': 'http://url.com',
                   'job_type': 'documents',
@@ -218,7 +218,7 @@ def test_client_returns_400_error_to_server(mock_requests):
 
     with mock_requests:
         mock_requests.get(
-            'http://test.com/get_job',
+            'http://work_server:8080/get_job?client_id=-1',
             json={'job_id': '1',
                   'url': 'http://url.com',
                   'job_type': 'documents',
@@ -254,7 +254,7 @@ def test_client_returns_500_error_to_server(mock_requests):
 
     with mock_requests:
         mock_requests.get(
-            'http://test.com/get_job',
+            'http://work_server:8080/get_job?client_id=-1',
             json={'job_id': '1',
                   'url': 'http://url.com',
                   'job_type': 'documents',
@@ -292,7 +292,7 @@ def test_client_sends_attachment_results(mock_requests):
 
     with mock_requests:
         mock_requests.get(
-            'http://test.com/get_job',
+            'http://work_server:8080/get_job?client_id=-1',
             json={'job_id': '1',
                   'url': 'http://url.com',
                   'job_type': 'attachments',
@@ -335,7 +335,7 @@ def test_client_handles_empty_json_from_regulations(mock_requests):
 
     with mock_requests:
         mock_requests.get(
-            'http://test.com/get_job',
+            'http://work_server:8080/get_job?client_id=-1',
             json={'job_id': '1',
                   'url': 'http://url.com',
                   'job_type': 'attachments',
