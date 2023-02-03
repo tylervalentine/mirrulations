@@ -132,7 +132,8 @@ class Validator:
             str response
         """
         try:
-            response = requests.get(f'{self.url}' + endpoint, **kwargs)
+            response = requests.get(f'{self.url}' + endpoint, **kwargs,
+                                    timeout=10)
             response.raise_for_status()
             return response
         except (HTTPError, RequestConnectionError):
@@ -154,7 +155,7 @@ class Validator:
         """
         try:
             requests.put(f'{self.url}' + endpoint,
-                         json=dumps(data), params=params)
+                         json=dumps(data), params=params, timeout=10)
 
         except (HTTPError, RequestConnectionError):
             print('There was an error handling this response.')
@@ -219,11 +220,13 @@ class Client:
         print('performing job')
 
         try:
-            work_server_hostname = os.getenv('WORK_SERVER_HOSTNAME')
-            work_server_port = os.getenv('WORK_SERVER_PORT')
-            url = f'http://{work_server_hostname}:{work_server_port}'
+            hostname = os.getenv('WORK_SERVER_HOSTNAME')
+            port = os.getenv('WORK_SERVER_PORT')
+            url = f'http://{hostname}:{port}'
 
-            response = requests.get(f'{url}/get_job', params={'client_id': self.client_id})
+            response = requests.get(f'{url}/get_job',
+                                    params={'client_id': self.client_id},
+                                    timeout=10)
             response.raise_for_status()
         except (HTTPError, RequestConnectionError):
             print('There was an error handling this response.')
