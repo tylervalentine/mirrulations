@@ -187,6 +187,10 @@ class Client:
         self.api_validator = api_validator
         self.client_id = -1
 
+        hostname = os.getenv('WORK_SERVER_HOSTNAME')
+        port = os.getenv('WORK_SERVER_PORT')
+        self.url = f'http://{hostname}:{port}'
+
     def get_id(self):
         """
         Retrieves an id for the Client from the workserver.
@@ -200,36 +204,16 @@ class Client:
 
     def get_job(self):
         """
-        The client will use its server validator to request a job
-        from its workserver.
-        This receives a json in this format:
-            {'job': {id: url, 'job_type': job_type}}
-        then pulls the job_id, url and job_type from the json.
+        Get a job from the work server.
 
-        Raises
-        ------
-        NoJobsAvailableException()
+        :raises: NoJobsAvailableException
             If no job is available from the work server
-            requested by the validator.
-
-        Returns
-        -------
-            tuple
-                a tuple containing job_id, url, and job_type
         """
         print('performing job')
 
-        try:
-            hostname = os.getenv('WORK_SERVER_HOSTNAME')
-            port = os.getenv('WORK_SERVER_PORT')
-            url = f'http://{hostname}:{port}'
-
-            response = requests.get(f'{url}/get_job',
-                                    params={'client_id': self.client_id},
-                                    timeout=10)
-            response.raise_for_status()
-        except (HTTPError, RequestConnectionError):
-            print('There was an error handling this response.')
+        response = requests.get(f'{self.url}/get_job',
+                                params={'client_id': self.client_id},
+                                timeout=10)
 
         job = loads(response.text)
         if 'error' in job:
