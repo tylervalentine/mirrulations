@@ -36,7 +36,7 @@ there are `pytest.ini` files in each module as well as a global `pytest.ini`.
 * Static analysis uses `flake8`, `pycodestyle`, and `pylint`
 * `pytest` uses a coverage metric of 95%.
 * NOTE: Sometimes if `pytest` is installed globally, the virtual environment will use that instead. Simply exit and reenter the virtual environment to resolve this.
-  Alternatively, uninstall `pytest` from the global packages (`pip3 uninstall pytest` in new termainal).
+  Alternatively, uninstall `pytest` from the global packages (`pip3 uninstall pytest` in new terminal).
 
 
 ## Setup for Local Launch
@@ -49,7 +49,7 @@ The system is made up of a number of Docker containers.  See the `docker-compose
 * **Mongo** - Database used to hold results
 * **Dashboard** - Provides a status page for the system
 * **NGINX** - Routes web traffic to appropriate host (currently only the dashboard)
-* **Clients** - There are multiple instances of the clients.  Each gets jobs from the work server, downloads the requested information from reguations.gov (using an API key), and returns the data to the work server.
+* **Clients** - There are multiple instances of the clients.  Each gets jobs from the work server, downloads the requested information from regulations.gov (using an API key), and returns the data to the work server.
 
 ### Docker Setup
 
