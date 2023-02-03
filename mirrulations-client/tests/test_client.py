@@ -127,7 +127,6 @@ def test_client_performs_job(mock_requests):
         client.job_operation()
 
         put_request = mock_requests.request_history[2]
-        print(put_request)
         json_data = json.loads(put_request.json())
         saved_data = json_data['results']['data']
         assert saved_data['attributes'] == {'agencyId': 'NOAA'}
@@ -279,7 +278,6 @@ def test_client_sends_attachment_results(mock_requests):
         mock_requests.put(f'{BASE_URL}/put_results', text='{}')
         client.job_operation()
         put_request = mock_requests.request_history[3]
-        print(put_request)
         json_data = json.loads(put_request.json())
         assert json_data['job_id'] == "1"
         assert json_data['job_type'] == "attachments"
@@ -318,7 +316,6 @@ def test_client_handles_empty_json_from_regulations(mock_requests):
         mock_requests.put(f'{BASE_URL}/put_results', text='{}')
         client.job_operation()
         put_request = mock_requests.request_history[2]
-        print(put_request)
         json_data = json.loads(put_request.json())
         assert json_data['job_id'] == "1"
         assert json_data['job_type'] == "attachments"
