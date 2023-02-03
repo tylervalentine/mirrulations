@@ -298,7 +298,7 @@ class Client:
         a dict of encoded files
         """
         url = url + f'?api_key={self.api_key}'
-        response_from_related = self.api_validator.get_request(url).json()
+        response_from_related = requests.get(url, timeout=10).json()
 
         # Get attachments
         try:
@@ -331,7 +331,7 @@ class Client:
         """
         attachments = {}
         for i, (url, file_type) in enumerate(zip(urls, file_types)):
-            attachment = self.api_validator.get_request(url)
+            attachment = requests.get(url, timeout=10)
             attachments[f'{job_id}_{i}.{file_type}'] = b64encode(
                 attachment.content).decode('ascii')
         return attachments
