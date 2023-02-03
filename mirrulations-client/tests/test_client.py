@@ -1,10 +1,12 @@
 import os
 import json
+import pytest
 from pytest import fixture, raises
 import requests_mock
 from mirrclient.client import NoJobsAvailableException, Client
 from mirrclient.client import is_environment_variables_present
 from mirrclient.client import get_output_path
+from requests.exceptions import Timeout
 
 BASE_URL = 'http://work_server:8080'
 
@@ -169,6 +171,64 @@ def test_client_returns_403_error_to_server(mock_requests):
         client.job_operation()
         response = mock_requests.request_history[-1]
         assert '403' in response.json()
+
+
+def test_get_id_timesout(mock_requests):
+    with mock_requests:
+        mock_requests.get(
+            'http://work_server:8080/get_client_id',
+            exc=Timeout)
+
+        with pytest.raises(Timeout):
+            Client().get_id()
+
+
+def test_get_job_timesout(mock_requests):
+    with mock_requests:
+        mock_requests.get(
+            'http://work_server:8080/get_job',
+            exc=Timeout)
+
+        with pytest.raises(Timeout):
+            Client().get_job()
+
+
+def test_perform_job_timesout(mock_requests):
+    with mock_requests:
+        fake_url = 'http://regulations.gov/fake/api/call'
+        mock_requests.get(
+            fake_url,
+            exc=Timeout)
+
+        with pytest.raises(Timeout):
+            Client().perform_job(fake_url)
+
+
+def test_perform_attachment_job_timesout(mock_requests):
+    with mock_requests:
+        fake_url = 'http://regulations.gov/fake/api/call'
+        mock_requests.get(
+            fake_url,
+            exc=Timeout)
+
+        with pytest.raises(Timeout):
+            fake_job_id = 'fake'
+            Client().perform_attachment_job(fake_url, fake_job_id)
+
+
+def test_download_attachments_times_out(mock_requests):
+    with mock_requests:
+        fake_url = 'http://regulations.gov/fake/api/call'
+        mock_requests.get(
+            fake_url,
+            exc=Timeout)
+
+        with pytest.raises(Timeout):
+            fake_job_id = 'fake'
+            fake_attachment_types = ['pdf']
+            Client().download_attachments([fake_url],
+                                          fake_attachment_types,
+                                          fake_job_id)
 
 
 def test_client_returns_400_error_to_server(mock_requests):

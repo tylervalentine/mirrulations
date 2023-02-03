@@ -255,10 +255,10 @@ class Client:
 
         Parameters
         ----------
-        urls : str
+        urls : list of str
             urls of attachments
 
-        file_types : str
+        file_types : list of str
             file formats of attachments
 
         job_id : str
