@@ -20,7 +20,7 @@ Jobs are then pushed to the job_waiting_queue in Redis.
 Work server will send jobs over to the clients as a new endpoint for attachments.
 
 ### Client
-Client will check the URL an determine if it is an attachment or not. This is done by adding 'attachements' to the end of the url.
+Client will check the URL an determine if it is an attachment or not. This is done by adding 'attachments' to the end of the url.
 If this is an attachment, it must download the list. Then returns the resulting JSON to server as a different PUT endpoint.
 
 # Examples of returned JSON objects

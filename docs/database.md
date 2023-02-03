@@ -46,7 +46,7 @@ timestamp seen when querying regulations.gov.
   by the work generator.
 * `document_last_timestamp` - The timestamp (in UTC) of the last document 
   discovered by the work generator.
-* `comment_last_timestamp` - The timestamp (in UTC) of the last commment 
+* `comment_last_timestamp` - The timestamp (in UTC) of the last comment 
   discovered by the work generator.
   
 ## Job IDs
