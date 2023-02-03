@@ -1,0 +1,18 @@
+name: mirrulations-testing
+on: [push, pull_request]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2 # Checkout the repository content to github runner.
+    
+      - name: Setup Repo & Environment
+        uses: ./.github/actions/setup_environment
+
+      - name: Execute Makefile Unit Tests 
+      # this works without .venv because the Makefile modifies the path to use the venv - see Makefile line 4
+        run: make test
+
