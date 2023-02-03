@@ -186,7 +186,7 @@ services:
       dockerfile: mirrulations-client/Dockerfile
     depends_on:
       - work_server
-    env_file: env_files/client17.env
+    env_file: env_files/client18.env
     restart: always
   client19:
     build:
@@ -194,7 +194,7 @@ services:
       dockerfile: mirrulations-client/Dockerfile
     depends_on:
       - work_server
-    env_file: env_files/client17.env
+    env_file: env_files/client19.env
     restart: always
   client20:
     build:
@@ -202,7 +202,7 @@ services:
       dockerfile: mirrulations-client/Dockerfile
     depends_on:
       - work_server
-    env_file: env_files/client17.env
+    env_file: env_files/client20.env
     restart: always
   client21:
     build:
@@ -210,7 +210,7 @@ services:
       dockerfile: mirrulations-client/Dockerfile
     depends_on:
       - work_server
-    env_file: env_files/client17.env
+    env_file: env_files/client21.env
     restart: always
   client22:
     build:
@@ -218,7 +218,7 @@ services:
       dockerfile: mirrulations-client/Dockerfile
     depends_on:
       - work_server
-    env_file: env_files/client17.env
+    env_file: env_files/client22.env
     restart: always
   client23:
     build:
@@ -226,7 +226,7 @@ services:
       dockerfile: mirrulations-client/Dockerfile
     depends_on:
       - work_server
-    env_file: env_files/client17.env
+    env_file: env_files/client23.env
     restart: always
   client24:
     build:
@@ -234,7 +234,7 @@ services:
       dockerfile: mirrulations-client/Dockerfile
     depends_on:
       - work_server
-    env_file: env_files/client17.env
+    env_file: env_files/client24.env
     restart: always
   client25:
     build:
@@ -242,7 +242,7 @@ services:
       dockerfile: mirrulations-client/Dockerfile
     depends_on:
       - work_server
-    env_file: env_files/client17.env
+    env_file: env_files/client25.env
     restart: always
   client26:
     build:
@@ -250,7 +250,7 @@ services:
       dockerfile: mirrulations-client/Dockerfile
     depends_on:
       - work_server
-    env_file: env_files/client17.env
+    env_file: env_files/client26.env
     restart: always
   client27:
     build:
@@ -258,5 +258,5 @@ services:
       dockerfile: mirrulations-client/Dockerfile
     depends_on:
       - work_server
-    env_file: env_files/client17.env
+    env_file: env_files/client27.env
     restart: always
