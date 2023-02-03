@@ -6,8 +6,6 @@ from base64 import b64encode
 from json import dumps, loads
 import requests
 from dotenv import load_dotenv
-from requests.exceptions import ConnectionError as RequestConnectionError
-from requests.exceptions import HTTPError
 
 
 class NoJobsAvailableException(Exception):
@@ -104,63 +102,6 @@ def is_environment_variables_present():
             and os.getenv('API_KEY') is not None)
 
 
-class Validator:
-    """
-    For validating HTTP requests and handling request
-    exceptions.
-
-    Attributes
-    ----------
-    server_url : str
-        The url for the workserver
-    """
-
-    def __init__(self, url=""):
-        self.url = url
-
-    def get_request(self, endpoint, **kwargs):
-        """
-        Requests and handles exceptions for GET request.
-
-        Parameters
-        ----------
-        endpoint : str
-            the url for the request
-
-        Returns
-        -------
-            str response
-        """
-        try:
-            response = requests.get(f'{self.url}' + endpoint, **kwargs,
-                                    timeout=10)
-            response.raise_for_status()
-            return response
-        except (HTTPError, RequestConnectionError):
-            print('There was an error handling this response.')
-            return response
-
-    def put_request(self, endpoint, data, params):
-        """
-        Requests and handles exceptions for PUT request.
-
-        Parameters
-        ----------
-        endpoint : str
-            the url for the request
-        data : dict
-            data sent to the endpoint
-        params : dict
-            additional arguments sent to the endpoint
-        """
-        try:
-            requests.put(f'{self.url}' + endpoint,
-                         json=dumps(data), params=params, timeout=10)
-
-        except (HTTPError, RequestConnectionError):
-            print('There was an error handling this response.')
-
-
 class Client:
     """
     The Client class performs jobs given to it by a workserver
@@ -181,10 +122,8 @@ class Client:
         value from the workserver.
     """
 
-    def __init__(self, server_validator, api_validator):
+    def __init__(self):
         self.api_key = os.getenv('API_KEY')
-        self.server_validator = server_validator
-        self.api_validator = api_validator
         self.client_id = -1
 
         hostname = os.getenv('WORK_SERVER_HOSTNAME')
@@ -356,12 +295,8 @@ if __name__ == '__main__':
     if not is_environment_variables_present():
         print('Need client environment variables')
         sys.exit(1)
-    work_server_hostname = os.getenv('WORK_SERVER_HOSTNAME')
-    work_server_port = os.getenv('WORK_SERVER_PORT')
 
-    validator_for_server = Validator(
-        f'http://{work_server_hostname}:{work_server_port}')
-    client = Client(validator_for_server, Validator())
+    client = Client()
     client.get_id()
 
     print('Your ID is: ', client.client_id)

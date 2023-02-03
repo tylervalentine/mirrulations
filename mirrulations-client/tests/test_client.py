@@ -4,7 +4,6 @@ from pytest import fixture, raises
 import requests
 import requests_mock
 from mirrclient.client import NoJobsAvailableException, Client
-from mirrclient.client import Validator
 from mirrclient.client import is_environment_variables_present
 from mirrclient.client import get_output_path
 
@@ -82,8 +81,7 @@ def write_mock_client_id(mocker):
 
 
 def test_client_gets_job(mock_requests):
-    server_validator = Validator('http://work_server:8080')
-    client = Client(server_validator, Validator())
+    client = Client()
     with mock_requests:
         mock_requests.get(
             'http://work_server:8080/get_job?client_id=-1',
@@ -100,8 +98,7 @@ def test_client_gets_job(mock_requests):
 
 
 def test_client_throws_exception_when_no_jobs(mock_requests):
-    server_validator = Validator('http://work_server:8080')
-    client = Client(server_validator, Validator())
+    client = Client()
     with mock_requests:
         mock_requests.get(
             'http://work_server:8080/get_job?client_id=-1',
@@ -114,20 +111,19 @@ def test_client_throws_exception_when_no_jobs(mock_requests):
 
 
 def test_client_gets_id_from_server(mock_requests):
-    server_validator = Validator('http://work_server:8080')
     with mock_requests:
         mock_requests.get(
             'http://work_server:8080/get_client_id',
             json={'client_id': 1},
             status_code=200
         )
-        client = Client(server_validator, Validator())
+        client = Client()
         client.get_id()
         assert client.client_id == 1
 
 
 def test_api_call_has_api_key(mock_requests):
-    client = Client(None, Validator())
+    client = Client()
     client.api_key = 'KEY12345'
     with mock_requests:
         mock_requests.get(
@@ -141,8 +137,7 @@ def test_api_call_has_api_key(mock_requests):
 
 
 def test_client_performs_job(mock_requests):
-    server_validator = Validator('http://work_server:8080')
-    client = Client(server_validator, Validator())
+    client = Client()
     client.api_key = 1234
 
     with mock_requests:
@@ -174,8 +169,7 @@ def test_client_performs_job(mock_requests):
 
 
 def test_client_returns_403_error_to_server(mock_requests):
-    server_validator = Validator('http://work_server:8080')
-    client = Client(server_validator, Validator())
+    client = Client()
     client.api_key = 1234
 
     with mock_requests:
@@ -212,8 +206,7 @@ def test_client_returns_403_error_to_server(mock_requests):
 
 
 def test_client_returns_400_error_to_server(mock_requests):
-    server_validator = Validator('http://work_server:8080')
-    client = Client(server_validator, Validator())
+    client = Client()
     client.api_key = 1234
 
     with mock_requests:
@@ -248,8 +241,7 @@ def test_client_returns_400_error_to_server(mock_requests):
 
 
 def test_client_returns_500_error_to_server(mock_requests):
-    server_validator = Validator('http://work_server:8080')
-    client = Client(server_validator, Validator())
+    client = Client()
     client.api_key = 1234
 
     with mock_requests:
@@ -286,8 +278,7 @@ def test_client_returns_500_error_to_server(mock_requests):
 
 
 def test_client_sends_attachment_results(mock_requests):
-    server_validator = Validator('http://work_server:8080')
-    client = Client(server_validator, Validator())
+    client = Client()
     client.api_key = 1234
 
     with mock_requests:
@@ -329,8 +320,7 @@ def test_client_sends_attachment_results(mock_requests):
 
 
 def test_client_handles_empty_json_from_regulations(mock_requests):
-    server_validator = Validator('http://work_server:8080')
-    client = Client(server_validator, Validator())
+    client = Client()
     client.api_key = 1234
 
     with mock_requests:
