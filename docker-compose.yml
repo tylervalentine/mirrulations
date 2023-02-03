@@ -260,3 +260,11 @@ services:
       - work_server
     env_file: env_files/client27.env
     restart: always
+  client28:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    depends_on:
+      - work_server
+    env_file: env_files/client27.env
+    restart: always
