@@ -197,7 +197,7 @@ class Client:
         That value is saved to client_id then written to
         a client.cfg file.
         """
-        response = self.server_validator.get_request('/get_client_id')
+        response = requests.get(f'{self.url}/get_client_id', timeout=10)
         self.client_id = int(response.json()['client_id'])
         with open('client.cfg', 'w', encoding='utf8') as file:
             file.write(str(self.client_id))
@@ -223,7 +223,7 @@ class Client:
 
     def send_job(self, job, job_result):
         """
-        Returns the job results to the workserver via the server_validator.
+        Returns the job results to the workserver
         If there are any errors in the job_result, the data json is returned
         as  {'job_id': job_id, 'results': job_result}
         else {
@@ -248,8 +248,9 @@ class Client:
         # If the job is not an attachment job we need to add an output path
         if ('errors' not in job_result) and (job['job_type'] != 'attachments'):
             data['directory'] = get_output_path(job_result)
-        self.server_validator.put_request(
-            '/put_results', data, {'client_id': self.client_id})
+        requests.put(f'{self.url}/put_results', json=dumps(data),
+                     params={'client_id': self.client_id},
+                     timeout=10)
 
     def perform_job(self, job_url):
         """
