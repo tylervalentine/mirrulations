@@ -1,5 +1,6 @@
 import os
 import json
+import pytest
 from pytest import fixture, raises
 import requests
 import requests_mock
@@ -7,6 +8,7 @@ from mirrclient.client import NoJobsAvailableException, Client
 from mirrclient.client import Validator
 from mirrclient.client import is_environment_variables_present
 from mirrclient.client import get_output_path
+from requests.exceptions import Timeout
 
 BASE_URL = 'http://work_server:8080'
 
@@ -209,6 +211,37 @@ def test_client_returns_403_error_to_server(mock_requests):
         client.job_operation()
         response = mock_requests.request_history[-1]
         assert '403' in response.json()
+
+
+def test_mock_get_timeout(mock_requests):
+    server_validator = Validator('http://test.com/')
+
+    with mock_requests:
+        mock_requests.get(
+            'http://test.com/http://test.com/get_results',
+            exc=Timeout)
+        try:
+            server_validator.get_request('http://test.com/get_results')
+            pytest.fail("Timeout Exception")
+        except Timeout as error:
+            assert isinstance(error, Timeout), "Expected a Timeout error"
+
+
+def test_mock_put_timeout(mock_requests):
+    server_validator = Validator('http://test.com/')
+
+    with mock_requests:
+        mock_requests.put(
+            'http://test.com/http://test.com/put_results?client_id=2001',
+            exc=Timeout)
+        try:
+            server_validator.put_request(
+                'http://test.com/put_results',
+                {'job_id': '1'},
+                {'client_id': 2001})
+            pytest.fail("Timeout Exception")
+        except Timeout as error:
+            assert isinstance(error, Timeout), "Expected a Timeout error"
 
 
 def test_client_returns_400_error_to_server(mock_requests):
