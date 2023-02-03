@@ -180,3 +180,83 @@ services:
       - work_server
     env_file: env_files/client17.env
     restart: always
+  client18:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    depends_on:
+      - work_server
+    env_file: env_files/client17.env
+    restart: always
+  client19:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    depends_on:
+      - work_server
+    env_file: env_files/client17.env
+    restart: always
+  client20:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    depends_on:
+      - work_server
+    env_file: env_files/client17.env
+    restart: always
+  client21:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    depends_on:
+      - work_server
+    env_file: env_files/client17.env
+    restart: always
+  client22:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    depends_on:
+      - work_server
+    env_file: env_files/client17.env
+    restart: always
+  client23:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    depends_on:
+      - work_server
+    env_file: env_files/client17.env
+    restart: always
+  client24:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    depends_on:
+      - work_server
+    env_file: env_files/client17.env
+    restart: always
+  client25:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    depends_on:
+      - work_server
+    env_file: env_files/client17.env
+    restart: always
+  client26:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    depends_on:
+      - work_server
+    env_file: env_files/client17.env
+    restart: always
+  client27:
+    build:
+      context: .
+      dockerfile: mirrulations-client/Dockerfile
+    depends_on:
+      - work_server
+    env_file: env_files/client17.env
+    restart: always
