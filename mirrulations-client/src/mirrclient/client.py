@@ -267,8 +267,8 @@ class Client:
         dict
             json results of the performed job
         """
-        return self.api_validator.get_request(
-            job_url + f'?api_key={self.api_key}').json()
+        return requests.get(job_url + f'?api_key={self.api_key}',
+                            timeout=10).json()
 
     def perform_attachment_job(self, url, job_id):
         """
