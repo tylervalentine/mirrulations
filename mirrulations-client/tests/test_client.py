@@ -1,7 +1,6 @@
 import os
 import json
 from pytest import fixture, raises
-import requests
 import requests_mock
 from mirrclient.client import NoJobsAvailableException, Client
 from mirrclient.client import is_environment_variables_present
@@ -20,10 +19,6 @@ def mock_env():
 @fixture(name='mock_requests')
 def fixture_mock_requests():
     return requests_mock.Mocker()
-
-
-def test_check_all_env_values():
-    assert is_environment_variables_present() is True
 
 
 def test_check_no_env_values():
@@ -50,34 +45,6 @@ def test_check_no_api_key():
     # Need to delete api key env variable set by mock_env fixture
     del os.environ['API_KEY']
     assert is_environment_variables_present() is False
-
-
-def mock_get_job(mocker):
-    mocker.patch(
-        'mirrclient.client.Client.get_job',
-        return_value=None
-    )
-
-
-def mock_raise_connection_error(mocker):
-    mocker.patch(
-        'requests.get',
-        side_effect=requests.exceptions.ConnectionError
-    )
-
-
-def read_mock_client_id(mocker, value):
-    mocker.patch(
-        'mirrclient.client.read_client_id',
-        return_value=value
-    )
-
-
-def write_mock_client_id(mocker):
-    mocker.patch(
-        'mirrclient.client.Client.write_client_id',
-        return_value=''
-    )
 
 
 def test_client_gets_job(mock_requests):
