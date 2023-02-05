@@ -6,8 +6,6 @@ from base64 import b64encode
 from json import dumps, loads
 import requests
 from dotenv import load_dotenv
-from requests.exceptions import ConnectionError as RequestConnectionError
-from requests.exceptions import HTTPError
 
 
 class NoJobsAvailableException(Exception):
@@ -104,63 +102,6 @@ def is_environment_variables_present():
             and os.getenv('API_KEY') is not None)
 
 
-class Validator:
-    """
-    For validating HTTP requests and handling request
-    exceptions.
-
-    Attributes
-    ----------
-    server_url : str
-        The url for the workserver
-    """
-
-    def __init__(self, url=""):
-        self.url = url
-
-    def get_request(self, endpoint, **kwargs):
-        """
-        Requests and handles exceptions for GET request.
-
-        Parameters
-        ----------
-        endpoint : str
-            the url for the request
-
-        Returns
-        -------
-            str response
-        """
-        try:
-            response = requests.get(f'{self.url}' + endpoint, **kwargs,
-                                    timeout=10)
-            response.raise_for_status()
-            return response
-        except (HTTPError, RequestConnectionError):
-            print('There was an error handling this response.')
-            return response
-
-    def put_request(self, endpoint, data, params):
-        """
-        Requests and handles exceptions for PUT request.
-
-        Parameters
-        ----------
-        endpoint : str
-            the url for the request
-        data : dict
-            data sent to the endpoint
-        params : dict
-            additional arguments sent to the endpoint
-        """
-        try:
-            requests.put(f'{self.url}' + endpoint,
-                         json=dumps(data), params=params, timeout=10)
-
-        except (HTTPError, RequestConnectionError):
-            print('There was an error handling this response.')
-
-
 class Client:
     """
     The Client class performs jobs given to it by a workserver
@@ -181,11 +122,13 @@ class Client:
         value from the workserver.
     """
 
-    def __init__(self, server_validator, api_validator):
+    def __init__(self):
         self.api_key = os.getenv('API_KEY')
-        self.server_validator = server_validator
-        self.api_validator = api_validator
         self.client_id = -1
+
+        hostname = os.getenv('WORK_SERVER_HOSTNAME')
+        port = os.getenv('WORK_SERVER_PORT')
+        self.url = f'http://{hostname}:{port}'
 
     def get_id(self):
         """
@@ -193,33 +136,24 @@ class Client:
         That value is saved to client_id then written to
         a client.cfg file.
         """
-        response = self.server_validator.get_request('/get_client_id')
+        response = requests.get(f'{self.url}/get_client_id', timeout=10)
         self.client_id = int(response.json()['client_id'])
         with open('client.cfg', 'w', encoding='utf8') as file:
             file.write(str(self.client_id))
 
     def get_job(self):
         """
-        The client will use its server validator to request a job
-        from its workserver.
-        This receives a json in this format:
-            {'job': {id: url, 'job_type': job_type}}
-        then pulls the job_id, url and job_type from the json.
+        Get a job from the work server.
 
-        Raises
-        ------
-        NoJobsAvailableException()
+        :raises: NoJobsAvailableException
             If no job is available from the work server
-            requested by the validator.
-
-        Returns
-        -------
-            tuple
-                a tuple containing job_id, url, and job_type
         """
         print('performing job')
-        response = self.server_validator.get_request(
-            '/get_job', params={'client_id': self.client_id})
+
+        response = requests.get(f'{self.url}/get_job',
+                                params={'client_id': self.client_id},
+                                timeout=10)
+
         job = loads(response.text)
         if 'error' in job:
             raise NoJobsAvailableException()
@@ -228,7 +162,7 @@ class Client:
 
     def send_job(self, job, job_result):
         """
-        Returns the job results to the workserver via the server_validator.
+        Returns the job results to the workserver
         If there are any errors in the job_result, the data json is returned
         as  {'job_id': job_id, 'results': job_result}
         else {
@@ -253,8 +187,9 @@ class Client:
         # If the job is not an attachment job we need to add an output path
         if ('errors' not in job_result) and (job['job_type'] != 'attachments'):
             data['directory'] = get_output_path(job_result)
-        self.server_validator.put_request(
-            '/put_results', data, {'client_id': self.client_id})
+        requests.put(f'{self.url}/put_results', json=dumps(data),
+                     params={'client_id': self.client_id},
+                     timeout=10)
 
     def perform_job(self, job_url):
         """
@@ -271,8 +206,8 @@ class Client:
         dict
             json results of the performed job
         """
-        return self.api_validator.get_request(
-            job_url + f'?api_key={self.api_key}').json()
+        return requests.get(job_url + f'?api_key={self.api_key}',
+                            timeout=10).json()
 
     def perform_attachment_job(self, url, job_id):
         """
@@ -302,7 +237,7 @@ class Client:
         a dict of encoded files
         """
         url = url + f'?api_key={self.api_key}'
-        response_from_related = self.api_validator.get_request(url).json()
+        response_from_related = requests.get(url, timeout=10).json()
 
         # Get attachments
         try:
@@ -320,10 +255,10 @@ class Client:
 
         Parameters
         ----------
-        urls : str
+        urls : list of str
             urls of attachments
 
-        file_types : str
+        file_types : list of str
             file formats of attachments
 
         job_id : str
@@ -335,7 +270,7 @@ class Client:
         """
         attachments = {}
         for i, (url, file_type) in enumerate(zip(urls, file_types)):
-            attachment = self.api_validator.get_request(url)
+            attachment = requests.get(url, timeout=10)
             attachments[f'{job_id}_{i}.{file_type}'] = b64encode(
                 attachment.content).decode('ascii')
         return attachments
@@ -360,12 +295,8 @@ if __name__ == '__main__':
     if not is_environment_variables_present():
         print('Need client environment variables')
         sys.exit(1)
-    work_server_hostname = os.getenv('WORK_SERVER_HOSTNAME')
-    work_server_port = os.getenv('WORK_SERVER_PORT')
 
-    validator_for_server = Validator(
-        f'http://{work_server_hostname}:{work_server_port}')
-    client = Client(validator_for_server, Validator())
+    client = Client()
     client.get_id()
 
     print('Your ID is: ', client.client_id)

@@ -2,10 +2,8 @@ import os
 import json
 import pytest
 from pytest import fixture, raises
-import requests
 import requests_mock
 from mirrclient.client import NoJobsAvailableException, Client
-from mirrclient.client import Validator
 from mirrclient.client import is_environment_variables_present
 from mirrclient.client import get_output_path
 from requests.exceptions import Timeout
@@ -23,10 +21,6 @@ def mock_env():
 @fixture(name='mock_requests')
 def fixture_mock_requests():
     return requests_mock.Mocker()
-
-
-def test_check_all_env_values():
-    assert is_environment_variables_present() is True
 
 
 def test_check_no_env_values():
@@ -55,40 +49,11 @@ def test_check_no_api_key():
     assert is_environment_variables_present() is False
 
 
-def mock_get_job(mocker):
-    mocker.patch(
-        'mirrclient.client.Client.get_job',
-        return_value=None
-    )
-
-
-def mock_raise_connection_error(mocker):
-    mocker.patch(
-        'requests.get',
-        side_effect=requests.exceptions.ConnectionError
-    )
-
-
-def read_mock_client_id(mocker, value):
-    mocker.patch(
-        'mirrclient.client.read_client_id',
-        return_value=value
-    )
-
-
-def write_mock_client_id(mocker):
-    mocker.patch(
-        'mirrclient.client.Client.write_client_id',
-        return_value=''
-    )
-
-
 def test_client_gets_job(mock_requests):
-    server_validator = Validator('http://test.com')
-    client = Client(server_validator, Validator())
+    client = Client()
     with mock_requests:
         mock_requests.get(
-            'http://test.com/get_job',
+            'http://work_server:8080/get_job?client_id=-1',
             json={'job_id': '1', 'url': 1, 'job_type': 'attachments',
                   'reg_id': '1', 'agency': 'foo'},
             status_code=200
@@ -102,11 +67,10 @@ def test_client_gets_job(mock_requests):
 
 
 def test_client_throws_exception_when_no_jobs(mock_requests):
-    server_validator = Validator('http://test.com')
-    client = Client(server_validator, Validator())
+    client = Client()
     with mock_requests:
         mock_requests.get(
-            'http://test.com/get_job',
+            'http://work_server:8080/get_job?client_id=-1',
             json={'error': 'No jobs available'},
             status_code=403
         )
@@ -116,20 +80,19 @@ def test_client_throws_exception_when_no_jobs(mock_requests):
 
 
 def test_client_gets_id_from_server(mock_requests):
-    server_validator = Validator('http://test.com')
     with mock_requests:
         mock_requests.get(
-            'http://test.com/get_client_id',
+            'http://work_server:8080/get_client_id',
             json={'client_id': 1},
             status_code=200
         )
-        client = Client(server_validator, Validator())
+        client = Client()
         client.get_id()
         assert client.client_id == 1
 
 
 def test_api_call_has_api_key(mock_requests):
-    client = Client(None, Validator())
+    client = Client()
     client.api_key = 'KEY12345'
     with mock_requests:
         mock_requests.get(
@@ -143,13 +106,12 @@ def test_api_call_has_api_key(mock_requests):
 
 
 def test_client_performs_job(mock_requests):
-    server_validator = Validator('http://test.com')
-    client = Client(server_validator, Validator())
+    client = Client()
     client.api_key = 1234
 
     with mock_requests:
         mock_requests.get(
-            'http://test.com/get_job',
+            'http://work_server:8080/get_job?client_id=-1',
             json={'job_id': '1',
                   'url': 'http://url.com',
                   'job_type': 'documents',
@@ -163,11 +125,10 @@ def test_client_performs_job(mock_requests):
                            'job_type': 'documents'}},
             status_code=200
         )
-        mock_requests.put('http://test.com/put_results', text='{}')
+        mock_requests.put('http://work_server:8080/put_results', text='{}')
         client.job_operation()
 
         put_request = mock_requests.request_history[2]
-        print(put_request)
         json_data = json.loads(put_request.json())
         saved_data = json_data['results']['data']
         assert saved_data['attributes'] == {'agencyId': 'NOAA'}
@@ -176,13 +137,12 @@ def test_client_performs_job(mock_requests):
 
 
 def test_client_returns_403_error_to_server(mock_requests):
-    server_validator = Validator('http://test.com')
-    client = Client(server_validator, Validator())
+    client = Client()
     client.api_key = 1234
 
     with mock_requests:
         mock_requests.get(
-            'http://test.com/get_job',
+            'http://work_server:8080/get_job?client_id=-1',
             json={'job_id': '1',
                   'url': 'http://url.com',
                   'job_type': 'documents',
@@ -204,7 +164,7 @@ def test_client_returns_403_error_to_server(mock_requests):
         )
 
         mock_requests.put(
-            'http://test.com/put_results',
+            'http://work_server:8080/put_results',
             json={'success': 'The job was successfully completed'},
             status_code=200
         )
@@ -213,45 +173,71 @@ def test_client_returns_403_error_to_server(mock_requests):
         assert '403' in response.json()
 
 
-def test_mock_get_timeout(mock_requests):
-    server_validator = Validator('http://test.com/')
-
+def test_get_id_timesout(mock_requests):
     with mock_requests:
         mock_requests.get(
-            'http://test.com/http://test.com/get_results',
+            'http://work_server:8080/get_client_id',
             exc=Timeout)
-        try:
-            server_validator.get_request('http://test.com/get_results')
-            pytest.fail("Timeout Exception")
-        except Timeout as error:
-            assert isinstance(error, Timeout), "Expected a Timeout error"
+
+        with pytest.raises(Timeout):
+            Client().get_id()
 
 
-def test_mock_put_timeout(mock_requests):
-    server_validator = Validator('http://test.com/')
-
+def test_get_job_timesout(mock_requests):
     with mock_requests:
-        mock_requests.put(
-            'http://test.com/http://test.com/put_results?client_id=2001',
+        mock_requests.get(
+            'http://work_server:8080/get_job',
             exc=Timeout)
-        try:
-            server_validator.put_request(
-                'http://test.com/put_results',
-                {'job_id': '1'},
-                {'client_id': 2001})
-            pytest.fail("Timeout Exception")
-        except Timeout as error:
-            assert isinstance(error, Timeout), "Expected a Timeout error"
+
+        with pytest.raises(Timeout):
+            Client().get_job()
+
+
+def test_perform_job_timesout(mock_requests):
+    with mock_requests:
+        fake_url = 'http://regulations.gov/fake/api/call'
+        mock_requests.get(
+            fake_url,
+            exc=Timeout)
+
+        with pytest.raises(Timeout):
+            Client().perform_job(fake_url)
+
+
+def test_perform_attachment_job_timesout(mock_requests):
+    with mock_requests:
+        fake_url = 'http://regulations.gov/fake/api/call'
+        mock_requests.get(
+            fake_url,
+            exc=Timeout)
+
+        with pytest.raises(Timeout):
+            fake_job_id = 'fake'
+            Client().perform_attachment_job(fake_url, fake_job_id)
+
+
+def test_download_attachments_times_out(mock_requests):
+    with mock_requests:
+        fake_url = 'http://regulations.gov/fake/api/call'
+        mock_requests.get(
+            fake_url,
+            exc=Timeout)
+
+        with pytest.raises(Timeout):
+            fake_job_id = 'fake'
+            fake_attachment_types = ['pdf']
+            Client().download_attachments([fake_url],
+                                          fake_attachment_types,
+                                          fake_job_id)
 
 
 def test_client_returns_400_error_to_server(mock_requests):
-    server_validator = Validator('http://test.com')
-    client = Client(server_validator, Validator())
+    client = Client()
     client.api_key = 1234
 
     with mock_requests:
         mock_requests.get(
-            'http://test.com/get_job',
+            'http://work_server:8080/get_job?client_id=-1',
             json={'job_id': '1',
                   'url': 'http://url.com',
                   'job_type': 'documents',
@@ -271,7 +257,7 @@ def test_client_returns_400_error_to_server(mock_requests):
         )
 
         mock_requests.put(
-            'http://test.com/put_results',
+            'http://work_server:8080/put_results',
             json={'success': 'The job was successfully completed'},
             status_code=200
         )
@@ -281,13 +267,12 @@ def test_client_returns_400_error_to_server(mock_requests):
 
 
 def test_client_returns_500_error_to_server(mock_requests):
-    server_validator = Validator('http://test.com')
-    client = Client(server_validator, Validator())
+    client = Client()
     client.api_key = 1234
 
     with mock_requests:
         mock_requests.get(
-            'http://test.com/get_job',
+            'http://work_server:8080/get_job?client_id=-1',
             json={'job_id': '1',
                   'url': 'http://url.com',
                   'job_type': 'documents',
@@ -309,7 +294,7 @@ def test_client_returns_500_error_to_server(mock_requests):
         )
 
         mock_requests.put(
-            'http://test.com/put_results',
+            'http://work_server:8080/put_results',
             json={'success': 'The job was successfully completed'},
             status_code=200
         )
@@ -319,13 +304,12 @@ def test_client_returns_500_error_to_server(mock_requests):
 
 
 def test_client_sends_attachment_results(mock_requests):
-    server_validator = Validator('http://test.com')
-    client = Client(server_validator, Validator())
+    client = Client()
     client.api_key = 1234
 
     with mock_requests:
         mock_requests.get(
-            'http://test.com/get_job',
+            'http://work_server:8080/get_job?client_id=-1',
             json={'job_id': '1',
                   'url': 'http://url.com',
                   'job_type': 'attachments',
@@ -348,13 +332,12 @@ def test_client_sends_attachment_results(mock_requests):
             json={"data": 'foobar'},
             status_code=200
         )
-        mock_requests.put('http://test.com/put_results', text='{}')
+        mock_requests.put('http://work_server:8080/put_results', text='{}')
         client.job_operation()
 
         mock_requests.put(f'{BASE_URL}/put_results', text='{}')
         client.job_operation()
         put_request = mock_requests.request_history[3]
-        print(put_request)
         json_data = json.loads(put_request.json())
         assert json_data['job_id'] == "1"
         assert json_data['job_type'] == "attachments"
@@ -362,13 +345,12 @@ def test_client_sends_attachment_results(mock_requests):
 
 
 def test_client_handles_empty_json_from_regulations(mock_requests):
-    server_validator = Validator('http://test.com')
-    client = Client(server_validator, Validator())
+    client = Client()
     client.api_key = 1234
 
     with mock_requests:
         mock_requests.get(
-            'http://test.com/get_job',
+            'http://work_server:8080/get_job?client_id=-1',
             json={'job_id': '1',
                   'url': 'http://url.com',
                   'job_type': 'attachments',
@@ -388,13 +370,12 @@ def test_client_handles_empty_json_from_regulations(mock_requests):
             json={"data": 'foobar'},
             status_code=200
         )
-        mock_requests.put('http://test.com/put_results', text='{}')
+        mock_requests.put('http://work_server:8080/put_results', text='{}')
         client.job_operation()
 
         mock_requests.put(f'{BASE_URL}/put_results', text='{}')
         client.job_operation()
         put_request = mock_requests.request_history[2]
-        print(put_request)
         json_data = json.loads(put_request.json())
         assert json_data['job_id'] == "1"
         assert json_data['job_type'] == "attachments"
