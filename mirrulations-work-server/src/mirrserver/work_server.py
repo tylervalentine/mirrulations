@@ -283,6 +283,7 @@ def put_attachment_results(workserver, data):
     job_id = data['job_id']
     workserver.redis.hdel('jobs_in_progress', job_id)
     if data.get('results') is not None:
+        print('Attachment Job Being Saved')
         print('agency', data['agency'])
         print('reg_id', data['reg_id'])
         workserver.attachment_saver.save(

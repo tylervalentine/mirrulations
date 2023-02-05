@@ -148,8 +148,7 @@ class Client:
         :raises: NoJobsAvailableException
             If no job is available from the work server
         """
-        print('performing job')
-
+        print('Staring New Job')
         response = requests.get(f'{self.url}/get_job',
                                 params={'client_id': self.client_id},
                                 timeout=10)
@@ -184,6 +183,7 @@ class Client:
             'reg_id': job['reg_id'],
             'agency': job['agency']
         }
+        print('Sending Job to Work Server')
         # If the job is not an attachment job we need to add an output path
         if ('errors' not in job_result) and (job['job_type'] != 'attachments'):
             data['directory'] = get_output_path(job_result)
