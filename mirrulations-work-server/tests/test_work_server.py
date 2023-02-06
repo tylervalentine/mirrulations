@@ -385,3 +385,26 @@ def mock_write_results(mocker):
         'mirrserver.work_server.write_results',
         return_value=None
     )
+
+
+def test_get_newer_jobs_from_job_waiting_queue(mock_server):
+    params = {'client_id': 1}
+    for i in range(2):
+        mock_server.redis.incr('total_num_client_ids')
+        job = {'job_id': i,
+               'url': 'url',
+               'job_type': 'docket',
+               'reg_id': 3,
+               'agency': 'EPA'
+               }
+        mock_server.redis.lpush('jobs_waiting_queue', dumps(job))
+    for i in range(2):
+        response = mock_server.client.get('/get_job', query_string=params)
+        assert response.status_code == 200
+        expected = {'job_id': str(i),
+                    'url': 'url',
+                    'job_type': 'docket',
+                    'reg_id': 3,
+                    'agency': 'EPA'
+                    }
+        assert response.get_json() == expected
