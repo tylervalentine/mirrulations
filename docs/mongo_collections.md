@@ -2,7 +2,7 @@
 Mongo database collections includes a table for the following: Comments, Dockets, and Documents. 
 
 ## Comments 
-This collection contains the comments made on documents. This collection is nested with multuple dictionaries. Below is an example of a comment: 
+This collection contains the comments made on documents. This collection is nested with multiple dictionaries. Below is an example of a comment: 
 
 ```
 {

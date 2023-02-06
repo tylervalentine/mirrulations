@@ -20,12 +20,12 @@ There is a finite number of agencies within the Regulations.gov api. Within a si
 
  * **Dockets**  
 
-Within each single docket there exists a description for the specific docket that is stored as a Json. EAch docket has its sopecific set of attributes that varies based on the specific Agency posting the docket.
+Within each single docket there exists a description for the specific docket that is stored as a Json. EAch docket has its specific set of attributes that varies based on the specific Agency posting the docket.
 
 * **Documents**
 
-Within a single Docket there exist a finite number of documents. A single document is defined by one of the following: Proposed Rule, Rule, Supporting and Re;ated, or Other. One can choose to include attachments using include parameter. These attachments could be PDF's or HTM. Attachments are not included by default. 
+Within a single Docket there exist a finite number of documents. A single document is defined by one of the following: Proposed Rule, Rule, Supporting and Related, or Other. One can choose to include attachments using include parameter. These attachments could be PDF's or HTM. Attachments are not included by default. 
 
 * **Comments**
 
-Comments are found within a single document and there are a few ways one can query comments endpoints so that one can retreive detailed information for a comment. Comments can be attachments for the specific documents. One could get comment details without attachements or with attachments and this relies on the end point one uses.
+Comments are found within a single document and there are a few ways one can query comments endpoints so that one can retrieve detailed information for a comment. Comments can be attachments for the specific documents. One could get comment details without attachments or with attachments and this relies on the end point one uses.

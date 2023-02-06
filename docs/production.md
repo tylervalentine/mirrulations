@@ -18,5 +18,5 @@ The system is Dockerized into a number of components:
 * `docker compose up -d` to start all containers (`-d` to run in background)
 * `docker compose logs` to see logs.  Optional, add a container name to see
   individual logs
-* `docker comopse down` to bring the system down
+* `docker compose down` to bring the system down
 * `docker compose stop <name>` to stop a particular container
