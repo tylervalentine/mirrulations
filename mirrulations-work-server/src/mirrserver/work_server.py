@@ -224,6 +224,7 @@ def write_results(directory, path, data):
     except FileExistsError:
         print(f'Directory already exists in root: /data/{directory}')
     with open(f'/data/{path}', 'w+', encoding='utf8') as file:
+        print('Writing results to disk')
         file.write(json.dumps(data))
 
 

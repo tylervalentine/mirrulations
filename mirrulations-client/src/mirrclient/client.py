@@ -268,6 +268,7 @@ class Client:
         -------
         a dict of encoded files
         """
+        print('Downloading attachments')
         attachments = {}
         for i, (url, file_type) in enumerate(zip(urls, file_types)):
             attachment = requests.get(url, timeout=10)
@@ -282,6 +283,7 @@ class Client:
         based on job_type, then sends back the job results to
         the workserver.
         """
+        print('Processing job')
         job = self.get_job()
         if job['job_type'] == 'attachments':
             result = self.perform_attachment_job(job['url'], job['job_id'])
