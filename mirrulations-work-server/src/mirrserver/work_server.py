@@ -250,7 +250,6 @@ def put_results(workserver, data):
     success, *results = check_results(workserver, data, int(values[0]))
     if not success:
         return (success, *results)
-    
     job_id = data['job_id']
     workserver.redis.hdel('jobs_in_progress', job_id)
     write_results(results[0], data['directory'], data['results'])
