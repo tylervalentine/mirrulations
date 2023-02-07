@@ -11,5 +11,4 @@ while getopts 'b' OPTION; do
             ;;
     esac
 done
-docker-compose up -d nginx redis mongo work_generator work_server 
-dashboard client1
+docker-compose up -d nginx redis mongo work_generator work_server dashboard client1
