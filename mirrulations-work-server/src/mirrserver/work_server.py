@@ -123,7 +123,7 @@ def decrement_count(workserver, job_type):
 def get_job(workserver):
     # pylint: disable=R0914
     """
-    Takes client's put endpoints validates wheter or not its a usable job
+    Takes client's put endpoints validates whether or not its a usable job
     if so it returns the job with the job ID, URL job_type and
     regulations id and agency so the job can be linked to related data
     in the databases
@@ -159,7 +159,7 @@ def get_job(workserver):
     workserver.redis.hset('client_jobs', job_id, client_id)
 
     decrement_count(workserver, job_type)
-
+    print(f'Job received: {job_type} client: ', request.args.get('client_id'))
     return True, job_id, url, job_type, reg_id, agency
 
 
@@ -234,6 +234,7 @@ def check_received_result(workserver):
     success, *values = check_valid_request_client_id(workserver, client_id)
     if not success:
         return False, values[0], values[1]
+    print('Work_server received job for client: ', client_id)
     return True, client_id
 
 
@@ -254,7 +255,7 @@ def put_results(workserver, data):
     workserver.redis.hdel('jobs_in_progress', job_id)
     write_results(results[0], data['directory'], data['results'])
     workserver.data.add(data['results'])
-    print('Job Saved')
+    print('Sending to work_server for client: ', request.args.get('client_id'))
     return (True,)
 
 
