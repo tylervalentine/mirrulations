@@ -159,7 +159,7 @@ def get_job(workserver):
     workserver.redis.hset('client_jobs', job_id, client_id)
 
     decrement_count(workserver, job_type)
-    print(f'Job received: {job_type} client: ', request.args.get('client_id'))
+    print(f'Job received: {job_type} for client: ', client_id)
     return True, job_id, url, job_type, reg_id, agency
 
 
@@ -251,11 +251,12 @@ def put_results(workserver, data):
     success, *results = check_results(workserver, data, int(values[0]))
     if not success:
         return (success, *results)
+    client_id = request.args.get('client_id')
     job_id = data['job_id']
     workserver.redis.hdel('jobs_in_progress', job_id)
     write_results(results[0], data['directory'], data['results'])
     workserver.data.add(data['results'])
-    print('Sending to work_server for client: ', request.args.get('client_id'))
+    print('Job success for client:'+client_id+', '+'job: ', job_id)
     return (True,)
 
 
@@ -403,7 +404,7 @@ def create_server(database):
         except (InvalidResultsException, InvalidClientIDException,
                 MissingClientIDException) as invalid_result:
             return jsonify(invalid_result.message), invalid_result.status_code
-        # Added ternary instead of if/else to apease pylint too many statements
+        # Added ternary instead of if/else to please pylint too many statements
         success, *values = put_attachment_results(workserver, data) if \
             data.get('job_type') == 'attachments' else \
             put_results(workserver, data)
