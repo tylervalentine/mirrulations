@@ -184,7 +184,7 @@ class Client:
             'reg_id': job['reg_id'],
             'agency': job['agency']
         }
-        print('Sending Job to Work Server')
+        print(f'Sending Job {job["job_id"]} to Work Server')
         # If the job is not an attachment job we need to add an output path
         if ('errors' not in job_result) and (job['job_type'] != 'attachments'):
             data['directory'] = get_output_path(job_result)
@@ -207,6 +207,7 @@ class Client:
         dict
             json results of the performed job
         """
+        print(f'Performing job {job_url}')
         return requests.get(job_url + f'?api_key={self.api_key}',
                             timeout=10).json()
 
@@ -247,9 +248,9 @@ class Client:
                     response_from_related["data"][0]
                     ["attributes"]["fileFormats"])
         except IndexError:
-            print('Index Error during attachment job')
+            print(f'Index Error during attachment job {job_id}')
             return {}
-        print('Performing attachment job')
+        print(f'Performing attachment job {job_id}')
         return self.download_attachments(file_urls, file_types, job_id)
 
     def download_attachments(self, urls, file_types, job_id):
@@ -286,7 +287,7 @@ class Client:
         based on job_type, then sends back the job results to
         the workserver.
         """
-        print('Processing job')
+        print('Processing job from work server')
         job = self.get_job()
         if job['job_type'] == 'attachments':
             result = self.perform_attachment_job(job['url'], job['job_id'])
