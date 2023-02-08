@@ -85,6 +85,7 @@ def get_output_path(results):
     output_path += get_key_path_string(data, "commentOnDocumentId")
     output_path += results["data"]["id"] + "/"
     output_path += results["data"]["id"] + ".json"
+    print(f'Job output path: {output_path}')
     return output_path
 
 
@@ -156,7 +157,7 @@ class Client:
         job = loads(response.text)
         if 'error' in job:
             raise NoJobsAvailableException()
-
+        print(f'Job ID: {job["job_id"]}')
         return job
 
     def send_job(self, job, job_result):
@@ -246,7 +247,9 @@ class Client:
                     response_from_related["data"][0]
                     ["attributes"]["fileFormats"])
         except IndexError:
+            print('Index Error during attachment job')
             return {}
+        print('Performing attachment job')
         return self.download_attachments(file_urls, file_types, job_id)
 
     def download_attachments(self, urls, file_types, job_id):
