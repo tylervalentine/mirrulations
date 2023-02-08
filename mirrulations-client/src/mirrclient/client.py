@@ -85,6 +85,7 @@ def get_output_path(results):
     output_path += get_key_path_string(data, "commentOnDocumentId")
     output_path += results["data"]["id"] + "/"
     output_path += results["data"]["id"] + ".json"
+    print(f'Job output path: {output_path}')
     return output_path
 
 
@@ -148,8 +149,7 @@ class Client:
         :raises: NoJobsAvailableException
             If no job is available from the work server
         """
-        print('performing job')
-
+        print('Staring New Job')
         response = requests.get(f'{self.url}/get_job',
                                 params={'client_id': self.client_id},
                                 timeout=10)
@@ -157,7 +157,7 @@ class Client:
         job = loads(response.text)
         if 'error' in job:
             raise NoJobsAvailableException()
-
+        print(f'Job ID: {job["job_id"]}')
         return job
 
     def send_job(self, job, job_result):
@@ -184,6 +184,7 @@ class Client:
             'reg_id': job['reg_id'],
             'agency': job['agency']
         }
+        print(f'Sending Job {job["job_id"]} to Work Server')
         # If the job is not an attachment job we need to add an output path
         if ('errors' not in job_result) and (job['job_type'] != 'attachments'):
             data['directory'] = get_output_path(job_result)
@@ -206,6 +207,7 @@ class Client:
         dict
             json results of the performed job
         """
+        print(f'Performing job {job_url}')
         return requests.get(job_url + f'?api_key={self.api_key}',
                             timeout=10).json()
 
@@ -246,7 +248,9 @@ class Client:
                     response_from_related["data"][0]
                     ["attributes"]["fileFormats"])
         except IndexError:
+            print(f'Index Error during attachment job {job_id}')
             return {}
+        print(f'Performing attachment job {job_id}')
         return self.download_attachments(file_urls, file_types, job_id)
 
     def download_attachments(self, urls, file_types, job_id):
@@ -268,6 +272,7 @@ class Client:
         -------
         a dict of encoded files
         """
+        print('Downloading attachments')
         attachments = {}
         for i, (url, file_type) in enumerate(zip(urls, file_types)):
             attachment = requests.get(url, timeout=10)
@@ -282,6 +287,7 @@ class Client:
         based on job_type, then sends back the job results to
         the workserver.
         """
+        print('Processing job from work server')
         job = self.get_job()
         if job['job_type'] == 'attachments':
             result = self.perform_attachment_job(job['url'], job['job_id'])
