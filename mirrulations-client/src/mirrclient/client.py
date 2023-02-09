@@ -149,7 +149,7 @@ class Client:
         :raises: NoJobsAvailableException
             If no job is available from the work server
         """
-        print('Staring New Job')
+        print('Starting New Job')
         response = requests.get(f'{self.url}/get_job',
                                 params={'client_id': self.client_id},
                                 timeout=10)
