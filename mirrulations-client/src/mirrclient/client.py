@@ -248,7 +248,8 @@ class Client:
                     response_from_related["data"][0]
                     ["attributes"]["fileFormats"])
         except IndexError:
-            print(f'Index Error during attachment job {job_id}')
+            # IndexError is caught if related attachments link is an empty data ={} json
+            print(f'No attachments to download for attachment job {job_id}')  
             return {}
         print(f'Performing attachment job {job_id}')
         return self.download_attachments(file_urls, file_types, job_id)
