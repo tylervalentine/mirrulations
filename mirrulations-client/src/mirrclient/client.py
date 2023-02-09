@@ -247,11 +247,12 @@ class Client:
                 get_urls_and_formats(
                     response_from_related["data"][0]
                     ["attributes"]["fileFormats"])
+
         except IndexError:
             # if related attachments link is an empty data ={} json
-            print(f'No attachments to download for attachment job {job_id}')
+            print(f'FAILURE: Empty attachment list from {url}')
             return {}
-        print(f'Performing attachment job {job_id}')
+        print(f'Performing attachment job {url}')
         return self.download_attachments(file_urls, file_types, job_id)
 
     def download_attachments(self, urls, file_types, job_id):
