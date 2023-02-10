@@ -243,6 +243,7 @@ class Client:
         -------
         a dict of encoded files
         """
+        non_api_url = url
         url = url + f'?api_key={self.api_key}'
         response_from_related = requests.get(url, timeout=10).json()
 
@@ -255,9 +256,9 @@ class Client:
 
         except IndexError:
             # if related attachments link is an empty data ={} json
-            print(f'FAILURE: Empty attachment list from {url}')
+            print(f'FAILURE: Empty attachment list from {non_api_url}')
             return {}
-        print(f'Performing attachment job {url}')
+        print(f'Performing attachment job {non_api_url}')
         return self.download_attachments(file_urls, file_types, job_id)
 
     def download_attachments(self, urls, file_types, job_id):
