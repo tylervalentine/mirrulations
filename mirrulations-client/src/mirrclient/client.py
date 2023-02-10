@@ -255,7 +255,7 @@ class Client:
                     ["attributes"]["fileFormats"])
 
         except IndexError:
-            # if related attachments link is an empty data ={} json
+            # if related attachments link is an empty data =[] json
             print(f'FAILURE: Empty attachment list from {non_api_url}')
             return {}
         print(f'Performing attachment job {non_api_url}')
