@@ -157,12 +157,12 @@ class Client:
         job = loads(response.text)
         if 'error' in job:
             raise NoJobsAvailableException()
-        if 'docket' in job['url']:
-            print(f'Regulations.gov link: https://www.regulations.gov/docket/{job["url"][39:]}')
-        if 'document' in job['url']:
-            print(f'Regulations.gov link: https://www.regulations.gov/document/{job["url"][39:]}')
-        if 'comment' in job['url']:
-            print(f'Regulations.gov link: https://www.regulations.gov/comment/{job["url"][39:]}')
+        # if 'docket' in job['url']:
+        #     print(f'Regulations.gov link: https://www.regulations.gov/docket/{job["url"][39:]}')
+        # if 'document' in job['url']:
+        #     print(f'Regulations.gov link: https://www.regulations.gov/document/{job["url"][39:]}')
+        # if 'comment' in job['url']:
+        #     print(f'Regulations.gov link: https://www.regulations.gov/comment/{job["url"][39:]}')
         return job
 
     def send_job(self, job, job_result):
