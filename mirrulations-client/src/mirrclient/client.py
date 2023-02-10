@@ -249,9 +249,6 @@ class Client:
                     response_from_related["data"][0]
                     ["attributes"]["fileFormats"])
 
-        except KeyError:
-            print(f"FAILURE: Related link JSON has no 'data' key from {non_api_url}")
-            return {}
         except IndexError:
             # if related attachments link is an empty data ={} json
             print(f'FAILURE: Empty attachment list from {non_api_url}')
