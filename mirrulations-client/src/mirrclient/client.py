@@ -106,9 +106,9 @@ def is_environment_variables_present():
 class Client:
     """
     The Client class performs jobs given to it by a workserver
-    It recieves a job, performs it depending on the job type.
+    It receives a job, performs it depending on the job type.
     A job is performed by calling an api endpoint to request
-    a json obect. The Client sends back the results back
+    a json object. The Client sends back the results back
     to the workserver.
 
     Attributes

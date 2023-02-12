@@ -165,7 +165,8 @@ def get_job(workserver):
 
 def check_results(workserver, data, client_id):
     """
-    checks that a result has a vaid directory structure in the results key.
+    checks that a result has a v
+    id directory structure in the results key.
     Used for comments, documents, and dockets jobs
     so they know where to be saved to disk.
 
@@ -299,7 +300,7 @@ def put_attachment_results(workserver, data):
 def get_client_id(workserver):
     """
     called when a client is started and needs a client id.
-    Incremenets the total number of clients and gives
+    Increments the total number of clients and gives
     the number to the client.
 
 
