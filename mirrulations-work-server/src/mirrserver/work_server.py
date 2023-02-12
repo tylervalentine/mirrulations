@@ -159,7 +159,7 @@ def get_job(workserver):
     workserver.redis.hset('client_jobs', job_id, client_id)
 
     decrement_count(workserver, job_type)
-
+    print(f'Job received: {job_type} for client: ', client_id)
     return True, job_id, url, job_type, reg_id, agency
 
 
@@ -225,6 +225,7 @@ def write_results(directory, path, data):
     except FileExistsError:
         print(f'Directory already exists in root: /data/{directory}')
     with open(f'/data/{path}', 'w+', encoding='utf8') as file:
+        print('Writing results to disk')
         file.write(json.dumps(data))
 
 
@@ -234,6 +235,7 @@ def check_received_result(workserver):
     success, *values = check_valid_request_client_id(workserver, client_id)
     if not success:
         return False, values[0], values[1]
+    print('Work_server received job for client: ', client_id)
     return True, client_id
 
 
@@ -250,10 +252,12 @@ def put_results(workserver, data):
     success, *results = check_results(workserver, data, int(values[0]))
     if not success:
         return (success, *results)
+    client_id = request.args.get('client_id')
     job_id = data['job_id']
     workserver.redis.hdel('jobs_in_progress', job_id)
     write_results(results[0], data['directory'], data['results'])
     workserver.data.add(data['results'])
+    print('Job success for client:'+client_id+', '+'job: ', job_id)
     return (True,)
 
 
@@ -284,6 +288,7 @@ def put_attachment_results(workserver, data):
     job_id = data['job_id']
     workserver.redis.hdel('jobs_in_progress', job_id)
     if data.get('results') is not None:
+        print('Attachment Job Being Saved')
         print('agency', data['agency'])
         print('reg_id', data['reg_id'])
         workserver.attachment_saver.save(
@@ -400,7 +405,7 @@ def create_server(database):
         except (InvalidResultsException, InvalidClientIDException,
                 MissingClientIDException) as invalid_result:
             return jsonify(invalid_result.message), invalid_result.status_code
-        # Added ternary instead of if/else to appease pylint too many statement
+        # Added ternary instead of if/else to please pylint too many statements
         success, *values = put_attachment_results(workserver, data) if \
             data.get('job_type') == 'attachments' else \
             put_results(workserver, data)

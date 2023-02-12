@@ -62,6 +62,17 @@ const updateDashboardData = () => {
             client15,
             client16,
             client17,
+            client18,
+            client19,
+            client20,
+            client21,
+            client22,
+            client23,
+            client24,
+            client25,
+            client26,
+            client27,
+            client28,
             jobs_total,
             nginx,
             num_attachments_done,
@@ -98,6 +109,17 @@ const updateDashboardData = () => {
         updateStatus('client15-status', client15)
         updateStatus('client16-status', client16)
         updateStatus('client17-status', client17)
+        updateStatus('client18-status', client18)
+        updateStatus('client19-status', client19)
+        updateStatus('client20-status', client20)
+        updateStatus('client21-status', client21)
+        updateStatus('client22-status', client22)
+        updateStatus('client23-status', client23)
+        updateStatus('client24-status', client24)
+        updateStatus('client25-status', client25)
+        updateStatus('client26-status', client26)
+        updateStatus('client27-status', client27)
+        updateStatus("client28-status", client28)
         updateStatus('nginx-status', nginx)
         updateStatus('mongo-status', mongo)
         updateStatus('redis-status', redis);
