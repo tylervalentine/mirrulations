@@ -255,6 +255,7 @@ def put_results(workserver, data):
     job_id = data['job_id']
     workserver.redis.hdel('jobs_in_progress', job_id)
     write_results(results[0], data['directory'], data['results'])
+    print(f"Writing job to {data['directory']}")
     workserver.data.add(data['results'])
     print('Job success for client:'+client_id+', '+'job: ', job_id)
     return (True,)
