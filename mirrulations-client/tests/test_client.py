@@ -51,16 +51,17 @@ def test_check_no_api_key():
 
 def test_client_gets_job(mock_requests):
     client = Client()
+    link = 'https://api.regulations.gov/v4/type/type_id'
     with mock_requests:
         mock_requests.get(
             'http://work_server:8080/get_job?client_id=-1',
-            json={'job_id': '1', 'url': 1, 'job_type': 'attachments',
+            json={'job_id': '1', 'url': link, 'job_type': 'attachments',
                   'reg_id': '1', 'agency': 'foo'},
             status_code=200
         )
         job_info = client.get_job()
         assert {'job_id': '1',
-                'url': 1,
+                'url': link,
                 'job_type': 'attachments',
                 'reg_id': '1',
                 'agency': 'foo'} == job_info
