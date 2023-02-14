@@ -145,19 +145,26 @@ class Client:
     def get_job(self):
         """
         Get a job from the work server.
+        Converts API URL to regulations.gov URL and prints to logs.
+        From: https://api.regulations.gov/v4/dockets/type_id
+        To: https://www.regulations.gov/docket/type_id
 
         :raises: NoJobsAvailableException
             If no job is available from the work server
         """
-        print('Staring New Job')
+
         response = requests.get(f'{self.url}/get_job',
                                 params={'client_id': self.client_id},
                                 timeout=10)
 
         job = loads(response.text)
+        link = 'https://www.regulations.gov/'
         if 'error' in job:
             raise NoJobsAvailableException()
-        print(f'Job ID: {job["job_id"]}')
+        split_url = str(job['url']).split('/')
+        job_type = split_url[-2][:-1]  # Removes plural from job type
+        type_id = split_url[-1]
+        print(f'Regulations.gov link: {link}{job_type}/{type_id}')
         return job
 
     def send_job(self, job, job_result):
@@ -207,7 +214,7 @@ class Client:
         dict
             json results of the performed job
         """
-        print(f'Performing job {job_url}')
+        print(f'Performing job: {job_url}')
         return requests.get(job_url + f'?api_key={self.api_key}',
                             timeout=10).json()
 
@@ -238,6 +245,7 @@ class Client:
         -------
         a dict of encoded files
         """
+        non_api_url = url
         url = url + f'?api_key={self.api_key}'
         response_from_related = requests.get(url, timeout=10).json()
 
@@ -247,10 +255,12 @@ class Client:
                 get_urls_and_formats(
                     response_from_related["data"][0]
                     ["attributes"]["fileFormats"])
+
         except IndexError:
-            print(f'Index Error during attachment job {job_id}')
+            # if related attachments link is an empty data =[] json
+            print(f'FAILURE: Empty attachment list from {non_api_url}')
             return {}
-        print(f'Performing attachment job {job_id}')
+        print(f'Performing attachment job {non_api_url}')
         return self.download_attachments(file_urls, file_types, job_id)
 
     def download_attachments(self, urls, file_types, job_id):
