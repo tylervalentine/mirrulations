@@ -252,7 +252,8 @@ class Client:
 
         # Get attachments
         try:
-            file_info = response_from_related["data"][0]["attributes"]["fileFormats"]
+            file_info = \
+                response_from_related["data"][0]["attributes"]["fileFormats"]
             if not file_info:
                 raise KeyError
             file_urls, file_types = get_urls_and_formats(file_info)
