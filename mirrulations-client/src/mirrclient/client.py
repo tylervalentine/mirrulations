@@ -215,7 +215,7 @@ class Client:
         dict
             json results of the performed job
         """
-        print(f'Performing job')
+        print('Performing job')
         return requests.get(job_url + f'?api_key={self.api_key}',
                             timeout=10).json()
 
