@@ -145,6 +145,7 @@ def get_job(workserver):
     client_id = request.args.get('client_id')
     success, *values = check_valid_request_client_id(workserver, client_id)
     if not success:
+        print('FAILURE')
         return False, values[0], values[1]
     if workserver.redis.llen('jobs_waiting_queue') == 0:
         return False, jsonify({'error': 'No jobs available'}), 403
