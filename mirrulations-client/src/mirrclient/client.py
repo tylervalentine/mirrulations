@@ -252,16 +252,19 @@ class Client:
 
         # Get attachments
         try:
-            file_urls, file_types = \
-                get_urls_and_formats(
-                    response_from_related["data"][0]
-                    ["attributes"]["fileFormats"])
-
+            file_info = \
+                response_from_related["data"][0]["attributes"]["fileFormats"]
+            if not file_info:
+                raise KeyError
+            file_urls, file_types = get_urls_and_formats(file_info)
         except IndexError:
             # if related attachments link is an empty data =[] json
             print(f'FAILURE: Empty attachment list from {non_api_url}')
             return {}
-        print(f'Performing attachment job {non_api_url}')
+        except KeyError:
+            print(f'FAILURE: null field in results from {non_api_url}')
+            return {}
+        print(f'Performing attachment job {job_id}')
         return self.download_attachments(file_urls, file_types, job_id)
 
     def download_attachments(self, urls, file_types, job_id):
