@@ -243,12 +243,15 @@ class Client:
 
         # Get attachments
         try:
-            file_urls, file_types = \
-                get_urls_and_formats(
-                    response_from_related["data"][0]
-                    ["attributes"]["fileFormats"])
+            file_info = response_from_related["data"][0]["attributes"]["fileFormats"]
+            if not file_info:
+                raise KeyError
+            file_urls, file_types = get_urls_and_formats(file_info)
         except IndexError:
             print(f'Index Error during attachment job {job_id}')
+            return {}
+        except KeyError:
+            print(f'Field is null during attachment job {job_id}')
             return {}
         print(f'Performing attachment job {job_id}')
         return self.download_attachments(file_urls, file_types, job_id)
