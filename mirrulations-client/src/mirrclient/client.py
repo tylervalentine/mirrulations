@@ -165,6 +165,7 @@ class Client:
         job_type = split_url[-2][:-1]  # Removes plural from job type
         type_id = split_url[-1]
         print(f'Regulations.gov link: {link}{job_type}/{type_id}')
+        print(f'API URL: {job["url"]}')
         return job
 
     def send_job(self, job, job_result):
@@ -214,7 +215,7 @@ class Client:
         dict
             json results of the performed job
         """
-        print(f'Performing job: {job_url}')
+        print('Performing job')
         return requests.get(job_url + f'?api_key={self.api_key}',
                             timeout=10).json()
 
