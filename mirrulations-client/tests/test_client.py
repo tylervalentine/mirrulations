@@ -388,3 +388,74 @@ def test_get_output_path_error():
     output_path = get_output_path(results)
 
     assert output_path == -1
+
+
+def test_handles_nonetype_error(mock_requests):
+    """
+    Test for handling of the NoneType Error caused by null fileformats
+    """
+    client = Client()
+    client.api_key = 1234
+
+    with mock_requests:
+        mock_requests.get(
+            'http://work_server:8080/get_job?client_id=-1',
+            json={'job_id': '1',
+                  'url': 'http://url.com',
+                  'job_type': 'attachments',
+                  'reg_id': '1',
+                  'agency': 'foo'},
+            status_code=200
+        )
+        mock_requests.get(
+            'http://url.com?api_key=1234',
+            json={
+                "data": [{
+                    "attributes": {
+                        "fileFormats": "null",
+                        }
+                    }]
+                },
+            status_code=200
+        )
+
+        mock_requests.put('http://work_server:8080/put_results', text='{}')
+        client.job_operation()
+        put_request = mock_requests.request_history[2]
+        json_data = json.loads(put_request.json())
+        assert json_data['job_type'] == "attachments"
+        assert json_data['results'] == {}
+
+
+def test_handles_index_error(mock_requests):
+    """
+    Test that handles IndexError as a result of an attachment json being:
+    {
+        'data' = []
+    }
+    """
+    client = Client()
+    client.api_key = 1234
+
+    with mock_requests:
+        mock_requests.get(
+            'http://work_server:8080/get_job?client_id=-1',
+            json={'job_id': '1',
+                  'url': 'http://url.com',
+                  'job_type': 'attachments',
+                  'reg_id': '1',
+                  'agency': 'foo'},
+            status_code=200
+        )
+        mock_requests.get(
+            'http://url.com?api_key=1234',
+            json={"data": []},
+            status_code=200
+        )
+
+        mock_requests.put('http://work_server:8080/put_results', text='{}')
+        client.job_operation()
+        put_request = mock_requests.request_history[2]
+        json_data = json.loads(put_request.json())
+        assert json_data['job_type'] == "attachments"
+        assert json_data['results'] == {}

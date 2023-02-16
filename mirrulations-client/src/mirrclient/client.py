@@ -250,22 +250,35 @@ class Client:
         url = url + f'?api_key={self.api_key}'
         response_from_related = requests.get(url, timeout=10).json()
 
-        # Get attachments
-        try:
-            file_info = \
-                response_from_related["data"][0]["attributes"]["fileFormats"]
-            if not file_info:
-                raise KeyError
-            file_urls, file_types = get_urls_and_formats(file_info)
-        except IndexError:
-            # if related attachments link is an empty data =[] json
-            print(f'FAILURE: Empty attachment list from {non_api_url}')
+        if not self.is_attachment_json_valid(
+                response_from_related, non_api_url):
             return {}
-        except KeyError:
-            print(f'FAILURE: null field in results from {non_api_url}')
-            return {}
-        print(f'Performing attachment job {job_id}')
+
+        # Get Attachments
+        print(f"SUCCESS: Performing attachment job {job_id}")
+        file_info = \
+            response_from_related["data"][0]["attributes"]["fileFormats"]
+        file_urls, file_types = get_urls_and_formats(file_info)
         return self.download_attachments(file_urls, file_types, job_id)
+
+    def is_attachment_json_valid(self, attachment_json, url):
+        """
+        Validates whether a json for an attachment is valid to continue
+        download process
+
+        RETURNS
+        -------
+        True or False depending if there is an attachment available to download
+        """
+        # Handles IndexError and NoneType
+        if not attachment_json['data'] \
+            or attachment_json['data'][0]['attributes']['fileFormats'] \
+                == "null":
+            print(
+                f"FAILURE: {'Empty' if not attachment_json['data'] else 'No'} \
+                    attachment list provided from {url}")
+            return False
+        return True
 
     def download_attachments(self, urls, file_types, job_id):
         """
