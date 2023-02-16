@@ -66,12 +66,16 @@ To get an api key, visit [here](https://open.gsa.gov/api/regulationsgov/).
   WORK_SERVER_HOSTNAME=work_server
   WORK_SERVER_PORT=8080
   API_KEY=YOUR_KEY
+  PYTHONUNBUFFERED=TRUE
   ```
+  
+  The `PYTHONUNBUFFERED=TRUE` line tells Python to execute `print` statements without buffering (so that we can view logs in realtime).
 
 * In `env_files`, create `work_gen.env` containing: 
   
   ```
   API_KEY=YOUR_KEY
+  PYTHONUNBUFFERED=TRUE
   ```
   
 * In `env_files`, create `dashboard.env` containing: 
@@ -79,6 +83,7 @@ To get an api key, visit [here](https://open.gsa.gov/api/regulationsgov/).
   ```
   MONGO_HOSTNAME=mongo
   REDIS_HOSTNAME=redis
+  PYTHONUNBUFFERED=TRUE
   ```
 
 * All data is stored in subfolders of `~/data`.  You must create this folder before launching:
