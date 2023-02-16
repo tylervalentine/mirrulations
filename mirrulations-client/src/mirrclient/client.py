@@ -100,7 +100,8 @@ def is_environment_variables_present():
     """
     return (os.getenv('WORK_SERVER_HOSTNAME') is not None
             and os.getenv('WORK_SERVER_PORT') is not None
-            and os.getenv('API_KEY') is not None)
+            and os.getenv('API_KEY') is not None
+            and os.getenv('ID') is not None)
 
 
 class Client:
@@ -125,22 +126,11 @@ class Client:
 
     def __init__(self):
         self.api_key = os.getenv('API_KEY')
-        self.client_id = -1
+        self.client_id = os.getenv('ID')
 
         hostname = os.getenv('WORK_SERVER_HOSTNAME')
         port = os.getenv('WORK_SERVER_PORT')
         self.url = f'http://{hostname}:{port}'
-
-    def get_id(self):
-        """
-        Retrieves an id for the Client from the workserver.
-        That value is saved to client_id then written to
-        a client.cfg file.
-        """
-        response = requests.get(f'{self.url}/get_client_id', timeout=10)
-        self.client_id = int(response.json()['client_id'])
-        with open('client.cfg', 'w', encoding='utf8') as file:
-            file.write(str(self.client_id))
 
     def get_job(self):
         """
@@ -317,9 +307,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     client = Client()
-    client.get_id()
 
-    print('Your ID is: ', client.client_id)
     while True:
         try:
             client.job_operation()
