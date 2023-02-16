@@ -60,7 +60,7 @@ Because a local instance of the system should only run for a short period of tim
 To get an api key, visit [here](https://open.gsa.gov/api/regulationsgov/). 
 
 * Create a folder named `env_files`.  
-* In `env_files`, create `client1.env`, `client2.env`, ... up to `client28.env`.  Each file should have the following format:
+* In `env_files`, create `client1.env`, `client2.env`, ... up to `client27.env`.  Each file should have the following format:
 
   ```
   WORK_SERVER_HOSTNAME=work_server
