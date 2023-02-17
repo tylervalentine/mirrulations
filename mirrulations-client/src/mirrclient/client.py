@@ -251,11 +251,11 @@ class Client:
             # if related attachments link is an empty data =[] json
             print(f'FAILURE: Empty attachment list from {non_api_url}')
             return {}
-        except KeyError as e:
-            print(f"FAILURE: {e} from {non_api_url}")
+        except KeyError as error:
+            print(f"FAILURE: {error} from {non_api_url}")
             return {}
-        except TypeError as e:
-            print(f"FAILURE: {e} from {non_api_url}")
+        except TypeError as error:
+            print(f"FAILURE: {error} from {non_api_url}")
             return {}
         print(f'Performing attachment job {job_id}')
         return self.download_attachments(file_urls, file_types, job_id)
