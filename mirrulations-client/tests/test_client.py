@@ -401,21 +401,21 @@ def test_handles_nonetype_error(mock_requests):
         mock_requests.get(
             'http://work_server:8080/get_job?client_id=-1',
             json={'job_id': '1',
-                  'url': 'http://url.com',
+                  'url': 'http://regulations.gov/job',
                   'job_type': 'attachments',
                   'reg_id': '1',
                   'agency': 'foo'},
             status_code=200
         )
         mock_requests.get(
-            'http://url.com?api_key=1234',
+            'http://regulations.gov/job?api_key=1234',
             json={
                 "data": [{
                     "attributes": {
                         "fileFormats": "null",
-                        }
-                    }]
-                },
+                    }
+                }]
+            },
             status_code=200
         )
 
@@ -441,14 +441,14 @@ def test_handles_index_error(mock_requests):
         mock_requests.get(
             'http://work_server:8080/get_job?client_id=-1',
             json={'job_id': '1',
-                  'url': 'http://url.com',
+                  'url': 'http://regulations.gov/job',
                   'job_type': 'attachments',
                   'reg_id': '1',
                   'agency': 'foo'},
             status_code=200
         )
         mock_requests.get(
-            'http://url.com?api_key=1234',
+            'http://regulations.gov/job?api_key=1234',
             json={"data": []},
             status_code=200
         )

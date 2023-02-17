@@ -86,6 +86,10 @@ def get_output_path(results):
     output_path += results["data"]["id"] + "/"
     output_path += results["data"]["id"] + ".json"
     print(f'Job output path: {output_path}')
+    print(output_path)
+    print(output_path)
+    print(output_path)
+
     return output_path
 
 
@@ -192,6 +196,10 @@ class Client:
             'reg_id': job['reg_id'],
             'agency': job['agency']
         }
+        print(job_result)
+        print(job_result)
+        print(job_result)
+
         print(f'Sending Job {job["job_id"]} to Work Server')
         # If the job is not an attachment job we need to add an output path
         if ('errors' not in job_result) and (job['job_type'] != 'attachments'):
@@ -246,25 +254,24 @@ class Client:
         -------
         a dict of encoded files
         """
-        non_api_url = url
         url = url + f'?api_key={self.api_key}'
-        response_from_related = requests.get(url, timeout=10).json()
+        response_json = requests.get(url, timeout=10).json()
 
-        if not self.is_attachment_json_valid(
-                response_from_related, non_api_url):
+        if not self.does_attachment_exists(response_json):
+            print(f"No attachments to download from {url}")
             return {}
 
         # Get Attachments
         print(f"SUCCESS: Performing attachment job {job_id}")
         file_info = \
-            response_from_related["data"][0]["attributes"]["fileFormats"]
+            response_json["data"][0]["attributes"]["fileFormats"]
         file_urls, file_types = get_urls_and_formats(file_info)
         return self.download_attachments(file_urls, file_types, job_id)
 
-    def is_attachment_json_valid(self, attachment_json, url):
+    def does_attachment_exists(self, attachment_json):
         """
         Validates whether a json for an attachment is valid to continue
-        download process
+        download process. Invalid JSON means no attachment(s) available
 
         RETURNS
         -------
@@ -274,9 +281,6 @@ class Client:
         if not attachment_json['data'] \
             or attachment_json['data'][0]['attributes']['fileFormats'] \
                 == "null":
-            print(
-                f"FAILURE: {'Empty' if not attachment_json['data'] else 'No'} \
-                    attachment list provided from {url}")
             return False
         return True
 
