@@ -410,11 +410,8 @@ def test_get_newer_jobs_from_job_waiting_queue(mock_server):
         assert response.get_json() == expected
 
 
-def test_output_job_link(capsys, mocker, mock_server):
+def test_logging_output_for_put_results(capsys, mocker, mock_server):
     
-    print("https://api.regulations.gov/v4/dockets/type-id")
-    captured = capsys.readouterr()
-    assert captured.out == "https://api.regulations.gov/v4/dockets/type-id\n"
     mock_write_results(mocker)
     mock_server.redis.hset('jobs_in_progress', 2, 3)
     mock_server.redis.hset('client_jobs', 2, 1)
