@@ -16,6 +16,7 @@ def mock_env():
     os.environ['WORK_SERVER_HOSTNAME'] = 'work_server'
     os.environ['WORK_SERVER_PORT'] = '8080'
     os.environ['API_KEY'] = 'TESTING_KEY'
+    os.environ['ID'] = '-1'
 
 
 @fixture(name='mock_requests')
@@ -49,6 +50,12 @@ def test_check_no_api_key():
     assert is_environment_variables_present() is False
 
 
+def test_client_has_no_id():
+    # Need to delete id env variable set by mock_env fixture
+    del os.environ['ID']
+    assert is_environment_variables_present() is False
+
+
 def test_client_gets_job(mock_requests):
     client = Client()
     link = 'https://api.regulations.gov/v4/type/type_id'
@@ -78,18 +85,6 @@ def test_client_throws_exception_when_no_jobs(mock_requests):
 
         with raises(NoJobsAvailableException):
             client.get_job()
-
-
-def test_client_gets_id_from_server(mock_requests):
-    with mock_requests:
-        mock_requests.get(
-            'http://work_server:8080/get_client_id',
-            json={'client_id': 1},
-            status_code=200
-        )
-        client = Client()
-        client.get_id()
-        assert client.client_id == 1
 
 
 def test_api_call_has_api_key(mock_requests):
@@ -172,16 +167,6 @@ def test_client_returns_403_error_to_server(mock_requests):
         client.job_operation()
         response = mock_requests.request_history[-1]
         assert '403' in response.json()
-
-
-def test_get_id_timesout(mock_requests):
-    with mock_requests:
-        mock_requests.get(
-            'http://work_server:8080/get_client_id',
-            exc=Timeout)
-
-        with pytest.raises(Timeout):
-            Client().get_id()
 
 
 def test_get_job_timesout(mock_requests):

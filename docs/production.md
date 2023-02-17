@@ -10,7 +10,7 @@ The system is Dockerized into a number of components:
 * `work_generator` - Crawl through the regulations.gov results to find missing data
 * `work_server` - Server jobs to clients and save results
 * `dashboard` - Web-based user interface to observe progress 
-* `client1` through `client15` - Clients that download data from regulations.gov
+* `client1` through `client27` - Clients that download data from regulations.gov
 
 ## Docker Compose commands
 

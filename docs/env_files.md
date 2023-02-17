@@ -5,6 +5,10 @@ For clients to make calls to the Regulations.gov API, they each need a unique AP
 	WORK_SERVER_HOSTNAME=___________
 	WORK_SERVER_PORT=____
 	API_KEY=_______________
+	ID=____
+    PYTHONUNBUFFERED=TRUE
+
+The `PYTHONUNBUFFERED=TRUE` tells Python to output immediately so that we can view logs in realtime.
 
 ## How to Add New Clients
 To add a new client, 
