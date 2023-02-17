@@ -235,6 +235,7 @@ def check_received_result(workserver):
     client_id = request.args.get('client_id')
     success, *values = check_valid_request_client_id(workserver, client_id)
     if not success:
+        print('FAILURE: Invalid Client ID')
         return False, values[0], values[1]
     print('Work_server received job for client: ', client_id)
     return True, client_id
