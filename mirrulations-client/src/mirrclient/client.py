@@ -249,7 +249,6 @@ class Client:
         file_info = \
             response_json["data"][0]["attributes"]["fileFormats"]
         file_urls, file_types = get_urls_and_formats(file_info)
-
         return self.download_attachments(file_urls, file_types, job_id)
 
     def does_attachment_exists(self, attachment_json):
