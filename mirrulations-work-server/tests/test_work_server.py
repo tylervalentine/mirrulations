@@ -408,3 +408,10 @@ def test_get_newer_jobs_from_job_waiting_queue(mock_server):
                     'agency': 'EPA'
                     }
         assert response.get_json() == expected
+
+
+def test_output_job_link(capsys):
+
+    print("https://api.regulations.gov/v4/dockets/type-id")
+    captured = capsys.readouterr()
+    assert captured.out == "https://api.regulations.gov/v4/dockets/type-id\n"
