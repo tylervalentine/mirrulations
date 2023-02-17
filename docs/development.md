@@ -66,6 +66,7 @@ To get an api key, visit [here](https://open.gsa.gov/api/regulationsgov/).
   WORK_SERVER_HOSTNAME=work_server
   WORK_SERVER_PORT=8080
   API_KEY=YOUR_KEY
+  ID=CLIENT_NUMBER
   PYTHONUNBUFFERED=TRUE
   ```
   
