@@ -434,4 +434,4 @@ def test_output_job_link(capsys, mocker, mock_server):
     assert len(mock_server.data.added) == 1
     print(f'Job success for client: {client_id}, job: {job_id}')
     captured = capsys.readouterr()
-    assert captured.out == 'Work_server Job success for client: 1, job: 2\n'
+    assert captured.out == 'Work_server received job for client:  1\nWrote job dir, job_id: 2, to dir/dir\nJob success for client:1, job: 2\nJob success for client: 1, job: 2\n'
