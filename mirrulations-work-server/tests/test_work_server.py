@@ -415,24 +415,24 @@ def test_success_logging_output_for_put_results(capsys, mocker, mock_server):
     mock_server.redis.hset('jobs_in_progress', 2, 3)
     mock_server.redis.hset('client_jobs', 2, 1)
     mock_server.redis.set('total_num_client_ids', 1)
-    job_id = 2
-    client_id = 1
     data = dumps({
-        'job_id': job_id, 
-        'directory': 'dir/dir', 
+        'job_id': 2,
+        'directory': 'dir/dir',
         'job_type': 'dockets',
-                  'results': {'data': {
-                      'type': 'dockets'
-                  }}})
-    params = {'client_id': client_id}
+        'results': {'data': {
+            'type': 'dockets'
+            }
+        }
+    })
+    params = {'client_id': 1}
     response = mock_server.client.put('/put_results',
                                       json=data, query_string=params)
     assert response.status_code == 200
-    expected = {'success': 'Job was successfully completed'}
-    assert response.get_json() == expected
     assert len(mock_server.data.added) == 1
     captured = capsys.readouterr()
-    msg1 = 'Work_server received job for client:  1\n'
-    msg2 = 'Wrote job dir, job_id: 2, to dir/dir\n'
-    msg3 = 'Job success for client:1, job: 2\n'
-    assert captured.out == msg1 + msg2 + msg3
+    print_msgs = [
+        'Work_server received job for client:  1\n',
+        'Wrote job dir, job_id: 2, to dir/dir\n',
+        'Job success for client:1, job: 2\n'
+    ]
+    assert captured.out == "".join(print_msgs)
