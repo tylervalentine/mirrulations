@@ -86,9 +86,6 @@ def get_output_path(results):
     output_path += results["data"]["id"] + "/"
     output_path += results["data"]["id"] + ".json"
     print(f'Job output path: {output_path}')
-    print(output_path)
-    print(output_path)
-    print(output_path)
 
     return output_path
 
@@ -196,10 +193,6 @@ class Client:
             'reg_id': job['reg_id'],
             'agency': job['agency']
         }
-        print(job_result)
-        print(job_result)
-        print(job_result)
-
         print(f'Sending Job {job["job_id"]} to Work Server')
         # If the job is not an attachment job we need to add an output path
         if ('errors' not in job_result) and (job['job_type'] != 'attachments'):
@@ -277,11 +270,16 @@ class Client:
         -------
         True or False depending if there is an attachment available to download
         """
-        # Handles IndexError and NoneType
-        if not attachment_json['data'] \
-            or attachment_json['data'][0]['attributes']['fileFormats'] \
-                == "null":
+        # handle keyError
+        if "data" not in attachment_json:
             return False
+        # Handles IndexError
+        if attachment_json.get("data") == []:
+            return False
+        # Handles NoneType
+        if len(attachment_json['data']) >= 1:
+            if not attachment_json['data'][0]['attributes']['fileFormats']:
+                return False
         return True
 
     def download_attachments(self, urls, file_types, job_id):

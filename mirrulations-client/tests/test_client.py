@@ -412,7 +412,7 @@ def test_handles_nonetype_error(mock_requests):
             json={
                 "data": [{
                     "attributes": {
-                        "fileFormats": "null",
+                        "fileFormats": None,
                     }
                 }]
             },
