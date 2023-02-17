@@ -410,15 +410,17 @@ def test_get_newer_jobs_from_job_waiting_queue(mock_server):
         assert response.get_json() == expected
 
 
-def test_logging_output_for_put_results(capsys, mocker, mock_server):
-    
+def test_success_logging_output_for_put_results(capsys, mocker, mock_server):
     mock_write_results(mocker)
     mock_server.redis.hset('jobs_in_progress', 2, 3)
     mock_server.redis.hset('client_jobs', 2, 1)
     mock_server.redis.set('total_num_client_ids', 1)
     job_id = 2
     client_id = 1
-    data = dumps({'job_id': job_id, 'directory': 'dir/dir', 'job_type': 'dockets',
+    data = dumps({
+        'job_id': job_id, 
+        'directory': 'dir/dir', 
+        'job_type': 'dockets',
                   'results': {'data': {
                       'type': 'dockets'
                   }}})
@@ -429,6 +431,8 @@ def test_logging_output_for_put_results(capsys, mocker, mock_server):
     expected = {'success': 'Job was successfully completed'}
     assert response.get_json() == expected
     assert len(mock_server.data.added) == 1
-    print(f'Job success for client: {client_id}, job: {job_id}')
     captured = capsys.readouterr()
-    assert captured.out == 'Work_server received job for client:  1\nWrote job dir, job_id: 2, to dir/dir\nJob success for client:1, job: 2\nJob success for client: 1, job: 2\n'
+    msg1 = 'Work_server received job for client:  1\n'
+    msg2 = 'Wrote job dir, job_id: 2, to dir/dir\n'
+    msg3 = 'Job success for client:1, job: 2\n'
+    assert captured.out == msg1 + msg2 + msg3
