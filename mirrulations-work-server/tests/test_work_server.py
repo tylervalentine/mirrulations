@@ -410,8 +410,28 @@ def test_get_newer_jobs_from_job_waiting_queue(mock_server):
         assert response.get_json() == expected
 
 
-def test_output_job_link(capsys):
-
+def test_output_job_link(capsys, mocker, mock_server):
+    
     print("https://api.regulations.gov/v4/dockets/type-id")
     captured = capsys.readouterr()
     assert captured.out == "https://api.regulations.gov/v4/dockets/type-id\n"
+    mock_write_results(mocker)
+    mock_server.redis.hset('jobs_in_progress', 2, 3)
+    mock_server.redis.hset('client_jobs', 2, 1)
+    mock_server.redis.set('total_num_client_ids', 1)
+    job_id = 2
+    client_id = 1
+    data = dumps({'job_id': job_id, 'directory': 'dir/dir', 'job_type': 'dockets',
+                  'results': {'data': {
+                      'type': 'dockets'
+                  }}})
+    params = {'client_id': client_id}
+    response = mock_server.client.put('/put_results',
+                                      json=data, query_string=params)
+    assert response.status_code == 200
+    expected = {'success': 'Job was successfully completed'}
+    assert response.get_json() == expected
+    assert len(mock_server.data.added) == 1
+    print(f'Job success for client: {client_id}, job: {job_id}')
+    captured = capsys.readouterr()
+    assert captured.out == 'Work_server Job success for client: 1, job: 2\n'
