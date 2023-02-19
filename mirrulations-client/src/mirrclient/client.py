@@ -260,15 +260,18 @@ class Client:
         -------
         True or False depending if there is an attachment available to download
         """
-        # handle keyError
-        if "data" not in attachment_json:
+        # handle KeyError
+        if attachment_json.get('data') in (None, []):
             return False
+        data = attachment_json.get('data')
         # Handles IndexError
-        if attachment_json.get("data") == []:
-            return False
-        # Handles NoneType
-        if len(attachment_json['data']) >= 1:
-            if not attachment_json['data'][0]['attributes']['fileFormats']:
+        if len(data) >= 1:
+            # Check if attributes and fileFormats exists
+            if ("attributes" not in data[0]) or \
+                    ("fileFormats" not in data[0].get('attributes')):
+                return False
+            # handles NoneType in the fileFormats when null
+            if not data[0]['attributes']['fileFormats']:
                 return False
         return True
 
