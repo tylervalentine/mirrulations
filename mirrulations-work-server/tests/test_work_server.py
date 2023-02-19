@@ -48,15 +48,6 @@ def test_get_job_without_client_id_is_unauthorized(mock_server):
     assert response.get_json() == expected
 
 
-def test_get_job_with_invalid_client_id_is_unauthorized(mock_server):
-    mock_server.redis.incr('total_num_client_ids')
-    params = {'client_id': 2}
-    response = mock_server.client.get('/get_job', query_string=params)
-    assert response.status_code == 401
-    expected = {'error': 'Invalid client ID'}
-    assert response.get_json() == expected
-
-
 def test_get_job_has_no_available_job(mock_server):
     mock_server.redis.incr('total_num_client_ids')
     params = {'client_id': 1}
@@ -262,35 +253,6 @@ def test_client_id_not_digit(mock_server):
     assert response.get_json() == {'error': 'Invalid client ID'}
 
 
-def test_put_results_with_invalid_client_id(mock_server):
-    mock_server.redis.incr('total_num_client_ids')
-    params = {'client_id': 2}
-    data = dumps({'job_id': 2, 'directory': 'dir/dir',
-                  'results': {'data': {
-                      'type': 'dockets'
-                  }}})
-    response = mock_server.client.put('/put_results',
-                                      json=data, query_string=params)
-    assert response.status_code == 401
-    expected = {'error': 'Invalid client ID'}
-    assert response.get_json() == expected
-
-
-def test_put_results_attachment_with_invalid_client_id(mock_server):
-    mock_server.redis.incr('total_num_client_ids')
-    params = {'client_id': 2}
-    with open('mirrulations-core/tests/test_files/test.pdf', 'rb') as file:
-        data = dumps({'job_id': 2,
-                      'job_type': 'attachments',
-                      'results': {'1234_0': base64.b64encode(
-                        file.read()).decode('ascii')}})
-        response = mock_server.client.put('/put_results',
-                                          json=data, query_string=params)
-    assert response.status_code == 401
-    expected = {'error': 'Invalid client ID'}
-    assert response.get_json() == expected
-
-
 def test_put_results_returns_500_error_from_regulations(mock_server, mocker):
 
     mock_write_results(mocker)
@@ -351,31 +313,10 @@ def test_server_handles_client_error_to_access_api_endpoint(mock_server):
     assert len(invalid_jobs) == 1
 
 
-def test_total_num_client_ids_is_increased_on_get_client_id_call(mock_server):
-    previous_number_of_ids = mock_server.redis.get('total_num_client_ids')
-    assert previous_number_of_ids is None
-    mock_server.client.get('/get_client_id')
-    assert int(mock_server.redis.get('total_num_client_ids')) == 1
-
-
-def test_get_client_id_sends_correct_id(mock_server):
-    mock_server.redis.set('total_num_client_ids', 1)
-    assert int(mock_server.redis.get('total_num_client_ids')) == 1
-    response = mock_server.client.get('/get_client_id')
-    assert response.json['client_id'] == 2
-
-
 def test_database_returns_error_when_database_does_not_exist(mock_server):
     params = {'client_id': 1}
     mock_server.redis_server.connected = False
     response = mock_server.client.get('/get_job', query_string=params)
-    assert response.json['error'] == 'Cannot connect to the database'
-    assert response.status_code == 500
-
-
-def test_get_client_id_returns_tuple_when_no_success(mock_server):
-    mock_server.redis_server.connected = False
-    response = mock_server.client.get('/get_client_id')
     assert response.json['error'] == 'Cannot connect to the database'
     assert response.status_code == 500
 
