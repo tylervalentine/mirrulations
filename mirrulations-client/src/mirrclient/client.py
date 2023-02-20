@@ -100,7 +100,8 @@ def is_environment_variables_present():
     """
     return (os.getenv('WORK_SERVER_HOSTNAME') is not None
             and os.getenv('WORK_SERVER_PORT') is not None
-            and os.getenv('API_KEY') is not None)
+            and os.getenv('API_KEY') is not None
+            and os.getenv('ID') is not None)
 
 
 class Client:
@@ -125,22 +126,11 @@ class Client:
 
     def __init__(self):
         self.api_key = os.getenv('API_KEY')
-        self.client_id = -1
+        self.client_id = os.getenv('ID')
 
         hostname = os.getenv('WORK_SERVER_HOSTNAME')
         port = os.getenv('WORK_SERVER_PORT')
         self.url = f'http://{hostname}:{port}'
-
-    def get_id(self):
-        """
-        Retrieves an id for the Client from the workserver.
-        That value is saved to client_id then written to
-        a client.cfg file.
-        """
-        response = requests.get(f'{self.url}/get_client_id', timeout=10)
-        self.client_id = int(response.json()['client_id'])
-        with open('client.cfg', 'w', encoding='utf8') as file:
-            file.write(str(self.client_id))
 
     def get_job(self):
         """
@@ -165,6 +155,7 @@ class Client:
         job_type = split_url[-2][:-1]  # Removes plural from job type
         type_id = split_url[-1]
         print(f'Regulations.gov link: {link}{job_type}/{type_id}')
+        print(f'API URL: {job["url"]}')
         return job
 
     def send_job(self, job, job_result):
@@ -214,7 +205,7 @@ class Client:
         dict
             json results of the performed job
         """
-        print(f'Performing job: {job_url}')
+        print('Performing job')
         return requests.get(job_url + f'?api_key={self.api_key}',
                             timeout=10).json()
 
@@ -251,16 +242,22 @@ class Client:
 
         # Get attachments
         try:
-            file_urls, file_types = \
-                get_urls_and_formats(
-                    response_from_related["data"][0]
-                    ["attributes"]["fileFormats"])
-
+            file_info = \
+                response_from_related["data"][0]["attributes"]["fileFormats"]
+            if not file_info:
+                raise TypeError
+            file_urls, file_types = get_urls_and_formats(file_info)
         except IndexError:
             # if related attachments link is an empty data =[] json
             print(f'FAILURE: Empty attachment list from {non_api_url}')
             return {}
-        print(f'Performing attachment job {non_api_url}')
+        except KeyError as error:
+            print(f"FAILURE: {error} from {non_api_url}")
+            return {}
+        except TypeError as error:
+            print(f"FAILURE: {error} from {non_api_url}")
+            return {}
+        print(f'Performing attachment job {job_id}')
         return self.download_attachments(file_urls, file_types, job_id)
 
     def download_attachments(self, urls, file_types, job_id):
@@ -313,9 +310,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     client = Client()
-    client.get_id()
 
-    print('Your ID is: ', client.client_id)
     while True:
         try:
             client.job_operation()
