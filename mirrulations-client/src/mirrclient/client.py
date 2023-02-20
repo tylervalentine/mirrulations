@@ -86,6 +86,7 @@ def get_output_path(results):
     output_path += results["data"]["id"] + "/"
     output_path += results["data"]["id"] + ".json"
     print(f'Job output path: {output_path}')
+
     return output_path
 
 
@@ -236,29 +237,45 @@ class Client:
         -------
         a dict of encoded files
         """
-        non_api_url = url
-        url = url + f'?api_key={self.api_key}'
-        response_from_related = requests.get(url, timeout=10).json()
+        response_json = requests.get(
+            f"{url}?api_key={self.api_key}",
+            timeout=10
+        ).json()
 
-        # Get attachments
-        try:
-            file_info = \
-                response_from_related["data"][0]["attributes"]["fileFormats"]
-            if not file_info:
-                raise TypeError
-            file_urls, file_types = get_urls_and_formats(file_info)
-        except IndexError:
-            # if related attachments link is an empty data =[] json
-            print(f'FAILURE: Empty attachment list from {non_api_url}')
+        if not self.does_attachment_exists(response_json):
+            print(f"No attachments to download from {url}")
             return {}
-        except KeyError as error:
-            print(f"FAILURE: {error} from {non_api_url}")
-            return {}
-        except TypeError as error:
-            print(f"FAILURE: {error} from {non_api_url}")
-            return {}
-        print(f'Performing attachment job {job_id}')
+
+        # Get Attachments
+        print(f"SUCCESS: Performing attachment job {job_id}")
+        file_info = \
+            response_json["data"][0]["attributes"]["fileFormats"]
+        file_urls, file_types = get_urls_and_formats(file_info)
         return self.download_attachments(file_urls, file_types, job_id)
+
+    def does_attachment_exists(self, attachment_json):
+        """
+        Validates whether a json for an attachment is valid to continue
+        download process. Invalid JSON means no attachment(s) available
+
+        RETURNS
+        -------
+        True or False depending if there is an attachment available to download
+        """
+        # handle KeyError
+        if attachment_json.get('data') in (None, []):
+            return False
+        data = attachment_json.get('data')
+        # Handles IndexError
+        if len(data) >= 1:
+            # Check if attributes and fileFormats exists
+            if ("attributes" not in data[0]) or \
+                    ("fileFormats" not in data[0].get('attributes')):
+                return False
+            # handles NoneType in the fileFormats when null
+            if not data[0]['attributes']['fileFormats']:
+                return False
+        return True
 
     def download_attachments(self, urls, file_types, job_id):
         """
