@@ -378,32 +378,30 @@ def test_success_logging_output_for_put_results(capsys, mocker, mock_server):
     ]
     assert captured.out == "".join(print_msgs)
 
-def test_success_logging_output_for_put_attachment_results(capsys, mocker, mock_server):
+
+def test_success_logging_for_attachment_results(capsys, mocker, mock_server):
     mock_write_results(mocker)
     mock_server.redis.hset('jobs_in_progress', 2, 3)
     mock_server.redis.hset('client_jobs', 2, 1)
     mock_server.redis.set('total_num_client_ids', 1)
-    data = dumps({'job_id': 2,
-                  'job_type': 'attachments',
-                  'results': {},
-                  'reg_id': 'AAAA',
-                  'agency': 'EPA'})
-    #job = {'job_id': i,
-     #   'url': 'url',
-      #  'job_type': 'docket',
-       # 'reg_id': 3,
-        # 'agency': 'EPA'
-        #}
+    data = dumps({
+        'job_id': 2,
+        'job_type': 'attachments',
+        'results': {},
+        'reg_id': 3,
+        'agency': 4
+    })
     params = {'client_id': 1}
     response = mock_server.client.put('/put_results',
                                       json=data, query_string=params)
     assert response.status_code == 200
     assert len(mock_server.data.added) == 1
     captured = capsys.readouterr()
-    print_msgs = [
+    print_data = [
+        'Work_server received job for client:  1\n'
         'Attachment Job Being Saved\n',
-        f'agency {str(data["agency"])}\n',
-        f'reg_id {str(data["reg_id"])}\n',
-        f'/data/{str(data["agency"])}/{data["reg_id"]}\n'
+        'agency 4\n',
+        'reg_id 3\n',
+        '/data/4/3\n'
     ]
-    assert captured.out == "".join(print_msgs)
+    assert captured.out == "".join(print_data)
