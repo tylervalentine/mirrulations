@@ -68,7 +68,7 @@ def test_get_docket_path_EPA(generator):
     expected_path = "data/EPA/2011/EPA-HQ-OPP-2011-0939/text-EPA-HQ-OPP-2011-0939/dockets/"
     assert expected_path == generator.get_docket_path(job)
 
-def test_get_docket_path_EPA(generatorgit):
+def test_get_docket_path_EPA(generator):
     job = {
         "data": {
             "id": "EPA-R08-OAR-2005-UT-0003",
