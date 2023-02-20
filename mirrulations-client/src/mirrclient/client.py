@@ -239,7 +239,7 @@ class Client:
         non_api_url = url
         url = url + f'?api_key={self.api_key}'
         response_from_related = requests.get(url, timeout=10).json()
-
+        print(f'Performing attachment job {url}')
         # Get attachments
         try:
             file_info = \
@@ -257,7 +257,6 @@ class Client:
         except TypeError as error:
             print(f"FAILURE: {error} from {non_api_url}")
             return {}
-        print(f'Performing attachment job {job_id}')
         return self.download_attachments(file_urls, file_types, job_id)
 
     def download_attachments(self, urls, file_types, job_id):
@@ -301,6 +300,7 @@ class Client:
         else:
             result = self.perform_job(job['url'])
         self.send_job(job, result)
+        print(f'SUCCESS: {job["url"]} complete')
 
 
 if __name__ == '__main__':
