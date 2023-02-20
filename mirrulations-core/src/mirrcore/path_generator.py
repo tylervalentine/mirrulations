@@ -30,7 +30,7 @@ class PathGenerator:
         docket_id = "-".join([agency, year, docket_num])
         type_folder = "text-" + docket_id
 
-        return f'data/{agency}/{year}/{docket_id}/{type_folder}/documents'
+        return f'data/{agency}/{year}/{docket_id}/{type_folder}/documents/'
 
 
     def get_comment_text_path(self, job):
@@ -40,7 +40,7 @@ class PathGenerator:
         docket_id = "-".join([agency, year, docket_num])
         type_folder = "text-" + docket_id
 
-        return f'data/{agency}/{year}/{docket_id}/{type_folder}/comments'
+        return f'data/{agency}/{year}/{docket_id}/{type_folder}/comments/'
 
     def get_path(self, job):
         if job['job_type'] == 'dockets':
