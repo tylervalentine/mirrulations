@@ -59,39 +59,7 @@ Because a local instance of the system should only run for a short period of tim
 
 To get an api key, visit [here](https://open.gsa.gov/api/regulationsgov/). 
 
-* Create a folder named `env_files`.  
-* In `env_files`, create `client1.env`, `client2.env`, ... up to `client27.env`.  Each file should have the following format:
-
-  ```
-  WORK_SERVER_HOSTNAME=work_server
-  WORK_SERVER_PORT=8080
-  API_KEY=YOUR_KEY
-  ID=CLIENT_NUMBER
-  PYTHONUNBUFFERED=TRUE
-  ```
-  
-  The `PYTHONUNBUFFERED=TRUE` line tells Python to execute `print` statements without buffering (so that we can view logs in realtime).
-
-* In `env_files`, create `work_gen.env` containing: 
-  
-  ```
-  API_KEY=YOUR_KEY
-  PYTHONUNBUFFERED=TRUE
-  ```
-  
-* In `env_files`, create `dashboard.env` containing: 
-  
-  ```
-  MONGO_HOSTNAME=mongo
-  REDIS_HOSTNAME=redis
-  PYTHONUNBUFFERED=TRUE
-  ```
-
-* All data is stored in subfolders of `~/data`.  You must create this folder before launching:
-
-  ```
-  mkdir ~/data
-  ```
+To make all neccessary files for the clients, dashboard, and the work generator, run `python dev_setup.py`.
 
 ## Launch Locally
 
