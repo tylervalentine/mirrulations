@@ -7,8 +7,8 @@ def test_get_docket_path():
             "type": "dockets"
         }  
     } 
-    actual_path = "data/VETS/2005/VETS-2005-0001/text-VETS-2005-0001/docket/"
-    assert actual_path == PathGenerator().get_docket_path(job)
+    expected_path = "data/VETS/2005/VETS-2005-0001/text-VETS-2005-0001/docket/"
+    assert expected_path == PathGenerator().get_docket_path(job)
 
 
 def test_get_docket_path_from_FRDOC_docket():
@@ -39,8 +39,8 @@ def test_get_document_path():
             "type": "documents"
         }  
     } 
-    actual_path = "data/USTR/2015/USTR-2015-0010/text-USTR-2015-0010/documents/"
-    assert actual_path == PathGenerator().get_document_text_path(job)
+    expected_path = "data/USTR/2015/USTR-2015-0010/text-USTR-2015-0010/documents/"
+    assert expected_path == PathGenerator().get_document_text_path(job)
 
 def test_get_comment_path():
     job = {
@@ -49,6 +49,6 @@ def test_get_comment_path():
             "type": "comments"
         }  
     } 
-    actual_path = "data/USTR/2015/USTR-2015-0010/text-USTR-2015-0010/comments/"
-    assert actual_path == PathGenerator().get_comment_text_path(job)
+    expected_path = "data/USTR/2015/USTR-2015-0010/text-USTR-2015-0010/comments/"
+    assert expected_path == PathGenerator().get_comment_text_path(job)
 
