@@ -13,9 +13,7 @@ The `PYTHONUNBUFFERED=TRUE` tells Python to output immediately so that we can vi
 ## How to Add New Clients
 To add a new client, 
 
-1. create a new client.env file in the `env_files` directory with the next number for example: `client18.env` be sure to use the same variable names as described above or else the client will error.
-
-2. In the `docker-compose.yaml` file, add the client information in this format at the end of the file to create a new Docker container (client18 is used as an example, in any case use the next highest unused number).
+1. In the `docker-compose.yaml` file, add the client information in this format at the end of the file to create a new Docker container (client18 is used as an example, in any case use the next highest unused number).
 
 		client18:
 		    build:
@@ -23,6 +21,8 @@ To add a new client,
 		      dockerfile: mirrulations-client/Dockerfile
 		    env_file: env_files/client18.env
 		    restart: always
+
+2. Run `python dev_setup.py` to add the new client into `env_files` folder.
 
 ## Error Case
 If a client does not have a corresponding env file the program prints `'need environment variables'` and then closes.
