@@ -52,3 +52,23 @@ def test_get_comment_path():
     expected_path = "data/USTR/2015/USTR-2015-0010/text-USTR-2015-0010/comments/"
     assert expected_path == PathGenerator().get_comment_text_path(job)
 
+
+def test_get_docket_path_EPA():
+    job = {
+        "data": {
+            "id": "EPA-HQ-OPP-2011-0939",
+            "type": "dockets"
+        }  
+    } 
+    expected_path = "data/EPA/2011/EPA-HQ-OPP-2011-0939/text-EPA-HQ-OPP-2011-0939/dockets/"
+    assert expected_path == PathGenerator().get_docket_path(job)
+
+def test_get_docket_path_EPA():
+    job = {
+        "data": {
+            "id": "EPA-R08-OAR-2005-UT-0003",
+            "type": "dockets"
+        }  
+    } 
+    expected_path = "data/EPA/2011/EPA-R08-OAR-2005-UT-0003/text-EPA-R08-OAR-2005-UT-0003/dockets/"
+    assert expected_path == PathGenerator().get_docket_path(job)
