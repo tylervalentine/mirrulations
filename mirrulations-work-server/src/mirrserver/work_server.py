@@ -267,6 +267,7 @@ def put_attachment_results(workserver, data):
         workserver.attachment_saver.save(
             data, f"/data/{data['agency']}/{data['reg_id']}")
     workserver.data.add_attachment(data)
+    print(f"/data/{data['agency']}/{data['reg_id']}")
     return (True,)
 
 
