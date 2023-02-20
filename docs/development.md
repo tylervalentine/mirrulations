@@ -59,7 +59,7 @@ Because a local instance of the system should only run for a short period of tim
 
 To get an api key, visit [here](https://open.gsa.gov/api/regulationsgov/). 
 
-To make all neccessary files for the clients, dashboard, and the work generator, run `dev_setup.py`.
+To make all neccessary files for the clients, dashboard, and the work generator, run `python dev_setup.py`.
 
 ## Launch Locally
 

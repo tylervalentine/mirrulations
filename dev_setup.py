@@ -4,7 +4,7 @@ import shutil
 
 def create_env_folder():
     parent_dir = os.path.realpath(os.path.expanduser("."))
-    dir_name = "env_files/" # Change name back to original
+    dir_name = "env_files/"
     env_path = os.path.join(parent_dir, dir_name)
     if(os.path.exists(env_path)):
         shutil.rmtree(env_path)

@@ -22,7 +22,7 @@ To add a new client,
 		    env_file: env_files/client18.env
 		    restart: always
 
-2. Run dev_setup.py to add the new client into `env_files` folder.
+2. Run `python dev_setup.py` to add the new client into `env_files` folder.
 
 ## Error Case
 If a client does not have a corresponding env file the program prints `'need environment variables'` and then closes.
