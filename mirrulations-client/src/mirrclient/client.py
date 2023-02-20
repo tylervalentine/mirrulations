@@ -237,8 +237,10 @@ class Client:
         -------
         a dict of encoded files
         """
-        url = url + f'?api_key={self.api_key}'
-        response_json = requests.get(url, timeout=10).json()
+        response_json = requests.get(
+            f"{url}?api_key={self.api_key}",
+            timeout=10
+        ).json()
 
         if not self.does_attachment_exists(response_json):
             print(f"No attachments to download from {url}")
