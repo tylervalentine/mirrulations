@@ -230,7 +230,7 @@ def put_results(workserver, data):
     print(f"Wrote job {data['directory'].split('/')[-1]},"
           f" job_id: {job_id}, to {data['directory']}")
     workserver.data.add(data['results'])
-    print(f'Job success for client:{client_id}, job: {job_id}')
+    print(f'SUCCESS: client:{client_id}, job: {job_id}')
     return (True,)
 
 

@@ -374,6 +374,6 @@ def test_success_logging_output_for_put_results(capsys, mocker, mock_server):
     print_msgs = [
         'Work_server received job for client:  1\n',
         'Wrote job dir, job_id: 2, to dir/dir\n',
-        'Job success for client:1, job: 2\n'
+        'SUCCESS: client:1, job: 2\n'
     ]
     assert captured.out == "".join(print_msgs)
