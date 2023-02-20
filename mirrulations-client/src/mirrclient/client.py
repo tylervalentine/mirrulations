@@ -318,6 +318,7 @@ class Client:
         else:
             result = self.perform_job(job['url'])
         self.send_job(job, result)
+        print(f'SUCCESS: {job["url"]} complete')
 
 
 if __name__ == '__main__':

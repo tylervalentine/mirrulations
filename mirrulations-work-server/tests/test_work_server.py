@@ -349,3 +349,59 @@ def test_get_newer_jobs_from_job_waiting_queue(mock_server):
                     'agency': 'EPA'
                     }
         assert response.get_json() == expected
+
+
+def test_success_logging_output_for_put_results(capsys, mocker, mock_server):
+    mock_write_results(mocker)
+    mock_server.redis.hset('jobs_in_progress', 2, 3)
+    mock_server.redis.hset('client_jobs', 2, 1)
+    mock_server.redis.set('total_num_client_ids', 1)
+    data = dumps({
+        'job_id': 2,
+        'directory': 'dir/dir',
+        'job_type': 'dockets',
+        'results': {'data': {
+            'type': 'dockets'
+            }
+        }
+    })
+    params = {'client_id': 1}
+    response = mock_server.client.put('/put_results',
+                                      json=data, query_string=params)
+    assert response.status_code == 200
+    assert len(mock_server.data.added) == 1
+    captured = capsys.readouterr()
+    print_msgs = [
+        'Work_server received job for client:  1\n',
+        'Wrote job dir, job_id: 2, to dir/dir\n',
+        'SUCCESS: client:1, job: 2\n'
+    ]
+    assert captured.out == "".join(print_msgs)
+
+
+def test_success_logging_for_attachment_results(capsys, mocker, mock_server):
+    mock_write_results(mocker)
+    mock_server.redis.hset('jobs_in_progress', 2, 3)
+    mock_server.redis.hset('client_jobs', 2, 1)
+    mock_server.redis.set('total_num_client_ids', 1)
+    data = dumps({
+        'job_id': 2,
+        'job_type': 'attachments',
+        'results': {},
+        'reg_id': 3,
+        'agency': 4
+    })
+    params = {'client_id': 1}
+    response = mock_server.client.put('/put_results',
+                                      json=data, query_string=params)
+    assert response.status_code == 200
+    assert len(mock_server.data.added) == 1
+    captured = capsys.readouterr()
+    print_data = [
+        'Work_server received job for client:  1\n'
+        'Attachment Job Being Saved\n',
+        'agency 4\n',
+        'reg_id 3\n',
+        '/data/4/3\n'
+    ]
+    assert captured.out == "".join(print_data)

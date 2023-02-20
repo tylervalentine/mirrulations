@@ -230,7 +230,7 @@ def put_results(workserver, data):
     print(f"Wrote job {data['directory'].split('/')[-1]},"
           f" job_id: {job_id}, to {data['directory']}")
     workserver.data.add(data['results'])
-    print(f'Job success for client:{client_id}, job: {job_id}')
+    print(f'SUCCESS: client:{client_id}, job: {job_id}')
     return (True,)
 
 
@@ -267,6 +267,7 @@ def put_attachment_results(workserver, data):
         workserver.attachment_saver.save(
             data, f"/data/{data['agency']}/{data['reg_id']}")
     workserver.data.add_attachment(data)
+    print(f"/data/{data['agency']}/{data['reg_id']}")
     return (True,)
 
 
