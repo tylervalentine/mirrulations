@@ -1,49 +1,50 @@
-import os
+
+'''
+Returns the agency, docket id, and item id from a loaded json object.
+'''
+def extract_data(json_data, is_docket_json=False):
+    agency_id = json_data['data']['attributes']['agencyId']
+    if is_docket_json:
+        docket_id = None
+    else:
+        docket_id = json_data['data']['attributes']['docketId']
+    item_id = json_data['data']['id']
+
+    if is_docket_json:
+        # in this case item_id is the docket id
+        return agency_id, item_id, None
+    else:
+        return agency_id, docket_id, item_id
 
 
 class PathGenerator:
+    def __init__(self, path):
+        self._path = path
 
-    def __init__(self):
-        self.path = "data"
+    def get_docket_path(self, json_data): 
+        agency, docket_id, _ = extract_data(json_data, is_docket_json=True)
+        return self._path + f'/data/{agency}/text-{docket_id}/docket/{docket_id}.json'
 
-    def get_docket_path(self, job): 
-        job = job['data']
-        job_id = job['id']
-        if "FRDOC" in job_id:
-            agency, FRDOC, docket_num = job_id.split("_")
-            docket_id = '_'.join([agency, FRDOC, docket_num])
-            return f'data/{agency}/FRDOCS/{docket_id}/text-{docket_id}/docket/'
+    def get_document_path(self, json_data):
+        agency, docket_id, item_id = extract_data(json_data)
+        return self._path + f'/data/{agency}/text-{docket_id}/documents/{item_id}.json'
 
-        agency, year, docket_id = job_id.split('-')
-        return f'data/{agency}/{year}/{job_id}/text-{job_id}/docket/'
+    def get_comment_path(self, json_data):
+        agency, docket_id, item_id = extract_data(json_data)
+        return self._path + f'/data/{agency}/text-{docket_id}/comments/{item_id}.json'
 
+    def get_document_extracted_text_path(self, json_data, file_name, extraction_method):
+        agency, docket_id, item_id = extract_data(json_data)
+        return self._path + f'/data/{agency}/text-{docket_id}/documents_extracted_text/{extraction_method}/{file_name}'
 
-    def get_document_text_path(self, job):
-        job = job['data']
-        job_id = job['id']
-        if "FRDOC" in job_id:
-            agency, FRDOC, rest_of_id = job_id.split("_")
-            docket_id, document_id = rest_of_id.split("-")
-            docket_id = '_'.join([agency, FRDOC, docket_id])
-            return f'data/{agency}/FRDOCS/{docket_id}/text-{docket_id}/documents/'
-        agency, year, docket_num, document_id = job_id.split('-')
-        docket_id = "-".join([agency, year, docket_num])
-        type_folder = "text-" + docket_id
+    def get_comment_extracted_text_path(self, json_data, file_name, extraction_method):
+        agency, docket_id, item_id = extract_data(json_data)
+        return self._path + f'/data/{agency}/text-{docket_id}/comments_extracted_text/{extraction_method}/{file_name}'
 
-        return f'data/{agency}/{year}/{docket_id}/{type_folder}/documents/'
+    def get_document_attachment_path(self, json_data, file_name):
+        agency, docket_id, item_id = extract_data(json_data)
+        return self._path + f'/data/{agency}/binary-{docket_id}/documents_attachments/{file_name}'
 
-
-    def get_comment_text_path(self, job):
-        job = job['data']
-        job_id = job['id']
-        agency, year, docket_num, comment_id = job_id.split('-')
-        docket_id = "-".join([agency, year, docket_num])
-        type_folder = "text-" + docket_id
-
-        return f'data/{agency}/{year}/{docket_id}/{type_folder}/comments/'
-
-    def get_path(self, job):
-        if job['job_type'] == 'dockets':
-            return get_docket_path(job)
-        if job['job_type'] == "documents":
-            return get_document_path(job)
+    def get_comment_attachment_path(self, json_data, file_name):
+        agency, docket_id, item_id = extract_data(json_data)
+        return self._path + f'/data/{agency}/binary-{docket_id}/comments_attachments/{file_name}'
