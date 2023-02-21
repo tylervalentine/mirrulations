@@ -25,43 +25,44 @@ def test_get_docket_path(generator):
 
 def test_get_docket_path_from_FRDOC_docket(generator):
     json = generate_json(id="VETS_FRDOC_0001", type="dockets", agencyId = "VETS")
-    expected_path = "data/VETS/FRDOCS/VETS_FRDOC_0001/text-VETS_FRDOC_0001/dockets/VETS_FRDOC_0001.json"
+    expected_path = "data/VETS/VETS_FRDOC_0001/text-VETS_FRDOC_0001/dockets/VETS_FRDOC_0001.json"
     assert expected_path == generator.get_path(json)
 
 def test_get_document_path(generator):
     json = generate_json(id = "VETS-2005-0001-0001", type="documents", agencyId="VETS")
     expected_path = "data/VETS/VETS-2005-0001/text-VETS-2005-0001/documents/VETS-2005-0001-0001.json"
-    assert expected_path == generator.get_document_text_path(json)
+    assert expected_path == generator.get_path(json)
 
 def test_get_document_path_from_FRDOC_document(generator):
     json = generate_json(id="VETS_FRDOC_0001-0001", type="documents", agencyId = "VETS")
-    expected_path = "data/VETS/FRDOCS/VETS_FRDOC_0001/text-VETS_FRDOC_0001/documents/VETS_FRDOC_0001-0001.json"
-    assert expected_path == generator.get_document_text_path(json)
+    expected_path = "data/VETS/VETS_FRDOC_0001/text-VETS_FRDOC_0001/documents/VETS_FRDOC_0001-0001.json"
+    assert expected_path == generator.get_path(json)
 
 def test_get_comment_path(generator):
     json = generate_json(id = "USTR-2015-0010-0002", type = "comments", agencyId="USTR")
     expected_path = "data/USTR/USTR-2015-0010/text-USTR-2015-0010/comments/USTR-2015-0010-0002.json"
-    assert expected_path == generator.get_comment_text_path(json)
+    assert expected_path == generator.get_path(json)
 
-# def test_get_docket_path_EPA(generator):
-#     job = {
-#         "data": {
-#             "id": "EPA-HQ-OPP-2011-0939",
-#             "type": "dockets"
-#         }  
-#     } 
-#     expected_path = "data/EPA/2011/EPA-HQ-OPP-2011-0939/text-EPA-HQ-OPP-2011-0939/dockets/"
-#     assert expected_path == generator.get_docket_path(job)
+def test_get_docket_path_EPA_with_unconvential_agencyId(generator):
+    json = generate_json(id = "EPA-HQ-OPP-2011-0939", type="dockets", agencyId="EPA")
+    expected_path = "data/EPA/EPA-HQ-OPP-2011-0939/text-EPA-HQ-OPP-2011-0939/dockets/EPA-HQ-OPP-2011-0939.json"
+    assert expected_path == generator.get_path(json)
 
-# def test_get_docket_path_EPA(generator):
-#     job = {
-#         "data": {
-#             "id": "EPA-R08-OAR-2005-UT-0003",
-#             "type": "dockets"
-#         }  
-#     } 
-#     expected_path = "data/EPA/2011/EPA-R08-OAR-2005-UT-0003/text-EPA-R08-OAR-2005-UT-0003/dockets/"
-#     assert expected_path == generator.get_docket_path(job)
+def test_get_document_path_EPA_with_unconvential_agencyId(generator):
+    json = generate_json(id = "EPA-HQ-OPP-2011-0939-0001", type="documents", agencyId="EPA")
+    expected_path = "data/EPA/EPA-HQ-OPP-2011-0939/text-EPA-HQ-OPP-2011-0939/documents/EPA-HQ-OPP-2011-0939-0001.json"
+    assert expected_path == generator.get_path(json)
+
+def test_get_docket_path_with_numbers_in_agencyId(generator):
+    json = generate_json(id = "EPA-R08-OAR-2005-UT-0003", type="dockets", agencyId="EPA")
+    expected_path = "data/EPA/EPA-R08-OAR-2005-UT-0003/text-EPA-R08-OAR-2005-UT-0003/dockets/EPA-R08-OAR-2005-UT-0003.json"
+    assert expected_path == generator.get_path(json)
+
+
+def test_get_comment_path(generator):
+    json = generate_json(id = "USTR-2015-0010-0002", type = "comments", agencyId="USTR")
+    expected_path = "data/USTR/USTR-2015-0010/text-USTR-2015-0010/comments/USTR-2015-0010-0002.json"
+    assert expected_path == generator.get_path(json)
 
 def test_get_docket_path_with_missing_type_key(generator):
     json = {"data":{
