@@ -181,7 +181,7 @@ def test_client_attempts_to_put_job_that_does_not_exist(mock_server):
 
 def test_put_results_returns_correct_job(mock_server, mocker):
 
-    mock_write_results(mocker)
+    # mock_write_results(mocker)
     mock_server.redis.hset('jobs_in_progress', 2, 3)
     mock_server.redis.hset('client_jobs', 2, 1)
     mock_server.redis.set('total_num_client_ids', 1)
@@ -200,7 +200,7 @@ def test_put_results_returns_correct_job(mock_server, mocker):
 
 def test_put_results_returns_correct_attachment_job(mock_server, mocker):
 
-    mock_write_results(mocker)
+    # mock_write_results(mocker)
     mock_server.redis.hset('jobs_in_progress', 2, 3)
     mock_server.redis.hset('client_jobs', 2, 1)
     mock_server.redis.set('total_num_client_ids', 1)
@@ -223,7 +223,7 @@ def test_put_results_returns_correct_attachment_job(mock_server, mocker):
 
 def test_put_results_correct_attachment_job_no_files(mock_server, mocker):
 
-    mock_write_results(mocker)
+    # mock_write_results(mocker)
     mock_server.redis.hset('jobs_in_progress', 2, 3)
     mock_server.redis.hset('client_jobs', 2, 1)
     mock_server.redis.set('total_num_client_ids', 1)
@@ -255,7 +255,7 @@ def test_client_id_not_digit(mock_server):
 
 def test_put_results_returns_500_error_from_regulations(mock_server, mocker):
 
-    mock_write_results(mocker)
+    # mock_write_results(mocker)
     mock_server.redis.hset('jobs_in_progress', 2, 3)
     mock_server.redis.hset('client_jobs', 2, 1)
     mock_server.redis.set('total_num_client_ids', 1)
@@ -280,7 +280,7 @@ def test_put_results_returns_500_error_from_regulations(mock_server, mocker):
 
 def test_put_results_returns_404_error_from_regulations(mock_server, mocker):
 
-    mock_write_results(mocker)
+    # mock_write_results(mocker)
     mock_server.redis.hset('jobs_in_progress', 2, 3)
     mock_server.redis.hset('client_jobs', 2, 1)
     mock_server.redis.set('total_num_client_ids', 1)
@@ -321,11 +321,11 @@ def test_database_returns_error_when_database_does_not_exist(mock_server):
     assert response.status_code == 500
 
 
-def mock_write_results(mocker):
-    mocker.patch(
-        'mirrserver.work_server.write_results',
-        return_value=None
-    )
+# def mock_write_results(mocker):
+#     mocker.patch(
+#         'mirrserver.work_server.write_results',
+#         return_value=None
+#     )
 
 
 def test_get_newer_jobs_from_job_waiting_queue(mock_server):
@@ -352,7 +352,7 @@ def test_get_newer_jobs_from_job_waiting_queue(mock_server):
 
 
 def test_success_logging_output_for_put_results(capsys, mocker, mock_server):
-    mock_write_results(mocker)
+    # mock_write_results(mocker)
     mock_server.redis.hset('jobs_in_progress', 2, 3)
     mock_server.redis.hset('client_jobs', 2, 1)
     mock_server.redis.set('total_num_client_ids', 1)
@@ -380,7 +380,7 @@ def test_success_logging_output_for_put_results(capsys, mocker, mock_server):
 
 
 def test_success_logging_for_attachment_results(capsys, mocker, mock_server):
-    mock_write_results(mocker)
+    # mock_write_results(mocker)
     mock_server.redis.hset('jobs_in_progress', 2, 3)
     mock_server.redis.hset('client_jobs', 2, 1)
     mock_server.redis.set('total_num_client_ids', 1)
