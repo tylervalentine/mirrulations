@@ -1,49 +1,66 @@
-'''
-Returns the agency, docket id, and item id from a loaded json object.
-'''
-def extract_data(json_data, is_docket_json=False):
-    agency_id = json_data['data']['attributes']['agencyId']
-    if is_docket_json:
-        docket_id = None
-    else:
-        docket_id = json_data['data']['attributes']['docketId']
-    item_id = json_data['data']['id']
-
-    if is_docket_json:
-        # in this case item_id is the docket id
-        return agency_id, item_id, None
-    else:
-        return agency_id, docket_id, item_id
+import os
 
 
 class PathGenerator:
-    def __init__(self, path):
-        self._path = path
 
-    def get_docket_path(self, json_data): 
-        agency, docket_id, _ = extract_data(json_data, is_docket_json=True)
-        return self._path + f'/data/{agency}/text-{docket_id}/docket/{docket_id}.json'
+    def __init__(self):
+        self.path = "data"
 
-    def get_document_path(self, json_data):
-        agency, docket_id, item_id = extract_data(json_data)
-        return self._path + f'/data/{agency}/text-{docket_id}/documents/{item_id}.json'
+    def get_path(self, json):
+        try: 
+            type = json["data"]["type"]
+        except KeyError:
+            print("JSON did not have 'type' key")
 
-    def get_comment_path(self, json_data):
-        agency, docket_id, item_id = extract_data(json_data)
-        return self._path + f'/data/{agency}/text-{docket_id}/comments/{item_id}.json'
+        if type == "dockets":
+            return self.get_docket_path(json)
 
-    def get_document_extracted_text_path(self, json_data, file_name, extraction_method):
-        agency, docket_id, item_id = extract_data(json_data)
-        return self._path + f'/data/{agency}/text-{docket_id}/documents_extracted_text/{extraction_method}/{file_name}'
+        elif type == "documents":
+            return self.get_document_text_path(json)
+        elif type == "comments":
+            #TODO implement comment pathing
+            return 0
 
-    def get_comment_extracted_text_path(self, json_data, file_name, extraction_method):
-        agency, docket_id, item_id = extract_data(json_data)
-        return self._path + f'/data/{agency}/text-{docket_id}/comments_extracted_text/{extraction_method}/{file_name}'
+    def get_docket_path(self, json): 
+        try: 
+            id, type, agencyId = json["data"]["id"], json["data"]["type"], json["data"]["attributes"]["agencyId"]
+        except KeyError:
+            print("Could not find necessary keys")
+        if "FRDOC" in id:
+            return f'data/{agencyId}/FRDOCS/{id}/text-{id}/{type}/{id}.json'
+        return f'data/{agencyId}/{id}/text-{id}/dockets/{id}.json'
 
-    def get_document_attachment_path(self, json_data, file_name):
-        agency, docket_id, item_id = extract_data(json_data)
-        return self._path + f'/data/{agency}/binary-{docket_id}/documents_attachments/{file_name}'
 
-    def get_comment_attachment_path(self, json_data, file_name):
-        agency, docket_id, item_id = extract_data(json_data)
-        return self._path + f'/data/{agency}/binary-{docket_id}/comments_attachments/{file_name}'
+    def get_document_text_path(self, json):
+        try: 
+            id, type, agencyId = json["data"]["id"], json["data"]["type"], json["data"]["attributes"]["agencyId"]
+        except KeyError:
+            print("Could not find necessary keys")
+        if "FRDOC" in id:
+            agency, FRDOC, rest_of_id = id.split("_")
+            docket_id, document_id = rest_of_id.split("-")
+            docket_id = '_'.join([agency, FRDOC, docket_id])
+            return f'data/{agencyId}/FRDOCS/{docket_id}/text-{docket_id}/documents/{id}.json'
+        agency, year, docket_num, document_id = id.split('-')
+        docket_id = "-".join([agency, year, docket_num])
+        type_folder = "text-" + docket_id
+
+        return f'data/{agencyId}/{docket_id}/{type_folder}/documents/{id}.json'
+
+
+    def get_comment_text_path(self, json):
+        try: 
+            id, type, agencyId = json["data"]["id"], json["data"]["type"], json["data"]["attributes"]["agencyId"]
+        except KeyError:
+            print("Could not find necessary keys")
+        if "FRDOC" in id:
+            agency, FRDOC, rest_of_id = id.split("_")
+            docket_id, comment_id = rest_of_id.split("-")[0]
+            docket_id = '_'.join([agency, FRDOC, docket_id])
+            return f'data/{agencyId}/FRDOCS/{docket_id}/text-{docket_id}/comments/{id}.json'
+        agency, year, docket_num, document_id = id.split('-')
+        docket_id = "-".join([agency, year, docket_num])
+        type_folder = "text-" + docket_id
+
+        return f'data/{agency}/{docket_id}/{type_folder}/comments/{id}.json'
+
