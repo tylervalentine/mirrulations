@@ -226,13 +226,6 @@ class Client:
         ----------
         data : dict
             the results from a performed job
-
-        Returns
-        -------
-        tuple
-            (bool, str) where bool is True if the
-            job was successful, False otherwise
-            and str is a message to be logged
         """
         print("Attachment Job Being Saved")
         print(f"agency: {data['agency']}")
