@@ -209,18 +209,13 @@ class Client:
         ----------
         data : dict
             the results from a performed job
-        
-        Returns
-        -------
-        bool
-            True if the job was successful, False otherwise
         """
         if not data or not data.get('results'):
-            return (False, 'No results found')
+            print(f'{data.get("job_id")}: No results found')
         if data.get('job_type', '') == 'attachments':
-            return self.put_attachment_results(data)
+            self.put_attachment_results(data)
         else:
-            return self.put_results(data)
+            self.put_results(data)
         
     def put_attachment_results(self, data):
         """
@@ -246,9 +241,8 @@ class Client:
             f"/data/{data['agency']}/{data['reg_id']}"
         )
         print(f"/data/{data['agency']}/{data['reg_id']}")
-        return (True, f"{data['job_id']}: Results written to disk")
+        print(f"{data['job_id']}: Attachment result(s) written to disk")
 
-        
     def put_results(self, data):
         """
         Ensures data format matches expected format
@@ -258,19 +252,13 @@ class Client:
         ----------
         data : dict
             the results from a performed job
-
-        Returns
-        -------
-        tuple
-            (bool, str) where bool is True if the job was successful, False otherwise
-            and str is a message to be logged
         """
         if any(x in data['results'] for x in ['error', 'errors']):
-            return (False, f"{data['job_id']}: Errors found in results")
+            print(f"{data['job_id']}: Errors found in results")
         if not data.get('directory') or data.get('directory').rfind('/') == -1:
-            return (False, f"{data['job_id']}: No directory found in results or what incorrect")
+            print(f"{data['job_id']}: No directory found in results or what incorrect")
         self.write_results(data)
-        return (True, f"{data['job_id']}: Results written to disk")
+        print(f"{data['job_id']}: Results written to disk")
 
     def write_results(self, data):
         """
