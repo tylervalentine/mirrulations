@@ -24,6 +24,13 @@ def fixture_mock_requests():
     return requests_mock.Mocker()
 
 
+def mock_write_results(mocker):
+    mocker.patch(
+        'mirrclient.client.Client._write_results',
+        return_value=None
+    )
+
+
 def test_check_no_env_values():
     # Need to delete env variables set by mock_env fixture
     del os.environ['WORK_SERVER_HOSTNAME']
