@@ -17,7 +17,6 @@ class PathGenerator:
             print("Could not find necessary keys in json")
             docket_id = None
             raise KeyError
-        print(docket_id)
         return agencyId, docket_id, item_id
 
 
