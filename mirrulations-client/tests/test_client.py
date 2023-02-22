@@ -469,10 +469,18 @@ def test_success_client_logging(capsys, mock_requests):
         mock_requests.put('http://work_server:8080/put_results', text='{}')
         client.job_operation()
 
-    # captured = capsys.readouterr()
-    # assert captured.out == ""
-    assert True
+    captured = capsys.readouterr()
+    print_data = [
+        'Processing job from work server\n',
+        'Regulations.gov link: https://www.regulations.gov/document/type_id\n',
+        'API URL: https://api.regulations.gov/v4/documents/type_id\n',
+        'Performing job\n',
+        'Sending Job 1 to Work Server\n',
+        'Job output path: NOAA/1/1.json\n',
+        'SUCCESS: https://api.regulations.gov/v4/documents/type_id complete\n'
+    ]
+    assert captured.out == "".join(print_data)
 
 
-def test_sucess_attachment_logging(capsys):
-    assert True
+# def test_sucess_attachment_logging(capsys):
+# assert True
