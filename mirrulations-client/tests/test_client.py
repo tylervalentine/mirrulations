@@ -482,7 +482,7 @@ def test_success_client_logging(capsys, mock_requests):
     assert captured.out == "".join(print_data)
 
 
-def test_sucess_attachment_logging(capsys, mock_requests):
+def test_success_attachment_logging(capsys, mock_requests):
     client = Client()
     client.api_key = 1234
 
@@ -518,7 +518,7 @@ def test_sucess_attachment_logging(capsys, mock_requests):
             'Processing job from work server\n'
             'Regulations.gov link: https://www.regulations.gov//url.com\n'
             'API URL: http://url.com\n'
-            'SUCCESS: Performing attachment job 1\n'
+            'Performing attachment job http://url.com\n'
             'Downloading attachments\n'
             'Sending Job 1 to Work Server\n'
             'SUCCESS: http://url.com complete\n'
