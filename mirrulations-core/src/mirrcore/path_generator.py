@@ -22,32 +22,34 @@ class PathGenerator:
 
     def get_docket_json_path(self, json): 
         agencyId, docket_id, item_id = self.get_attributes(json, True)
-        return f'data/{agencyId}/{item_id}/text-{item_id}/docket/'
+        return f'data/{agencyId}/{item_id}/text-{item_id}/docket/{item_id}.json'
 
     
     def get_document_json_path(self, json):
 
         agencyId, docket_id, item_id = self.get_attributes(json)
         if docket_id is not None:
-            return f'data/{agencyId}/{docket_id}/text-{docket_id}/documents/'
+            return f'data/{agencyId}/{docket_id}/text-{docket_id}/documents/{item_id}.json'
         
         else: 
             # Case where we do not have a docketId so we must parse the item_id
+            print(f"Document json did not have a DocketId, parsing id: {item_id}")
             split_id = item_id.split('-') # list of id_segments
             docket_id = '-'.join(split_id[:-1])
-            return f'data/{agencyId}/{docket_id}/text-{docket_id}/documents/'
+            return f'data/{agencyId}/{docket_id}/text-{docket_id}/documents/{item_id}.json'
 
     def get_comment_json_path(self, json):
 
         agencyId, docket_id, item_id = self.get_attributes(json)
         if docket_id is not None:
-            return f'data/{agencyId}/{docket_id}/text-{docket_id}/comments/'
+            return f'data/{agencyId}/{docket_id}/text-{docket_id}/comments/{item_id}.json'
         
         else: 
             # Case where we do not have a docketId so we must parse the item_id
+            print(f"Comment json did not have a DocketId, parsing id: {item_id}")
             split_id = item_id.split('-') # list of id_segments
             docket_id = '-'.join(split_id[:-1])
-            return f'data/{agencyId}/{docket_id}/text-{docket_id}/comments/'
+            return f'data/{agencyId}/{docket_id}/text-{docket_id}/comments/{item_id}.json'
 
 
     # def get_comment_extracted_text_path(self, json_data, file_name, extraction_method):
