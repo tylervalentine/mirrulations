@@ -24,9 +24,10 @@ def fixture_mock_requests():
     return requests_mock.Mocker()
 
 
-def mock_write_results(mocker):
-    mocker.patch(
-        'mirrclient.client.Client._write_results',
+def mock_write_results(mocker, client_obj):
+    mocker.patch.object(
+        client_obj, 
+        '_write_results', 
         return_value=None
     )
 
