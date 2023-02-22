@@ -3,6 +3,20 @@ import re
 
 class PathGenerator:
 
+    def extract_data(json_data, is_docket_json=False):
+        agency_id = json_data['data']['attributes']['agencyId']
+        if is_docket_json:
+            docket_id = None
+        else:
+            docket_id = json_data['data']['attributes']['docketId']
+        item_id = json_data['data']['id']
+
+        if is_docket_json:
+            # in this case item_id is the docket id
+            return agency_id, item_id, None
+        else:
+            return agency_id, docket_id, item_id
+
     def get_docket_json_path(self, json): 
         try: 
             id, agencyId = json["data"]["id"], json["data"]["attributes"]["agencyId"]
