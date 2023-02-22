@@ -332,7 +332,7 @@ class Client:
             return {}
 
         # Get Attachments
-        print(f"SUCCESS: Performing attachment job {job_id}")
+        print(f"Performing attachment job {url}")
         file_info = \
             response_json["data"][0]["attributes"]["fileFormats"]
         file_urls, file_types = get_urls_and_formats(file_info)
