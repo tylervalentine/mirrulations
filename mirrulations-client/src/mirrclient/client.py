@@ -212,6 +212,7 @@ class Client:
         """
         if not data or not data.get('results'):
             print(f'{data.get("job_id")}: No results found')
+            return
         if data.get('job_type', '') == 'attachments':
             self._put_attachment_results(data)
         else:
