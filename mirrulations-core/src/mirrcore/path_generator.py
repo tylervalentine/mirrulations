@@ -20,7 +20,7 @@ class PathGenerator:
 
 
     def get_docket_json_path(self, json): 
-        agencyId, docket_id, item_id = self.get_attributes(json)
+        agencyId, docket_id, item_id = self.get_attributes(json, True)
         if "FRDOC" in item_id:
             item_id = f'{agencyId}_FRDOC_0001'
 
