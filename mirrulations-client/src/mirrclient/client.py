@@ -6,6 +6,7 @@ from base64 import b64encode
 from json import dumps, loads
 import requests
 from dotenv import load_dotenv
+from mirrcore.attachment_saver import AttachmentSaver
 
 
 class NoJobsAvailableException(Exception):
@@ -190,6 +191,104 @@ class Client:
         requests.put(f'{self.url}/put_results', json=dumps(data),
                      params={'client_id': self.client_id},
                      timeout=10)
+        self.handle_results(data)
+
+        # For now, still need to send original put request for Mongo
+        # requests.put(
+        #     f'{self.url}/put_results',
+        #     json=dumps(data['job_id']),
+        #     params={'client_id': self.client_id},
+        #     timeout=10
+        # )
+
+    def handle_results(self, data):
+        """
+        Verifies job results and deals with them appropriately.
+
+        Parameters
+        ----------
+        data : dict
+            the results from a performed job
+        
+        Returns
+        -------
+        bool
+            True if the job was successful, False otherwise
+        """
+        if not data or not data.get('results'):
+            return (False, 'No results found')
+        if data.get('job_type', '') == 'attachments':
+            return self.put_attachment_results(data)
+        else:
+            return self.put_results(data)
+        
+    def put_attachment_results(self, data):
+        """
+        Ensures data format matches what is expected for attachments
+        If results are valid, writes them to disk
+
+        Parameters
+        ----------
+        data : dict
+            the results from a performed job
+
+        Returns
+        -------
+        tuple
+            (bool, str) where bool is True if the job was successful, False otherwise
+            and str is a message to be logged
+        """
+        print("Attachment Job Being Saved")
+        print(f"agency: {data['agency']}")
+        print(f"reg_id: {data['reg_id']}")
+        AttachmentSaver().save(
+            data,
+            f"/data/{data['agency']}/{data['reg_id']}"
+        )
+        print(f"/data/{data['agency']}/{data['reg_id']}")
+        return (True, f"{data['job_id']}: Results written to disk")
+
+        
+    def put_results(self, data):
+        """
+        Ensures data format matches expected format
+        If results are valid, writes them to disk
+
+        Parameters
+        ----------
+        data : dict
+            the results from a performed job
+
+        Returns
+        -------
+        tuple
+            (bool, str) where bool is True if the job was successful, False otherwise
+            and str is a message to be logged
+        """
+        if any(x in data['results'] for x in ['error', 'errors']):
+            return (False, f"{data['job_id']}: Errors found in results")
+        if not data.get('directory') or data.get('directory').rfind('/') == -1:
+            return (False, f"{data['job_id']}: No directory found in results or what incorrect")
+        self.write_results(data)
+        return (True, f"{data['job_id']}: Results written to disk")
+
+    def write_results(self, data):
+        """
+        writes the results to disk. used by docket document and comment jobs
+
+        Parameters
+        ----------
+        data : dict
+            the results data to be written to disk
+        """
+        directory, filename = data['directory'].rsplit('/', 1)
+        try:
+            os.makedirs(f'/data/{directory}')
+        except FileExistsError:
+            print(f'Directory already exists in root: /data/{directory}')
+        with open(f'/data/{directory}/{filename}', 'w+', encoding='utf8') as file:
+            print('Writing results to disk')
+            file.write(dumps(data['results']))
 
     def perform_job(self, job_url):
         """
