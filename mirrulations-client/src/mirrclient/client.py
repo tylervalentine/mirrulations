@@ -255,8 +255,10 @@ class Client:
         """
         if any(x in data['results'] for x in ['error', 'errors']):
             print(f"{data['job_id']}: Errors found in results")
+            return
         if not data.get('directory') or data.get('directory').rfind('/') == -1:
             print(f"{data['job_id']}: No directory found in results or was incorrect")
+            return
         self.write_results(data)
         print(f"{data['job_id']}: Results written to disk")
 
