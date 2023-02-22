@@ -6,16 +6,71 @@ import json
 @fixture(name='generator')
 def path_generator():
     return PathGenerator()
+    
 
-def generate_json(id=str, type=str, agencyId=str) -> dict:
+def get_test_docket():
+    return {
+        "data":{
+        "id": "USTR-2015-0010",
+        "type": "dockets", 
+        "attributes": {
+                    "agencyId":"USTR",
+                    "docketId":"USTR-2015-0010"
+                }
+        }}
+
+def get_test_document():
+    return {
+        "data":{
+        "id": "USTR-2015-0010-0015",
+        "type": "documents", 
+        "attributes": {
+                    "agencyId":"USTR",
+                    "docketId":"USTR-2015-0010"
+                }
+        }}
+
+def get_test_comment():
+    return {
+        "data":{
+        "id": "USTR-2015-0010-0002",
+        "type": "comments", 
+        "attributes": {
+                    "agencyId":"USTR",
+                    "docketId":"USTR-2015-0010"
+                }
+        }}
+
+def generate_json(id=str, type=str, agencyId=str, docketId=None) -> dict:
     # returns a json in the form that regulations.gov api stores data
-    return {"data":{
+    return {
+        "data":{
         "id": id,
         "type": type, 
         "attributes": {
-                    "agencyId":agencyId
+                    "agencyId": agencyId,
+                    "docketId": docketId
                 }
         }}
+
+def test_get_comment_attributes(generator):
+    agencyId, docket_id, item_id = generator.get_attributes(get_test_comment())
+    assert "USTR-2015-0010-0002" == item_id
+    assert "USTR-2015-0010" == docket_id
+    assert "USTR" == agencyId
+
+
+def test_get_document_attributes(generator):
+    agencyId, docket_id, item_id = generator.get_attributes(get_test_document())
+    assert "USTR-2015-0010-0015" == item_id
+    assert "USTR-2015-0010" == docket_id
+    assert "USTR" == agencyId
+
+def test_get_docket_attributes(generator):
+    agencyId, docket_id, item_id = generator.get_attributes(get_test_docket())
+    assert "USTR-2015-0010" == item_id
+    assert "USTR-2015-0010" == docket_id
+    assert "USTR" == agencyId
 
 
 def test_get_comment_path_full_json(generator):
@@ -31,9 +86,8 @@ def test_get_document_path_full_json(generator):
     assert expected_path == generator.get_document_json_path(json_file)
 
 def test_get_docket_path(generator):
-    json = generate_json(id="VETS-2005-0001", type="dockets", agencyId = "VETS")
-    expected_path = "data/VETS/VETS-2005-0001/text-VETS-2005-0001/docket/"
-    assert expected_path == generator.get_docket_json_path(json)
+    expected_path = "data/USTR/USTR-2015-0010/text-USTR-2015-0010/docket/"
+    assert expected_path == generator.get_docket_json_path(get_test_docket())
 
 def test_get_docket_path_from_FRDOC_docket(generator):
     json = generate_json(id="VETS_FRDOC_0001", type="dockets", agencyId = "VETS")
@@ -41,9 +95,8 @@ def test_get_docket_path_from_FRDOC_docket(generator):
     assert expected_path == generator.get_docket_json_path(json)
 
 def test_get_document_path(generator):
-    json = generate_json(id = "VETS-2005-0001-0001", type="documents", agencyId="VETS")
-    expected_path = "data/VETS/VETS-2005-0001/text-VETS-2005-0001/documents/"
-    assert expected_path == generator.get_document_json_path(json)
+    expected_path = "data/USTR/USTR-2015-0010/text-USTR-2015-0010/documents/"
+    assert expected_path == generator.get_document_json_path(get_test_document())
 
 def test_get_document_path_from_FRDOC_document(generator):
     json = generate_json(id="VETS_FRDOC_0001-0001", type="documents", agencyId = "VETS")
@@ -51,16 +104,15 @@ def test_get_document_path_from_FRDOC_document(generator):
     assert expected_path == generator.get_document_json_path(json)
 
 def test_get_comment_path(generator):
-    json = generate_json(id = "USTR-2015-0010-0002", type = "comments", agencyId="USTR")
     expected_path = "data/USTR/USTR-2015-0010/text-USTR-2015-0010/comments/"
-    assert expected_path == generator.get_comment_json_path(json)
+    assert expected_path == generator.get_comment_json_path(get_test_comment())
 
-def test_get_docket_path_EPA_with_unconvential_agencyId(generator):
+def test_get_docket_path_EPA_with_unconventional_agencyId(generator):
     json = generate_json(id = "EPA-HQ-OPP-2011-0939", type="dockets", agencyId="EPA")
     expected_path = "data/EPA/EPA-HQ-OPP-2011-0939/text-EPA-HQ-OPP-2011-0939/docket/"
     assert expected_path == generator.get_docket_json_path(json)
 
-def test_get_document_path_EPA_with_unconvential_agencyId(generator):
+def test_get_document_path_EPA_with_unconventional_agencyId(generator):
     json = generate_json(id = "EPA-HQ-OPP-2011-0939-0001", type="documents", agencyId="EPA")
     expected_path = "data/EPA/EPA-HQ-OPP-2011-0939/text-EPA-HQ-OPP-2011-0939/documents/"
     assert expected_path == generator.get_document_json_path(json)
@@ -75,7 +127,8 @@ def test_get_docket_path_with_missing_id_key(generator):
     json = {"data":{
         "type":"dockets",
         "attributes": {
-            "agencyId":"VETS"
+            "agencyId":"VETS",
+            "docketId": "VETS-2010-0001"
         }
     }}
     with pytest.raises(KeyError):
@@ -85,7 +138,8 @@ def test_get_document_path_with_missing_id_key(generator):
     json = {"data":{
         "type":"documents",
         "attributes": {
-                    "agencyId":"VETS"
+                    "agencyId":"VETS",
+                    "docketId": "VETS-2010-0001"
                 }
         }}
     with pytest.raises(KeyError):
@@ -95,7 +149,31 @@ def test_get_comment_path_with_missing_id_key(generator):
     json = {"data":{
         "type":"comments",
         "attributes": {
-                    "agencyId":"VETS"
+                    "agencyId":"VETS",
+                    "docketId": "VETS-2010-0001"
+                }
+        }}
+    with pytest.raises(KeyError):
+        generator.get_comment_json_path(json)
+
+def test_get_comment_path_with_missing_docketId_key(generator):
+    json = {"data":{
+        "id": "VETS-2010-0001-0010",
+        "type":"comments",
+        "attributes": {
+                    "agencyId":"VETS",
+                }
+        }}
+    with pytest.raises(KeyError):
+        generator.get_comment_json_path(json)
+
+
+def test_get_document_path_with_missing_docketId_key(generator):
+    json = {"data":{
+        "id": "VETS-2010-0001-0011",
+        "type":"document",
+        "attributes": {
+                    "agencyId":"VETS",
                 }
         }}
     with pytest.raises(KeyError):
