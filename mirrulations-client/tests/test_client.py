@@ -482,5 +482,47 @@ def test_success_client_logging(capsys, mock_requests):
     assert captured.out == "".join(print_data)
 
 
-# def test_sucess_attachment_logging(capsys):
-# assert True
+def test_sucess_attachment_logging(capsys, mock_requests):
+    client = Client()
+    client.api_key = 1234
+
+    with mock_requests:
+        mock_requests.get(
+            'http://work_server:8080/get_job?client_id=-1',
+            json={'job_id': '1',
+                  'url': 'http://url.com',
+                  'job_type': 'attachments',
+                  'reg_id': '1',
+                  'agency': 'foo'},
+            status_code=200
+        )
+        mock_requests.get(
+            'http://url.com?api_key=1234',
+            json={"data": [{"id": "0900006480cb703d", "type": "attachments",
+                           "attributes": {"fileFormats": [
+                               {"fileUrl": "https://downloads.regulations.gov",
+                                "format": "doc"}]}}]
+                  },
+            status_code=200
+        )
+
+        mock_requests.get(
+            "https://downloads.regulations.gov",
+            json={"data": 'foobar'},
+            status_code=200
+        )
+        mock_requests.put('http://work_server:8080/put_results', text='{}')
+        client.job_operation()
+
+        print_data = {
+            'Processing job from work server\n'
+            'Regulations.gov link: https://www.regulations.gov//url.com\n'
+            'API URL: http://url.com\n'
+            'SUCCESS: Performing attachment job 1\n'
+            'Downloading attachments\n'
+            'Sending Job 1 to Work Server\n'
+            'SUCCESS: http://url.com complete\n'
+        }
+
+        captured = capsys.readouterr()
+        assert captured.out == "".join(print_data)
