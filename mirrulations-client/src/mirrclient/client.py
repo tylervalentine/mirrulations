@@ -191,7 +191,7 @@ class Client:
         requests.put(f'{self.url}/put_results', json=dumps(data),
                      params={'client_id': self.client_id},
                      timeout=10)
-        self.handle_results(data)
+        self._handle_results(data)
 
         # For now, still need to send original put request for Mongo
         # requests.put(
@@ -201,7 +201,7 @@ class Client:
         #     timeout=10
         # )
 
-    def handle_results(self, data):
+    def _handle_results(self, data):
         """
         Verifies job results and deals with them appropriately.
 
@@ -213,11 +213,11 @@ class Client:
         if not data or not data.get('results'):
             print(f'{data.get("job_id")}: No results found')
         if data.get('job_type', '') == 'attachments':
-            self.put_attachment_results(data)
+            self._put_attachment_results(data)
         else:
-            self.put_results(data)
-        
-    def put_attachment_results(self, data):
+            self._put_results(data)
+
+    def _put_attachment_results(self, data):
         """
         Ensures data format matches what is expected for attachments
         If results are valid, writes them to disk
@@ -230,7 +230,8 @@ class Client:
         Returns
         -------
         tuple
-            (bool, str) where bool is True if the job was successful, False otherwise
+            (bool, str) where bool is True if the
+            job was successful, False otherwise
             and str is a message to be logged
         """
         print("Attachment Job Being Saved")
@@ -243,7 +244,7 @@ class Client:
         print(f"/data/{data['agency']}/{data['reg_id']}")
         print(f"{data['job_id']}: Attachment result(s) written to disk")
 
-    def put_results(self, data):
+    def _put_results(self, data):
         """
         Ensures data format matches expected format
         If results are valid, writes them to disk
@@ -257,12 +258,13 @@ class Client:
             print(f"{data['job_id']}: Errors found in results")
             return
         if not data.get('directory') or data.get('directory').rfind('/') == -1:
-            print(f"{data['job_id']}: No directory found in results or was incorrect")
+            print(f"{data['job_id']}: \
+                  No directory found in results or was incorrect")
             return
-        self.write_results(data)
+        self._write_results(data)
         print(f"{data['job_id']}: Results written to disk")
 
-    def write_results(self, data):
+    def _write_results(self, data):
         """
         writes the results to disk. used by docket document and comment jobs
 
@@ -271,12 +273,12 @@ class Client:
         data : dict
             the results data to be written to disk
         """
-        directory, filename = data['directory'].rsplit('/', 1)
+        dir_, filename = data['directory'].rsplit('/', 1)
         try:
-            os.makedirs(f'/data/{directory}')
+            os.makedirs(f'/data/{dir_}')
         except FileExistsError:
-            print(f'Directory already exists in root: /data/{directory}')
-        with open(f'/data/{directory}/{filename}', 'w+', encoding='utf8') as file:
+            print(f'Directory already exists in root: /data/{dir_}')
+        with open(f'/data/{dir_}/{filename}', 'w+', encoding='utf8') as file:
             print('Writing results to disk')
             file.write(dumps(data['results']))
 

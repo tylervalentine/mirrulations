@@ -179,11 +179,13 @@ def check_results(workserver, data, client_id):
         return False, jsonify(error), 403
     return (True, directory[:filename_start])
 
+
 def check_received_result(workserver):
     check_for_database(workserver)
     client_id = request.args.get('client_id')
     print('Work_server received job for client: ', client_id)
     return True, client_id
+
 
 def put_results(workserver, data):
     success, *values = check_received_result(workserver)
