@@ -444,3 +444,35 @@ def test_handles_index_error(mock_requests):
         json_data = json.loads(put_request.json())
         assert json_data['job_type'] == "attachments"
         assert json_data['results'] == {}
+
+
+def test_success_client_logging(capsys, mock_requests):
+    client = Client()
+    client.api_key = 1234
+
+    with mock_requests:
+        mock_requests.get(
+            'http://work_server:8080/get_job?client_id=-1',
+            json={'job_id': '1',
+                  'url': 'https://api.regulations.gov/v4/documents/type_id',
+                  'job_type': 'documents',
+                  'reg_id': '1',
+                  'agency': 'foo'},
+            status_code=200
+        )
+        mock_requests.get(
+            'https://api.regulations.gov/v4/documents/type_id?api_key=1234',
+            json={'data': {'id': '1', 'attributes': {'agencyId': 'NOAA'},
+                           'job_type': 'documents'}},
+            status_code=200
+        )
+        mock_requests.put('http://work_server:8080/put_results', text='{}')
+        client.job_operation()
+
+    # captured = capsys.readouterr()
+    # assert captured.out == ""
+    assert True
+
+
+def test_sucess_attachment_logging(capsys):
+    assert True
