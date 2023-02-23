@@ -312,6 +312,8 @@ def create_server(database):
                 MissingClientIDException) as invalid_result:
             return jsonify(invalid_result.message), invalid_result.status_code
         # Added ternary instead of if/else to please pylint too many statements
+        if data['results'] == {}:
+            return jsonify({'success': 'Job completed no attachments'}), 200
         success, *values = put_attachment_results(workserver, data) if \
             data.get('job_type') == 'attachments' else \
             put_results(workserver, data)
