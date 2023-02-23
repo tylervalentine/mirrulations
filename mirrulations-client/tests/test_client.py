@@ -582,7 +582,7 @@ def test_success_no_attachment_logging(capsys, mock_requests):
             'API URL: http://url.com\n'
             'No attachments to download from http://url.com\n'
             'Sending Job 1 to Work Server\n'
-            '1: No attachments found\n'
+            '1: No results found\n'
             'SUCCESS: http://url.com complete\n'
         }
 
