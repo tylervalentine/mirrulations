@@ -347,19 +347,15 @@ class Client:
         -------
         True or False depending if there is an attachment available to download
         """
-        # handle KeyError
-        if attachment_json.get('data') in (None, []):
+        # handle KeyError & IndexError
+        if not attachment_json.get('data', []):
             return False
-        data = attachment_json.get('data')
-        # Handles IndexError
-        if len(data) >= 1:
-            # Check if attributes and fileFormats exists
-            if ("attributes" not in data[0]) or \
-                    ("fileFormats" not in data[0].get('attributes')):
-                return False
-            # handles NoneType in the fileFormats when null
-            if not data[0]['attributes']['fileFormats']:
-                return False
+        data = attachment_json['data'][0]
+
+        # Check if attributes and fileFormats exists
+        if not data.get('attributes', {}).get('fileFormats'):
+            return False
+
         return True
 
     def download_attachments(self, urls, file_types, job_id):
