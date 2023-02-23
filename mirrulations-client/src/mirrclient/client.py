@@ -327,6 +327,10 @@ class Client:
             timeout=10
         ).json()
 
+        if any(x in response_json for x in ('error', 'errors')):
+            print(f"Error in attachment job {url}")
+            return {}
+
         if not self.does_attachment_exists(response_json):
             print(f"No attachments to download from {url}")
             return {}
