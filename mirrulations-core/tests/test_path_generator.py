@@ -232,3 +232,9 @@ def test_get_comment_path_with_missing_agencyId_key(generator):
         }}
     expected_path = "data/unknown/VETS-2010-0001/text-VETS-2010-0001/comments/VETS-2010-0001-0010.json"
     assert expected_path == generator.get_comment_json_path(json)
+
+
+## Comments Attachments
+def test_get_comment_path(generator):
+    expected_path = "data/USTR/USTR-2015-0010/binary-USTR-2015-0010/comments_attachments/USTR-2015-0010-0002_attachment_1.pdf"
+    assert expected_path == generator.get_comment_attachment_path(get_test_comment(), "attachment_1.pdf")

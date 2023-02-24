@@ -1,5 +1,14 @@
 
 class PathGenerator:
+
+    # def get_path(self, json):
+    #     if json['data']["type"] == "comments":
+    #         return self.get_comment_json_path(json)
+    #     if json['data']["type"] == "dockets":
+    #         return self.get_docket_json_path(json)
+    #     if json['data']["type"] == "documents":
+    #         return self.get_document_json_path(json)
+
     '''
     Gets a value from traversing a series of nested keys in a JSON object.
     default_value is the value that should be returned if any of the nested
@@ -57,10 +66,6 @@ class PathGenerator:
 
         return agency_id, docket_id, item_id
 
-
-    
-
-
     def get_docket_json_path(self, json): 
         agencyId, docket_id, _ = self.get_attributes(json, is_docket_json=True)
 
@@ -78,4 +83,14 @@ class PathGenerator:
         return f'data/{agencyId}/{docket_id}/text-{docket_id}/comments/{item_id}.json'
 
 
-    # def get_comment_extracted_text_path(self, json_data, file_name, extraction_method):
+
+    def get_comment_attachment_path(self, json, file_name):
+        agencyId, docket_id, item_id = self.get_attributes(json)
+        attachment_file_name = f'{item_id}_{file_name}'
+
+        return f'data/{agencyId}/{docket_id}/binary-{docket_id}/comments_attachments/{attachment_file_name}'
+
+    # def get_comment_extracted_text_path(self, json, file_name, extraction_method):
+    #     agencyId, docket_id, item_id = self.get_attributes(json)
+
+    #     return f'data/{agencyId}/{docket_id}/binary-{docket_id}/comments_extracted_text/{extraction_method}/{file_name}'
