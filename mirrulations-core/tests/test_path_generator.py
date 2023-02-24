@@ -95,16 +95,24 @@ def test_get_docket_path_from_FRDOC_docket(generator):
     expected_path = "data/VETS/VETS_FRDOC_0001/text-VETS_FRDOC_0001/docket/VETS_FRDOC_0001.json"
     assert expected_path == generator.get_docket_json_path(json)
 
-def test_get_docket_path_with_missing_id_key(generator):
+def test_get_docket_path_with_missing_id_key_but_has_agency_id_key(generator):
     json = {"data":{
         "type":"dockets",
         "attributes": {
             "agencyId":"VETS",
-            "docketId": "VETS-2010-0001"
         }
     }}
-    with pytest.raises(KeyError):
-        generator.get_docket_json_path(json)
+    expected_path = "data/VETS/unknown/text-unknown/docket/unknown.json"
+    assert expected_path == generator.get_docket_json_path(json)
+
+def test_get_docket_path_with_missing_agency_id_and_missing_id_keys(generator):
+    json = {"data":{
+        "type":"dockets",
+        "attributes": {
+        }
+    }}
+    expected_path = "data/unknown/unknown/text-unknown/docket/unknown.json"
+    assert expected_path == generator.get_docket_json_path(json)
 
 ## Documents 
 
@@ -138,16 +146,15 @@ def test_get_FRDOC_document_path_without_docket_id_key(generator):
     expected_path = "data/VETS/VETS_FRDOC_0001/text-VETS_FRDOC_0001/documents/VETS_FRDOC_0001-0021.json"
     assert expected_path == generator.get_document_json_path(json)
 
-def test_get_document_path_with_missing_id_key(generator):
+def test_get_document_path_with_missing_id_key_but_has_agencyID(generator):
     json = {"data":{
         "type":"documents",
         "attributes": {
                     "agencyId":"VETS",
-                    "docketId": "VETS-2010-0001"
                 }
         }}
-    with pytest.raises(KeyError):
-        generator.get_document_json_path(json)
+    expected_path = "data/VETS/unknown/text-unknown/documents/unknown.json"
+    assert expected_path == generator.get_document_json_path(json)
     
 def test_get_document_path_with_missing_docketId_key(generator):
     json = {"data":{
@@ -157,8 +164,19 @@ def test_get_document_path_with_missing_docketId_key(generator):
                     "agencyId":"VETS",
                 }
         }}
-    with pytest.raises(KeyError):
-        generator.get_comment_json_path(json)
+    # Here we must parse the id
+    expected_path = "data/VETS/VETS-2010-0001/text-VETS-2010-0001/documents/VETS-2010-0001-0011.json"
+    assert expected_path == generator.get_document_json_path(json)
+
+def test_get_document_path_with_missing_agencyId_key(generator):
+    json = {"data":{
+        "id": "VETS-2010-0001-0010",
+        "type":"comments",
+        "attributes": {
+                }
+        }}
+    expected_path = "data/unknown/VETS-2010-0001/text-VETS-2010-0001/documents/VETS-2010-0001-0010.json"
+    assert expected_path == generator.get_document_json_path(json)
 
 
 ## Comments
@@ -183,16 +201,15 @@ def test_get_FRDOC_comment_path_without_docket_id_key(generator):
     expected_path = "data/CPPBSD/CPPBSD_FRDOC_0001/text-CPPBSD_FRDOC_0001/comments/CPPBSD_FRDOC_0001-0076.json"
     assert expected_path == generator.get_comment_json_path(json)
 
-def test_get_comment_path_with_missing_id_key(generator):
+def test_get_comment_path_with_missing_id_key_but_has_agencyId_key(generator):
     json = {"data":{
         "type":"comments",
         "attributes": {
                     "agencyId":"VETS",
-                    "docketId": "VETS-2010-0001"
                 }
         }}
-    with pytest.raises(KeyError):
-        generator.get_comment_json_path(json)
+    expected_path = "data/VETS/unknown/text-unknown/comments/unknown.json"
+    assert expected_path == generator.get_comment_json_path(json)
 
 def test_get_comment_path_with_missing_docketId_key(generator):
     json = {"data":{
@@ -202,5 +219,16 @@ def test_get_comment_path_with_missing_docketId_key(generator):
                     "agencyId":"VETS",
                 }
         }}
-    with pytest.raises(KeyError):
-        generator.get_comment_json_path(json)
+    # Parsing
+    expected_path = "data/VETS/VETS-2010-0001/text-VETS-2010-0001/comments/VETS-2010-0001-0010.json"
+    assert expected_path == generator.get_comment_json_path(json)
+
+def test_get_comment_path_with_missing_agencyId_key(generator):
+    json = {"data":{
+        "id": "VETS-2010-0001-0010",
+        "type":"comments",
+        "attributes": {
+                }
+        }}
+    expected_path = "data/unknown/VETS-2010-0001/text-VETS-2010-0001/comments/VETS-2010-0001-0010.json"
+    assert expected_path == generator.get_comment_json_path(json)
