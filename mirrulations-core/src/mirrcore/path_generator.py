@@ -1,13 +1,13 @@
 
 class PathGenerator:
 
-    # def get_path(self, json):
-    #     if json['data']["type"] == "comments":
-    #         return self.get_comment_json_path(json)
-    #     if json['data']["type"] == "dockets":
-    #         return self.get_docket_json_path(json)
-    #     if json['data']["type"] == "documents":
-    #         return self.get_document_json_path(json)
+    def get_path(self, json):
+        if json['data']["type"] == "comments":
+            return self.get_comment_json_path(json)
+        if json['data']["type"] == "dockets":
+            return self.get_docket_json_path(json)
+        if json['data']["type"] == "documents":
+            return self.get_document_json_path(json)
 
     '''
     Gets a value from traversing a series of nested keys in a JSON object.

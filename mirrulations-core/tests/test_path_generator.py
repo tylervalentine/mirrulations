@@ -53,6 +53,7 @@ def generate_json(id=str, type=str, agencyId=str, docketId=None) -> dict:
                 }
         }}
 
+
 def test_get_comment_attributes(generator):
     agencyId, docket_id, item_id = generator.get_attributes(get_test_comment())
     assert "USTR-2015-0010-0002" == item_id
@@ -79,6 +80,10 @@ def test_get_docket_attributes(generator):
 def test_get_docket_path(generator):
     expected_path = "data/USTR/USTR-2015-0010/text-USTR-2015-0010/docket/USTR-2015-0010.json"
     assert expected_path == generator.get_docket_json_path(get_test_docket())
+
+def test_get_path_returns_valid_corpus_type_path(generator):
+    expected_path = "data/USTR/USTR-2015-0010/text-USTR-2015-0010/docket/USTR-2015-0010.json"
+    assert expected_path == generator.get_path(get_test_docket())
 
 def test_get_docket_path_with_numbers_in_agencyId(generator):
     json = generate_json(id = "EPA-R08-OAR-2005-UT-0003", type="dockets", agencyId="EPA", docketId="EPA-R08-OAR-2005-UT-0003")
@@ -119,6 +124,10 @@ def test_get_docket_path_with_missing_agency_id_and_missing_id_keys(generator):
 def test_get_document_path(generator):
     expected_path = "data/USTR/USTR-2015-0010/text-USTR-2015-0010/documents/USTR-2015-0010-0015.json"
     assert expected_path == generator.get_document_json_path(get_test_document())
+
+def test_get_path_on_document_returns_valid_path(generator):
+    expected_path = "data/USTR/USTR-2015-0010/text-USTR-2015-0010/documents/USTR-2015-0010-0015.json"
+    assert expected_path == generator.get_path(get_test_document())
 
 def test_get_document_path_EPA_with_unconventional_agencyId(generator):
     json = generate_json(id = "EPA-HQ-OPP-2011-0939-0001", type="documents", agencyId="EPA", docketId="EPA-HQ-OPP-2011-0939")
@@ -184,6 +193,10 @@ def test_get_document_path_with_missing_agencyId_key(generator):
 def test_get_comment_path(generator):
     expected_path = "data/USTR/USTR-2015-0010/text-USTR-2015-0010/comments/USTR-2015-0010-0002.json"
     assert expected_path == generator.get_comment_json_path(get_test_comment())
+
+def test_get_path_on_comment_returns_valid_comment_path(generator):
+    expected_path = "data/USTR/USTR-2015-0010/text-USTR-2015-0010/comments/USTR-2015-0010-0002.json"
+    assert expected_path == generator.get_path(get_test_comment())
 
 def test_get_comment_path_without_docket_id_key(generator):
     json = generate_json(id = "USTR-2015-0001-0002", type="comments", agencyId="USTR")
