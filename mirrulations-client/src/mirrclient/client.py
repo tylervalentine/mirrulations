@@ -229,6 +229,9 @@ class Client:
             the results from a performed job
         """
         print("Attachment Job Being Saved")
+        if any(x in data['results'] for x in ['error', 'errors']):
+            print(f"{data['job_id']}: Errors found in results")
+            return
         print(f"agency: {data['agency']}")
         print(f"reg_id: {data['reg_id']}")
         AttachmentSaver().save(
@@ -328,8 +331,7 @@ class Client:
         ).json()
 
         if any(x in response_json for x in ('error', 'errors')):
-            print(f"Error in attachment job {url}")
-            return {}
+            return response_json
 
         if not self.does_attachment_exists(response_json):
             print(f"No attachments to download from {url}")
@@ -403,7 +405,10 @@ class Client:
         else:
             result = self.perform_job(job['url'])
         self.send_job(job, result)
-        print(f'SUCCESS: {job["url"]} complete')
+        if any(x in result for x in ('error', 'errors')):
+            print(f'FAILURE: Error in {job["url"]}')
+        else:
+            print(f'SUCCESS: {job["url"]} complete')
 
 
 if __name__ == '__main__':
