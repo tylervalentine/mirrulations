@@ -15,25 +15,58 @@ services:
     ports:
       - "6379:6379"
     restart: always
+    healthcheck:
+      test: [ "CMD", "redis-cli","ping" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+  rabbitmq:
+    build:
+      context: .
+      dockerfile: mirrulations-rabbitmq/Dockerfile
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:15672" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
   mongo:
     image: mongo
     volumes:
       - "~/data/db:/data/db"
     ports:
       - "27017:27017"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh mongo:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
   work_generator:
     build:
       context: .
       dockerfile: mirrulations-work-generator/Dockerfile
     depends_on:
-      - redis
-      - mongo
+      redis:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     env_file: env_files/work_gen.env
     restart: always
   work_server:
     build:
       context: .
       dockerfile: mirrulations-work-server/Dockerfile
+    depends_on:
+      redis:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     restart: always
     volumes:
       - ~/data/data:/data
@@ -44,6 +77,13 @@ services:
     env_file: env_files/dashboard.env
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock'
+    depends_on:
+      redis:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
   client1:
     build:
       context: .
