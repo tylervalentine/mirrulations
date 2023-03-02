@@ -20,15 +20,18 @@ class ResultsProcessor:
                 if job_type == 'comments':
                     # updates the url and job_type
                     url = url + '/attachments'
-                    job_type = 'attachments'
                     # adds new attachment job to jobs_waiting_queue
                     reg_id = item['id']
                     agency = reg_id.split('-')[0]
-                    self.job_queue.add_job(url, job_type, reg_id, agency)
-                    count['attachment'] += 1
+                    self.job_queue.add_job(url, 'attachments', reg_id, agency)
+                    counts['attachment'] += 1
             else:
                 counts['preexisting'] += 1
 
-        # join counts into a single string
-        report = ', '.join([f'{key}: {counts[key]}' for key in counts])
-        print(f'Added {report}')
+        print_report(counts)
+
+
+def print_report(counts):
+    # join counts into a single string
+    report = ', '.join([f'{key}: {counts[key]}' for key in counts])
+    print(f'Added {report}')
