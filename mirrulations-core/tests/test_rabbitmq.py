@@ -25,7 +25,7 @@ class ChannelSpy:
 class PikaSpy:
 
     def __init__(self, params):
-        pass
+        self.is_open = True
 
     def channel(self):
         return ChannelSpy()
