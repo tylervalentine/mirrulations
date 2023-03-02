@@ -12,6 +12,7 @@ from flask import Flask, jsonify, render_template
 from flask_cors import CORS
 from redis import Redis
 from mirrdash.sum_mongo_counts import connect_mongo_db, get_done_counts
+from mirrcore.job_queue import JobQueue
 from dotenv import load_dotenv
 import docker
 
@@ -26,7 +27,8 @@ class Dashboard:
 
 
 def get_jobs_stats(database):
-    jobs_waiting = int(database.llen('jobs_waiting_queue'))
+    job_queue = JobQueue(database)
+    jobs_waiting = job_queue.get_num_jobs()
     jobs_in_progress = int(database.hlen('jobs_in_progress'))
     jobs_total_minus_jobs_done = jobs_waiting + jobs_in_progress
 
@@ -34,8 +36,7 @@ def get_jobs_stats(database):
     clients_total = int(client_ids) if client_ids is not None else 0
 
     return {
-        'num_jobs_waiting':
-        int(database.llen('jobs_waiting_queue')),
+        'num_jobs_waiting': jobs_waiting,
         'num_jobs_in_progress':
         int(database.hlen('jobs_in_progress')),
         'jobs_total': jobs_total_minus_jobs_done,
