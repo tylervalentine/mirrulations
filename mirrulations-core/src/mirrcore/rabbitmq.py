@@ -15,7 +15,7 @@ class RabbitMQ:
         if self.connection is None or not self.connection.is_open:
             self.connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq'))
             self.channel = self.connection.channel()
-            self. channel.queue_declare('jobs_waiting_queue')
+            self.channel.queue_declare('jobs_waiting_queue', durable=True)
 
     def add(self, job):
         """
@@ -26,7 +26,10 @@ class RabbitMQ:
         self._ensure_channel()
         self.channel.basic_publish(exchange='',
                                    routing_key='jobs_waiting_queue',
-                                   body=json.dumps(job))
+                                   body=json.dumps(job),
+                                   properties=pika.BasicProperties(
+                                       delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE)
+                                   )
 
     def size(self):
         """
@@ -34,7 +37,7 @@ class RabbitMQ:
         @return: a non-negative integer
         """
         self._ensure_channel()
-        queue = self.channel.queue_declare('jobs_waiting_queue')
+        queue = self.channel.queue_declare('jobs_waiting_queue', durable=True)
         return queue.method.message_count
 
     def get(self):
