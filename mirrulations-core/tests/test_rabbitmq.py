@@ -12,22 +12,22 @@ so this test simply calls all the methods using a mock
 
 class ChannelSpy:
 
-    def queue_declare(self, queue):
+    def queue_declare(self, *args, **kwargs):
         return MagicMock()
 
-    def basic_publish(self, exchange, routing_key, body):
+    def basic_publish(self, *args, **kwargs):
         pass
 
-    def basic_get(self, name):
+    def basic_get(self, *args, **kwargs):
         return None, None, None
 
 
 class PikaSpy:
 
-    def __init__(self, params):
+    def __init__(self, *args, **kwargs):
         self.is_open = True
 
-    def channel(self):
+    def channel(self, *args, **kwargs):
         return ChannelSpy()
 
 
