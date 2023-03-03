@@ -63,7 +63,7 @@ if __name__ == '__main__':
         print('End generate document jobs')
         print('Begin generate comment/attachment jobs')
         generator.download('comments')
-        print('End generate commend/attachment jobs')
+        print('End generate comment/attachment jobs')
 
     while True:
         generate_work()
