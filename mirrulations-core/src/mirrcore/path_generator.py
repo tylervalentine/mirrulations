@@ -127,43 +127,8 @@ class PathGenerator:
         return f'data/{agencyId}/{docket_id}/text-{docket_id}/comments/{item_id}.json'
 
 
-
     def get_comment_attachment_path(self, json, file_name):
         agencyId, docket_id, item_id = self.get_attributes(json)
         attachment_file_name = f'{item_id}_{file_name}'
 
         return f'data/{agencyId}/{docket_id}/binary-{docket_id}/comments_attachments/{attachment_file_name}'
-
-
-    def get_attachment_json_paths(self, json):
-        '''
-        Given a json, this function will return all attachment paths for 
-        n number attachment links
-        '''
-        agencyId, docket_id, item_id = self.get_attributes(json)
-
-        # contains list of paths for attachments
-        attachments = []
-
-        # handles the case if "fileFormats" does not exist
-        if ("fileFormats" not in json["included"][0]["attributes"]):
-            print("This json is missing fileFormats")
-            # may need to change what gets returned here
-            return attachments
-
-        for attachment in json["included"][0]["attributes"]["fileFormats"]:
-            if ("fileUrl" not in attachment):
-                print("attachment download link does not exist for this attachment")
-                continue
-
-            attachment_name = attachment['fileUrl'].split("/")[-1]
-            attachment_id = item_id + "_" + attachment_name
-            attachments.append(f'data/{agencyId}/{docket_id}/binary-{docket_id}/comments_attachments/{attachment_id}')
-
-        return attachments
-
-
-    # def get_comment_extracted_text_path(self, json, file_name, extraction_method):
-    #     agencyId, docket_id, item_id = self.get_attributes(json)
-
-    #     return f'data/{agencyId}/{docket_id}/binary-{docket_id}/comments_extracted_text/{extraction_method}/{file_name}'
