@@ -44,6 +44,8 @@ class PathGenerator:
     """
 
     def get_path(self, json):
+        if 'data' not in json:
+            return "data/unknown/unknown.json"
         if json['data']["type"] == "comments":
             return self.get_comment_json_path(json)
         if json['data']["type"] == "dockets":
