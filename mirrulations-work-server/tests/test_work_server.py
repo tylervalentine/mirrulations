@@ -214,7 +214,6 @@ def test_put_results_returns_correct_attachment_job(mock_server):
     assert response.get_json() == expected
     assert response.status_code == 200
     assert len(mock_server.data.attachments_added) == 1
-    # assert mock_server.attachment_saver.num_attachments == 1
 
 
 def test_put_results_correct_attachment_job_no_files(mock_server):
@@ -308,13 +307,6 @@ def test_database_returns_error_when_database_does_not_exist(mock_server):
     response = mock_server.client.get('/get_job', query_string=params)
     assert response.json['error'] == 'Cannot connect to the database'
     assert response.status_code == 500
-
-
-# def mock_write_results(mocker):
-#     mocker.patch(
-#         'mirrserver.work_server.write_results',
-#         return_value=None
-#     )
 
 
 def test_get_newer_jobs_from_job_waiting_queue(mock_server):

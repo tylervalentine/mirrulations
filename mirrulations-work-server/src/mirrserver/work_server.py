@@ -203,7 +203,6 @@ def put_results(workserver, data):
     client_id = request.args.get('client_id')
     job_id = data['job_id']
     workserver.redis.hdel('jobs_in_progress', job_id)
-    # write_results(results[0], data['directory'], data['results'])
     print(f"Wrote job {data['directory'].split('/')[-1]},"
           f" job_id: {job_id}, to {data['directory']}")
     workserver.data.add(data['results'])
@@ -241,8 +240,6 @@ def put_attachment_results(workserver, data):
         print('Attachment Job Being Saved')
         print('agency', data['agency'])
         print('reg_id', data['reg_id'])
-        # workserver.attachment_saver.save(
-        #     data, f"/data/{data['agency']}/{data['reg_id']}")
     workserver.data.add_attachment(data)
     print(f"/data/{data['agency']}/{data['reg_id']}")
     return (True,)
