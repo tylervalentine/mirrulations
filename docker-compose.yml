@@ -35,8 +35,6 @@ services:
       context: .
       dockerfile: mirrulations-work-server/Dockerfile
     restart: always
-    volumes:
-      - ~/data/data:/data
   dashboard:
     build:
       context: .
