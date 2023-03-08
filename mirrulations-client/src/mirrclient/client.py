@@ -295,6 +295,9 @@ class Client:
             json results of the performed job
         """
         print('Performing job')
+        if "?" in job_url:
+            return requests.get(job_url + f'&api_key={self.api_key}',
+                                timeout=10).json()
         return requests.get(job_url + f'?api_key={self.api_key}',
                             timeout=10).json()
 
