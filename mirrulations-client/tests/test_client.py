@@ -1,12 +1,12 @@
 import os
 import json
 from mirrcore.attachment_saver import AttachmentSaver
+from mirrcore.path_generator import PathGenerator
 import pytest
 from pytest import fixture, raises
 import requests_mock
 from mirrclient.client import NoJobsAvailableException, Client
 from mirrclient.client import is_environment_variables_present
-from mirrclient.client import get_output_path
 from requests.exceptions import Timeout
 
 BASE_URL = 'http://work_server:8080'
@@ -23,6 +23,11 @@ def mock_env():
 @fixture(name='mock_requests')
 def fixture_mock_requests():
     return requests_mock.Mocker()
+
+
+@fixture(name="path_generator")
+def get_path():
+    return PathGenerator()
 
 
 @fixture(autouse=True)
@@ -136,7 +141,7 @@ def test_client_performs_job(mock_requests):
         )
         mock_requests.get(
             'http://url.com?api_key=1234',
-            json={'data': {'id': '1', 'attributes': {'agencyId': 'NOAA'},
+            json={'data': {'id': '1', 'type': 'documents', 'attributes': {'agencyId': 'NOAA'},
                            'job_type': 'documents'}},
             status_code=200
         )
@@ -387,11 +392,11 @@ def test_client_handles_empty_json_from_regulations(mock_requests):
         assert json_data['results'] == {}
 
 
-def test_get_output_path_error():
+def test_get_output_path_error(path_generator):
     results = {'error': 'error'}
-    output_path = get_output_path(results)
+    output_path = path_generator.get_path(results)
 
-    assert output_path == -1
+    assert output_path == "/data/data/unknown/unknown.json"
 
 
 def test_handles_nonetype_error(mock_requests):
@@ -481,7 +486,7 @@ def test_success_client_logging(capsys, mock_requests):
         )
         mock_requests.get(
             'https://api.regulations.gov/v4/documents/type_id?api_key=1234',
-            json={'data': {'id': '1', 'attributes': {'agencyId': 'NOAA'},
+            json={'data': {'id': '1', 'type': 'documents', 'attributes': {'agencyId': 'NOAA', 'docketId': 'NOAA-0001-0001'},
                            'job_type': 'documents'}},
             status_code=200
         )
@@ -495,7 +500,6 @@ def test_success_client_logging(capsys, mock_requests):
         'API URL: https://api.regulations.gov/v4/documents/type_id\n',
         'Performing job\n',
         'Sending Job 1 to Work Server\n',
-        'Job output path: NOAA/1/1.json\n',
         '1: Results written to disk\n',
         'SUCCESS: https://api.regulations.gov/v4/documents/type_id complete\n'
     ]

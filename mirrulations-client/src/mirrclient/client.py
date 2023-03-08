@@ -7,6 +7,7 @@ from json import dumps, loads
 import requests
 from dotenv import load_dotenv
 from mirrcore.attachment_saver import AttachmentSaver
+from mirrcore.path_generator import PathGenerator
 
 
 class NoJobsAvailableException(Exception):
@@ -41,54 +42,6 @@ def get_urls_and_formats(file_info):
         formats.append(link["format"])
 
     return urls, formats
-
-
-def get_key_path_string(results, key):
-    """
-    Creates path for keys in results
-
-    Parameters
-    ----------
-    results : dict
-        The results of a performed job
-
-    key : str
-        A key in the result
-    """
-    if key in results.keys():
-        if results[key] is None:
-            return 'None/'
-        return results[key] + "/"
-    return ""
-
-
-def get_output_path(results):
-    """
-    Takes results from a performed job and creates an output
-    path for a directory.
-
-    Parameters
-    ----------
-    results : dict
-        the results from a performed job
-
-    Returns
-    -------
-    str
-        the output path for the job
-    """
-    if 'error' in results:
-        return -1
-    output_path = ""
-    data = results["data"]["attributes"]
-    output_path += get_key_path_string(data, "agencyId")
-    output_path += get_key_path_string(data, "docketId")
-    output_path += get_key_path_string(data, "commentOnDocumentId")
-    output_path += results["data"]["id"] + "/"
-    output_path += results["data"]["id"] + ".json"
-    print(f'Job output path: {output_path}')
-
-    return output_path
 
 
 def is_environment_variables_present():
@@ -129,6 +82,7 @@ class Client:
     def __init__(self):
         self.api_key = os.getenv('API_KEY')
         self.client_id = os.getenv('ID')
+        self.path_generator = PathGenerator()
 
         hostname = os.getenv('WORK_SERVER_HOSTNAME')
         port = os.getenv('WORK_SERVER_PORT')
@@ -187,7 +141,7 @@ class Client:
         print(f'Sending Job {job["job_id"]} to Work Server')
         # If the job is not an attachment job we need to add an output path
         if ('errors' not in job_result) and (job['job_type'] != 'attachments'):
-            data['directory'] = get_output_path(job_result)
+            data['directory'] = self.path_generator.get_path(job_result)
         requests.put(f'{self.url}/put_results', json=dumps(data),
                      params={'client_id': self.client_id},
                      timeout=10)
