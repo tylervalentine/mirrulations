@@ -356,7 +356,7 @@ def test_client_sends_attachment_results(mock_requests):
         assert json_data['results'] == {'1_0.doc': 'eyJkYXRhIjogImZvb2JhciJ9'}
 
 
-def test_client_handles_empty_json_from_regulations(mock_requests):
+def test_client_handles_empty_json_from_regulations(mock_requests, path_generator):
     client = Client()
     client.api_key = 1234
 
@@ -392,6 +392,7 @@ def test_client_handles_empty_json_from_regulations(mock_requests):
         assert json_data['job_id'] == "1"
         assert json_data['job_type'] == "attachments"
         assert json_data['results'] == {}
+        assert path_generator.get_path(json_data['results'])  == "/data/data/unknown/unknown.json"
 
 
 def test_get_output_path_error(path_generator):
@@ -678,3 +679,21 @@ def test_failure_attachment_job_results(capsys, mock_requests):
 
         captured = capsys.readouterr()
         assert captured.out == "".join(print_data)
+
+def test_client_downloads_all_comments_attachments(mock_requests, path_generator):
+    # TODO
+    client = Client()
+    client.api_key = 1234
+
+    with mock_requests:
+        ## Need to add included section for comments WITH attachments
+        mock_requests.get(
+            'http://work_server:8080/get_job?client_id=-1',
+            json={'job_id': '1',
+                  'url': 'http://url.com',
+                  'job_type': 'comments',
+                  'reg_id': '1',
+                  'agency': 'foo'},
+            status_code=200
+        )
+    assert True
