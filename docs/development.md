@@ -80,10 +80,10 @@ To make all neccessary files for the clients, dashboard, and the work generator,
 * Using devup to Build and Launch Docker Containers
 
   ```
-  bash devup -b
+  bash devup [-b]
   ```
 
-  If you forget the `-b`, it will build the containers before launching them. Additionall you can run devup with the `-b` to just launch the containers. If you run devup you don't need to build or launch the containers manually.
+  Running devup will launch the docker containers for you. Along with the optional `-b` you can build and launch the containers simaltaniously. 
   
 * Kill all containers
 
