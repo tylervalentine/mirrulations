@@ -54,11 +54,12 @@ if __name__ == '__main__':
         for (root, dirs, files) in os.walk('/data'):
             for file in files:
                 # Checks for pdfs
-                if file.endswith('pdf'):
-                    save_path = '' # TODO: generate path
-                    if not save_path.is_file():
-                        # extractor = Extractor(os.path.join(root, file), save_path)
-                        Extractor.extract_pdf(os.path.join(root, file), save_path)
+                if not file.endswith('pdf'):
+                    continue
+                save_path = '' # TODO: generate path
+                if not save_path.is_file():
+                    # extractor = Extractor(os.path.join(root, file), save_path)
+                    Extractor.extract_pdf(os.path.join(root, file), save_path)
         
         # sleep for a hour
         current_time = now.strftime("%H:%M:%S")
