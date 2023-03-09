@@ -250,11 +250,72 @@ def test_get_comment_path_with_missing_agencyId_key(generator):
 
 
 ## Comments Attachments
-def test_get_comment_path(generator):
+def test_get_comment_attachment_path(generator):
     expected_path = "/data/data/USTR/USTR-2015-0010/binary-USTR-2015-0010/comments_attachments/USTR-2015-0010-0002_attachment_1.pdf"
     assert expected_path == generator.get_comment_attachment_path(get_test_comment(), "attachment_1.pdf")
 
+def test_comment_with_one_attachment_returns_attachment_path(generator):
+    json = {"data":{
+        "id": "USTR-2015-0010-0002",
+        "type":"comments",
+        "attributes": {
+            "agencyId":"USTR",
+                }
+        }, 
+        "included":[
+        {
+            "id": "0900006481c7f7ae",
+            "type": "attachments",
+            "attributes":{
+                "fileFormats":[{
+                    "fileUrl": "https://downloads.regulations.gov/USTR-2015-0010-0002/attachment_1.pdf", 
+                    "format":"pdf"
+                }]
+            } 
+        }]
+    }
+    expected_path = "/data/data/USTR/USTR-2015-0010/binary-USTR-2015-0010/comments_attachments/USTR-2015-0010-0002_attachment_1.pdf"
+    # get_attachment_json_paths returns a list of attachment paths
+    assert expected_path == generator.get_attachment_json_paths(json)[0] 
 
+def test_comment_with_multiple_attachments_returns_correct_attachment_paths(generator):
+    json = {"data":{
+        "id": "USTR-2015-0010-0002",
+        "type":"comments",
+        "attributes": {
+            "agencyId":"USTR",
+                }
+        }, 
+        "included":[
+        {
+            "id": "0900006481c7f7ae",
+            "type": "attachments",
+            "attributes":{
+                "fileFormats":[{
+                    "fileUrl": "https://downloads.regulations.gov/USTR-2015-0010-0002/attachment_1.pdf", 
+                    "format":"pdf"
+                }]
+            } 
+        }, 
+        {
+            "id": "0900006481c7f7ae",
+            "type": "attachments",
+            "attributes":{
+                "fileFormats":[{
+                    "fileUrl": "https://downloads.regulations.gov/USTR-2015-0010-0002/attachment_2.pdf", 
+                    "format":"pdf"
+                }]
+            } 
+        }]
+    }
+    expected_paths = ["/data/data/USTR/USTR-2015-0010/binary-USTR-2015-0010/comments_attachments/USTR-2015-0010-0002_attachment_1.pdf",
+    "/data/data/USTR/USTR-2015-0010/binary-USTR-2015-0010/comments_attachments/USTR-2015-0010-0002_attachment_2.pdf"]
+
+    # get_attachment_json_paths returns a list of attachment paths
+    assert expected_paths == generator.get_attachment_json_paths(json) 
+
+
+## Unknown Files/Invalid Formats
 def test_empty_json_places_json_in_unknown(generator):
     json = dict()
     expected_path = "/data/data/unknown/unknown.json"

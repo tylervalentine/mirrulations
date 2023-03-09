@@ -155,7 +155,7 @@ class PathGenerator:
                     print(f"valid attachment for attachment ID: {id}")
                     attachment_name = attachment["attributes"]["fileFormats"][0]["fileUrl"].split("/")[-1]
                     attachment_id = item_id + "_" + attachment_name
-                    attachments.append(f'data/{agencyId}/{docket_id}/binary-{docket_id}/comments_attachments/{attachment_id}')
+                    attachments.append(f'/data/data/{agencyId}/{docket_id}/binary-{docket_id}/comments_attachments/{attachment_id}')
                 else:
                     print(f"fileUrl did not exist for attachment ID: {id}")
             else:
