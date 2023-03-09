@@ -83,7 +83,8 @@ To make all neccessary files for the clients, dashboard, and the work generator,
   bash devup -b
   ```
 
-  If you forget the `-b`, it will build the containers before launching them. Additionall you can run devup with the `-b` to just launch the containers. If you run devup you don't need to build or launch the containers manually.
+  If you forget the `-b`, it will build the containers before launching them. Additionally you can run devup 
+with the `-b` to just launch the containers. If you run devup you don't need to build or launch the containers manually.
   
 * Kill all containers
 
@@ -104,5 +105,3 @@ To make all neccessary files for the clients, dashboard, and the work generator,
   ```
   
   If you forget `--tail=25`, it will show **all** log messages.
-
-
