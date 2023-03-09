@@ -141,7 +141,9 @@ def test_client_performs_job(mock_requests):
         )
         mock_requests.get(
             'http://url.com?api_key=1234',
-            json={'data': {'id': '1', 'type': 'documents', 'attributes': {'agencyId': 'NOAA'},
+            json={'data': {'id': '1', 'type': 'documents',
+                           'attributes':
+                           {'agencyId': 'NOAA'},
                            'job_type': 'documents'}},
             status_code=200
         )
@@ -486,7 +488,9 @@ def test_success_client_logging(capsys, mock_requests):
         )
         mock_requests.get(
             'https://api.regulations.gov/v4/documents/type_id?api_key=1234',
-            json={'data': {'id': '1', 'type': 'documents', 'attributes': {'agencyId': 'NOAA', 'docketId': 'NOAA-0001-0001'},
+            json={'data': {'id': '1', 'type': 'documents',
+                           'attributes':
+                           {'agencyId': 'NOAA', 'docketId': 'NOAA-0001-0001'},
                            'job_type': 'documents'}},
             status_code=200
         )
