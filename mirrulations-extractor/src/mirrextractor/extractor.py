@@ -58,8 +58,10 @@ if __name__ == '__main__':
                     continue
                 save_path = '' # TODO: generate path
                 if not save_path.is_file():
-                    # extractor = Extractor(os.path.join(root, file), save_path)
-                    Extractor.extract_pdf(os.path.join(root, file), save_path)
+                    complete_path = os.path.join(root, file)
+                    start_time = time.time()
+                    Extractor.extract_pdf(complete_path, save_path)
+                    print(f"Time taken to extract text from {complete_path} is {start_time - time.time()} seconds")
         
         # sleep for a hour
         current_time = now.strftime("%H:%M:%S")
