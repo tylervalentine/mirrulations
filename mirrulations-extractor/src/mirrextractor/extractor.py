@@ -29,7 +29,8 @@ class Extractor:
             if isinstance(e.inner_exception, pikepdf.ReadError):
                 pdf = pikepdf.open(attachment_path, recover=True)
             else:
-                raise e
+                print(f"FAILURE: failed to open {attachment_path}")
+                return
         # Check if the PDF is already linearized
         # Linearize the PDF
         pdf.save(attachment_path, linearize=True)
