@@ -38,9 +38,9 @@ class Extractor:
             pdf_bytes = io.BytesIO(f.read())
         text = pdfminer.high_level.extract_text(pdf_bytes)
         # Save the extracted text to a file
-        print(f"SUCCESS: Saved pdf at {save_path}")
         with open(save_path, "w", encoding="utf-8") as f:
             f.write(text)
+        print(f"SUCCESS: Saved pdf at {save_path}")
 
 
 if __name__ == '__main__':
