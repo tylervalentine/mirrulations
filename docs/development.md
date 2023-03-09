@@ -75,12 +75,26 @@ To make all neccessary files for the clients, dashboard, and the work generator,
   docker-compose up -d
   ```
   
-  If you forget the `-d`, it will launch in the foreground, and you will see the log output for all containers.  Press ctlr-c to exit all containers
+  If you forget the `-d`, it will launch in the foreground, and you will see the log output for all containers. Press ctlr-c to exit all containers
+
+* Using devup to Build and Launch Docker Containers
+
+  ```
+  bash devup -b
+  ```
+
+  If you forget the `-b`, it will build the containers before launching them. Additionall you can run devup with the `-b` to just launch the containers. If you run devup you don't need to build or launch the containers manually.
   
 * Kill all containers
 
   ```
   docker-compose down
+  ```
+
+  or you could do
+
+  ```
+  bash devdown
   ```
   
 * To see the last 25 log messages of one container (`client1` in this example):
