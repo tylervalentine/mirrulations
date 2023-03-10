@@ -6,6 +6,7 @@ import pdfminer.layout
 import pikepdf
 from datetime import datetime
 
+
 class Extractor:
     """
     Class containing methods to extract text from files.
@@ -27,19 +28,17 @@ class Extractor:
         """
         print(f"Extracting text from {attachment_path}")
         try:
-            pdf = pikepdf.open(attachment_path)
+            pdf = pikepdf.open(attachment_path, allow_overwriting_input=True)
         except pikepdf.PdfError as e:
             if isinstance(e.inner_exception, pikepdf.ReadError):
-                pdf = pikepdf.open(attachment_path, recover=True)
+                pdf = pikepdf.open(attachment_path, recover=True, allow_overwriting_input=True)
             else:
                 print(f"FAILURE: failed to open {attachment_path}")
                 return
-        # Check if the PDF is already linearized
-        # Linearize the PDF
-        pdf.save(attachment_path, linearize=True)
-        # Extract all text from the PDF using pdfminer.six
-        with open(attachment_path, "rb") as f:
-            pdf_bytes = io.BytesIO(f.read())
+
+        pdf_bytes = io.BytesIO()
+        pdf.save(pdf_bytes, linearize=True)
+
         text = pdfminer.high_level.extract_text(pdf_bytes)
         # Save the extracted text to a file
         with open(save_path, "w", encoding="utf-8") as f:
