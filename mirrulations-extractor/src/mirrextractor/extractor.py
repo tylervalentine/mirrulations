@@ -38,7 +38,7 @@ class Extractor:
 
     @staticmethod
     def make_save_path(path):
-        return "/data/" + path.replace('binary', 'text').replace('comments_attachments', 'comments_extracted_text/pdfminer/').replace('.pdf', '_extracted.txt')
+        return path.replace('binary', 'text').replace('comments_attachments', 'comments_extracted_text/pdfminer').replace('.pdf', '_extracted.txt')
 
     @staticmethod
     def extract_pdf(attachment_path, save_path):
