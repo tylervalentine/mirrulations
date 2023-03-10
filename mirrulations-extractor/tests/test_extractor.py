@@ -25,7 +25,7 @@ def test_extractor_creates_saved_file():
 
     save_path = os.path.join(absolute_path, SAVE_PATH)
 
-    Extractor.extract_pdf(
+    Extractor.extract_text(
         os.path.join(absolute_path, 'pdfs/empty.pdf'),
         save_path)
 
