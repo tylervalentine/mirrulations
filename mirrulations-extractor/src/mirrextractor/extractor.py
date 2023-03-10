@@ -57,7 +57,7 @@ if __name__ == '__main__':
                 # Checks for pdfs
                 if not file.endswith('pdf'):
                     continue
-                save_path = PathGenerator.get_attachment_text_save_path(json.dumps(file), file) # json dumps should be changed
+                save_path = f"/data/data/{PathGenerator.get_attachment_text_save_path(json.dumps(file), file)}" # json dumps should be changed
                 if not save_path.is_file():
                     complete_path = os.path.join(root, file)
                     start_time = time.time()
