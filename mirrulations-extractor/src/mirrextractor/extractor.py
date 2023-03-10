@@ -2,10 +2,12 @@ import os
 import time
 import io
 import pdfminer
+import pdfminer.high_level
 import pikepdf
 import json
 from datetime import datetime
 from mirrcore.path_generator import PathGenerator
+
 
 class Extractor:
     """
@@ -53,19 +55,17 @@ class Extractor:
             ex. /path/to/text/attachment_1.txt
         """
         try:
-            pdf = pikepdf.open(attachment_path)
+            pdf = pikepdf.open(attachment_path, allow_overwriting_input=True)
         except pikepdf.PdfError as e:
             if isinstance(e.inner_exception, pikepdf.ReadError):
-                pdf = pikepdf.open(attachment_path, recover=True)
+                pdf = pikepdf.open(attachment_path, recover=True, allow_overwriting_input=True)
             else:
                 print(f"FAILURE: failed to open {attachment_path}")
                 return
-        # Check if the PDF is already linearized
-        # Linearize the PDF
-        pdf.save(attachment_path, linearize=True)
-        # Extract all text from the PDF using pdfminer.six
-        with open(attachment_path, "rb") as f:
-            pdf_bytes = io.BytesIO(f.read())
+
+        pdf_bytes = io.BytesIO()
+        pdf.save(pdf_bytes, linearize=True)
+
         text = pdfminer.high_level.extract_text(pdf_bytes)
         # Save the extracted text to a file
         with open(save_path, "w", encoding="utf-8") as f:
@@ -79,7 +79,7 @@ if __name__ == '__main__':
     while True:
         for (root, dirs, files) in os.walk('/data'):
             for file in files:
-                save_path = PathGenerator.get_attachment_text_save_path(json.dumps(file), file) # json dumps should be changed
+                save_path = f"/data/data/{PathGenerator.get_attachment_text_save_path(json.dumps(file), file)}" # json dumps should be changed
                 if not save_path.is_file():
                     complete_path = os.path.join(root, file)
                     start_time = time.time()
