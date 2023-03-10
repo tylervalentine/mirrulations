@@ -1,15 +1,17 @@
 
-from this import d
 from fakeredis import FakeRedis
-from mirrmock import mock_redis
+
+from mirrmock.mock_rabbitmq import MockRabbit
 from mirrmock.mock_redis import MockRedisWithStorage
-from pytest import fixture
 from mirrcore.job_queue import JobQueue
 
-    
-def test_first_job_added_with_id_0():
+
+def test_first_job_added_with_id_0(monkeypatch):
+
     database = FakeRedis()
     queue = JobQueue(database)
+    # Mock out the rabbitmq connection
+    queue.rabbitmq = MockRabbit()
 
     queue.add_job('http://a.b.c')
 
@@ -23,6 +25,7 @@ def test_job_added_with_next_id():
     database = FakeRedis()
     database.set('last_job_id', 42)
     queue = JobQueue(database)
+    queue.rabbitmq = MockRabbit()
 
     queue.add_job('http://a.b.c')
 
@@ -36,6 +39,7 @@ def test_last_timestamp():
 
     database = FakeRedis()
     queue = JobQueue(database)
+    queue.rabbitmq = MockRabbit()
 
     assert queue.get_last_timestamp_string('dockets') == '1972-01-01 00:00:00'
     assert queue.get_last_timestamp_string('documents') == \
@@ -51,14 +55,12 @@ def test_last_timestamp():
            '2015-06-10 20:49:03'
     assert queue.get_last_timestamp_string('comments') == '2020-06-10 20:49:03'
 
-# @fixture(name='mock_redis')
-# def fixture_MockRedisWithStorage():
-#     return mock_redis.MockRedisWithStorage()
 
 def test_increment_function():
     # with mock_redis:
     database = MockRedisWithStorage()
     queue = JobQueue(database)
+    queue.rabbitmq = MockRabbit()
 
     database.set('num_jobs_attachments_waiting', 0)
     database.set('num_jobs_comments_waiting', 0)

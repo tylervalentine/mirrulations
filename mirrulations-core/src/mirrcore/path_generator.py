@@ -45,7 +45,7 @@ class PathGenerator:
 
     def get_path(self, json):
         if 'data' not in json:
-            return "/data/data/unknown/unknown.json"
+            return "/unknown/unknown.json"
         if json['data']["type"] == "comments":
             return self.get_comment_json_path(json)
         if json['data']["type"] == "dockets":
@@ -115,28 +115,42 @@ class PathGenerator:
     def get_docket_json_path(self, json): 
         agencyId, docket_id, _ = self.get_attributes(json, is_docket_json=True)
 
-        return f'/data/data/{agencyId}/{docket_id}/text-{docket_id}/docket/{docket_id}.json'
+        return f'/{agencyId}/{docket_id}/text-{docket_id}/docket/{docket_id}.json'
 
 
     def get_document_json_path(self, json):
         agencyId, docket_id, item_id = self.get_attributes(json)
 
-        return f'/data/data/{agencyId}/{docket_id}/text-{docket_id}/documents/{item_id}.json'
+        return f'/{agencyId}/{docket_id}/text-{docket_id}/documents/{item_id}.json'
 
     def get_comment_json_path(self, json):
         agencyId, docket_id, item_id = self.get_attributes(json)
 
-        return f'/data/data/{agencyId}/{docket_id}/text-{docket_id}/comments/{item_id}.json'
-
-
-    def get_comment_attachment_path(self, json, file_name):
+        return f'/{agencyId}/{docket_id}/text-{docket_id}/comments/{item_id}.json'
+    
+    def get_attachment_json_paths(self, json):
+        '''
+        Given a json, this function will return all attachment paths for 
+        n number attachment links
+        '''
         agencyId, docket_id, item_id = self.get_attributes(json)
-        attachment_file_name = f'{item_id}_{file_name}'
 
-        return f'/data/data/{agencyId}/{docket_id}/binary-{docket_id}/comments_attachments/{attachment_file_name}'
+        # contains list of paths for attachments
+        attachments = []
 
-    def get_attachment_text_extract_save_path(self, json, file_name):
-        agencyId, docket_id, item_id = self.get_attributes(json)
-        attachment_file_name = f'{item_id}_{file_name}'.replace('.pdf', '_extracted')
+        for attachment in json["included"]:
+            id = attachment.get("id")
+            attributes = attachment["attributes"]
+            if (attributes["fileFormats"] and attributes["fileFormats"] != "null" and attributes["fileFormats"] is not None):
+                for file_format in attributes["fileFormats"]:
+                    if ("fileUrl" in file_format):
+                        print(f"Valid attachment for attachment ID: {id}")
+                        attachment_name = file_format["fileUrl"].split("/")[-1]
+                        attachment_id = item_id + "_" + attachment_name
+                        attachments.append(f'/{agencyId}/{docket_id}/binary-{docket_id}/comments_attachments/{attachment_id}')
+                    else:
+                        print(f"fileUrl did not exist for attachment ID: {id}")
+            else:
+                print(f"fileFormats did not exist for attachment ID: {id}")
 
-        return f'/data/data/{agencyId}/{docket_id}/text-{docket_id}/comments_extracted_text/pdfminer/{attachment_file_name}.txt'
+        return attachments
