@@ -45,7 +45,7 @@ class PathGenerator:
 
     def get_path(self, json):
         if 'data' not in json:
-            return "/data/data/unknown/unknown.json"
+            return "/unknown/unknown.json"
         if json['data']["type"] == "comments":
             return self.get_comment_json_path(json)
         if json['data']["type"] == "dockets":
@@ -115,25 +115,25 @@ class PathGenerator:
     def get_docket_json_path(self, json): 
         agencyId, docket_id, _ = self.get_attributes(json, is_docket_json=True)
 
-        return f'/data/data/{agencyId}/{docket_id}/text-{docket_id}/docket/{docket_id}.json'
+        return f'/{agencyId}/{docket_id}/text-{docket_id}/docket/{docket_id}.json'
 
 
     def get_document_json_path(self, json):
         agencyId, docket_id, item_id = self.get_attributes(json)
 
-        return f'/data/data/{agencyId}/{docket_id}/text-{docket_id}/documents/{item_id}.json'
+        return f'/{agencyId}/{docket_id}/text-{docket_id}/documents/{item_id}.json'
 
     def get_comment_json_path(self, json):
         agencyId, docket_id, item_id = self.get_attributes(json)
 
-        return f'/data/data/{agencyId}/{docket_id}/text-{docket_id}/comments/{item_id}.json'
+        return f'/{agencyId}/{docket_id}/text-{docket_id}/comments/{item_id}.json'
 
 
     def get_comment_attachment_path(self, json, file_name):
         agencyId, docket_id, item_id = self.get_attributes(json)
         attachment_file_name = f'{item_id}_{file_name}'
 
-        return f'/data/data/{agencyId}/{docket_id}/binary-{docket_id}/comments_attachments/{attachment_file_name}'
+        return f'/{agencyId}/{docket_id}/binary-{docket_id}/comments_attachments/{attachment_file_name}'
 
 
     def get_attachment_json_paths(self, json):
@@ -155,7 +155,7 @@ class PathGenerator:
                     print(f"valid attachment for attachment ID: {id}")
                     attachment_name = attachment["attributes"]["fileFormats"][0]["fileUrl"].split("/")[-1]
                     attachment_id = item_id + "_" + attachment_name
-                    attachments.append(f'/data/data/{agencyId}/{docket_id}/binary-{docket_id}/comments_attachments/{attachment_id}')
+                    attachments.append(f'/{agencyId}/{docket_id}/binary-{docket_id}/comments_attachments/{attachment_id}')
                 else:
                     print(f"fileUrl did not exist for attachment ID: {id}")
             else:
