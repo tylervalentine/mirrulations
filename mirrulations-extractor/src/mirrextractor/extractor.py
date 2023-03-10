@@ -2,6 +2,7 @@ import os
 import time
 import io
 import pdfminer
+import pdfminer.high_level
 import pikepdf
 import json
 from datetime import datetime
