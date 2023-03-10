@@ -148,16 +148,16 @@ class PathGenerator:
 
         for attachment in json["included"]:
             id = attachment.get("id")
-            attributes = attachment.get("attributes")
-            if (attributes.get("fileFormats") and attributes.get("fileFormats") != "null" and attributes.get("fileFormats") is not None):
-                file_format = attributes["fileFormats"][0]
-                if ("fileUrl" in file_format):
-                    print(f"valid attachment for attachment ID: {id}")
-                    attachment_name = attachment["attributes"]["fileFormats"][0]["fileUrl"].split("/")[-1]
-                    attachment_id = item_id + "_" + attachment_name
-                    attachments.append(f'/{agencyId}/{docket_id}/binary-{docket_id}/comments_attachments/{attachment_id}')
-                else:
-                    print(f"fileUrl did not exist for attachment ID: {id}")
+            attributes = attachment["attributes"]
+            if (attributes["fileFormats"] and attributes["fileFormats"] != "null" and attributes["fileFormats"] is not None):
+                for file_format in attributes["fileFormats"]:
+                    if ("fileUrl" in file_format):
+                        print(f"Valid attachment for attachment ID: {id}")
+                        attachment_name = file_format["fileUrl"].split("/")[-1]
+                        attachment_id = item_id + "_" + attachment_name
+                        attachments.append(f'/data/data/{agencyId}/{docket_id}/binary-{docket_id}/comments_attachments/{attachment_id}')
+                    else:
+                        print(f"fileUrl did not exist for attachment ID: {id}")
             else:
                 print(f"fileFormats did not exist for attachment ID: {id}")
 
