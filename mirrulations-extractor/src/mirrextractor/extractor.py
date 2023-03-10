@@ -31,6 +31,7 @@ class Extractor:
         file_type = attachment_path[attachment_path.find('.') + 1 : len(attachment_path)]
         match file_type:
             case 'pdf':
+                print(f"Extracting text from {attachment_path}")
                 Extractor.extract_pdf(attachment_path, save_path)
             case _:
                 print(f"FAILURE: attachment doesn't have appropriate extension {attachment_path}")
@@ -51,7 +52,6 @@ class Extractor:
             the complete path to store the extract text
             ex. /path/to/text/attachment_1.txt
         """
-        print(f"Extracting text from {attachment_path}")
         try:
             pdf = pikepdf.open(attachment_path)
         except pikepdf.PdfError as e:
