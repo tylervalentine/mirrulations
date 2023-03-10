@@ -42,6 +42,7 @@ if __name__ == '__main__':
 
         # Checks if redis database is available
         database = redis.Redis('redis')
+        # database = RabbitMQ
         # Sleep for 30 seconds to give time to load
         while not is_redis_available(database):
             print("Redis database is busy loading")
