@@ -134,3 +134,9 @@ class PathGenerator:
         attachment_file_name = f'{item_id}_{file_name}'
 
         return f'/data/data/{agencyId}/{docket_id}/binary-{docket_id}/comments_attachments/{attachment_file_name}'
+
+    def get_attachment_text_extract_save_path(self, json, file_name):
+        agencyId, docket_id, item_id = self.get_attributes(json)
+        attachment_file_name = f'{item_id}_{file_name}'.replace('.pdf', '_extracted')
+
+        return f'/data/data/{agencyId}/{docket_id}/text-{docket_id}/comments_extracted_text/pdfminer/{attachment_file_name}.txt'

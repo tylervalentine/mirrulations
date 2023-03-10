@@ -35,6 +35,11 @@ services:
       context: .
       dockerfile: mirrulations-work-server/Dockerfile
     restart: always
+  extractor:
+    build:
+      context: .
+      dockerfile: mirrulations-extractor/Dockerfile
+    restart: always
   dashboard:
     build:
       context: .

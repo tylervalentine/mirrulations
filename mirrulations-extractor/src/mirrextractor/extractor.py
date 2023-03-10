@@ -1,16 +1,43 @@
 import os
 import time
 import io
-import pdfminer.high_level
-import pdfminer.layout
+import pdfminer
 import pikepdf
+import json
 from datetime import datetime
+from mirrcore.path_generator import PathGenerator
 
 
 class Extractor:
     """
     Class containing methods to extract text from files.
     """ 
+    @staticmethod
+    def extract_text(attachment_path, save_path):
+        """
+        This method takes a complete path to an attachment and determines which type of extraction
+        will take place.
+        *Note* save_path is for later use when saving the extracted text
+
+        Parameters
+        ----------
+        attachment_path : str
+            the complete file path for the attachment that is being extracted
+            ex. /path/to/pdf/attachment_1.pdf
+        save_path : str
+            the complete path to store the extract text
+            ex. /path/to/text/attachment_1.txt
+        """
+        # gets the type of the attachment file (ex. /path/to/pdf/attachment_1.pdf -> pdf)
+        file_type = attachment_path[attachment_path.find('.') + 1 : len(attachment_path)]
+        match file_type:
+            case 'pdf':
+                print(f"Extracting text from {attachment_path}")
+                Extractor.extract_pdf(attachment_path, save_path)
+            case _:
+                print(f"FAILURE: attachment doesn't have appropriate extension {attachment_path}")
+
+
     @staticmethod
     def extract_pdf(attachment_path, save_path):
         """
@@ -26,7 +53,6 @@ class Extractor:
             the complete path to store the extract text
             ex. /path/to/text/attachment_1.txt
         """
-        print(f"Extracting text from {attachment_path}")
         try:
             pdf = pikepdf.open(attachment_path, allow_overwriting_input=True)
         except pikepdf.PdfError as e:
@@ -55,11 +81,11 @@ if __name__ == '__main__':
                 # Checks for pdfs
                 if not file.endswith('pdf'):
                     continue
-                save_path = '' # TODO: generate path
+                save_path = f"/data/data/{PathGenerator.get_attachment_text_save_path(json.dumps(file), file)}" # json dumps should be changed
                 if not save_path.is_file():
                     complete_path = os.path.join(root, file)
                     start_time = time.time()
-                    Extractor.extract_pdf(complete_path, save_path)
+                    Extractor.extract_text(complete_path, save_path)
                     print(f"Time taken to extract text from {complete_path} is {start_time - time.time()} seconds")
         
         # sleep for a hour
