@@ -144,19 +144,17 @@ class Client:
             data['directory'] = self.path_generator.get_path(job_result)
 
 
-        self.put_results(data)
-        # requests.put(f'{self.url}/put_results', json=dumps(data),
-        #              params={'client_id': self.client_id},
-        #              timeout=10)
+        self._put_results(data)
+        requests.put(f'{self.url}/put_results', json=dumps(data),
+                     params={'client_id': self.client_id},
+                     timeout=10)
         self.handle_results(data)
         if data["job_type"] == "comments" and self.does_comment_have_attachment(job_result):
             self.get_all_attachments_from_comment(job_result)
         
-
-
         # For now, still need to send original put request for Mongo
         # requests.put(
-        #     f'{self.url}/put_results',
+        #     f'{self.url}/_put_results',
         #     json=dumps(data['job_id']),
         #     params={'client_id': self.client_id},
         #     timeout=10
@@ -177,7 +175,7 @@ class Client:
         if data.get('job_type', '') == 'attachments':
             self._put_attachment_results(data)
         else:
-            self.put_results(data)
+            self._put_results(data)
 
     def _put_attachment_results(self, data):
         """
@@ -202,7 +200,7 @@ class Client:
         print(f"/data/{data['agency']}/{data['reg_id']}")
         print(f"{data['job_id']}: Attachment result(s) written to disk")
 
-    def put_results(self, data):
+    def _put_results(self, data):
         """
         Ensures data format matches expected format
         If results are valid, writes them to disk
@@ -233,10 +231,10 @@ class Client:
         """
         dir_, filename = data['directory'].rsplit('/', 1)
         try:
-            os.makedirs(f'{dir_}')
+            os.makedirs(f'/data{dir_}')
         except FileExistsError:
-            print(f'Directory already exists in root: {dir_}')
-        with open(f'{dir_}/{filename}', 'w+', encoding='utf8') as file:
+            print(f'Directory already exists in root: /data{dir_}')
+        with open(f'/data{dir_}/{filename}', 'w+', encoding='utf8') as file:
             print('Writing results to disk')
             file.write(dumps(data['results']))
 
@@ -317,7 +315,6 @@ class Client:
         # list of paths for attachmennts
 
         path_list = self.path_generator.get_attachment_json_paths(comment_json)
-        print(path_list)
         counter = 0
         print(f"Downloading {len(path_list)} attachment/s for Comment - {comment_json['data']['id']}")
         # We need an additional check before assuming "included" exists in the json
@@ -338,8 +335,8 @@ class Client:
         response = requests.get(url)
         
         self.make_attachment_directory(path)
-        print(f"wrote {url} to path: " + path)
-        with open(path, "wb") as file:
+        print(f"Wrote attachment - {url} to path: " + path)
+        with open(f'/data{path}', "wb") as file:
             file.write(response.content)
             file.close()
 
@@ -350,9 +347,9 @@ class Client:
         filepath_components = filepath.split("/")
         filepath = "/".join(filepath_components[0:-1])
         try:
-            os.makedirs(filepath)
+            os.makedirs(f'/data{filepath}')
         except FileExistsError:
-            print("Directory Exists at", filepath)
+            print("Directory Exists at", f'/data{filepath}')
 
     def does_comment_have_attachment(self, comment_json):
         """

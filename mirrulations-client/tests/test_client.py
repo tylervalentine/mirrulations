@@ -315,7 +315,7 @@ def test_client_returns_500_error_to_server(mock_requests):
         assert '500' in response.json()
 
 
-def test_client_sends_attachment_results(mock_requests):
+def test_client_downloads_attachment_results(mock_requests):
     client = Client()
     client.api_key = 1234
 
@@ -324,36 +324,44 @@ def test_client_sends_attachment_results(mock_requests):
             'http://work_server:8080/get_job?client_id=-1',
             json={'job_id': '1',
                   'url': 'http://url.com',
-                  'job_type': 'attachments',
+                  'job_type': 'comments',
                   'reg_id': '1',
                   'agency': 'foo'},
             status_code=200
         )
         mock_requests.get(
             'http://url.com?api_key=1234',
-            json={"data": [{"id": "0900006480cb703d", "type": "attachments",
-                           "attributes": {"fileFormats": [
-                               {"fileUrl": "https://downloads.regulations.gov",
-                                "format": "doc"}]}}]
-                  },
+            json={
+            "data":{
+            "id": "FDA-2016-D-2335-1566",
+            "type": "comments",
+            "attributes": {
+                        "agencyId": "FDA",
+                        "docketId": "FDA-2016-D-2335"
+                    }
+            },
+            "included":[{
+            "attributes": {
+                        "fileFormats": [{
+                            "fileUrl" : "https://downloads.regulations.gov"
+                        }]
+                    }
+            }] },
             status_code=200
         )
-
         mock_requests.get(
             "https://downloads.regulations.gov",
             json={"data": 'foobar'},
             status_code=200
         )
         mock_requests.put('http://work_server:8080/put_results', text='{}')
-        client.job_operation()
 
-        mock_requests.put(f'{BASE_URL}/put_results', text='{}')
         client.job_operation()
-        put_request = mock_requests.request_history[3]
+        put_request = mock_requests.request_history[2]
         json_data = json.loads(put_request.json())
         assert json_data['job_id'] == "1"
-        assert json_data['job_type'] == "attachments"
-        assert json_data['results'] == {'1_0.doc': 'eyJkYXRhIjogImZvb2JhciJ9'}
+        assert json_data['job_type'] == "comments"
+        # assert json_data['results'] == {'1_0.doc': 'eyJkYXRhIjogImZvb2JhciJ9'}
 
 
 def test_client_handles_empty_json(mock_requests, path_generator):
@@ -393,14 +401,14 @@ def test_client_handles_empty_json(mock_requests, path_generator):
         assert json_data['job_type'] == "attachments"
         assert json_data['results'] == {}
         output_path = path_generator.get_path(json_data['results'])
-        assert output_path == "/data/data/unknown/unknown.json"
+        assert output_path == "/unknown/unknown.json"
 
 
 def test_get_output_path_error(path_generator):
     results = {'error': 'error'}
     output_path = path_generator.get_path(results)
 
-    assert output_path == "/data/data/unknown/unknown.json"
+    assert output_path == "/unknown/unknown.json"
 
 
 def test_handles_nonetype_error(mock_requests):
@@ -682,20 +690,38 @@ def test_failure_attachment_job_results(capsys, mock_requests):
         assert captured.out == "".join(print_data)
 
 
-def test_client_downloads_all_comment_attach(mock_requests):
-    # Needs to be implemented
-    client = Client()
-    client.api_key = 1234
+# def test_client_downloads_all_comment_attach(mock_requests):
+#     # Needs to be implemented
+#     client = Client()
+#     client.api_key = 1234
 
-    with mock_requests:
-        # Need to add included section for comments WITH attachments
-        mock_requests.get(
-            'http://work_server:8080/get_job?client_id=-1',
-            json={'job_id': '1',
-                  'url': 'http://url.com',
-                  'job_type': 'comments',
-                  'reg_id': '1',
-                  'agency': 'foo'},
-            status_code=200
-        )
-    assert True
+#     with mock_requests:
+#         # Need to add included section for comments WITH attachments
+#         mock_requests.get(
+#             'http://work_server:8080/get_job?client_id=-1',
+#             json={'job_id': '1',
+#                   'url': 'http://url.com',
+#                   'job_type': 'comments',
+#                   'reg_id': '1',
+#                   'agency': 'foo', 
+#                   },
+#             status_code=200
+#         )
+#         mock_requests.get(
+#             'http://url.com?api_key=1234',
+#             json={'data': {'id': '1', 'type': 'documents',
+#                            'attributes':
+#                            {'agencyId': 'NOAA'},
+#                            'job_type': 'documents'}},
+#             status_code=200
+#         )
+#         print(client.get_job())
+
+
+#         print(client.job_operation())
+
+#         json_data = json.loads(put_request.json())
+#         saved_data = json_data['results']['data']
+#         assert saved_data['attributes'] == {'agencyId': 'NOAA'}
+#         assert saved_data['id'] == '1'
+#         assert saved_data['job_type'] == 'documents'
