@@ -30,3 +30,15 @@ def test_extractor_creates_saved_file():
         save_path)
 
     assert os.path.isfile(save_path)
+
+
+def test_extractor_doesnt_save_non_pdf():
+    absolute_path = os.path.dirname(__file__)
+
+    save_path = os.path.join(absolute_path, SAVE_PATH)
+
+    Extractor.extract_text(
+        os.path.join(absolute_path, 'pdfs/a.docx'),
+        save_path)
+
+    assert not os.path.isfile(save_path)
