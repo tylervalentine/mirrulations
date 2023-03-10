@@ -1,10 +1,11 @@
 import os
 import time
 import io
-import pdfminer.high_level
-import pdfminer.layout
+import pdfminer
 import pikepdf
+import json
 from datetime import datetime
+from mirrcore.path_generator import PathGenerator
 
 class Extractor:
     """
@@ -56,7 +57,7 @@ if __name__ == '__main__':
                 # Checks for pdfs
                 if not file.endswith('pdf'):
                     continue
-                save_path = '' # TODO: generate path
+                save_path = PathGenerator.get_attachment_text_save_path(json.dumps(file), file) # json dumps should be changed
                 if not save_path.is_file():
                     complete_path = os.path.join(root, file)
                     start_time = time.time()
