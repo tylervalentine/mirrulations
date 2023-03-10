@@ -41,6 +41,27 @@ def get_test_comment():
                 }
         }}
 
+
+def get_attachment_and_comment():
+        return {
+            "data":{
+            "id": "FDA-2016-D-2335-1566",
+            "type": "comments", 
+            "attributes": {
+                        "agencyId": "FDA",
+                        "docketId": "FDA-2016-D-2335"
+                    }
+            },
+            "included":[{
+            "attributes": {
+                        "fileFormats": [{
+                            "fileUrl" : "https://downloads.regulations.gov/FDA-2016-D-2335-1566/attachment_1.pdf"
+                        }]
+                    }
+            }] }
+
+
+
 def generate_json(id=str, type=str, agencyId=str, docketId=None) -> dict:
     # returns a json in the form that regulations.gov api stores data
     return {
@@ -250,12 +271,14 @@ def test_get_comment_path_with_missing_agencyId_key(generator):
 
 
 ## Comments Attachments
-def test_get_comment_path(generator):
-    expected_path = "/USTR/USTR-2015-0010/binary-USTR-2015-0010/comments_attachments/USTR-2015-0010-0002_attachment_1.pdf"
-    assert expected_path == generator.get_comment_attachment_path(get_test_comment(), "attachment_1.pdf")
-
 
 def test_empty_json_places_json_in_unknown(generator):
     json = dict()
     expected_path = "/unknown/unknown.json"
     assert expected_path == generator.get_path(json)
+
+
+def test_attachment_comment_paths(generator):
+    json_pls = get_attachment_and_comment()
+    expected_path = ["/FDA/FDA-2016-D-2335/binary-FDA-2016-D-2335/comments_attachments/FDA-2016-D-2335-1566_attachment_1.pdf"]
+    assert expected_path == generator.get_attachment_json_paths(json_pls)

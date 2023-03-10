@@ -128,13 +128,6 @@ class PathGenerator:
 
         return f'/{agencyId}/{docket_id}/text-{docket_id}/comments/{item_id}.json'
 
-
-    def get_comment_attachment_path(self, json, file_name):
-        agencyId, docket_id, item_id = self.get_attributes(json)
-        attachment_file_name = f'{item_id}_{file_name}'
-
-        return f'/{agencyId}/{docket_id}/binary-{docket_id}/comments_attachments/{attachment_file_name}'
-
     
     def get_attachment_json_paths(self, json):
         '''
@@ -155,7 +148,7 @@ class PathGenerator:
                         print(f"Valid attachment for attachment ID: {id}")
                         attachment_name = file_format["fileUrl"].split("/")[-1]
                         attachment_id = item_id + "_" + attachment_name
-                        attachments.append(f'/data/data/{agencyId}/{docket_id}/binary-{docket_id}/comments_attachments/{attachment_id}')
+                        attachments.append(f'/{agencyId}/{docket_id}/binary-{docket_id}/comments_attachments/{attachment_id}')
                     else:
                         print(f"fileUrl did not exist for attachment ID: {id}")
             else:
