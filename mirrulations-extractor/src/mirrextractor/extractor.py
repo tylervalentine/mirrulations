@@ -29,12 +29,11 @@ class Extractor:
         """
         # gets the type of the attachment file (ex. /path/to/pdf/attachment_1.pdf -> pdf)
         file_type = attachment_path[attachment_path.find('.') + 1 : len(attachment_path)]
-        match file_type:
-            case 'pdf':
-                print(f"Extracting text from {attachment_path}")
-                Extractor.extract_pdf(attachment_path, save_path)
-            case _:
-                print(f"FAILURE: attachment doesn't have appropriate extension {attachment_path}")
+        if file_type == 'pdf':
+            print(f"Extracting text from {attachment_path}")
+            Extractor.extract_pdf(attachment_path, save_path)
+        else:
+            print(f"FAILURE: attachment doesn't have appropriate extension {attachment_path}")
 
     @staticmethod
     def make_save_path(path):
