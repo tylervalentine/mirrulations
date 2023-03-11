@@ -34,7 +34,7 @@ class PathGenerator:
     """
 
     def get_path(self, json):
-        if 'data' not in json:
+        if 'data' not in json or json['data'] ==[]:
             return "/unknown/unknown.json"
         if json['data']["type"] == "comments":
             return self.get_comment_json_path(json)
@@ -142,6 +142,7 @@ class PathGenerator:
                     else:
                         print(f"fileUrl did not exist for attachment ID: {id}")
             else:
+                
                 print(f"fileFormats did not exist for attachment ID: {id}")
 
         return attachments

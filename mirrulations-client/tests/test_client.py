@@ -399,7 +399,7 @@ def test_client_handles_empty_json(mock_requests, path_generator):
         json_data = json.loads(put_request.json())
         assert json_data['job_id'] == "1"
         assert json_data['job_type'] == "attachments"
-        assert json_data['results'] == {}
+        assert json_data['results'] == {'data':[]}
         output_path = path_generator.get_path(json_data['results'])
         assert output_path == "/unknown/unknown.json"
 
@@ -411,7 +411,7 @@ def test_get_output_path_error(path_generator):
     assert output_path == "/unknown/unknown.json"
 
 
-def test_handles_nonetype_error(mock_requests):
+def test_handles_nonetype_error(mock_requests, path_generator):
     """
     Test for handling of the NoneType Error caused by null fileformats
     """
@@ -423,7 +423,7 @@ def test_handles_nonetype_error(mock_requests):
             'http://work_server:8080/get_job?client_id=-1',
             json={'job_id': '1',
                   'url': 'http://regulations.gov/job',
-                  'job_type': 'attachments',
+                  'job_type': 'comments',
                   'reg_id': '1',
                   'agency': 'foo'},
             status_code=200
@@ -431,12 +431,19 @@ def test_handles_nonetype_error(mock_requests):
         mock_requests.get(
             'http://regulations.gov/job?api_key=1234',
             json={
-                "data": [{
-                    "attributes": {
-                        "fileFormats": None,
+            "data":{
+            "id": "agencyID-001-0002",
+            "type": "comments",
+            "attributes": {
+                        "agencyId": "agencyID",
+                        "docketId": "agencyID-001"
                     }
-                }]
             },
+            "included":[{
+            "attributes": {
+                        "fileFormats": None
+                    }
+            }] },
             status_code=200
         )
 
@@ -444,11 +451,12 @@ def test_handles_nonetype_error(mock_requests):
         client.job_operation()
         put_request = mock_requests.request_history[2]
         json_data = json.loads(put_request.json())
-        assert json_data['job_type'] == "attachments"
-        assert json_data['results'] == {}
+        assert json_data['job_type'] == "comments"
+        attachment_paths = path_generator.get_attachment_json_paths(json_data['results'])
+        assert attachment_paths == []
 
 
-def test_handles_index_error(mock_requests):
+def test_handles_empty_attachment_list(mock_requests):
     """
     Test that handles IndexError as a result of an attachment json being:
     {
@@ -463,14 +471,27 @@ def test_handles_index_error(mock_requests):
             'http://work_server:8080/get_job?client_id=-1',
             json={'job_id': '1',
                   'url': 'http://regulations.gov/job',
-                  'job_type': 'attachments',
+                  'job_type': 'comments',
                   'reg_id': '1',
                   'agency': 'foo'},
             status_code=200
         )
         mock_requests.get(
             'http://regulations.gov/job?api_key=1234',
-            json={"data": []},
+            json={
+            "data":{
+            "id": "agencyID-001-0002",
+            "type": "comments",
+            "attributes": {
+                        "agencyId": "agencyID",
+                        "docketId": "agencyID-001"
+                    }
+            },
+            "relationships" : {
+                "attachments" : {
+                    "data" : [ ]}
+                    }
+                },
             status_code=200
         )
 
@@ -478,8 +499,9 @@ def test_handles_index_error(mock_requests):
         client.job_operation()
         put_request = mock_requests.request_history[2]
         json_data = json.loads(put_request.json())
-        assert json_data['job_type'] == "attachments"
-        assert json_data['results'] == {}
+        assert json_data['job_type'] == "comments"
+        assert client.does_comment_have_attachment(json_data['results']) == False
+
 
 
 def test_success_client_logging(capsys, mock_requests):
@@ -529,18 +551,29 @@ def test_success_attachment_logging(capsys, mock_requests):
             'http://work_server:8080/get_job?client_id=-1',
             json={'job_id': '1',
                   'url': 'http://url.com',
-                  'job_type': 'attachments',
+                  'job_type': 'comments',
                   'reg_id': '1',
                   'agency': 'foo'},
             status_code=200
         )
         mock_requests.get(
             'http://url.com?api_key=1234',
-            json={"data": [{"id": "0900006480cb703d", "type": "attachments",
-                           "attributes": {"fileFormats": [
-                               {"fileUrl": "https://downloads.regulations.gov",
-                                "format": "doc"}]}}]
-                  },
+            json={
+            "data":{
+            "id": "agencyID-001-0002",
+            "type": "comments",
+            "attributes": {
+                        "agencyId": "agencyID",
+                        "docketId": "agencyID-001"
+                    }
+            },
+            "included":[{
+            "attributes": {
+                        "fileFormats":[{
+                            "fileUrl" : "https://downloads.regulations.gov"
+                        }]
+                    }
+            }] },
             status_code=200
         )
 
@@ -556,13 +589,8 @@ def test_success_attachment_logging(capsys, mock_requests):
             'Processing job from work server\n'
             'Regulations.gov link: https://www.regulations.gov//url.com\n'
             'API URL: http://url.com\n'
-            'Performing attachment job http://url.com\n'
-            'Downloading attachments\n'
+            'Performing job\n'
             'Sending Job 1 to Work Server\n'
-            'Attachment Job Being Saved\n'
-            'agency: foo\n'
-            'reg_id: 1\n'
-            '/data/foo/1\n'
             '1: Attachment result(s) written to disk\n'
             'SUCCESS: http://url.com complete\n'
         }
