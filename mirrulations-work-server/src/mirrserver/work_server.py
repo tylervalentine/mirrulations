@@ -118,9 +118,6 @@ def get_job(workserver):
     check_for_database(workserver)
     client_id = request.args.get('client_id')
 
-    # if workserver.redis.llen('jobs_waiting_queue') == 0:
-    #     return False, jsonify({'error': 'No jobs available'}), 403
-    # job = json.loads(workserver.redis.rpop('jobs_waiting_queue'))
     if workserver.rabbitmq.size() == 0:
         return False, jsonify({'error': 'No jobs available'}), 403
     job = workserver.rabbitmq.get()
