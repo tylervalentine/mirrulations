@@ -135,13 +135,13 @@ class PathGenerator:
             if (attributes["fileFormats"] and attributes["fileFormats"] != "null" and attributes["fileFormats"] is not None):
                 for file_format in attributes["fileFormats"]:
                     if ("fileUrl" in file_format):
+                        print(f"Valid attachment for attachment ID: {id}")
                         attachment_name = file_format["fileUrl"].split("/")[-1]
                         attachment_id = item_id + "_" + attachment_name
                         attachments.append(f'/{agencyId}/{docket_id}/binary-{docket_id}/comments_attachments/{attachment_id}')
                     else:
                         print(f"fileUrl did not exist for attachment ID: {id}")
             else:
-                
                 print(f"fileFormats did not exist for attachment ID: {id}")
 
         return attachments

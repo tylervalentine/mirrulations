@@ -3,6 +3,7 @@ from mirrcore.job_queue import JobQueue
 from mirrcore.regulations_api import RegulationsAPI
 from mirrmock.mock_dataset import MockDataSet
 from mirrmock.mock_data_storage import MockDataStorage
+from mirrmock.mock_rabbitmq import MockRabbit
 from mirrgen.work_generator import WorkGenerator
 
 
@@ -14,13 +15,15 @@ def test_work_generator_single_page(requests_mock, mocker):
     database = FakeRedis()
     api = RegulationsAPI('FAKE_KEY')
     job_queue = JobQueue(database)
+    # mock out the rabbit connection
+    job_queue.rabbitmq = MockRabbit()
 
     storage = MockDataStorage()
 
     generator = WorkGenerator(job_queue, api, storage)
     generator.download('documents')
 
-    assert database.llen('jobs_waiting_queue') == 150
+    assert job_queue.get_num_jobs() == 150
 
 
 def test_work_generator_large(requests_mock, mocker):
@@ -31,12 +34,14 @@ def test_work_generator_large(requests_mock, mocker):
     database = FakeRedis()
     api = RegulationsAPI('FAKE_KEY')
     job_queue = JobQueue(database)
+    # mock out the rabbit connection
+    job_queue.rabbitmq = MockRabbit()
 
     storage = MockDataStorage()
     generator = WorkGenerator(job_queue, api, storage)
     generator.download('documents')
 
-    assert database.llen('jobs_waiting_queue') == 6666
+    assert job_queue.get_num_jobs() == 6666
 
 
 def test_work_generator_retries_after_500(requests_mock, mocker):
@@ -48,6 +53,8 @@ def test_work_generator_retries_after_500(requests_mock, mocker):
     database = FakeRedis()
     api = RegulationsAPI('FAKE_KEY')
     job_queue = JobQueue(database)
+    # mock out the rabbit connection
+    job_queue.rabbitmq = MockRabbit()
 
     storage = MockDataStorage()
     generator = WorkGenerator(job_queue, api, storage)
