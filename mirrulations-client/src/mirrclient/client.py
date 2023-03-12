@@ -150,9 +150,6 @@ class Client:
         
         if data["job_type"] == "comments" and comment_has_attachment:
             self.download_all_attachments_from_comment(job_result)
-        else: 
-            print("No attachments to download")
-
         # For now, still need to send original put request for Mongo
         # requests.put(
         #     f'{self.url}/_put_results',
