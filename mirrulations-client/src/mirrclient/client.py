@@ -21,27 +21,6 @@ class NoJobsAvailableException(Exception):
         return f'{self.message}'
 
 
-def get_urls_and_formats(file_info):
-    """
-    Parameters
-    ----------
-    file_info : dict
-        a json of file formats and urls
-
-    Returns
-    -------
-    two lists of urls and file formats
-    """
-    urls = []
-    formats = []
-
-    for link in file_info:
-        urls.append(link["fileUrl"])
-        formats.append(link["format"])
-
-    return urls, formats
-
-
 def is_environment_variables_present():
     """
     A boolean function that returns whether environment variables are
@@ -144,7 +123,6 @@ class Client:
         requests.put(f'{self.url}/put_results', json=dumps(data),
                      params={'client_id': self.client_id},
                      timeout=10)
-        self.handle_results(data)
         comment_has_attachment = self.does_comment_have_attachment(job_result)
 
         if data["job_type"] == "comments" and comment_has_attachment:
@@ -156,19 +134,6 @@ class Client:
         #     params={'client_id': self.client_id},
         #     timeout=10
         # )
-
-    def handle_results(self, data):
-        """
-        Verifies job results and deals with them appropriately.
-
-        Parameters
-        ----------
-        data : dict
-            the results from a performed job
-        """
-        if not data or not data.get('results'):
-            print(f'{data.get("job_id")}: No results found')
-            return
 
     def _put_results(self, data):
         """
@@ -200,13 +165,24 @@ class Client:
             the results data to be written to disk
         """
         dir_, filename = data['directory'].rsplit('/', 1)
-        try:
-            os.makedirs(f'/data{dir_}')
-        except FileExistsError:
-            print(f'Directory already exists in root: /data{dir_}')
+        self.make_path(dir_)
         with open(f'/data{dir_}/{filename}', 'w+', encoding='utf8') as file:
             print('Writing results to disk')
             file.write(dumps(data['results']))
+
+    def make_attachment_directory(self, filepath):
+        '''
+        Makes a path for a attachment if one does not already exist
+        '''
+        filepath_components = filepath.split("/")
+        filepath = "/".join(filepath_components[0:-1])
+        self.make_path(filepath)
+
+    def make_path(self, path):
+        try:
+            os.makedirs(f'/data{path}')
+        except FileExistsError:
+            print(f'Directory already exists in root: /data{path}')
 
     def perform_job(self, job_url):
         """
@@ -264,17 +240,6 @@ class Client:
         with open(f'/data{path}', "wb") as file:
             file.write(response.content)
             file.close()
-
-    def make_attachment_directory(self, filepath):
-        '''
-        Makes a path for a attachment if one does not already exist
-        '''
-        filepath_components = filepath.split("/")
-        filepath = "/".join(filepath_components[0:-1])
-        try:
-            os.makedirs(f'/data{filepath}')
-        except FileExistsError:
-            print("Directory Exists at", f'/data{filepath}')
 
     def does_comment_have_attachment(self, comment_json):
         """

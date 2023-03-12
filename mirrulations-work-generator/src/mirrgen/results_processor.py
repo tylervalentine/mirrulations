@@ -17,7 +17,6 @@ class ResultsProcessor:
                 if job_type == 'comments':
                     # updates the url and job_type
                     url = url + '?include=attachments'
-                    print(url)
                 # adds current job to jobs_waiting_queue
                 self.job_queue.add_job(url, job_type)
                 counts[job_type] += 1

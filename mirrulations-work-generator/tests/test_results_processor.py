@@ -6,6 +6,7 @@ from mirrcore.job_queue import JobQueue
 from mirrmock.mock_data_storage import MockDataStorage
 from mirrmock.mock_dataset import MockDataSet
 from mirrmock.mock_rabbitmq import MockRabbit
+from mirrgen.results_processor import print_report
 
 
 def test_process_results():
@@ -34,3 +35,9 @@ def test_job_is_added():
     processor = ResultsProcessor(queue, MockDataStorage())
     processor.process_results(json.loads(results[0]['text']))
     assert queue.get_num_jobs() == 1
+
+
+def test_print_counts(capsys):
+    print_report({'docket': 250})
+    captured = capsys.readouterr()
+    assert captured.out == 'Added docket: 250\n'
