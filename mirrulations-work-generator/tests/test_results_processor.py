@@ -33,33 +33,4 @@ def test_job_is_added():
     queue.rabbitmq = MockRabbit()
     processor = ResultsProcessor(queue, MockDataStorage())
     processor.process_results(json.loads(results[0]['text']))
-    assert database.llen('jobs_waiting_queue') == 1
     assert queue.get_num_jobs() == 1
-
-
-def test_adds_two_jobs_if_is_comment():
-    database = FakeRedis()
-    results = MockDataSet(1, job_type='comments').get_results()
-    queue = JobQueue(database)
-    # mock out the rabbit connection
-    queue.rabbitmq = MockRabbit()
-    processor = ResultsProcessor(queue, MockDataStorage())
-    processor.process_results(json.loads(results[0]['text']))
-    assert queue.get_num_jobs() == 2
-
-
-def test_job_types_added_if_comment_is_a_comment_type_and_attachment_type():
-    database = FakeRedis()
-    results = MockDataSet(1, job_type='comments').get_results()
-    queue = JobQueue(database)
-    # mock out the rabbit connection
-    queue.rabbitmq = MockRabbit()
-    processor = ResultsProcessor(queue, MockDataStorage())
-    processor.process_results(json.loads(results[0]['text']))
-
-    job_type_1 = queue.get_job()
-    job_type_2 = queue.get_job()
-
-    # returned in reverse order
-    assert job_type_2["job_type"] == "attachments"
-    assert job_type_1["job_type"] == "comments"

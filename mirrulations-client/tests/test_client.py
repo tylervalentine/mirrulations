@@ -624,6 +624,8 @@ def test_client_logs_for_multiple_attachments(capsys, mock_requests):
             'Performing job\n'
             'Sending Job 1 to Work Server\n'
             '1: Results written to disk\n'
+            "Valid attachment for attachment ID: None\n"
+            "Valid attachment for attachment ID: None\n"
             'Found 2 attachment(s) for Comment - agencyID-001-0002\n'
             'Downloaded 1/2 attachment(s) for Comment - agencyID-001-0002\n'
             'Downloaded 2/2 attachment(s) for Comment - agencyID-001-0002\n'
@@ -685,6 +687,7 @@ def test_success_attachment_logging(capsys, mock_requests):
             'Performing job\n'
             'Sending Job 1 to Work Server\n'
             '1: Results written to disk\n'
+            "Valid attachment for attachment ID: None\n"
             'Found 1 attachment(s) for Comment - agencyID-001-0002\n'
             'Downloaded 1/1 attachment(s) for Comment - agencyID-001-0002\n'
             'SUCCESS: http://url.com complete\n'
@@ -782,6 +785,7 @@ def test_failure_attachment_job_results(capsys, mock_requests):
             'Performing job\n'
             'Sending Job 1 to Work Server\n'
             '1: Results written to disk\n'
+            "Valid attachment for attachment ID: None\n"
             'Found 1 attachment(s) for Comment - agencyID-001-0002\n'
             'Downloaded 1/1 attachment(s) for Comment - agencyID-001-0002\n'
             'SUCCESS: http://url.com complete\n'
