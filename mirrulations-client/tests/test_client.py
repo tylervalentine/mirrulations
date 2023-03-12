@@ -1,6 +1,5 @@
 import os
 import json
-from mirrcore.attachment_saver import AttachmentSaver
 from mirrcore.path_generator import PathGenerator
 import pytest
 from pytest import fixture, raises
@@ -42,9 +41,9 @@ def mock_disk_writing(mocker):
         return_value=None
     )
     mocker.patch.object(
-        Client, 
-        'download_single_attachment', 
-        return_value = None
+        Client,
+        'download_single_attachment',
+        return_value=None
     )
 
 
@@ -215,6 +214,7 @@ def test_perform_job_timesout(mock_requests):
         with pytest.raises(Timeout):
             Client().perform_job(fake_url)
 
+
 def test_client_returns_400_error_to_server(mock_requests):
     client = Client()
     client.api_key = 1234
@@ -322,7 +322,7 @@ def test_client_handles_empty_json(mock_requests, path_generator):
         json_data = json.loads(put_request.json())
         assert json_data['job_id'] == "1"
         assert json_data['job_type'] == "attachments"
-        assert json_data['results'] == {'data':[]}
+        assert json_data['results'] == {'data': []}
         output_path = path_generator.get_path(json_data['results'])
         assert output_path == "/unknown/unknown.json"
 
@@ -354,19 +354,20 @@ def test_handles_nonetype_error(mock_requests, path_generator):
         mock_requests.get(
             'http://regulations.gov/job?api_key=1234',
             json={
-            "data":{
-            "id": "agencyID-001-0002",
-            "type": "comments",
-            "attributes": {
+                "data": {
+                    "id": "agencyID-001-0002",
+                    "type": "comments",
+                    "attributes": {
                         "agencyId": "agencyID",
                         "docketId": "agencyID-001"
                     }
-            },
-            "included":[{
-            "attributes": {
+                },
+                "included": [{
+                    "attributes": {
                         "fileFormats": None
-                    }
-            }] },
+                    },
+                }]
+            },
             status_code=200
         )
 
@@ -375,7 +376,8 @@ def test_handles_nonetype_error(mock_requests, path_generator):
         put_request = mock_requests.request_history[2]
         json_data = json.loads(put_request.json())
         assert json_data['job_type'] == "comments"
-        attachment_paths = path_generator.get_attachment_json_paths(json_data['results'])
+        results = json_data['results']
+        attachment_paths = path_generator.get_attachment_json_paths(results)
         assert attachment_paths == []
 
 
@@ -475,21 +477,22 @@ def test_client_downloads_attachment_results(mock_requests):
         mock_requests.get(
             'http://url.com?api_key=1234',
             json={
-            "data":{
-            "id": "FDA-2016-D-2335-1566",
-            "type": "comments",
-            "attributes": {
+                "data": {
+                    "id": "FDA-2016-D-2335-1566",
+                    "type": "comments",
+                    "attributes": {
                         "agencyId": "FDA",
                         "docketId": "FDA-2016-D-2335"
                     }
-            },
-            "included":[{
-            "attributes": {
+                },
+                "included": [{
+                    "attributes": {
                         "fileFormats": [{
-                            "fileUrl" : "https://downloads.regulations.gov"
+                            "fileUrl": "https://downloads.regulations.gov"
                         }]
                     }
-            }] },
+                }]
+            },
             status_code=200
         )
         mock_requests.get(
@@ -504,6 +507,7 @@ def test_client_downloads_attachment_results(mock_requests):
         json_data = json.loads(put_request.json())
         assert json_data['job_id'] == "1"
         assert json_data['job_type'] == "comments"
+
 
 def test_handles_empty_attachment_list(mock_requests):
     """
@@ -531,19 +535,20 @@ def test_handles_empty_attachment_list(mock_requests):
         mock_requests.get(
             'http://regulations.gov/job?api_key=1234',
             json={
-            "data":{
-            "id": "agencyID-001-0002",
-            "type": "comments",
-            "attributes": {
+                "data": {
+                    "id": "agencyID-001-0002",
+                    "type": "comments",
+                    "attributes": {
                         "agencyId": "agencyID",
                         "docketId": "agencyID-001"
                     }
-            },
-            "relationships" : {
-                "attachments" : {
-                    "data" : [ ]}
-                    }
                 },
+                "relationships": {
+                    "attachments": {
+                        "data": []
+                    }
+                }
+            },
             status_code=200
         )
 
@@ -551,8 +556,10 @@ def test_handles_empty_attachment_list(mock_requests):
         client.job_operation()
         put_request = mock_requests.request_history[2]
         json_data = json.loads(put_request.json())
+        results = json_data['results']
         assert json_data['job_type'] == "comments"
-        assert client.does_comment_have_attachment(json_data['results']) == False
+        assert client.does_comment_have_attachment(results) is False
+
 
 def test_client_logs_for_multiple_attachments(capsys, mock_requests):
     client = Client()
@@ -571,28 +578,29 @@ def test_client_logs_for_multiple_attachments(capsys, mock_requests):
         mock_requests.get(
             'http://url.com?api_key=1234',
             json={
-            "data":{
-            "id": "agencyID-001-0002",
-            "type": "comments",
-            "attributes": {
+                "data": {
+                    "id": "agencyID-001-0002",
+                    "type": "comments",
+                    "attributes": {
                         "agencyId": "agencyID",
                         "docketId": "agencyID-001"
                     }
+                },
+                "included": [{
+                    "attributes": {
+                        "fileFormats": [{
+                            "fileUrl": "https://downloads1.regulations.gov"
+                        }]
+                    }
+                },
+                    {
+                        "attributes": {
+                            "fileFormats": [{
+                                "fileUrl": "https://downloads2.regulations.gov"
+                            }]
+                        }
+                    }]
             },
-            "included":[{
-            "attributes": {
-                        "fileFormats":[{
-                            "fileUrl" : "https://downloads1.regulations.gov"
-                        }]
-                    }
-            }, 
-            {
-            "attributes": {
-                        "fileFormats":[{
-                            "fileUrl" : "https://downloads2.regulations.gov"
-                        }]
-                    }
-            }] },
             status_code=200
         )
 
@@ -625,6 +633,7 @@ def test_client_logs_for_multiple_attachments(capsys, mock_requests):
         captured = capsys.readouterr()
         assert captured.out == "".join(print_data)
 
+
 def test_success_attachment_logging(capsys, mock_requests):
     client = Client()
     client.api_key = 1234
@@ -642,21 +651,22 @@ def test_success_attachment_logging(capsys, mock_requests):
         mock_requests.get(
             'http://url.com?api_key=1234',
             json={
-            "data":{
-            "id": "agencyID-001-0002",
-            "type": "comments",
-            "attributes": {
+                "data": {
+                    "id": "agencyID-001-0002",
+                    "type": "comments",
+                    "attributes": {
                         "agencyId": "agencyID",
                         "docketId": "agencyID-001"
                     }
-            },
-            "included":[{
-            "attributes": {
-                        "fileFormats":[{
-                            "fileUrl" : "https://downloads.regulations.gov"
+                },
+                "included": [{
+                    "attributes": {
+                        "fileFormats": [{
+                            "fileUrl": "https://downloads.regulations.gov"
                         }]
                     }
-            }] },
+                }]
+            },
             status_code=200
         )
 
@@ -682,6 +692,7 @@ def test_success_attachment_logging(capsys, mock_requests):
 
         captured = capsys.readouterr()
         assert captured.out == "".join(print_data)
+
 
 def test_success_no_attachment_logging(capsys, mock_requests):
     client = Client()
@@ -719,6 +730,7 @@ def test_success_no_attachment_logging(capsys, mock_requests):
         captured = capsys.readouterr()
         assert captured.out == "".join(print_data)
 
+
 def test_failure_attachment_job_results(capsys, mock_requests):
     client = Client()
     client.api_key = 1234
@@ -736,21 +748,22 @@ def test_failure_attachment_job_results(capsys, mock_requests):
         mock_requests.get(
             'http://url.com?api_key=1234',
             json={
-            "data":{
-            "id": "agencyID-001-0002",
-            "type": "comments",
-            "attributes": {
+                "data": {
+                    "id": "agencyID-001-0002",
+                    "type": "comments",
+                    "attributes": {
                         "agencyId": "agencyID",
                         "docketId": "agencyID-001"
                     }
-            },
-            "included":[{
-            "attributes": {
-                        "fileFormats":[{
-                            "fileUrl" : "https://downloads.regulations.gov"
+                },
+                "included": [{
+                    "attributes": {
+                        "fileFormats": [{
+                            "fileUrl": "https://downloads.regulations.gov"
                         }]
                     }
-            }] },
+                }]
+            },
             status_code=200
         )
 

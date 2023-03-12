@@ -5,7 +5,6 @@ import sys
 from json import dumps, loads
 import requests
 from dotenv import load_dotenv
-from mirrcore.attachment_saver import AttachmentSaver
 from mirrcore.path_generator import PathGenerator
 
 
@@ -138,7 +137,7 @@ class Client:
             'agency': job['agency']
         }
         print(f'Sending Job {job["job_id"]} to Work Server')
-        if ('errors' not in job_result):
+        if 'errors' not in job_result:
             data['directory'] = self.path_generator.get_path(job_result)
 
         self._put_results(data)
@@ -147,7 +146,7 @@ class Client:
                      timeout=10)
         self.handle_results(data)
         comment_has_attachment = self.does_comment_have_attachment(job_result)
-        
+
         if data["job_type"] == "comments" and comment_has_attachment:
             self.download_all_attachments_from_comment(job_result)
         # For now, still need to send original put request for Mongo
@@ -170,32 +169,6 @@ class Client:
         if not data or not data.get('results'):
             print(f'{data.get("job_id")}: No results found')
             return
-        # No more 'attachment' job types
-        # if data.get('job_type', '') == 'attachments':
-        #     self._put_attachment_results(data)
-
-    def _put_attachment_results(self, data):
-        """
-        Ensures data format matches what is expected for attachments
-        If results are valid, writes them to disk
-
-        Parameters
-        ----------
-        data : dict
-            the results from a performed job
-        """
-        print("Attachment Job Being Saved")
-        if any(x in data['results'] for x in ['error', 'errors']):
-            print(f"{data['job_id']}: Errors found in results")
-            return
-        print(f"agency: {data['agency']}")
-        print(f"reg_id: {data['reg_id']}")
-        AttachmentSaver().save(
-            data,
-            f"/data/{data['agency']}/{data['reg_id']}"
-        )
-        print(f"/data/{data['agency']}/{data['reg_id']}")
-        print(f"{data['job_id']}: Attachment result(s) written to disk")
 
     def _put_results(self, data):
         """
@@ -270,20 +243,22 @@ class Client:
         # We need an additional check for if "included" exists in the json
         for included in comment_json["included"]:
             attributes = included["attributes"]
-            if (attributes["fileFormats"] and attributes["fileFormats"] not in ["null", None]):
+            if (attributes["fileFormats"] and
+                    attributes["fileFormats"] not in ["null", None]):
                 for attachment in included['attributes']['fileFormats']:
                     url = attachment['fileUrl']
                     self.download_single_attachment(url, path_list[counter])
-                    print(f"Downloaded {counter+1}/{len(path_list)} attachment(s) for {comment_id_str}")
-                    counter += 1
-                     # re write this
+                    print(f"Downloaded {counter+1}/{len(path_list)} "
+                          f"attachment(s) for {comment_id_str}")
+                    counter += 1  # re write this
 
     def download_single_attachment(self, url, path):
         '''
-        Downloads a single attachment for a comment and writes it to its correct path
+        Downloads a single attachment for a comment and
+        writes it to its correct path
         '''
-        response = requests.get(url)
-        
+        response = requests.get(url, timeout=10)
+
         self.make_attachment_directory(path)
         print(f"Wrote attachment - {url} to path: " + path)
         with open(f'/data{path}', "wb") as file:
@@ -303,16 +278,18 @@ class Client:
 
     def does_comment_have_attachment(self, comment_json):
         """
-        Validates whether a json for a comment has any attachments to be downloaded.
+        Validates whether a json for a comment has any
+        attachments to be downloaded.
 
         RETURNS
         -------
-        True or False depending if there is an attachment available to download from a comment
+        True or False depending if there is an attachment
+        available to download from a comment
         """
-        if "included" in comment_json and len(comment_json["included"])>0:
+        if "included" in comment_json and len(comment_json["included"]) > 0:
             return True
         return False
-    
+
     def job_operation(self):
         """
         Processes a job.
