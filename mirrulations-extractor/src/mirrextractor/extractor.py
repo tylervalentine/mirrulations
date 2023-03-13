@@ -72,12 +72,12 @@ class Extractor:
         # Linearize the PDF
         pdf.save(attachment_path, linearize=True)
         # Extract all text from the PDF using pdfminer.six
-        with open(attachment_path, "rb") as file:
-            pdf_bytes = io.BytesIO(file.read())
+        with open(attachment_path, "rb") as save_file:
+            pdf_bytes = io.BytesIO(save_file.read())
         text = pdfminer.high_level.extract_text(pdf_bytes)
         # Save the extracted text to a file
-        with open(save_path, "w", encoding="utf-8") as file:
-            file.write(text)
+        with open(save_path, "w", encoding="utf-8") as save_file:
+            save_file.write(text)
         print(f"SUCCESS: Saved pdf at {save_path}")
 
 
@@ -88,10 +88,10 @@ if __name__ == '__main__':
         for (root, dirs, files) in os.walk('/data'):
             for file in files:
                 complete_path = os.path.join(root, file)
-                save_path = Extractor.make_save_path(complete_path)
-                if not save_path.is_file():
+                file_save_path = Extractor.make_save_path(complete_path)
+                if not file_save_path.is_file():
                     start_time = time.time()
-                    Extractor.extract_text(complete_path, save_path)
+                    Extractor.extract_text(complete_path, file_save_path)
                     print(f"Time taken to extract text from {complete_path} \
                     is {start_time - time.time()} seconds")
 
