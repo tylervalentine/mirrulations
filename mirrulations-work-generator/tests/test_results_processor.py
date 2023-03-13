@@ -2,11 +2,11 @@ import json
 import os
 from fakeredis import FakeRedis
 from mirrgen.results_processor import ResultsProcessor
+from mirrgen.results_processor import print_report
 from mirrcore.job_queue import JobQueue
 from mirrmock.mock_data_storage import MockDataStorage
 from mirrmock.mock_dataset import MockDataSet
 from mirrmock.mock_rabbitmq import MockRabbit
-from mirrgen.results_processor import print_report
 
 
 def test_process_results():
