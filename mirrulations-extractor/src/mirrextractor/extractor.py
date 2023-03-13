@@ -72,7 +72,7 @@ class Extractor:
         # Save the extracted text to a file
         with open(save_path, "w", encoding="utf-8") as out_file:
             out_file.write(text.strip())
-        print(f"SUCCESS: Saved pdf at {save_path}")
+        print(f"SUCCESS: Saved extraction at {save_path}")
 
 
 if __name__ == '__main__':
