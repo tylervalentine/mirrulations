@@ -71,7 +71,7 @@ class Extractor:
         text = pdfminer.high_level.extract_text(pdf_bytes)
         # Save the extracted text to a file
         with open(save_path, "w", encoding="utf-8") as out_file:
-            out_file.write(text)
+            out_file.write(text.strip())
         print(f"SUCCESS: Saved pdf at {save_path}")
 
 
