@@ -1,6 +1,7 @@
-import pika
 import json
-import time
+import pika
+from mirrcore.job_queue_exceptions import JobQueueException
+
 
 class RabbitMQ:
     """
@@ -32,8 +33,8 @@ class RabbitMQ:
                                         delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE)
                                        )
         except pika.exceptions.StreamLostError:
-            print('FAILURE: Error occurred when adding a job. Sleeping...')
-            time.sleep(60 * 60 * 4)
+            print("FAILURE: Error occured when adding a job. Sleeping. . .")
+            raise JobQueueException
 
     def size(self):
         """
