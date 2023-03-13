@@ -11,7 +11,6 @@ from mirrcore.redis_check import is_redis_available
 from mirrcore.job_queue_exceptions import WorkGenException
 
 
-
 class WorkGenerator:
 
     def __init__(self, job_queue, api, datastorage):
