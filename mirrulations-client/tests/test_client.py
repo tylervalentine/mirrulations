@@ -1,5 +1,6 @@
 import os
 import json
+from unittest.mock import patch
 from mirrcore.path_generator import PathGenerator
 import pytest
 from pytest import fixture, raises
@@ -800,3 +801,32 @@ def test_failure_attachment_job_results(capsys, mock_requests):
 
         captured = capsys.readouterr()
         assert captured.out == "".join(print_data)
+
+
+def test_save_path_directory_does_not_already_exist():
+    with patch('os.makedirs') as mock_dir:
+        client = Client()
+        client.make_path('/USTR')
+        mock_dir.assert_called_once_with('/data/USTR')
+
+
+def test_save_path_directory_already_exists(capsys):
+    with patch('os.makedirs') as mock_dir:
+        client = Client()
+        mock_dir.side_effect = FileExistsError('Directory already exists')
+        client.make_path('/USTR')
+
+        print_data = 'Directory already exists in root: /data/USTR\n'
+        captured = capsys.readouterr()
+        assert captured.out == print_data
+
+
+def test_make_attachment_directory():
+    with patch('os.makedirs') as mock_dir:
+        client = Client()
+        client.make_attachment_directory(
+            '/USTR/USTR-2015-0010/binary-USTR-2015-0010/comments_attachments/'
+            'USTR-2015-0010-0002_attachment_1.pdf')
+        mock_dir.assert_called_once_with(
+            '/data/USTR/USTR-2015-0010/binary-USTR-2015-0010/'
+            'comments_attachments')

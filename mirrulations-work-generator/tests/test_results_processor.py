@@ -1,8 +1,7 @@
 import json
 import os
 from fakeredis import FakeRedis
-from mirrgen.results_processor import ResultsProcessor
-from mirrgen.results_processor import print_report
+from mirrgen.results_processor import ResultsProcessor, print_report
 from mirrcore.job_queue import JobQueue
 from mirrmock.mock_data_storage import MockDataStorage
 from mirrmock.mock_dataset import MockDataSet
