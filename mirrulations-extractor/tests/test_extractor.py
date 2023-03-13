@@ -57,16 +57,3 @@ def test_extractor_doesnt_save_non_pdf():
         save_path)
 
     assert not os.path.isfile(save_path)
-
-
-def test_extractor_save_path():
-    path = "/data/data/USTR/USTR-2015-0010/" + \
-           "binary-USTR-2015-0010/" + \
-           "comments_attachments/USTR-2015-0010-0002_attachment_1.pdf"
-    save_path = Extractor.make_save_path(path)
-    expected_path = "/data/data/USTR/USTR-2015-0010/text-USTR-2015-0010/" + \
-                    "comments_extracted_text/pdfminer/" + \
-                    "USTR-2015-0010-0002_attachment_1_extracted.txt"
-    print(save_path)
-    print(expected_path)
-    assert save_path == expected_path

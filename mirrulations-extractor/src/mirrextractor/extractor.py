@@ -5,6 +5,7 @@ import io
 import pdfminer
 import pdfminer.high_level
 import pikepdf
+from mirrcore.path_generator import PathGenerator
 
 
 class Extractor:
@@ -38,6 +39,15 @@ class Extractor:
 
     @staticmethod
     def make_save_path(path):
+        """
+        This method takes a complete path to a pdf and makes
+        the save path based on paramters in that path.
+        Parameters
+        ----------
+        path : str
+            the complete file path for the attachment that is being extracted
+            ex. /path/to/pdf/attachment_1.pdf
+        """
         return path.replace('binary', 'text') \
             .replace('comments_attachments',
                      'comments_extracted_text/pdfminer') \
@@ -85,7 +95,7 @@ if __name__ == '__main__':
                     continue
                 complete_path = os.path.join(root, file)
                 output_path = "/data/data/" + \
-                    Extractor.make_save_path(complete_path)
+                    PathGenerator.make_attachment_save_path(complete_path)
                 if not output_path.is_file():
                     start_time = time.time()
                     Extractor.extract_text(complete_path, output_path)
