@@ -2,12 +2,12 @@ from flask import Flask, json, jsonify, request
 import redis
 from mirrcore.data_storage import DataStorage
 from mirrcore.attachment_saver import AttachmentSaver
+from mirrcore.rabbitmq import RabbitMQ
 from mirrserver.put_results_validator import PutResultsValidator
 from mirrserver.exceptions import InvalidResultsException
 from mirrserver.exceptions import InvalidClientIDException
 from mirrserver.exceptions import MissingClientIDException
 from mirrserver.exceptions import NoJobsException
-from mirrserver.get_client_id_validator import GetClientIDValidator
 from mirrserver.get_job_validator import GetJobValidator
 
 
@@ -29,8 +29,6 @@ class WorkServer:
         the attachment saver class that saves attachments
     put_results_validator : PutResultsValidator
         the validator class for the put results endpoint
-    get_client_id_validator : GetClientIDValidator
-        the validator class for the get client id endpoint
     get_job_validator : GetJobValidator
         the validator class for the get job endpoint
 
@@ -53,8 +51,8 @@ class WorkServer:
         self.data = DataStorage()
         self.attachment_saver = AttachmentSaver()
         self.put_results_validator = PutResultsValidator()
-        self.get_client_id_validator = GetClientIDValidator()
         self.get_job_validator = GetJobValidator()
+        self.rabbitmq = RabbitMQ()
 
 
 def check_for_database(workserver):
@@ -119,9 +117,11 @@ def get_job(workserver):
     """
     check_for_database(workserver)
     client_id = request.args.get('client_id')
-    if workserver.redis.llen('jobs_waiting_queue') == 0:
+
+    if workserver.rabbitmq.size() == 0:
         return False, jsonify({'error': 'No jobs available'}), 403
-    job = json.loads(workserver.redis.rpop('jobs_waiting_queue'))
+    job = workserver.rabbitmq.get()
+
     job_id = job['job_id']
     url = job['url']
     agency = job['agency'] if job.get('agency') else "other_agency"
