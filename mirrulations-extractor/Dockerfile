@@ -11,4 +11,4 @@ COPY mirrulations-core /mirrulations-core
 RUN .venv/bin/pip install -e .
 RUN .venv/bin/pip install /mirrulations-core
 
-CMD [".venv/bin/python", "src/extractor/extractor.py"]
+CMD [".venv/bin/python", "src/mirrextractor/extractor.py"]
