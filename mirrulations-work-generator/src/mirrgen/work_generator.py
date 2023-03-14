@@ -6,9 +6,9 @@ from mirrgen.search_iterator import SearchIterator
 from mirrgen.results_processor import ResultsProcessor
 from mirrcore.regulations_api import RegulationsAPI
 from mirrcore.job_queue import JobQueue
+from mirrcore.job_queue_exceptions import JobQueueException
 from mirrcore.data_storage import DataStorage
 from mirrcore.redis_check import is_redis_available
-from mirrcore.job_queue_exceptions import WorkGenException
 
 
 class WorkGenerator:
@@ -69,7 +69,7 @@ if __name__ == '__main__':
     while True:
         try:
             generate_work()
-        except Exception as error:
-            raise WorkGenException from error
-        # Sleeps for 6 hours
-        time.sleep(60 * 60 * 6)
+        except JobQueueException:
+            print("FAILURE: Error occurred when adding a job. Sleeping...")
+            # Sleeps for 6 hours when Exception is caught
+            time.sleep(60 * 60 * 6)

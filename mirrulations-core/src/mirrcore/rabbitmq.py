@@ -33,7 +33,7 @@ class RabbitMQ:
                                         delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE)
                                        )
         except pika.exceptions.StreamLostError as error:
-            print("FAILURE: Error occurred when adding a job. Sleeping. . .")
+            print("FAILURE: RabbitMQ Channel Connection Lost")
             raise JobQueueException from error
 
     def size(self):

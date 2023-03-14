@@ -31,10 +31,7 @@ class JobQueue:
             'reg_id': reg_id,
             'agency': agency
             }
-        try: 
-            self.rabbitmq.add(job)
-        except:
-            raise JobQueueException
+        self.rabbitmq.add(job)
         if job_type == 'attachments':
             self.database.incr('num_jobs_attachments_waiting')
         elif job_type == 'comments':
