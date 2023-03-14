@@ -113,8 +113,9 @@ class Client:
             'job_type': job['job_type'],
             'job_id': job['job_id'],
             'results': job_result,
-            'reg_id': job['reg_id'],
-            'agency': job['agency']
+            ## Updated to get reg_id and agency from regulations json - Jack W. 3/14
+            'reg_id': job_result['data']['id'],
+            'agency': job_result['data']['attributes']['agencyId']
         }
         print(f'Sending Job {job["job_id"]} to Work Server')
         if 'errors' not in job_result:
@@ -238,22 +239,24 @@ class Client:
         response = requests.get(url, timeout=10)
         self.make_attachment_directory(path)
         filename = path.split('/')[-1]
-        data[filename] = b64encode(response.content).decode('ascii')
-        print(f"Wrote attachment - {url} to path: " + path)
         with open(f'/data{path}', "wb") as file:
             file.write(response.content)
             file.close()
+        print(f"SAVED attachment - {url} to path: " + path)
+
         data = {
             'job_type': 'attachments',
             'job_id': data['job_id'],
-            'results': filename,
+            'results': data['results'],
             'reg_id': data['reg_id'],
-            'agency': data['agency']
+            'agency': data['agency'], 
+            ## Included attachment_path and attachment_filename for workserver request 3/14
+            'attachment_path': f'/data{path}', 
+            'attachment_filename': filename
         }
         result = requests.put(f'{self.url}/put_results', json=dumps(data),
                               params={'client_id': self.client_id},
                               timeout=10)
-        print(result.status_code)
 
     def does_comment_have_attachment(self, comment_json):
         """
