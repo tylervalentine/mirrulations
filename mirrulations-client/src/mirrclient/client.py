@@ -114,8 +114,8 @@ class Client:
             'results': job_result,
             # Updated to get reg_id and agency from regulations json
             # - Jack W. 3/14
-            'reg_id': job_result['data']['id'],
-            'agency': job_result['data']['attributes']['agencyId']
+            'reg_id': job['reg_id'],
+            'agency': job['agency']
         }
         print(f'Sending Job {job["job_id"]} to Work Server')
         if 'errors' not in job_result:
@@ -243,12 +243,11 @@ class Client:
             file.write(response.content)
             file.close()
         print(f"SAVED attachment - {url} to path: ", path)
-        print("Current Attachment Count:", self.attachment_count)
-
         data = {
             'job_type': 'attachments',
             'job_id': data['job_id'],
             'results': data['results'],
+            # This is not returning the valid reg_id, agency
             'reg_id': data['reg_id'],
             'agency': data['agency'],
             # Included attachment_path and attachment_filename for workserver
