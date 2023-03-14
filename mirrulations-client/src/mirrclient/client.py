@@ -3,7 +3,6 @@ import time
 import os
 import sys
 from json import dumps, loads
-from base64 import b64encode
 import requests
 from dotenv import load_dotenv
 from mirrcore.path_generator import PathGenerator
@@ -113,7 +112,8 @@ class Client:
             'job_type': job['job_type'],
             'job_id': job['job_id'],
             'results': job_result,
-            ## Updated to get reg_id and agency from regulations json - Jack W. 3/14
+            # Updated to get reg_id and agency from regulations json
+            # - Jack W. 3/14
             'reg_id': job_result['data']['id'],
             'agency': job_result['data']['attributes']['agencyId']
         }
@@ -242,21 +242,23 @@ class Client:
         with open(f'/data{path}', "wb") as file:
             file.write(response.content)
             file.close()
-        print(f"SAVED attachment - {url} to path: " + path)
+        print(f"SAVED attachment - {url} to path: ", path)
+        print("Current Attachment Count:", self.attachment_count)
 
         data = {
             'job_type': 'attachments',
             'job_id': data['job_id'],
             'results': data['results'],
             'reg_id': data['reg_id'],
-            'agency': data['agency'], 
-            ## Included attachment_path and attachment_filename for workserver request 3/14
-            'attachment_path': f'/data{path}', 
+            'agency': data['agency'],
+            # Included attachment_path and attachment_filename for workserver
+            # request 3/14
+            'attachment_path': f'/data{path}',
             'attachment_filename': filename
         }
-        result = requests.put(f'{self.url}/put_results', json=dumps(data),
-                              params={'client_id': self.client_id},
-                              timeout=10)
+        requests.put(f'{self.url}/put_results', json=dumps(data),
+                     params={'client_id': self.client_id},
+                     timeout=10)
 
     def does_comment_have_attachment(self, comment_json):
         """

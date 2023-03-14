@@ -230,11 +230,13 @@ def put_attachment_results(workserver, data):
     success, *values = check_received_result(workserver)
     if not success:
         return success, values[0], values[1]
-    # Not sure if we need the following two lines since attachments aren't considered jobs?
+    # Not sure if we need the following two lines
+    # since attachments aren't considered jobs?
     # job_id = data['job_id']
     # workserver.redis.hdel('jobs_in_progress', job_id)
     if data.get('results') is not None:
-        print(f'Attachment from Comment {data["reg_id"]} saved to {data["attachment_path"]}')
+        print(f'Attachment from Comment {data["reg_id"]} \
+        saved to {data["attachment_path"]}')
     workserver.data.add_attachment(data)
     return (True,)
 
