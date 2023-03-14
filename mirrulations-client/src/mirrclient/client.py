@@ -3,6 +3,7 @@ import time
 import os
 import sys
 from json import dumps, loads
+from base64 import b64encode
 import requests
 from dotenv import load_dotenv
 from mirrcore.path_generator import PathGenerator
@@ -126,7 +127,7 @@ class Client:
         comment_has_attachment = self.does_comment_have_attachment(job_result)
 
         if data["job_type"] == "comments" and comment_has_attachment:
-            self.download_all_attachments_from_comment(job_result)
+            self.download_all_attachments_from_comment(data, job_result)
         # For now, still need to send original put request for Mongo
         # requests.put(
         #     f'{self.url}/_put_results',
@@ -206,7 +207,7 @@ class Client:
         return requests.get(job_url + f'?api_key={self.api_key}',
                             timeout=10).json()
 
-    def download_all_attachments_from_comment(self, comment_json):
+    def download_all_attachments_from_comment(self, data, comment_json):
         '''
         Downloads all attachments for a comment
         '''
@@ -223,23 +224,36 @@ class Client:
                     attributes["fileFormats"] not in ["null", None]):
                 for attachment in included['attributes']['fileFormats']:
                     url = attachment['fileUrl']
-                    self.download_single_attachment(url, path_list[counter])
+                    self.download_single_attachment(url, path_list[counter],
+                                                    data)
                     print(f"Downloaded {counter+1}/{len(path_list)} "
                           f"attachment(s) for {comment_id_str}")
                     counter += 1  # re write this
 
-    def download_single_attachment(self, url, path):
+    def download_single_attachment(self, url, path, data):
         '''
         Downloads a single attachment for a comment and
         writes it to its correct path
         '''
         response = requests.get(url, timeout=10)
-
         self.make_attachment_directory(path)
+        filename = path.split('/')[-1]
+        data[filename] = b64encode(response.content).decode('ascii')
         print(f"Wrote attachment - {url} to path: " + path)
         with open(f'/data{path}', "wb") as file:
             file.write(response.content)
             file.close()
+        data = {
+            'job_type': 'attachments',
+            'job_id': data['job_id'],
+            'results': filename,
+            'reg_id': data['reg_id'],
+            'agency': data['agency']
+        }
+        result = requests.put(f'{self.url}/put_results', json=dumps(data),
+                              params={'client_id': self.client_id},
+                              timeout=10)
+        print(result.status_code)
 
     def does_comment_have_attachment(self, comment_json):
         """
@@ -264,9 +278,6 @@ class Client:
         """
         print('Processing job from work server')
         job = self.get_job()
-        # if job['job_type'] == 'attachments':
-        #     result = self.perform_attachment_job(job['url'], job['job_id'])
-
         result = self.perform_job(job['url'])
         self.send_job(job, result)
         if any(x in result for x in ('error', 'errors')):
