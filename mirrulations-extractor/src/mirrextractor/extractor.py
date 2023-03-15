@@ -71,11 +71,9 @@ class Extractor:
         try:
             pdf = pikepdf.open(attachment_path)
         except pikepdf.PdfError:
-            try:
-                pdf = pikepdf.open(attachment_path, recover=True)
-            except pikepdf.PdfError:
-                print(f"FAILURE: failed to open {attachment_path}")
-                return
+            print(f"FAILURE: failed to open {attachment_path}")
+            return
+
         pdf_bytes = io.BytesIO()
         pdf.save(pdf_bytes, linearize=True)
         text = pdfminer.high_level.extract_text(pdf_bytes)

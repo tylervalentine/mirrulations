@@ -1,10 +1,11 @@
 import os
+import shutil
 from pytest import fixture
 from mirrextractor.extractor import Extractor
 
 
-SAVE_DIR = 'saved'
-SAVE_PATH = 'saved/saved.txt'
+SAVE_DIR = 'test-area'
+SAVE_PATH = SAVE_DIR + '/saved.txt'
 
 
 @fixture(autouse=True)
@@ -55,5 +56,23 @@ def test_extractor_doesnt_save_non_pdf():
     Extractor.extract_text(
         os.path.join(absolute_path, 'pdfs/a.docx'),
         save_path)
+
+    assert not os.path.isfile(save_path)
+
+
+def test_error_when_file_is_already_open():
+    absolute_path = os.path.dirname(__file__)
+
+    file_name = 'a.pdf'
+    attachment_path = os.path.join(absolute_path, 'pdfs/' + file_name)
+    copy_path = os.path.join(absolute_path, SAVE_DIR + '/' + file_name)
+
+    shutil.copy(attachment_path, copy_path)
+
+    save_path = os.path.join(absolute_path, SAVE_PATH)
+    
+    # File will be open at the same time we are trying to extract it.
+    with open(copy_path, "w", encoding="utf-8") as _:
+        Extractor.extract_text(copy_path, save_path)
 
     assert not os.path.isfile(save_path)
