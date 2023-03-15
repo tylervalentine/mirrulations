@@ -291,6 +291,4 @@ def test_extractor_save_path():
     expected_path = "/data/data/USTR/USTR-2015-0010/text-USTR-2015-0010/" + \
                     "comments_extracted_text/pdfminer/" + \
                     "USTR-2015-0010-0002_attachment_1_extracted.txt"
-    print(save_path)
-    print(expected_path)
     assert save_path == expected_path
