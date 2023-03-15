@@ -70,7 +70,7 @@ def test_error_when_file_is_already_open():
     shutil.copy(attachment_path, copy_path)
 
     save_path = os.path.join(absolute_path, SAVE_PATH)
-    
+
     # File will be open at the same time we are trying to extract it.
     with open(copy_path, "w", encoding="utf-8") as _:
         Extractor.extract_text(copy_path, save_path)
