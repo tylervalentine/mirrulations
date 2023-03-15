@@ -77,3 +77,18 @@ def test_extractor_overwrites_existing_file():
 
    with open(save_path, 'r') as f:
        assert f.read() != 'test'
+
+
+def test_extractor_handles_mixed_text_and_images():
+    absolute_path = os.path.dirname(__file__)
+
+    save_path = os.path.join(absolute_path, SAVE_PATH)
+
+    Extractor.extract_text(
+        os.path.join(absolute_path, 'pdfs/mixed.pdf'),
+        save_path)
+
+    with open(save_path, "r", encoding="utf-8") as in_file:
+        text = in_file.read()
+
+    assert text.strip() == 'a'
