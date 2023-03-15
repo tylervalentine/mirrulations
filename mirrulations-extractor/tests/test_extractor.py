@@ -57,3 +57,23 @@ def test_extractor_doesnt_save_non_pdf():
         save_path)
 
     assert not os.path.isfile(save_path)
+
+
+def test_extractor_overwrites_existing_file():
+   absolute_path = os.path.dirname(__file__)
+
+
+   save_path = os.path.join(absolute_path, SAVE_PATH)
+
+
+   with open(save_path, 'w') as f:
+       f.write('test')
+
+
+   Extractor.extract_text(
+       os.path.join(absolute_path, 'pdfs/empty.pdf'),
+       save_path)
+
+
+   with open(save_path, 'r') as f:
+       assert f.read() != 'test'
