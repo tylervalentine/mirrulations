@@ -210,6 +210,8 @@ def test_put_results_returns_correct_attachment_job(mock_server):
                       'job_type': 'attachments',
                       'agency': 'EPA',
                       'reg_id': 'AAAAA',
+                      'attachment_path': 'att-path',
+                      'attachment_filename': 'att-filename',
                       'results': {'1234_0': base64.b64encode(
                         file.read()).decode('ascii')}})
         params = {'client_id': 1}
