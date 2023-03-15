@@ -10,8 +10,8 @@ Dependencies:
 import os
 from flask import Flask, jsonify, render_template
 from flask_cors import CORS
-
 from mirrcore.job_queue import JobQueue
+from mirrcore.job_queue_exceptions import JobQueueException
 from mirrdash.sum_mongo_counts import connect_mongo_db, get_done_counts
 from dotenv import load_dotenv
 from redis import Redis
@@ -64,7 +64,11 @@ def create_server(job_queue, docker_server, mongo_client):
     @dashboard.app.route('/data', methods=['GET'])
     def _get_dashboard_data():
         """ returns data as json and request status code """
-        data = get_jobs_stats(dashboard.job_queue)
+        try:
+            data = get_jobs_stats(dashboard.job_queue)
+        except JobQueueException as error:
+            print(f"FAILURE: Encountered JobQueueException from {error}")
+            return jsonify(error.message), error.status_code
 
         # Get the number of jobs done from the mongo db
         # and add it to the data
