@@ -82,15 +82,15 @@ def test_extractor_overwrites_existing_file():
     absolute_path = os.path.dirname(__file__)
     save_path = os.path.join(absolute_path, SAVE_PATH)
 
-    with open(save_path, 'w') as file:
+    with open(save_path, 'w', encoding="utf-8") as file:
         file.write('test')
 
     Extractor.extract_text(
         os.path.join(absolute_path, 'pdfs/empty.pdf'),
         save_path)
 
-    with open(save_path, 'r') as f:
-        assert f.read() != 'test'
+    with open(save_path, 'r', encoding="utf-8") as file:
+        assert file.read() != 'test'
 
 
 def test_extractor_handles_mixed_text_and_images():
