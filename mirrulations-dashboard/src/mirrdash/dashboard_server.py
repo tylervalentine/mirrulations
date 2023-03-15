@@ -68,16 +68,10 @@ def create_server(job_queue, docker_server, mongo_client):
 
         # Get the number of jobs done from the mongo db
         # and add it to the data
-        # TO DO: 'attachments_count' is hardwired. Needs to have it
-        # added in from plumbing.
         jobs_done_info = get_done_counts(dashboard.mongo, 'mirrulations')
         data.update(jobs_done_info)
 
         # Add this value to the total jobs
-        # TO DO: This should go away entirely when Redis is
-        # removed from this process
-        # TO DO: When this happens, change the variable name
-        # in get_done_counts to simplify
         data['jobs_total'] += jobs_done_info['num_jobs_done']
 
         # Add container info to data
