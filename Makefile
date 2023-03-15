@@ -8,6 +8,9 @@ all: test static
 test:
 	pytest;
 
+test-cov:
+	pytest --cov-report html;open ./htmlcov/index.html;
+
 static:
 	flake8 mirrulations-client mirrulations-dashboard mirrulations-work-generator mirrulations-work-server mirrulations-extractor;
 	pycodestyle mirrulations-client mirrulations-dashboard mirrulations-work-generator mirrulations-work-server mirrulations-extractor;
