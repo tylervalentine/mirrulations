@@ -6,6 +6,7 @@ from json import dumps, loads
 import requests
 from dotenv import load_dotenv
 from mirrcore.path_generator import PathGenerator
+from mirrcore.saver import Saver
 
 
 class NoJobsAvailableException(Exception):
@@ -60,6 +61,7 @@ class Client:
         self.api_key = os.getenv('API_KEY')
         self.client_id = os.getenv('ID')
         self.path_generator = PathGenerator()
+        self.saver = Saver()
 
         hostname = os.getenv('WORK_SERVER_HOSTNAME')
         port = os.getenv('WORK_SERVER_PORT')
@@ -234,11 +236,11 @@ class Client:
         '''
         response = requests.get(url, timeout=10)
         self.make_attachment_directory(path)
-        filename = path.split('/')[-1]
-        with open(f'/data{path}', "wb") as file:
-            file.write(response.content)
-            file.close()
+        self.saver.save(response.content, path)
         print(f"SAVED attachment - {url} to path: ", path)
+
+        # Not sure where this would go
+        filename = path.split('/')[-1]
         data = {
             'job_type': 'attachments',
             'job_id': data['job_id'],
