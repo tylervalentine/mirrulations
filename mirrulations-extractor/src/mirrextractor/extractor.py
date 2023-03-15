@@ -38,22 +38,6 @@ class Extractor:
             {attachment_path}")
 
     @staticmethod
-    def make_save_path(path):
-        """
-        This method takes a complete path to a pdf and makes
-        the save path based on paramters in that path.
-        Parameters
-        ----------
-        path : str
-            the complete file path for the attachment that is being extracted
-            ex. /path/to/pdf/attachment_1.pdf
-        """
-        return path.replace('binary', 'text') \
-            .replace('comments_attachments',
-                     'comments_extracted_text/pdfminer') \
-            .replace('.pdf', '_extracted.txt')
-
-    @staticmethod
     def _extract_pdf(attachment_path, save_path):
         """
         This method takes a complete path to a pdf and stores
