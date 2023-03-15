@@ -165,6 +165,39 @@ def test_client_performs_job(mock_requests):
         assert saved_data['job_type'] == 'documents'
 
 
+def test_client_performs_job_with_new_url(mock_requests):
+    client = Client()
+    client.api_key = 1234
+
+    with mock_requests:
+        mock_requests.get(
+            'http://work_server:8080/get_job?client_id=-1',
+            json={'job_id': '1',
+                  'url': 'http://url.com?include=attachments',
+                  'job_type': 'comments',
+                  'reg_id': '1',
+                  'agency': 'foo'},
+            status_code=200
+        )
+        mock_requests.get(
+            'http://url.com?include=attachments&api_key=1234',
+            json={'data': {'id': '1', 'type': 'comments',
+                           'attributes':
+                           {'agencyId': 'NOAA'},
+                           'job_type': 'comments'}},
+            status_code=200
+        )
+        mock_requests.put('http://work_server:8080/put_results', text='{}')
+        client.job_operation()
+
+        put_request = mock_requests.request_history[2]
+        json_data = json.loads(put_request.json())
+        saved_data = json_data['results']['data']
+        assert saved_data['attributes'] == {'agencyId': 'NOAA'}
+        assert saved_data['id'] == '1'
+        assert saved_data['job_type'] == 'comments'
+
+
 def test_client_returns_403_error_to_server(mock_requests):
     client = Client()
     client.api_key = 1234
