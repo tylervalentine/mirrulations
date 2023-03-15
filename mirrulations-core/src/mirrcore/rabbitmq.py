@@ -38,12 +38,18 @@ class RabbitMQ:
 
     def size(self):
         """
-        Get the number of jobs in the queue
+        Get the number of jobs in the queue.
+        Can't be sure Channel is active between ensure_channel() and queue_declare()
+        which is the reasoning for implmentation of try except
         @return: a non-negative integer
         """
         self._ensure_channel()
-        queue = self.channel.queue_declare('jobs_waiting_queue', durable=True)
-        return queue.method.message_count
+        try:
+            queue = self.channel.queue_declare('jobs_waiting_queue', durable=True)     
+            return queue.method.message_count
+        except pika.exceptions.StreamLostError as error:
+            print("FAILURE: RabbitMQ Channel Connection Lost")
+            raise JobQueueException from error
 
     def get(self):
         """
