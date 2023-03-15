@@ -76,3 +76,33 @@ def test_error_when_file_is_already_open():
         Extractor.extract_text(copy_path, save_path)
 
     assert not os.path.isfile(save_path)
+
+
+def test_extractor_overwrites_existing_file():
+    absolute_path = os.path.dirname(__file__)
+    save_path = os.path.join(absolute_path, SAVE_PATH)
+
+    with open(save_path, 'w') as file:
+        file.write('test')
+
+    Extractor.extract_text(
+        os.path.join(absolute_path, 'pdfs/empty.pdf'),
+        save_path)
+
+    with open(save_path, 'r') as f:
+        assert f.read() != 'test'
+
+
+def test_extractor_handles_mixed_text_and_images():
+    absolute_path = os.path.dirname(__file__)
+
+    save_path = os.path.join(absolute_path, SAVE_PATH)
+
+    Extractor.extract_text(
+        os.path.join(absolute_path, 'pdfs/mixed.pdf'),
+        save_path)
+
+    with open(save_path, "r", encoding="utf-8") as in_file:
+        text = in_file.read()
+
+    assert text.strip() == 'a'
