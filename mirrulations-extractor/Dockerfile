@@ -3,7 +3,6 @@ FROM python:3.8-slim-buster
 WORKDIR /app
 
 RUN python3 -m venv .venv
-RUN source .venv/bin/activate
 
 COPY mirrulations-extractor .
 COPY mirrulations-core /mirrulations-core
