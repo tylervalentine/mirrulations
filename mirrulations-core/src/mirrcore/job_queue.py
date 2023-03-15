@@ -1,6 +1,4 @@
 from mirrcore.rabbitmq import RabbitMQ
-from mirrcore.job_queue_exceptions import JobQueueException
-
 
 class JobQueue:
     """

@@ -4,6 +4,16 @@ from pytest import fixture
 from mirrserver.work_server import create_server
 from mirrmock.mock_flask_server import mock_work_server
 from mirrmock.mock_rabbitmq import MockRabbit
+from mirrcore.job_queue_exceptions import JobQueueException
+
+from mirrmock.mock_dataset import MockDataSet
+from fakeredis import FakeRedis
+from mirrcore.regulations_api import RegulationsAPI
+from mirrcore.job_queue import JobQueue
+from mirrmock.mock_data_storage import MockDataStorage
+from mirrgen.work_generator import WorkGenerator
+
+import pytest
 
 
 @fixture(name='mock_server')
@@ -385,3 +395,59 @@ def test_success_logging_for_no_attachment_results(capsys, mock_server):
     captured = capsys.readouterr()
     print_data = []
     assert captured.out == "".join(print_data)
+
+# def test_work_server_catches_job_queue_exception(requests_mock, mocker, mock_server):
+#     with pytest.raises(JobQueueException):
+
+#         results = MockDataSet(10).get_results()
+#         requests_mock.get('https://api.regulations.gov/v4/documents', results)
+
+
+#         # params = {'client_id': 1}
+#         # job = {'job_id': 1,
+#         #     'url': 'url',
+#         #     'job_type': 'docket',
+#         #     'reg_id': 3,
+#         #     'agency': 'EPA'
+#         #     }
+#         # mock_server.rabbitmq.get()
+#         database = FakeRedis()
+#         job_queue = JobQueue(database)
+#         job_queue.rabbitmq = MockRabbit()
+
+#         mocker.patch.object(job_queue, 'get_job', side_effect=JobQueueException())
+
+
+#         # response = mock_server.client.get('/get_job', query_string=params)
+#         # assert response.status_code == 503
+#         # assert response.get_json() == ""
+#         # mock_work_server(create_server)
+
+def test_work_server_catches_job_queue_exception(requests_mock, mocker, mock_server):
+    params = {'client_id': 1}
+    results = MockDataSet(10).get_results()
+    requests_mock.get('https://api.regulations.gov/v4/documents', results)
+
+    job = {'job_id': 1,
+        'url': 'url',
+        'job_type': 'docket',
+        'reg_id': 3,
+        'agency': 'EPA'
+        }
+
+    database = FakeRedis()
+    api = RegulationsAPI('FAKE_KEY')
+    job_queue = JobQueue(database)
+    # mock out the rabbit connection
+    # job_queue.rabbitmq = MockRabbit()
+    # mock_server.rabbitmq.add(job)
+
+    job_queue.add_job(job)
+
+    # mock the job queue to raise a JobQueueException when a job is added.
+    # Essentially replaces the original add_job method of the job_queue object
+    # with a new method that raises the JobQueueException exception
+    mocker.patch.object(job_queue, 'get_job', side_effect=JobQueueException())
+    response = mock_server.client.get('/get_job', query_string=params)
+
+    assert response.status_code == 503
