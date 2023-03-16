@@ -77,7 +77,7 @@ if __name__ == '__main__':
                     continue
                 complete_path = os.path.join(root, file)
                 output_path = PathGenerator.make_attachment_save_path(complete_path)
-                if not output_path.is_file():
+                if not os.path.isfile(output_path):
                     start_time = time.time()
                     Extractor.extract_text(complete_path, output_path)
                     print(f"Time taken to extract text from {complete_path}"
