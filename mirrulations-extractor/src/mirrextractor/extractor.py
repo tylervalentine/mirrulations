@@ -78,7 +78,8 @@ if __name__ == '__main__':
                 if not file.endswith('pdf'):
                     continue
                 complete_path = os.path.join(root, file)
-                output_path = PathGenerator.make_attachment_save_path(complete_path)
+                output_path = PathGenerator\
+                    .make_attachment_save_path(complete_path)
                 if not os.path.isfile(output_path):
                     start_time = time.time()
                     Extractor.extract_text(complete_path, output_path)
