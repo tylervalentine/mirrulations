@@ -81,7 +81,7 @@ if __name__ == '__main__':
                     start_time = time.time()
                     Extractor.extract_text(complete_path, output_path)
                     print(f"Time taken to extract text from {complete_path}"
-                          f" is {start_time - time.time()} seconds")
+                          f" is {time.time() - start_time} seconds")
         # sleep for a hour
         current_time = now.strftime("%H:%M:%S")
         print(f"Sleeping for an hour : started at {current_time}")
