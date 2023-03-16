@@ -62,7 +62,7 @@ class Extractor:
         pdf.save(pdf_bytes, linearize=True)
         text = pdfminer.high_level.extract_text(pdf_bytes)
         # Make dirs if they do not already exist
-        os.makedirs(save_path, exist_ok=True)
+        os.makedirs(save_path[:save_path.rfind('/')], exist_ok=True)
         # Save the extracted text to a file
         with open(save_path, "w", encoding="utf-8") as out_file:
             out_file.write(text.strip())
