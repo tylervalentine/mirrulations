@@ -6,7 +6,7 @@ from json import dumps, loads
 import requests
 from dotenv import load_dotenv
 from mirrcore.path_generator import PathGenerator
-from mirrcore.saver import Saver
+from mirrclient.saver import Saver
 
 
 class NoJobsAvailableException(Exception):
@@ -152,37 +152,11 @@ class Client:
         if any(x in data['results'] for x in ['error', 'errors']):
             print(f"{data['job_id']}: Errors found in results")
             return
-        self._write_results(data)
+        dir_, filename = data['directory'].rsplit('/', 1)
+        self.saver.make_path(dir_)
+        self.saver.save_json(f'/data{dir_}/{filename}', data)
         print(f"{data['job_id']}: Results written to disk")
 
-    def _write_results(self, data):
-        """
-        writes the results to disk. used by docket document and comment jobs
-
-        Parameters
-        ----------
-        data : dict
-            the results data to be written to disk
-        """
-        dir_, filename = data['directory'].rsplit('/', 1)
-        self.make_path(dir_)
-        with open(f'/data{dir_}/{filename}', 'w+', encoding='utf8') as file:
-            print('Writing results to disk')
-            file.write(dumps(data['results']))
-
-    def make_attachment_directory(self, filepath):
-        '''
-        Makes a path for a attachment if one does not already exist
-        '''
-        filepath_components = filepath.split("/")
-        filepath = "/".join(filepath_components[0:-1])
-        self.make_path(filepath)
-
-    def make_path(self, path):
-        try:
-            os.makedirs(f'/data{path}')
-        except FileExistsError:
-            print(f'Directory already exists in root: /data{path}')
 
     def perform_job(self, job_url):
         """
@@ -210,7 +184,7 @@ class Client:
         '''
         Downloads all attachments for a comment
         '''
-        # list of paths for attachmennts
+        # list of paths for attachments
 
         path_list = self.path_generator.get_attachment_json_paths(comment_json)
         counter = 0
@@ -235,8 +209,9 @@ class Client:
         writes it to its correct path
         '''
         response = requests.get(url, timeout=10)
-        self.make_attachment_directory(path)
-        self.saver.save(response.content, path)
+        dir_, filename = path.rsplit('/', 1)
+        self.saver.make_path(dir_)
+        self.saver.save_attachment(f'/data{dir_}/{filename}', response.content)
         print(f"SAVED attachment - {url} to path: ", path)
 
         # Not sure where this would go
