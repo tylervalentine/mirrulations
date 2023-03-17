@@ -5,8 +5,8 @@ import sys
 from json import dumps, loads
 import requests
 from dotenv import load_dotenv
-from mirrcore.path_generator import PathGenerator
 from mirrclient.saver import Saver
+from mirrcore.path_generator import PathGenerator
 
 
 class NoJobsAvailableException(Exception):
@@ -156,7 +156,6 @@ class Client:
         self.saver.make_path(dir_)
         self.saver.save_json(f'/data{dir_}/{filename}', data)
         print(f"{data['job_id']}: Results written to disk")
-
 
     def perform_job(self, job_url):
         """

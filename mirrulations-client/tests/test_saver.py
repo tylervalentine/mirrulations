@@ -1,6 +1,7 @@
-from mirrclient.saver import Saver
-from unittest.mock import patch, mock_open
 from json import dumps
+from unittest.mock import patch, mock_open
+from mirrclient.saver import Saver
+
 
 def test_save_path_directory_does_not_already_exist():
     with patch('os.makedirs') as mock_dir:
@@ -19,15 +20,17 @@ def test_save_path_directory_already_exists(capsys):
         captured = capsys.readouterr()
         assert captured.out == print_data
 
+
 def test_save_json():
     saver = Saver()
     path = 'data/USTR/file.json'
-    data = { 'results': 'Hello world' }
+    data = {'results': 'Hello world'}
 
     with patch('mirrclient.saver.open', mock_open()) as mocked_file:
-            saver.save_json(path, data)
-            mocked_file.assert_called_once_with(path, 'w+', encoding='utf8')
-            mocked_file().write.assert_called_once_with(dumps(data['results']))
+        saver.save_json(path, data)
+        mocked_file.assert_called_once_with(path, 'w+', encoding='utf8')
+        mocked_file().write.assert_called_once_with(dumps(data['results']))
+
 
 def test_save_attachment():
     saver = Saver()
@@ -35,6 +38,6 @@ def test_save_attachment():
     data = 'Some Binary'
 
     with patch('mirrclient.saver.open', mock_open()) as mocked_file:
-            saver.save_attachment(path, data)
-            mocked_file.assert_called_once_with(path, 'wb')
-            mocked_file().write.assert_called_once_with(data)
+        saver.save_attachment(path, data)
+        mocked_file.assert_called_once_with(path, 'wb')
+        mocked_file().write.assert_called_once_with(data)

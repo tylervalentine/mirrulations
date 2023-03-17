@@ -823,4 +823,3 @@ def test_failure_attachment_job_results(capsys, mock_requests):
 
         captured = capsys.readouterr()
         assert captured.out == "".join(print_data)
-
