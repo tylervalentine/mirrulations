@@ -47,15 +47,11 @@ class JobQueue:
         jobs_in_progress = int(self.database.hlen('jobs_in_progress'))
         jobs_total_minus_jobs_done = jobs_waiting + jobs_in_progress
 
-        client_ids = self.database.get('total_num_client_ids')
-        clients_total = int(client_ids) if client_ids is not None else 0
-
         return {
             'num_jobs_waiting': jobs_waiting,
             'num_jobs_in_progress':
                 int(self.database.hlen('jobs_in_progress')),
             'jobs_total': jobs_total_minus_jobs_done,
-            'clients_total': clients_total,
             'num_jobs_attachments_queued':
                 int(self.database.get('num_jobs_attachments_waiting')),
             'num_jobs_comments_queued':

@@ -68,7 +68,10 @@ def create_server(job_queue, docker_server, mongo_client):
             data = get_jobs_stats(dashboard.job_queue)
         except JobQueueException as error:
             print(f"FAILURE: Encountered JobQueueException from {error}")
-            return jsonify(error.message), error.status_code
+            # Index.js expects some values to update. by providing None or
+            # 'null' to num_jobs_waiting (supposed to be an int), dashboard
+            # javascript will recognize something went wrong and reflect status
+            return {'num_jobs_waiting': None}, error.status_code
 
         # Get the number of jobs done from the mongo db
         # and add it to the data

@@ -139,7 +139,7 @@ def test_dashboard_handles_job_queue_exception(mock_server):
     add_mock_data_to_database(mock_server.job_queue)
     mock_server.docker = client
 
-    # Set up the mock job queue to raise a StreamLossError
+    # Set up the mock job queue to raise a JobQueueException
     # when get_job_stats is called
     mock_server.job_queue.get_job_stats = Mock(side_effect=JobQueueException())
 
@@ -147,4 +147,4 @@ def test_dashboard_handles_job_queue_exception(mock_server):
     response = mock_server.client.get('/data')
     assert response.status_code == 503
     assert response.get_json() == \
-        {'error': 'The job queue encountered an error'}
+        {'num_jobs_waiting': None}

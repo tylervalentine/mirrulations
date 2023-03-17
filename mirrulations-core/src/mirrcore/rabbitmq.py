@@ -45,7 +45,7 @@ class RabbitMQ:
         """
         self._ensure_channel()
         try:
-            queue = self.channel.queue_declare('jobs_waiting_queue', durable=True)     
+            queue = self.channel.queue_declare('jobs_waiting_queue', durable=True)
             return queue.method.message_count
         except pika.exceptions.StreamLostError as error:
             print("FAILURE: RabbitMQ Channel Connection Lost")
