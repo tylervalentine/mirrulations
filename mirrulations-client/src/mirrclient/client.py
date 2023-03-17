@@ -212,19 +212,15 @@ class Client:
         self.saver.make_path(dir_)
         self.saver.save_attachment(f'/data{dir_}/{filename}', response.content)
         print(f"SAVED attachment - {url} to path: ", path)
-
         # Not sure where this would go
         filename = path.split('/')[-1]
         data = {
             'job_type': 'attachments',
             'job_id': data['job_id'],
             'results': data['results'],
-            # This is not returning the valid reg_id, agency
             'reg_id': data['reg_id'],
             'agency': data['agency'],
-            # Included attachment_path and attachment_filename for workserver
-            # request 3/14
-            'attachment_path': f'/data{path}',
+            'attachment_path': f'/data/data{path}',
             'attachment_filename': filename
         }
         requests.put(f'{self.url}/put_results', json=dumps(data),
