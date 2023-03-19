@@ -11,8 +11,6 @@ class JobQueue:
         self.database = database
         self.rabbitmq = RabbitMQ()
 
-        if not self.database.exists('num_jobs_attachments_waiting'):
-            self.database.set('num_jobs_attachments_waiting', 0)
         if not self.database.exists('num_jobs_comments_waiting'):
             self.database.set('num_jobs_comments_waiting', 0)
         if not self.database.exists('num_jobs_documents_waiting'):
@@ -30,9 +28,7 @@ class JobQueue:
             'agency': agency
             }
         self.rabbitmq.add(job)
-        if job_type == 'attachments':
-            self.database.incr('num_jobs_attachments_waiting')
-        elif job_type == 'comments':
+        if job_type == 'comments':
             self.database.incr('num_jobs_comments_waiting')
         elif job_type == 'documents':
             self.database.incr('num_jobs_documents_waiting')
@@ -52,8 +48,7 @@ class JobQueue:
             'num_jobs_in_progress':
                 int(self.database.hlen('jobs_in_progress')),
             'jobs_total': jobs_total_minus_jobs_done,
-            'num_jobs_attachments_queued':
-                int(self.database.get('num_jobs_attachments_waiting')),
+            'clients_total': clients_total,
             'num_jobs_comments_queued':
                 int(self.database.get('num_jobs_comments_waiting')),
             'num_jobs_documents_queued':
