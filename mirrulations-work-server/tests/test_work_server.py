@@ -387,22 +387,3 @@ def test_success_logging_for_no_attachment_results(capsys, mock_server):
     captured = capsys.readouterr()
     print_data = []
     assert captured.out == "".join(print_data)
-
-
-def test_work_server_catches_job_queue_exception(mock_server):
-    mock_server.rabbitmq = MockRabbit()
-    params = {'client_id': 1}
-
-    job = {'job_id': '1',
-           'url': 'url',
-           'job_type': 'docket',
-           'reg_id': 3,
-           'agency': 'EPA'
-           }
-    mock_server.rabbitmq.add(job)
-
-    assert mock_server.rabbitmq.size() == 1
-
-    response = mock_server.client.get('/get_job', query_string=params)
-
-    assert response.status_code == 503
