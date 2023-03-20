@@ -1,5 +1,6 @@
 from mirrcore.rabbitmq import RabbitMQ
 
+
 class JobQueue:
     """
     This class is an abstraction of the process of adding and
