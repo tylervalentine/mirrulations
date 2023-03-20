@@ -50,7 +50,6 @@ def test_get_job_without_client_id_is_unauthorized(mock_server):
 
 
 def test_get_job_has_no_available_job(mock_server):
-    # TODO
     mock_server.rabbitmq = MockRabbit()
     params = {'client_id': 1}
     response = mock_server.client.get('/get_job', query_string=params)
@@ -61,7 +60,6 @@ def test_get_job_has_no_available_job(mock_server):
 
 
 def test_get_job_returns_single_job(mock_server):
-    # TODO
     # mock_server.redis.incr('total_num_client_ids')
     mock_server.rabbitmq = MockRabbit()
     params = {'client_id': 1}
@@ -84,18 +82,18 @@ def test_get_job_returns_single_job(mock_server):
     assert response.get_json() == expected
 
 
-# def test_get_waiting_job_is_now_in_progress_and_not_waiting(mock_server):
-#     mock_server.rabbitmq = MockRabbit()
-#     # mock_server.redis.incr('total_num_client_ids')
-#     params = {'client_id': 1}
-#     job = {'job_id': 3, 'url': 'url'}
-#     mock_server.rabbitmq.add(job)
-#     # mock_server.redis.rpush('jobs_waiting_queue', dumps(job))
-#     mock_server.client.get('/get_job', query_string=params)
-#     # assert mock_server.redis.llen('jobs_waiting_queue') == 0
-#     # keys = mock_server.redis.hkeys('jobs_in_progress')
-#     # assert mock_server.redis.hget('jobs_in_progress',
-#     #                               keys[0]).decode() == 'url'
+def test_get_waiting_job_is_now_in_progress_and_not_waiting(mock_server):
+    mock_server.rabbitmq = MockRabbit()
+    # mock_server.redis.incr('total_num_client_ids')
+    params = {'client_id': 1}
+    job = {'job_id': 3, 'url': 'url'}
+    mock_server.rabbitmq.add(job)
+    # mock_server.redis.rpush('jobs_waiting_queue', dumps(job))
+    mock_server.client.get('/get_job', query_string=params)
+    # assert mock_server.redis.llen('jobs_waiting_queue') == 0
+    # keys = mock_server.redis.hkeys('jobs_in_progress')
+    # assert mock_server.redis.hget('jobs_in_progress',
+    #                               keys[0]).decode() == 'url'
 
 
 def test_put_results_message_body_contains_no_results(mock_server):
@@ -212,6 +210,8 @@ def test_put_results_returns_correct_attachment_job(mock_server):
                       'job_type': 'attachments',
                       'agency': 'EPA',
                       'reg_id': 'AAAAA',
+                      'attachment_path': 'att-path',
+                      'attachment_filename': 'att-filename',
                       'results': {'1234_0': base64.b64encode(
                         file.read()).decode('ascii')}})
         params = {'client_id': 1}

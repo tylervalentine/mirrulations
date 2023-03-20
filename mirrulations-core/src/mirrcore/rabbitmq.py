@@ -58,13 +58,10 @@ class RabbitMQ:
         """
         # Connections timeout, so we have to create a new one each time
         self._ensure_channel()
-        try:
-            method_frame, header_frame, body = self.channel.basic_get('jobs_waiting_queue')
-            # If there was no job available
-            if method_frame is None:
-                return None
-            self.channel.basic_ack(method_frame.delivery_tag)
-            return json.loads(body.decode('utf-8'))
-        except pika.exceptions.StreamLostError as error:
-            print("FAILURE: RabbitMQ Channel Connection Lost")
-            raise JobQueueException from error
+        method_frame, header_frame, body = self.channel.basic_get('jobs_waiting_queue')
+        # If there was no job available
+        if method_frame is None:
+            return None
+
+        self.channel.basic_ack(method_frame.delivery_tag)
+        return json.loads(body.decode('utf-8'))
