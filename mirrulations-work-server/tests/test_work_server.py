@@ -19,8 +19,12 @@ def test_create_mock_server(mock_server):
     assert mock_server.app is not None
 
 
-def test_new_mock_database_is_empty(mock_server):
-    assert mock_server.redis.keys() == []
+def test_new_mock_database_keys(mock_server):
+    assert mock_server.redis.keys() == [
+        b'num_jobs_comments_waiting',
+        b'num_jobs_documents_waiting',
+        b'num_jobs_dockets_waiting',
+    ]
 
 
 def test_data_entry_in_mock_database_is_correct(mock_server):
