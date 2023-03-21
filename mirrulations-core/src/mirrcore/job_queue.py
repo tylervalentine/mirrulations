@@ -57,6 +57,26 @@ class JobQueue:
                 int(self.database.get('num_jobs_dockets_waiting'))
         }
 
+    def decrement_count(self, job_type):
+        """
+        for each job type, when that type of job is taken, remove one from
+        its redis queue
+
+        Parameters
+        ----------
+        workserver : WorkServer
+            the work server class
+
+        """
+        if job_type == 'attachments':
+            self.database.decr('num_jobs_attachments_waiting')
+        elif job_type == 'comments':
+            self.database.decr('num_jobs_comments_waiting')
+        elif job_type == 'documents':
+            self.database.decr('num_jobs_documents_waiting')
+        elif job_type == 'dockets':
+            self.database.decr('num_jobs_dockets_waiting')
+
     def get_job(self):
         return self.rabbitmq.get()
 
