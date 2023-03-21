@@ -1,7 +1,7 @@
 from flask import Flask, json, jsonify, request
 import redis
 from mirrcore.data_storage import DataStorage
-from mirrcore.rabbitmq import RabbitMQ
+from mirrcore.job_queue import JobQueue
 from mirrserver.put_results_validator import PutResultsValidator
 from mirrserver.exceptions import InvalidResultsException
 from mirrserver.exceptions import InvalidClientIDException
@@ -41,14 +41,16 @@ class WorkServer:
         Parameters
         ----------
         redis_server : redis
-            the redis server holding the jobs waiting queue and client ids
+            redis stores counts of types of jobs being processed
+
+        job_queue: the queue from which jobs are accessed
         """
         self.app = Flask(__name__)
         self.redis = redis_server
         self.data = DataStorage()
         self.put_results_validator = PutResultsValidator()
         self.get_job_validator = GetJobValidator()
-        self.rabbitmq = RabbitMQ()
+        self.job_queue = JobQueue(redis_server)
 
 
 def check_for_database(workserver):
@@ -114,9 +116,9 @@ def get_job(workserver):
     check_for_database(workserver)
     client_id = request.args.get('client_id')
 
-    if workserver.rabbitmq.size() == 0:
+    if workserver.job_queue.get_num_jobs() == 0:
         return False, jsonify({'error': 'No jobs available'}), 403
-    job = workserver.rabbitmq.get()
+    job = workserver.job_queue.get_job()
 
     job_id = job['job_id']
     url = job['url']
