@@ -68,9 +68,7 @@ class JobQueue:
             the work server class
 
         """
-        if job_type == 'attachments':
-            self.database.decr('num_jobs_attachments_waiting')
-        elif job_type == 'comments':
+        if job_type == 'comments':
             self.database.decr('num_jobs_comments_waiting')
         elif job_type == 'documents':
             self.database.decr('num_jobs_documents_waiting')
