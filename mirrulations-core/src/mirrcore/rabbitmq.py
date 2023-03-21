@@ -25,6 +25,7 @@ class RabbitMQ:
         @return: None
         """
         self._ensure_channel()
+        # channel cannot be ensured hasn't dropped been between these calls
         try:
             self.channel.basic_publish(exchange='',
                                        routing_key='jobs_waiting_queue',
@@ -56,12 +57,16 @@ class RabbitMQ:
         Take one job from the queue and return it
         @return: a job, or None if there are no jobs
         """
-        # Connections timeout, so we have to create a new one each time
+        # Check if channel is up, if not, create a new one
         self._ensure_channel()
-        method_frame, header_frame, body = self.channel.basic_get('jobs_waiting_queue')
-        # If there was no job available
-        if method_frame is None:
-            return None
+        try:
+            method_frame, header_frame, body = self.channel.basic_get('jobs_waiting_queue')
+            # If there was no job available
+            if method_frame is None:
+                return None
 
-        self.channel.basic_ack(method_frame.delivery_tag)
-        return json.loads(body.decode('utf-8'))
+            self.channel.basic_ack(method_frame.delivery_tag)
+            return json.loads(body.decode('utf-8'))
+        except pika.exceptions.StreamLostError as error:
+            print("FAILURE: RabbitMQ Channel Connection Lost")
+            raise JobQueueException from error

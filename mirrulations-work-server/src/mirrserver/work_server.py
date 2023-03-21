@@ -2,6 +2,7 @@ from flask import Flask, json, jsonify, request
 import redis
 from mirrcore.data_storage import DataStorage
 from mirrcore.job_queue import JobQueue
+from mirrcore.job_queue_exceptions import JobQueueException
 from mirrserver.put_results_validator import PutResultsValidator
 from mirrserver.exceptions import InvalidResultsException
 from mirrserver.exceptions import InvalidClientIDException
@@ -95,9 +96,13 @@ def get_job(workserver):
     check_for_database(workserver)
     client_id = request.args.get('client_id')
 
-    if workserver.job_queue.get_num_jobs() == 0:
-        return False, jsonify({'error': 'No jobs available'}), 403
-    job = workserver.job_queue.get_job()
+    try:
+        if workserver.job_queue.get_num_jobs() == 0:
+            return False, jsonify({'error': 'No jobs available'}), 403
+        job = workserver.job_queue.get_job()
+    except JobQueueException:
+        # if connection failed, no jobs to process
+        return False, jsonify({'error': 'No jobs available'}), 503
 
     job_id = job['job_id']
     url = job['url']

@@ -1,9 +1,11 @@
 from json import dumps
 import base64
+from unittest.mock import Mock
 from pytest import fixture
 from mirrserver.work_server import create_server
 from mirrmock.mock_flask_server import mock_work_server
 from mirrmock.mock_job_queue import MockJobQueue
+from mirrcore.job_queue_exceptions import JobQueueException
 
 
 @fixture(name='mock_server')
@@ -373,3 +375,24 @@ def test_success_logging_for_no_attachment_results(capsys, mock_server):
     captured = capsys.readouterr()
     print_data = []
     assert captured.out == "".join(print_data)
+
+
+def test_work_server_catches_job_queue_exception(mock_server):
+    mock_server.job_queue = MockJobQueue()
+    params = {'client_id': 1}
+
+    job = {'job_id': '1',
+           'url': 'url',
+           'job_type': 'docket',
+           'reg_id': 3,
+           'agency': 'EPA'
+           }
+    mock_server.job_queue.add_job(job)
+
+    assert mock_server.job_queue.get_num_jobs() == 1
+
+    mock_server.job_queue.get_job = Mock(side_effect=JobQueueException())
+
+    response = mock_server.client.get('/get_job', query_string=params)
+
+    assert response.status_code == 503

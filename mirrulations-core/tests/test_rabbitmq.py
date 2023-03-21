@@ -70,6 +70,6 @@ def test_rabbit_error_interactions(monkeypatch):
     with pytest.raises(JobQueueException):
         rabbitmq.add('foo')
 
-    # Ensure that the exception is caught and re-raised as a JobQueueException in size()
+    # Ensure that the exception is caught and re-raised as a JobQueueException in get()
     with pytest.raises(JobQueueException):
         rabbitmq.get()
