@@ -95,11 +95,12 @@ def get_job(workserver):
     """
     check_for_database(workserver)
     client_id = request.args.get('client_id')
-
+    print("Attempting to get job")
     try:
         if workserver.job_queue.get_num_jobs() == 0:
             return False, jsonify({'error': 'No jobs available'}), 403
         job = workserver.job_queue.get_job()
+        print("Job received from job queue")
     except JobQueueException:
         # if connection failed, no jobs to process
         return False, jsonify({'error': 'No jobs available'}), 503
