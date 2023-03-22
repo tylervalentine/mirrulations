@@ -36,7 +36,9 @@ services:
       timeout: 10s
       retries: 5
   mongo:
-    image: mongo:5.0.1
+    build:
+      context: .
+      dockerfile: mirrulations-mongo/Dockerfile
     volumes:
       - "~/data/db:/data/db"
     ports:
