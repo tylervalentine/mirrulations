@@ -124,9 +124,7 @@ class Client:
             data['directory'] = self.path_generator.get_path(job_result)
 
         self._put_results(data)
-        requests.put(f'{self.url}/put_results', json=dumps(data),
-                     params={'client_id': self.client_id},
-                     timeout=10)
+        self.put_results_to_mongo(data)
         comment_has_attachment = self.does_comment_have_attachment(job_result)
 
         if data["job_type"] == "comments" and comment_has_attachment:
@@ -173,11 +171,15 @@ class Client:
             json results of the performed job
         """
         print('Performing job')
-        if "?" in job_url:
-            return requests.get(job_url + f'&api_key={self.api_key}',
+        try: 
+            if "?" in job_url:
+                return requests.get(job_url + f'&api_key={self.api_key}',
+                                    timeout=10).json()
+            return requests.get(job_url + f'?api_key={self.api_key}',
                                 timeout=10).json()
-        return requests.get(job_url + f'?api_key={self.api_key}',
-                            timeout=10).json()
+        except (requests.Timeout):
+            print(f'There was an error performing job {job_url}')
+            raise requests.Timeout
 
     def download_all_attachments_from_comment(self, data, comment_json):
         '''
@@ -239,15 +241,17 @@ class Client:
         print(f"SAVED attachment - {url} to path: ", path)
         # Not sure where this would go
         filename = path.split('/')[-1]
-        data = {
-            'job_type': 'attachments',
-            'job_id': data['job_id'],
-            'results': data['results'],
-            'reg_id': data['reg_id'],
-            'agency': data['agency'],
-            'attachment_path': f'/data/data{path}',
-            'attachment_filename': filename
-        }
+        data = self.add_attachment_information_to_data(data, path, filename)
+        self.put_results_to_mongo(data)
+        
+
+    def add_attachment_information_to_data(self, data, path, filename):
+        data['job_type'] = 'attachments'
+        data['attachment_path'] = f'/data/data{path}'
+        data['attachment_filename'] = filename
+        return data
+
+    def put_results_to_mongo(self, data):
         requests.put(f'{self.url}/put_results', json=dumps(data),
                      params={'client_id': self.client_id},
                      timeout=10)
