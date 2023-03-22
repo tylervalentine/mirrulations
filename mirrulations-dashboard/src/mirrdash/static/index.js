@@ -10,11 +10,18 @@ window.addEventListener('load', function init() {
 })
 
 const updateHtmlValues = (id, value, total) => {
-    let percent = (value/total) * 100;
-    percent = isNaN(percent) ? 0 : Math.round(percent * 10) / 10;
-    document.getElementById(id+'-number').textContent = value.toLocaleString('en');
-    document.getElementById(id+'-circle-percentage').textContent = `${percent}%`;
-    document.getElementById(id+'-circle-front').style.strokeDasharray = `${percent}, 100`;
+    if (value === null || total === null) {
+        // Handle the case where value or total is null,
+        // indicating Job Queue Error from dashboard
+        document.getElementById(id+'-number').textContent = "Error";
+    }
+    else {
+        let percent = (value/total) * 100;
+        percent = isNaN(percent) ? 0 : Math.round(percent * 10) / 10;
+        document.getElementById(id+'-number').textContent = value.toLocaleString('en');
+        document.getElementById(id+'-circle-percentage').textContent = `${percent}%`;
+        document.getElementById(id+'-circle-front').style.strokeDasharray = `${percent}, 100`;
+    }
 }
 
 
