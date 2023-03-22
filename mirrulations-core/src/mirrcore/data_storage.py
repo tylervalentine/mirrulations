@@ -38,3 +38,6 @@ class DataStorage:
         # were making an entry for each key in data['results'] before
         entry = {'path': data['attachment_path'], 'file': data['attachment_filename']}
         self.attachments.insert_one(entry)
+
+    def get_collection_size(self, collection):
+         return self.__getattribute__(collection).count_documents({})
