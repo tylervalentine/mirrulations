@@ -171,15 +171,15 @@ class Client:
             json results of the performed job
         """
         print('Performing job')
-        try: 
+        try:
             if "?" in job_url:
                 return requests.get(job_url + f'&api_key={self.api_key}',
                                     timeout=10).json()
             return requests.get(job_url + f'?api_key={self.api_key}',
                                 timeout=10).json()
-        except (requests.Timeout):
+        except requests.Timeout as exc:
             print(f'There was an error performing job {job_url}')
-            raise requests.Timeout
+            raise requests.Timeout from exc
 
     def download_all_attachments_from_comment(self, data, comment_json):
         '''
@@ -190,7 +190,7 @@ class Client:
         data : dict
             Dictionary of the job
             Keys include: 'job_type', 'job_id', 'results', 'reg_id', 'agency'
-        
+
         comment_json : dict
             The json of the comment
 
@@ -226,7 +226,7 @@ class Client:
             Ex: http://downloads.regulations.gov/####
 
         path : str
-            The attachment path the download should be written to 
+            The attachment path the download should be written to
             Comes from the path_generator.get_attachment_json_paths
 
         data : dict
@@ -243,7 +243,6 @@ class Client:
         filename = path.split('/')[-1]
         data = self.add_attachment_information_to_data(data, path, filename)
         self.put_results_to_mongo(data)
-        
 
     def add_attachment_information_to_data(self, data, path, filename):
         data['job_type'] = 'attachments'

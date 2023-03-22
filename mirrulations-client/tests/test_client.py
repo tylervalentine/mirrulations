@@ -823,3 +823,14 @@ def test_failure_attachment_job_results(capsys, mock_requests):
 
         captured = capsys.readouterr()
         assert captured.out == "".join(print_data)
+
+
+def test_add_attachment_information_to_data():
+    data = {}
+    path = '/USTR/docket.json'
+    filename = "docket.json"
+    client = Client()
+    data = client.add_attachment_information_to_data(data, path, filename)
+    assert data['job_type'] == 'attachments'
+    assert data['attachment_path'] == '/data/data/USTR/docket.json'
+    assert data['attachment_filename'] == 'docket.json'
