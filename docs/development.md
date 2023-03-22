@@ -1,27 +1,7 @@
 
 ## Developer Setup
 
-* Create and activate a virtual environment
-
-  ```
-  python3 -m venv .venv
-  source .venv/bin/activate
-  ```
-
-* Install source code as a module
-
-  The project is organized into multiple modules, which must each be installed as "editable"
-  (using the `-e` switch on `pip`):
-
-  ```
-  pip install -e mirrulations-client
-  pip install -e mirrulations-core
-  pip install -e mirrulations-dashboard
-  pip install -e mirrulations-mocks
-  pip install -e mirrulations-work-generator 
-  pip install -e mirrulations-work-server
-  pip install -e mirrulations-extractor
-  ```
+* Run `python dev_setup.py` to create a virtual environment and install all neccessary packages.
 
 ## Run Static Analysis and Tests
 
