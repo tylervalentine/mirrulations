@@ -200,7 +200,6 @@ class Client:
         counter = 0
         comment_id_str = f"Comment - {comment_json['data']['id']}"
         print(f"Found {len(path_list)} attachment(s) for {comment_id_str}")
-        # We need an additional check for if "included" exists in the json
         for included in comment_json["included"]:
             attributes = included["attributes"]
             if (attributes["fileFormats"] and
@@ -211,7 +210,7 @@ class Client:
                                                     data)
                     print(f"Downloaded {counter+1}/{len(path_list)} "
                           f"attachment(s) for {comment_id_str}")
-                    counter += 1  # re write this
+                    counter += 1
 
     def download_single_attachment(self, url, path, data):
         '''
@@ -239,7 +238,6 @@ class Client:
         self.saver.make_path(dir_)
         self.saver.save_attachment(f'/data{dir_}/{filename}', response.content)
         print(f"SAVED attachment - {url} to path: ", path)
-        # Not sure where this would go
         filename = path.split('/')[-1]
         data = self.add_attachment_information_to_data(data, path, filename)
         self.put_results_to_mongo(data)
