@@ -7,7 +7,7 @@ from pytest import fixture, raises
 import requests_mock
 from mirrclient.client import NoJobsAvailableException, Client
 from mirrclient.client import is_environment_variables_present
-from requests.exceptions import Timeout
+from requests.exceptions import Timeout, ReadTimeout
 
 BASE_URL = 'http://work_server:8080'
 
@@ -250,10 +250,9 @@ def test_perform_job_timesout(mock_requests):
         fake_url = 'http://regulations.gov/fake/api/call'
         mock_requests.get(
             fake_url,
-            exc=Timeout)
+            exc=ReadTimeout)
 
-        with pytest.raises(Timeout):
-            Client().perform_job(fake_url)
+        assert Client().perform_job(fake_url) == {"errors"}
 
 
 def test_client_returns_400_error_to_server(mock_requests):
