@@ -252,7 +252,7 @@ def test_perform_job_timesout(mock_requests):
             fake_url,
             exc=ReadTimeout)
 
-        assert Client().perform_job(fake_url) == {"errors"}
+        assert Client().perform_job(fake_url) == {"error": "Read Timeout"}
 
 
 def test_client_returns_400_error_to_server(mock_requests):
