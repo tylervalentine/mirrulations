@@ -200,11 +200,15 @@ class Client:
             json results of the performed job
         """
         print('Performing job')
-        if "?" in job_url:
-            return requests.get(job_url + f'&api_key={self.api_key}',
+        try:
+            if "?" in job_url:
+                return requests.get(job_url + f'&api_key={self.api_key}',
+                                    timeout=10).json()
+            return requests.get(job_url + f'?api_key={self.api_key}',
                                 timeout=10).json()
-        return requests.get(job_url + f'?api_key={self.api_key}',
-                            timeout=10).json()
+        except Exception as e:
+            print(f"FAILURE: Request Timeout from url {job_url}, Adding job to invalid_jobs")
+            return {"error"}
 
     def download_all_attachments_from_comment(self, data, comment_json):
         '''
