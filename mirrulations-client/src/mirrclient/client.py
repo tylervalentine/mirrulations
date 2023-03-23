@@ -207,7 +207,6 @@ class Client:
             return requests.get(job_url + f'?api_key={self.api_key}',
                                 timeout=10).json()
         except requests.exceptions.ReadTimeout:
-            print(f"FAILURE: Request Timeout from url {job_url}")
             return {"error": "Read Timeout"}
 
     def download_all_attachments_from_comment(self, data, comment_json):
@@ -287,7 +286,7 @@ class Client:
         result = self.perform_job(job['url'])
         self.send_job(job, result)
         if any(x in result for x in ('error', 'errors')):
-            print(f'FAILURE: Error in {job["url"]}')
+            print(f'FAILURE: Error in {job["url"]}\nError: {result["error"]}')
         else:
             print(f'SUCCESS: {job["url"]} complete')
 

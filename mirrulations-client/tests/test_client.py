@@ -270,7 +270,7 @@ def test_client_returns_400_error_to_server(mock_requests):
             status_code=200
         )
 
-        regulation_response = {"errors": [{
+        regulation_response = {"error": [{
             "status": "400",
             "title": "The document ID could not be found."}]}
 
@@ -305,7 +305,7 @@ def test_client_returns_500_error_to_server(mock_requests):
             status_code=200
         )
 
-        regulation_response = {"errors": [{
+        regulation_response = {"error": [{
             "status": "500",
             "title": "INTERNAL_SERVER_ERROR",
             "detail": "Incorrect result size: expected 1, actual 2"}]
@@ -493,6 +493,7 @@ def test_failure_job_results(capsys, mock_requests):
             'Sending Job 1 to Work Server\n'
             '1: Errors found in results\n'
             'FAILURE: Error in http://url.com\n'
+            'Error: foobar\n'
         }
 
         captured = capsys.readouterr()
