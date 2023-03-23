@@ -71,5 +71,5 @@ if __name__ == '__main__':
             generate_work()
         except JobQueueException:
             print("FAILURE: Error occurred when adding a job. Sleeping...")
-            # Sleeps for 6 hours when Exception is caught
-            time.sleep(60 * 60 * 6)
+        # Sleeps for 6 hours
+        time.sleep(60 * 60 * 6)
