@@ -120,7 +120,7 @@ class Client:
             'agency': job['agency']
         }
         print(f'Sending Job {job["job_id"]} to Work Server')
-        if 'errors' not in job_result:
+        if 'error' not in job_result:
             data['directory'] = self.path_generator.get_path(job_result)
 
         self._put_results(data)
@@ -200,11 +200,14 @@ class Client:
             json results of the performed job
         """
         print('Performing job')
-        if "?" in job_url:
-            return requests.get(job_url + f'&api_key={self.api_key}',
+        try:
+            if "?" in job_url:
+                return requests.get(job_url + f'&api_key={self.api_key}',
+                                    timeout=10).json()
+            return requests.get(job_url + f'?api_key={self.api_key}',
                                 timeout=10).json()
-        return requests.get(job_url + f'?api_key={self.api_key}',
-                            timeout=10).json()
+        except requests.exceptions.ReadTimeout:
+            return {"error": "Read Timeout"}
 
     def download_all_attachments_from_comment(self, data, comment_json):
         '''
@@ -283,7 +286,7 @@ class Client:
         result = self.perform_job(job['url'])
         self.send_job(job, result)
         if any(x in result for x in ('error', 'errors')):
-            print(f'FAILURE: Error in {job["url"]}')
+            print(f'FAILURE: Error in {job["url"]}\nError: {result["error"]}')
         else:
             print(f'SUCCESS: {job["url"]} complete')
 
