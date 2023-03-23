@@ -120,7 +120,7 @@ class Client:
             'agency': job['agency']
         }
         print(f'Sending Job {job["job_id"]} to Work Server')
-        if 'errors' not in job_result:
+        if 'error' not in job_result:
             data['directory'] = self.path_generator.get_path(job_result)
 
         self._put_results(data)
@@ -207,9 +207,8 @@ class Client:
             return requests.get(job_url + f'?api_key={self.api_key}',
                                 timeout=10).json()
         except requests.exceptions.ReadTimeout:
-            print(f"FAILURE: Request Timeout from url {job_url}, \
-                  Adding job to invalid_jobs")
-            return {"errors"}
+            print(f"FAILURE: Request Timeout from url {job_url}")
+            return {"error": "Read Timeout"}
 
     def download_all_attachments_from_comment(self, data, comment_json):
         '''
