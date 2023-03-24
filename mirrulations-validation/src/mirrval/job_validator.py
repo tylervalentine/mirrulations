@@ -22,14 +22,13 @@ class Validator:
         collection_size = self.datastorage.get_collection_size(endpoint)
         counter = 0
         for result in SearchIterator(self.api, endpoint, beginning_timestamp):
-            print(f"Result was: {result}")
             if result == {}:
                 continue
             for res in result['data']:
                 if not self.datastorage.exists(res):
-                    print(f"Job {res}: {res['id']} not in database, adding to job queue")
+                    print(f"{res['id']} not in database, adding to job queue")
                     self.job_queue.add_job(res['links']['self'], res['type'])
-                    print(f"Finished adding job {res}: {res['id']}")
+                    print(f"Finished adding {res['id']}")
                 counter += 1
             percentage = (counter / collection_size) * 100
             print(f'{percentage:.2f}%')
@@ -44,7 +43,6 @@ def generate_work(collection=None):
         print("Redis database is busy loading")
         time.sleep(30)
 
-    # api_prefix = collection.upper() if collection else 'DOCKETS'
     api_key = os.getenv("API_KEY")
     api = RegulationsAPI(api_key)
     storage = DataStorage()
