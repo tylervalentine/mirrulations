@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <!-- CSS -->
+        <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+
+        <title>Mirrulations Dashboard</title>
+    </head>
+
+    <body>
+        <div class="dashboard">
+            <div class="dashboard-heading">
+                <h1>Mirrulations Dashboard</h1>
+            </div>
+            <div class="container">
+                <div class="container-section">
+                    <div class="card">
+                        <div class="info-container">
+                            <h2>
+                                <span id="jobs-waiting-number">0</span>
+                                <span class="dot green"></span>
+                            </h2>
+                            <p>Jobs Waiting</p>
+                        </div>
+                        <svg viewBox="0 0 36 36" class="circular-chart">
+                            <path class="circle-back" d="M18 2.0845
+                            a 15.9155 15.9155 0 0 1 0 31.831
+                            a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path class="circle-front green" id="jobs-waiting-circle-front" d="M18 2.0845
+                            a 15.9155 15.9155 0 0 1 0 31.831
+                            a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <text x="18" y="20.35" class="circle-percentage"
+                                id='jobs-waiting-circle-percentage'>0%</text>
+                        </svg>
+                    </div>
+                    <div class="card">
+                        <div class="info-container">
+                            <h2>
+                                <span id="jobs-done-number">0</span>
+                                <span class="dot red"></span>
+                            </h2>
+                            <p>Jobs Done</p>
+                        </div>
+                        <svg viewBox="0 0 36 36" class="circular-chart">
+                            <path class="circle-back" d="M18 2.0845
+                            a 15.9155 15.9155 0 0 1 0 31.831
+                            a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path class="circle-front red" id="jobs-done-circle-front" d="M18 2.0845
+                            a 15.9155 15.9155 0 0 1 0 31.831
+                            a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <text x="18" y="20.35" class="circle-percentage" id='jobs-done-circle-percentage'>0%</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="container-section">
+                    <div class="card header-card">
+                        <div class="info-container">
+                            <div class="info-container-data">
+                                <h3>Attachments Downloaded</h3>
+                                <span id="attachments-done-number">0</span>
+                            </div>
+                        </div>
+                    </div>
+                        <div class="card header-card">
+                            <div class="info-container">
+                                <div class="info-container-data">
+                                    <h3>Comments Downloaded</h3>
+                                    <span id="comments-done-number">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card header-card">
+                            <div class="info-container">
+                                <div class="info-container-data">
+                                    <h3>Documents Downloaded</h3>
+                                    <span id="documents-done-number">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    <div class="card header-card">
+                        <div class="info-container">
+                            <div class="info-container-data">
+                                <h3>Dockets Downloaded</h3>
+                                <span id="dockets-done-number">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card header-card">
+                        <div class="info-container">
+                            <div class="info-container-data">
+                                <h3>Comments Queued</h3>
+                                <span id="comments-queued-number">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card header-card">
+                        <div class="info-container">
+                            <div class="info-container-data">
+                                <h3>Documents Queued</h3>
+                                <span id="documents-queued-number">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card header-card">
+                        <div class="info-container">
+                            <div class="info-container-data">
+                                <h3>Dockets Queued</h3>
+                                <span id="dockets-queued-number">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>        
+                            <!-- JS -->
+        <script src="{{ url_for('static', filename='index.js') }}"></script>
+    </body>
+
+</html>
