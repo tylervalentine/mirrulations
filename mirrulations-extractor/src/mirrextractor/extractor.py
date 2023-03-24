@@ -72,7 +72,7 @@ class Extractor:
 if __name__ == '__main__':
     now = datetime.now()
     while True:
-        for (root, dirs, files) in os.walk('/data/data'):
+        for (root, dirs, files) in os.walk('/data'):
             for file in files:
                 # Checks for pdfs
                 if not file.endswith('pdf'):
