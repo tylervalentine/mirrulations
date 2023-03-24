@@ -44,6 +44,7 @@ class Saver:
         path_without_file_type = path.strip(".json")
         path = f'{path_without_file_type}({i}).json'
         if os.path.exists(path) is False:
+            print(f'JSON is different than duplicate: Labeling ({i})')
             self.save_to_disk(path, data)
         else:
             self.check_for_duplicates(path, data, i + 1)
@@ -54,7 +55,7 @@ class Saver:
             file.close()
 
     def open_json_file(self, path):
-        with open(f'/data/{path}', encoding='utf8') as file:
+        with open(path, encoding='utf8') as file:
             saved_data = load(file)
         return saved_data
 
@@ -67,5 +68,3 @@ class Saver:
     def check_for_duplicates(self, path, data, i):
         if self.is_duplicate(self.open_json_file(path), data) is False:
             self.save_duplicate_json(path, data, i)
-        else:
-            print("This file has already been downloaded")

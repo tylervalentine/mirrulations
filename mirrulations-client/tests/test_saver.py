@@ -94,7 +94,7 @@ def test_open_json():
     mock = mock_open(read_data=dumps(data))
     with patch('mirrclient.saver.open', mock) as mocked_file:
         saver.open_json_file(path)
-        mocked_file.assert_called_once_with(f'/data/{path}', encoding='utf8')
+        mocked_file.assert_called_once_with(path, encoding='utf8')
 
 
 def test_save_duplicate_json():
@@ -146,8 +146,8 @@ def test_check_for_duplicates(capsys):
     mock = mock_open(read_data=dumps(data))
     with patch('mirrclient.saver.open', mock) as mocked_file:
         saver.open_json_file(path)
-        mocked_file.assert_called_once_with(f'/data/{path}', encoding='utf8')
+        mocked_file.assert_called_once_with(path, encoding='utf8')
         saver.check_for_duplicates(path, data, 1)
-        print_data = 'This file has already been downloaded\n'
+        print_data = ''
         captured = capsys.readouterr()
         assert captured.out == print_data
