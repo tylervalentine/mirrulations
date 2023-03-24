@@ -69,7 +69,7 @@ services:
       - redis
       - mongo
       - work_generator
-    env_file: env_files/validation.env
+    env_file: env_files/validator.env
     restart: always
   work_server:
     build:
