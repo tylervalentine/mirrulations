@@ -49,9 +49,11 @@ class SearchIterator:
             result = self.api.download(self.url, self.params)
             self.next_page += 1
         except HTTPError as error:
-            url = self.fix_url(str(error.request).rsplit(" ", maxsplit=1)[-1])
-            error_reason = ''.join(str(error).split(':', maxsplit=1)[0])
-            print(f'FAILED: {self.url}\n{error_reason} from url {url}')
+            # Splitting on ': ' since error has form of
+            # 504 Server Error: for url: 'https://...'
+            reason, url = str(error).rsplit(": ", maxsplit=1)
+            url = self.fix_url(url)
+            print(f'FAILED: {self.url}\n{reason}: {url}')
             return {}
 
         self.iteration_done = self.check_if_done(result)
@@ -70,7 +72,7 @@ class SearchIterator:
                                               parsed_query,
                                               parsed_link.fragment))
         # Return link without '%' and w/o api_key
-        return ''.join(str(fixed_link).split("&")[:-1])
+        return ''.join(str(fixed_link).rsplit("&", maxsplit=1)[:-1])
 
     def check_if_done(self, result):
         if result['meta']['pageNumber'] != result['meta']['totalPages']:

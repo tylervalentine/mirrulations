@@ -79,10 +79,10 @@ def test_work_generator_output_after_500_error(capsys, requests_mock, mocker):
 
     print_data = [
         'FAILED: https://api.regulations.gov/v4/documents\n',
-        '504 Server Error from url ',
-        'https://api.regulations.gov/v4/documents?sort=',
-        'lastModifiedDatepage[size]=250filter[lastModifiedDate]',
-        '[ge]=1971-12-31+19:00:00page[number]=1\n',
+        '504 Server Error: None for url: ',
+        'https://api.regulations.gov/v4/documents?',
+        'sort=lastModifiedDate&page[size]=250',
+        '&filter[lastModifiedDate][ge]=1971-12-31+19:00:00&page[number]=1\n',
         'Added any: 150\n'
     ]
     assert capsys.readouterr().out == "".join(print_data)
