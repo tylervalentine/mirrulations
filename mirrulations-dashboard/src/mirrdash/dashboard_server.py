@@ -61,6 +61,12 @@ def create_server(job_queue, docker_server, mongo_client):
             'index.html'
         )
 
+    @dashboard.app.route('/dev', methods=['GET'])
+    def _dev():
+        return render_template(
+            'dev.html'
+        )
+
     @dashboard.app.route('/data', methods=['GET'])
     def _get_dashboard_data():
         """ returns data as json and request status code """
