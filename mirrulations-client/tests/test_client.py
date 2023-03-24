@@ -6,7 +6,7 @@ from pytest import fixture, raises
 import requests_mock
 from mirrclient.client import NoJobsAvailableException, Client
 from mirrclient.client import is_environment_variables_present
-from requests.exceptions import Timeout
+from requests.exceptions import Timeout, ReadTimeout
 
 BASE_URL = 'http://work_server:8080'
 
@@ -249,10 +249,9 @@ def test_perform_job_timesout(mock_requests):
         fake_url = 'http://regulations.gov/fake/api/call'
         mock_requests.get(
             fake_url,
-            exc=Timeout)
+            exc=ReadTimeout)
 
-        with pytest.raises(Timeout):
-            Client().perform_job(fake_url)
+        assert Client().perform_job(fake_url) == {"error": "Read Timeout"}
 
 
 def test_client_returns_400_error_to_server(mock_requests):
@@ -270,7 +269,7 @@ def test_client_returns_400_error_to_server(mock_requests):
             status_code=200
         )
 
-        regulation_response = {"errors": [{
+        regulation_response = {"error": [{
             "status": "400",
             "title": "The document ID could not be found."}]}
 
@@ -305,7 +304,7 @@ def test_client_returns_500_error_to_server(mock_requests):
             status_code=200
         )
 
-        regulation_response = {"errors": [{
+        regulation_response = {"error": [{
             "status": "500",
             "title": "INTERNAL_SERVER_ERROR",
             "detail": "Incorrect result size: expected 1, actual 2"}]
@@ -491,6 +490,7 @@ def test_failure_job_results(capsys, mock_requests):
             'Performing job\n'
             'Sending Job 1 to Work Server\n'
             'FAILURE: Error in http://url.com\n'
+            'Error: foobar\n'
         }
 
         captured = capsys.readouterr()
