@@ -61,3 +61,28 @@ def test_work_generator_retries_after_500(requests_mock, mocker):
     generator.download('documents')
 
     assert len(requests_mock.request_history) == 2
+
+
+def test_work_generator_output_after_500_error(capsys, requests_mock, mocker):
+    mocker.patch('time.sleep')
+    results = MockDataSet(150).get_results()
+    results.insert(0, {'json': '{}', 'status_code': 504})
+    requests_mock.get('https://api.regulations.gov/v4/documents', results)
+
+    api = RegulationsAPI('FAKE_KEY')
+    job_queue = JobQueue(FakeRedis())
+    # mock out the rabbit connection
+    job_queue.rabbitmq = MockRabbit()
+
+    generator = WorkGenerator(job_queue, api, MockDataStorage())
+    generator.download('documents')
+
+    print_data = [
+        'FAILED: https://api.regulations.gov/v4/documents\n',
+        '504 Server Error: None for url: ',
+        'https://api.regulations.gov/v4/documents?',
+        'sort=lastModifiedDate&page[size]=250',
+        '&filter[lastModifiedDate][ge]=1971-12-31+19:00:00&page[number]=1\n',
+        'Added any: 150\n'
+    ]
+    assert capsys.readouterr().out == "".join(print_data)

@@ -1,4 +1,5 @@
 import datetime
+import urllib
 import pytz
 from requests import HTTPError
 
@@ -48,12 +49,30 @@ class SearchIterator:
             result = self.api.download(self.url, self.params)
             self.next_page += 1
         except HTTPError as error:
-            print(f'FAILED: {self.url}\n{error}')
+            # Splitting on ': ' since error has form of
+            # 504 Server Error: for url: 'https://...'
+            reason, url = str(error).rsplit(": ", maxsplit=1)
+            url = self.fix_url(url)
+            print(f'FAILED: {self.url}\n{reason}: {url}')
             return {}
 
         self.iteration_done = self.check_if_done(result)
 
         return result
+
+    def fix_url(self, link):
+        # Parse the link into its components
+        parsed_link = urllib.parse.urlparse(link)
+        parsed_path = urllib.parse.unquote(parsed_link.path)
+        parsed_query = urllib.parse.unquote(parsed_link.query)
+        # joins parts of url together without special characters
+        fixed_link = urllib.parse.urlunparse((parsed_link.scheme,
+                                              parsed_link.netloc,
+                                              parsed_path, parsed_link.params,
+                                              parsed_query,
+                                              parsed_link.fragment))
+        # Return link without '%' and w/o api_key
+        return ''.join(str(fixed_link).rsplit("&", maxsplit=1)[:-1])
 
     def check_if_done(self, result):
         if result['meta']['pageNumber'] != result['meta']['totalPages']:
