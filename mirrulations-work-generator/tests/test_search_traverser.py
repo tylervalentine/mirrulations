@@ -71,3 +71,16 @@ def test_date_converted_utc_to_est(requests_mock, mocker):
         call = requests_mock.request_history[index]
         assert call.qs['filter[lastmodifieddate][ge]'][0] == \
                '2020-01-01 01:23:20'
+
+
+def test_fix_url():
+    api = RegulationsAPI('FAKE_KEY')
+    url = 'https://api.regulations.gov/v4/comments'\
+        '?sort=lastModifiedDate&page%5Bsize%5D=250'\
+        '&filter%5BlastModifiedDate%5D%5Bge%5D=2023-03-17+16%3A00%3A04'\
+        '&page%5Bnumber%5D=7&api_key=TEST_KEY'
+    expected_url = 'https://api.regulations.gov/v4/comments?sort='\
+        'lastModifiedDatepage[size]=250filter[lastModifiedDate]'\
+        '[ge]=2023-03-17+16:00:04page[number]=7'
+    iterator = SearchIterator(api, 'comments', '2023-03-17 16:00:04')
+    assert expected_url == iterator.fix_url(url)
