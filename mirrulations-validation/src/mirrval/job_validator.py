@@ -36,7 +36,7 @@ class Validator:
 
 
 def generate_work(collection=None):
-    load_dotenv(dotenv_path='env_files/validation.env')
+    load_dotenv(dotenv_path='env_files/validator.env')
 
     database = redis.Redis('redis')
     # Sleep for 30 seconds to give time to load
