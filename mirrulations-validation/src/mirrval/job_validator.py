@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-import dotenv
+from dotenv import load_dotenv
 import redis
 from mirrgen.search_iterator import SearchIterator
 from mirrcore.redis_check import is_redis_available
@@ -41,7 +41,7 @@ class Validator:
 
 
 def generate_work(collection=None):
-    dotenv.load_dotenv()
+    load_dotenv(dotenv_path='env_files/validation.env')
 
     database = redis.Redis('redis')
     # Sleep for 30 seconds to give time to load
@@ -49,9 +49,11 @@ def generate_work(collection=None):
         print("Redis database is busy loading")
         time.sleep(30)
 
-    api_prefix = collection.upper() if collection else 'DOCKETS'
-    api_key = os.getenv(api_prefix + '_API_KEY')
+    # api_prefix = collection.upper() if collection else 'DOCKETS'
+    api_key = os.getenv("API_KEY")
     api = RegulationsAPI(api_key)
+    print(f"API Key {api_key}")
+    print(f"API {api}")
     storage = DataStorage()
     job_queue = JobQueue(database)
     generator = Validator(api, storage, job_queue)
