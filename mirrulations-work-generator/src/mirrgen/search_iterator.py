@@ -49,7 +49,9 @@ class SearchIterator:
             result = self.api.download(self.url, self.params)
             self.next_page += 1
         except HTTPError as error:
-            print(f'FAILED: {self.url}\n{error}')
+            url = self.fix_url(str(error.request).rsplit(" ", maxsplit=1)[-1])
+            error_reason = ''.join(str(error).split(':', maxsplit=1)[0])
+            print(f'FAILED: {self.url}\n{error_reason} from url {url}')
             return {}
 
         self.iteration_done = self.check_if_done(result)
