@@ -78,6 +78,8 @@ services:
       context: .
       dockerfile: mirrulations-extractor/Dockerfile
     restart: always
+    volumes:
+      - "~/data/data:/data"
   dashboard:
     build:
       context: .
