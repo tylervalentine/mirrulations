@@ -177,6 +177,7 @@ def put_results(workserver, data):
     if 'error' in data['results'] or 'errors' in data['results']:
         job_id = data['job_id']
         result = workserver.redis.hget('jobs_in_progress', job_id)
+        print(f"Errors in results. Adding job_url {result} to invalid_jobs")
         workserver.redis.hdel('jobs_in_progress', job_id)
         workserver.redis.hset('invalid_jobs', job_id, result)
         return (True,)

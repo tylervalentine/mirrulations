@@ -30,6 +30,28 @@ def get_test_document():
                 }
         }}
 
+def get_test_document_htm():
+    return {
+        "data":{
+        "id": "USTR-2015-0010-0001",
+        "type": "documents", 
+        "attributes": {
+                    "agencyId":"USTR",
+                    "docketId":"USTR-2015-0010",
+                    "fileFormats": [{
+                        "fileUrl" : "https://downloads.regulations.gov/USTR-2015-0010-0001/content.pdf",
+                        "format" : "pdf",
+                        "size" : 182010
+                    }, {
+                        "fileUrl" : "https://downloads.regulations.gov/USTR-2015-0010-0001/content.htm",
+                        "format" : "htm",
+                        "size" : 9709
+                    }
+                    ]
+                }
+                
+        }}
+
 def get_test_comment():
     return {
         "data":{
@@ -210,6 +232,10 @@ def test_get_document_path_with_missing_agencyId_key(generator):
     expected_path = "/unknown/VETS-2010-0001/text-VETS-2010-0001/documents/VETS-2010-0001-0010.json"
     assert expected_path == generator.get_document_json_path(json)
 
+def test_get_document_path_for_htm(generator):
+    expected_path = "/USTR/USTR-2015-0010/text-USTR-2015-0010/documents/USTR-2015-0010-0001_content.htm"
+    assert expected_path == generator.get_document_htm_path(get_test_document_htm())
+
 
 ## Comments
 
@@ -282,3 +308,13 @@ def test_attachment_comment_paths(generator):
     json_pls = get_attachment_and_comment()
     expected_path = ["/FDA/FDA-2016-D-2335/binary-FDA-2016-D-2335/comments_attachments/FDA-2016-D-2335-1566_attachment_1.pdf"]
     assert expected_path == generator.get_attachment_json_paths(json_pls)
+
+def test_extractor_save_path():
+    path = "/data/data/USTR/USTR-2015-0010/" + \
+           "binary-USTR-2015-0010/" + \
+           "comments_attachments/USTR-2015-0010-0002_attachment_1.pdf"
+    save_path = PathGenerator.make_attachment_save_path(path)
+    expected_path = "/data/data/USTR/USTR-2015-0010/text-USTR-2015-0010/" + \
+                    "comments_extracted_text/pdfminer/" + \
+                    "USTR-2015-0010-0002_attachment_1_extracted.txt"
+    assert save_path == expected_path

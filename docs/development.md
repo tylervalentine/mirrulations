@@ -1,26 +1,7 @@
 
 ## Developer Setup
 
-* Create and activate a virtual environment
-
-  ```
-  python3 -m venv .venv
-  source .venv/bin/activate
-  ```
-
-* Install source code as a module
-
-  The project is organized into multiple modules, which must each be installed as "editable"
-  (using the `-e` switch on `pip`):
-
-  ```
-  pip install -e mirrulations-client
-  pip install -e mirrulations-core
-  pip install -e mirrulations-dashboard
-  pip install -e mirrulations-mocks
-  pip install -e mirrulations-work-generator 
-  pip install -e mirrulations-work-server
-  ```
+* Run `python dev_setup.py` to create a virtual environment and install all neccessary packages.
 
 ## Run Static Analysis and Tests
 
@@ -50,6 +31,7 @@ The system is made up of a number of Docker containers.  See the `docker-compose
 * **Dashboard** - Provides a status page for the system
 * **NGINX** - Routes web traffic to appropriate host (currently only the dashboard)
 * **Clients** - There are multiple instances of the clients.  Each gets jobs from the work server, downloads the requested information from regulations.gov (using an API key), and returns the data to the work server.
+* **Extractor** - Walks through the data and extracts text from attachments. The text is then saved to the appropriate location.
 
 ### Docker Setup
 

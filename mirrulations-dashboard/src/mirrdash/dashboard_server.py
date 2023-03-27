@@ -25,6 +25,7 @@ class Dashboard:
         self.docker = docker_server
         self.mongo = mongo_client
         CORS(self.app, resources={r'/data': {'origins': '*'}})
+        CORS(self.app, resources={r'/devdata': {'origins': '*'}})
 
 
 def get_jobs_stats(job_queue):
@@ -61,8 +62,14 @@ def create_server(job_queue, docker_server, mongo_client):
             'index.html'
         )
 
+    @dashboard.app.route('/dev', methods=['GET'])
+    def _dev():
+        return render_template(
+            'dev.html'
+        )
+
     @dashboard.app.route('/data', methods=['GET'])
-    def _get_dashboard_data():
+    def _get_client_dashboard_data():
         """ returns data as json and request status code """
         try:
             data = get_jobs_stats(dashboard.job_queue)
@@ -81,9 +88,14 @@ def create_server(job_queue, docker_server, mongo_client):
         # Add this value to the total jobs
         data['jobs_total'] += jobs_done_info['num_jobs_done']
 
+        return jsonify(data), 200
+
+    @dashboard.app.route('/devdata', methods=['GET'])
+    def _get_developer_dashboard_data():
+        """ returns data as json and request status code """
+
         # Add container info to data
-        container_information = get_container_stats(dashboard.docker)
-        data.update(container_information)
+        data = get_container_stats(dashboard.docker)
 
         return jsonify(data), 200
 

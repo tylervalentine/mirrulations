@@ -59,6 +59,9 @@ if __name__ == "__main__":
     env_path = create_env_folder() 
     total_clients = get_total_client_number()
 
+    # Install all packages
+    os.system("bash install_packages.sh")
+
     write_files(api_key, env_path, total_clients)
 
             
