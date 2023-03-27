@@ -1,123 +1,46 @@
-import os
-import shutil
-from pytest import fixture
 from mirrextractor.extractor import Extractor
+import pikepdf
 
 
-SAVE_DIR = 'test-area'
-SAVE_PATH = SAVE_DIR + '/saved.txt'
+def mock_pdf_extraction(mocker):
+    mocker.patch.object(
+        Extractor,
+        '_extract_pdf',
+        return_value=None
+    )
 
 
-@fixture(autouse=True)
-def remove_saved_file():
-    absolute_path = os.path.dirname(__file__)
-    save_dir = os.path.join(absolute_path, SAVE_DIR)
-    save_path = os.path.join(absolute_path, SAVE_PATH)
-
-    if not os.path.isdir(save_dir):
-        os.mkdir(save_dir)
-
-    if os.path.isfile(save_path):
-        os.remove(save_path)
+def test_extract_text(capfd, mocker):
+    mock_pdf_extraction(mocker)
+    Extractor.extract_text('a.pdf', 'b.txt')
+    assert "Extracting text from a.pdf" in capfd.readouterr()[0]
 
 
-def test_extractor_creates_saved_file():
-    absolute_path = os.path.dirname(__file__)
-
-    save_path = os.path.join(absolute_path, SAVE_PATH)
-
-    Extractor.extract_text(
-        os.path.join(absolute_path, 'pdfs/empty.pdf'),
-        save_path)
-
-    assert os.path.isfile(save_path)
+def test_extract_text_non_pdf(capfd, mocker):
+    mock_pdf_extraction(mocker)
+    Extractor.extract_text('a.docx', 'b.txt')
+    assert "FAILURE: attachment doesn't have appropriate extension a.docx" \
+        in capfd.readouterr()[0]
 
 
-def test_extractor_extracts_pdf_with_text_a():
-    absolute_path = os.path.dirname(__file__)
-
-    save_path = os.path.join(absolute_path, SAVE_PATH)
-
-    Extractor.extract_text(
-        os.path.join(absolute_path, 'pdfs/a.pdf'),
-        save_path)
-
-    with open(save_path, "r", encoding="utf-8") as in_file:
-        text = in_file.read()
-
-    assert text.strip() == 'a'
+def test_open_pdf_throws_pikepdf_error(mocker, capfd):
+    mocker.patch('pikepdf.open', side_effect=pikepdf.PdfError)
+    Extractor.extract_text('a.pdf', 'b.txt')
+    assert "FAILURE: failed to open" in capfd.readouterr()[0]
 
 
-def test_extractor_doesnt_save_non_pdf():
-    absolute_path = os.path.dirname(__file__)
-
-    save_path = os.path.join(absolute_path, SAVE_PATH)
-
-    Extractor.extract_text(
-        os.path.join(absolute_path, 'pdfs/a.docx'),
-        save_path)
-
-    assert not os.path.isfile(save_path)
+def test_save_pdf_throws_runtime_error(mocker, capfd):
+    mocker.patch('pikepdf.open', return_value=pikepdf.Pdf.new())
+    mocker.patch('pikepdf.Pdf.save', side_effect=RuntimeError)
+    Extractor.extract_text('a.pdf', 'b.txt')
+    assert "FAILURE: failed to save" in capfd.readouterr()[0]
 
 
-def test_error_when_file_is_already_open():
-    absolute_path = os.path.dirname(__file__)
-
-    file_name = 'a.pdf'
-    attachment_path = os.path.join(absolute_path, 'pdfs/' + file_name)
-    copy_path = os.path.join(absolute_path, SAVE_DIR + '/' + file_name)
-
-    shutil.copy(attachment_path, copy_path)
-
-    save_path = os.path.join(absolute_path, SAVE_PATH)
-
-    # File will be open at the same time we are trying to extract it.
-    with open(copy_path, "w", encoding="utf-8") as _:
-        Extractor.extract_text(copy_path, save_path)
-
-    assert not os.path.isfile(save_path)
-
-
-def test_extractor_overwrites_existing_file():
-    absolute_path = os.path.dirname(__file__)
-    save_path = os.path.join(absolute_path, SAVE_PATH)
-
-    with open(save_path, 'w', encoding="utf-8") as file:
-        file.write('test')
-
-    Extractor.extract_text(
-        os.path.join(absolute_path, 'pdfs/empty.pdf'),
-        save_path)
-
-    with open(save_path, 'r', encoding="utf-8") as file:
-        assert file.read() != 'test'
-
-
-def test_extractor_handles_mixed_text_and_images():
-    absolute_path = os.path.dirname(__file__)
-
-    save_path = os.path.join(absolute_path, SAVE_PATH)
-
-    Extractor.extract_text(
-        os.path.join(absolute_path, 'pdfs/mixed.pdf'),
-        save_path)
-
-    with open(save_path, "r", encoding="utf-8") as in_file:
-        text = in_file.read()
-
-    assert text.strip() == 'a'
-
-
-def test_extractor_catches_runtime_error(capfd):
-    absolute_path = os.path.dirname(__file__)
-
-    save_path = os.path.join(absolute_path, SAVE_PATH)
-
-    Extractor.extract_text(
-        os.path.join(absolute_path, 'pdfs/error.pdf'),
-        save_path)
-    # extracted file should not exist
-    assert os.path.exists(save_path) is False
-    # should print error message
-    out, _ = capfd.readouterr()
-    assert "operation for stream attempted on object of type dictionary" in out
+def test_extract_pdf(mocker, capfd):
+    mocker.patch('pikepdf.open', return_value=pikepdf.Pdf.new())
+    mocker.patch('pikepdf.Pdf.save', return_value=None)
+    mocker.patch('pdfminer.high_level.extract_text', return_value='test')
+    mocker.patch('os.makedirs', return_value=None)
+    mocker.patch("builtins.open", mocker.mock_open())
+    Extractor.extract_text('a.pdf', 'b.txt')
+    assert "SUCCESS: Saved extraction at" in capfd.readouterr()[0]
