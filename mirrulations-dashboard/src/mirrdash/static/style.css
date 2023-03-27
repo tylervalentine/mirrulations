@@ -201,15 +201,21 @@ header {
     border-radius: 16px;
   }
 
-  .progress-to-corpus {
+  .progress-bar-to-corpus {
     width: 50%;
     border-radius: 16px;
-    color: white;
+    color: #4C84FF;
     animation: onReload 2s ease-out forwards;
   }
 
   .corpus-header {
     padding-bottom: 10px;
+  }
+
+  .progress-percentage-to-corpus {
+    padding-top: 5px;
+    padding-left: 5px;
+    text-align: left;
   }
 
   @keyframes onReload {
