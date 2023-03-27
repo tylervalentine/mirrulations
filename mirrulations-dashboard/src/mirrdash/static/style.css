@@ -13,6 +13,12 @@ p {
     margin: 10px 0;
 }
 
+header {
+    padding-right: 10px;
+    padding-top: 5px;
+    text-align: right;
+  }
+
 /* Utilities */
 .container {
     max-width: 1100px;
@@ -87,6 +93,10 @@ p {
 .info-container {
     margin-right: 68px;
     width: 160px;
+}
+
+.progress-container {
+    width: 100%;
 }
 
 .dashboard h2 {
@@ -170,7 +180,7 @@ p {
     transform: translateY(30%);
     animation: display 2s ease-out forwards;
   }
-  
+
   @keyframes progress {
     0% {
       stroke-dasharray: 0 100;
@@ -183,3 +193,37 @@ p {
         transform: translateY(0);
     }
 }
+
+/* Progress to Corpus */
+.total-to-corpus {
+    width: 100%;
+    background: rgb(238,238,238);
+    border-radius: 16px;
+  }
+
+  .progress-bar-to-corpus {
+    width: 50%;
+    border-radius: 16px;
+    color: #4C84FF;
+    animation: onReload 2s ease-out forwards;
+  }
+
+  .corpus-header {
+    padding-bottom: 10px;
+  }
+
+  .progress-percentage-to-corpus {
+    padding-top: 5px;
+    padding-left: 5px;
+    text-align: left;
+  }
+
+  @keyframes onReload {
+    0% {
+        opacity: 0;
+        width: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+  }
