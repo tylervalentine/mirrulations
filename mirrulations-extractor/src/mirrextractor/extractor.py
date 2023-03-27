@@ -34,8 +34,8 @@ class Extractor:
             print(f"Extracting text from {attachment_path}")
             Extractor._extract_pdf(attachment_path, save_path)
         else:
-            print(f"FAILURE: attachment doesn't have appropriate extension \
-            {attachment_path}")
+            print("FAILURE: attachment doesn't have appropriate extension " \
+            f"{attachment_path}")
 
     @staticmethod
     def _extract_pdf(attachment_path, save_path):
