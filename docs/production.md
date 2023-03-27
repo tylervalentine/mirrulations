@@ -8,7 +8,7 @@ The system is Dockerized into a number of components:
 
 * `nginx` - A reverse proxy that routes requests to the dashboard
 * `redis` - Job management as well as permanent variable storage
-* `mongo` - Storage of dockets, documents, comments and attachments(in parallel with disk storage)
+* `mongo` - Storage of dockets, documents, comments and attachments (in parallel with disk storage)
 * `work_generator` - Crawl through the regulations.gov results to find missing data
 * `work_server` - Server jobs to clients and save results
 * `rabbitmq` - Job Queue Management
