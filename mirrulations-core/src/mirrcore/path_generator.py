@@ -67,8 +67,6 @@ class PathGenerator:
         segments = item_id.split('-') # list of segments separated by '-'
         segments_excluding_end = segments[:-1] # drops the last segment
         parsed_docket_id = '-'.join(segments_excluding_end)
-        print(f'No DocketId Key found, parsing the "id" key')
-        print(f'Id = {item_id}, Parsed DocketId = {parsed_docket_id}')
         return parsed_docket_id
 
 
