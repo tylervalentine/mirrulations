@@ -10,8 +10,8 @@ Dependencies:
 import os
 from flask import Flask, jsonify, render_template
 from flask_cors import CORS
-
 from mirrcore.job_queue import JobQueue
+from mirrcore.job_queue_exceptions import JobQueueException
 from mirrdash.sum_mongo_counts import connect_mongo_db, get_done_counts
 from dotenv import load_dotenv
 from redis import Redis
@@ -71,20 +71,21 @@ def create_server(job_queue, docker_server, mongo_client):
     @dashboard.app.route('/data', methods=['GET'])
     def _get_client_dashboard_data():
         """ returns data as json and request status code """
-        data = get_jobs_stats(dashboard.job_queue)
+        try:
+            data = get_jobs_stats(dashboard.job_queue)
+        except JobQueueException as error:
+            print(f"FAILURE: Encountered JobQueueException from {error}")
+            # Index.js expects some values to update. by providing None or
+            # 'null' to num_jobs_waiting (supposed to be an int), dashboard
+            # javascript will recognize something went wrong and reflect status
+            return {'num_jobs_waiting': None}, error.status_code
 
         # Get the number of jobs done from the mongo db
         # and add it to the data
-        # TO DO: 'attachments_count' is hardwired. Needs to have it
-        # added in from plumbing.
         jobs_done_info = get_done_counts(dashboard.mongo, 'mirrulations')
         data.update(jobs_done_info)
 
         # Add this value to the total jobs
-        # TO DO: This should go away entirely when Redis is
-        # removed from this process
-        # TO DO: When this happens, change the variable name
-        # in get_done_counts to simplify
         data['jobs_total'] += jobs_done_info['num_jobs_done']
 
         return jsonify(data), 200
