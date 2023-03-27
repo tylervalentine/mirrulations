@@ -180,7 +180,7 @@ header {
     transform: translateY(30%);
     animation: display 2s ease-out forwards;
   }
-  
+
   @keyframes progress {
     0% {
       stroke-dasharray: 0 100;
@@ -205,8 +205,19 @@ header {
     width: 50%;
     border-radius: 16px;
     color: white;
+    animation: onReload 2s ease-out forwards;
   }
 
   .corpus-header {
     padding-bottom: 10px;
+  }
+
+  @keyframes onReload {
+    0% {
+        opacity: 0;
+        width: 0;
+    }
+    100% {
+        opacity: 1;
+    }
   }
