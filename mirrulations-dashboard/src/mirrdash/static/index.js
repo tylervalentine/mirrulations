@@ -119,7 +119,8 @@ const updateDeveloperDashboardData = () => {
             mongo,
             redis,
             work_generator,
-            work_server
+            work_server, 
+            rabbitmq
         } = jobInformation;
 
         updateStatus('client1-status', client1)
@@ -153,6 +154,7 @@ const updateDeveloperDashboardData = () => {
         updateStatus('redis-status', redis);
         updateStatus('work-generator-status', work_generator);
         updateStatus('work-server-status', work_server);
+        updateStatus('rabbitmq-status', rabbitmq);
     })
     .catch((err) => console.log(err));
 } 
