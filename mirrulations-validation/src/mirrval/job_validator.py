@@ -29,6 +29,8 @@ class Validator:
                     print(f"{res['id']} not in database, adding to job queue")
                     self.job_queue.add_job(res['links']['self'], res['type'])
                     print(f"Finished adding {res['id']}")
+                else:
+                    print(f"{res['id']} exists in database")
                 counter += 1
             percentage = (counter / collection_size) * 100
             print(f'{percentage:.2f}%')
@@ -60,7 +62,7 @@ def generate_work(collection=None):
 if __name__ == '__main__':
     job_types = ('dockets', 'documents', 'comments')
     while True:
-        if len(sys.argv) > 1 and sys.argv[1] in job_types:
+        if len(sys.argv) > 1 and sys.argv[1] in job_types: # Start from last job type performed
             generate_work(sys.argv[1])
         else:
             generate_work()
