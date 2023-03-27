@@ -26,6 +26,7 @@ const updateHtmlValues = (id, value, total) => {
         document.getElementById(id+'-number').textContent = value.toLocaleString('en');
         document.getElementById(id+'-circle-percentage').textContent = `${percent}%`;
         document.getElementById(id+'-circle-front').style.strokeDasharray = `${percent}, 100`;
+        document.getElementById(id+'-percent').textContent = `${percent}%`;
     }
 }
 
@@ -70,10 +71,10 @@ const updateClientDashboardData = () => {
         } = jobInformation;
         updateHtmlValues('jobs-waiting', num_jobs_waiting, jobs_total);
         updateHtmlValues('jobs-done', num_jobs_done, jobs_total);
+        updateHtmlValues("dockets-done", num_dockets_done, 232255); //TO DO: change hard coded number
         // Counts
         updateCounts("attachments-done",num_attachments_done);
         updateCounts("comments-done",num_comments_done);
-        updateCounts("dockets-done",num_dockets_done);
         updateCounts("documents-done",num_documents_done);
         updateJobsQueuedByType("comments-queued", num_jobs_comments_queued);
         updateJobsQueuedByType("dockets-queued", num_jobs_dockets_queued);
