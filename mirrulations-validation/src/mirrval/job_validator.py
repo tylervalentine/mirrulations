@@ -34,6 +34,7 @@ class Validator:
                 counter += 1
             percentage = (counter / collection_size) * 100
             print(f'{percentage:.2f}%')
+            time.sleep(3.6)
 
 
 def generate_work(collection=None):
