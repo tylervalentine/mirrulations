@@ -5,7 +5,7 @@ import pytz
 
 class MockDataSet:
 
-    def __init__(self, num_results, job_type='any', start_date='2020-01-01 00:00:00'):
+    def __init__(self, num_results, job_type='dockets', start_date='2020-01-01 00:00:00'):
         utc = pytz.utc
 
         self.start = datetime.datetime.fromisoformat(start_date)\
