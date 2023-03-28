@@ -31,10 +31,9 @@ class DataStorage:
         #     for attachment_text in data['data']['attachments_text']:
         #             data = {'id':data['data']['id'], 'text':attachment_text}
         #             self.attachments.insert_one(data)
-        agency = data['agency']
-        reg_id = data['reg_id']
         # Updated this line to no longer be a for loop
-        # This was causing the large attachments downloaded counter since we 
+        # This was causing the large attachments downloaded counter since we
         # were making an entry for each key in data['results'] before
-        entry = {'path': data['attachment_path'], 'file': data['attachment_filename']}
+        entry = {'path': data['attachment_path'],
+                 'file': data['attachment_filename']}
         self.attachments.insert_one(entry)

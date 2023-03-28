@@ -1,6 +1,7 @@
-import pika
 import json
 import time
+import pika
+
 
 class RabbitMQ:
     """
@@ -13,7 +14,8 @@ class RabbitMQ:
 
     def _ensure_channel(self):
         if self.connection is None or not self.connection.is_open:
-            self.connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq'))
+            connection_parameter = pika.ConnectionParameters('rabbitmq')
+            self.connection = pika.BlockingConnection(connection_parameter)
             self.channel = self.connection.channel()
             self.channel.queue_declare('jobs_waiting_queue', durable=True)
 
@@ -25,11 +27,12 @@ class RabbitMQ:
         """
         self._ensure_channel()
         try:
+            persistent_delivery = pika.spec.PERSISTENT_DELIVERY_MODE
             self.channel.basic_publish(exchange='',
                                        routing_key='jobs_waiting_queue',
                                        body=json.dumps(job),
                                        properties=pika.BasicProperties(
-                                        delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE)
+                                        delivery_mode=persistent_delivery)
                                        )
         except pika.exceptions.StreamLostError:
             print('FAILURE: Error occurred when adding a job. Sleeping...')
@@ -51,7 +54,10 @@ class RabbitMQ:
         """
         # Connections timeout, so we have to create a new one each time
         self._ensure_channel()
-        method_frame, header_frame, body = self.channel.basic_get('jobs_waiting_queue')
+        get_job_waiting_queue = self.channel.basic_get('jobs_waiting_queue')
+        frames = get_job_waiting_queue
+        method_frame = frames[0]
+        body = frames[2]
         # If there was no job available
         if method_frame is None:
             return None
