@@ -202,7 +202,7 @@ header {
   }
 
   .progress-bar-to-corpus {
-    width: 50%;
+    width: 0%;
     border-radius: 16px;
     color: #4C84FF;
     animation: onReload 2s ease-out forwards;

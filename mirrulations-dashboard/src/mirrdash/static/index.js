@@ -26,8 +26,28 @@ const updateHtmlValues = (id, value, total) => {
         document.getElementById(id+'-number').textContent = value.toLocaleString('en');
         document.getElementById(id+'-circle-percentage').textContent = `${percent}%`;
         document.getElementById(id+'-circle-front').style.strokeDasharray = `${percent}, 100`;
-        document.getElementById(id+'-percent').textContent = `${percent}%`;
     }
+}
+
+/**
+ * Calculates the progression towards corpus
+ * @param jobTypeCountsDone : array of number of jobs for each job type (dockets, documents, comments, attachments) completed
+ * @param totalJobs : array of number of jobs from Regulations for each job type 
+ * TODO: totalJobs should ideally be be an int that is calculated
+ */
+const updateCorpusProgressHtml = (jobTypeCountsDone, totalJobs) => {
+    let totalCorpus = 0
+    let currentProgress = 0
+    for (let i = 0; i < jobTypeCountsDone.length; i++) {
+        currentProgress += jobTypeCountsDone[i]
+        totalCorpus += totalJobs[i]
+    }
+    let percent = (currentProgress/totalCorpus) * 100;
+    document.getElementById('progress-to-corpus-bar-percentage').textContent = `${percent.toFixed(2)}%`
+    const progressBar = document.querySelector('.progress-bar-to-corpus');
+
+    // Set the width of the progress bar to the calculated percentage
+    progressBar.style.width = `${percent}%`;
 }
 
 
@@ -44,9 +64,9 @@ const updateStatus = (container, status) => {
 
 }
 
-const updateCounts = (id, value) => {
-    document.getElementById(id+'-number').textContent = value.toLocaleString('en');
-
+const updateJobTypeProgress = (id, value, total) => {
+    let percent = (value/total) * 100;
+    document.getElementById(id+'-percent').textContent = `${percent.toFixed(2)}%`;
 }
 
 const updateJobsQueuedByType = (id, value) => {
@@ -71,11 +91,13 @@ const updateClientDashboardData = () => {
         } = jobInformation;
         updateHtmlValues('jobs-waiting', num_jobs_waiting, jobs_total);
         updateHtmlValues('jobs-done', num_jobs_done, jobs_total);
-        updateHtmlValues("dockets-done", num_dockets_done, 232255); //TO DO: change hard coded number
+        updateCorpusProgressHtml([num_dockets_done, num_documents_done, num_comments_done], [232255, 1718669, 18072106]); //TO DO: change hard coded numbers
         // Counts
-        updateCounts("attachments-done",num_attachments_done);
-        updateCounts("comments-done",num_comments_done);
-        updateCounts("documents-done",num_documents_done);
+        updateJobTypeProgress("dockets-done",num_dockets_done, 232255);
+        // TODO: figure out how to estimate number of attachments
+        updateJobTypeProgress("attachments-done",num_attachments_done, 0);
+        updateJobTypeProgress("comments-done",num_comments_done, 1718669);
+        updateJobTypeProgress("documents-done",num_documents_done, 18072106);
         updateJobsQueuedByType("comments-queued", num_jobs_comments_queued);
         updateJobsQueuedByType("dockets-queued", num_jobs_dockets_queued);
         updateJobsQueuedByType("documents-queued", num_jobs_documents_queued);
