@@ -100,7 +100,6 @@ class PathGenerator:
 
             if docket_id is None:
                 docket_id = self.parse_docket_id(item_i_d)
-                print(f'{item_i_d} was parsed to get docket id: {docket_id}.')
         if not is_docket and item_i_d is None:
             item_i_d = 'unknown'
         docket_id, agency_id = self._check_for_none_values(docket_id,
@@ -133,8 +132,7 @@ class PathGenerator:
                f'{item_i_d}.json'
 
     def _has_file_formats(self, attributes, attachment):
-        if attributes["fileFormats"] and attributes["fileFormats"] \
-                    != "null" and attributes["fileFormats"] is not None:
+        if attributes.get("fileFormats"):
             return True
         print("fileFormats did not exist for attachment ID: " +
               f"{attachment.get('id')}")
