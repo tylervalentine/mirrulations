@@ -5,16 +5,28 @@ const RADIUS = 80;
 const NUMBER_ANIMATION_STEP = 4;
 
 window.addEventListener('load', function init() {
-    updateDashboardData();
-    setInterval(updateDashboardData, 5000);
+    if (window.location.pathname === '/') {
+        updateClientDashboardData();
+        setInterval(updateClientDashboardData, 5000);
+    } else if (window.location.pathname === '/dev') {
+        updateDeveloperDashboardData()
+        setInterval(updateDeveloperDashboardData, 5000)
+    }
 })
 
 const updateHtmlValues = (id, value, total) => {
-    let percent = (value/total) * 100;
-    percent = isNaN(percent) ? 0 : Math.round(percent * 10) / 10;
-    document.getElementById(id+'-number').textContent = value.toLocaleString('en');
-    document.getElementById(id+'-circle-percentage').textContent = `${percent}%`;
-    document.getElementById(id+'-circle-front').style.strokeDasharray = `${percent}, 100`;
+    if (value === null || total === null) {
+        // Handle the case where value or total is null,
+        // indicating Job Queue Error from dashboard
+        document.getElementById(id+'-number').textContent = "Error";
+    }
+    else {
+        let percent = (value/total) * 100;
+        percent = isNaN(percent) ? 0 : Math.round(percent * 10) / 10;
+        document.getElementById(id+'-number').textContent = value.toLocaleString('en');
+        document.getElementById(id+'-circle-percentage').textContent = `${percent}%`;
+        document.getElementById(id+'-circle-front').style.strokeDasharray = `${percent}, 100`;
+    }
 }
 
 
@@ -40,10 +52,42 @@ const updateJobsQueuedByType = (id, value) => {
     document.getElementById(id+'-number').textContent = value;
 }
 
-const updateDashboardData = () => {
+const updateClientDashboardData = () => {
     fetch(`${BASE_URL}data`)
     .then(response => response.json())
     .then(jobInformation => {
+        const {
+            jobs_total,
+            num_attachments_done,
+            num_comments_done,
+            num_dockets_done,
+            num_documents_done,
+            num_jobs_done, 
+            num_jobs_waiting,
+            num_jobs_comments_queued,
+            num_jobs_dockets_queued,
+            num_jobs_documents_queued,
+        } = jobInformation;
+        updateHtmlValues('jobs-waiting', num_jobs_waiting, jobs_total);
+        updateHtmlValues('jobs-done', num_jobs_done, jobs_total);
+        // Counts
+        updateCounts("attachments-done",num_attachments_done);
+        updateCounts("comments-done",num_comments_done);
+        updateCounts("dockets-done",num_dockets_done);
+        updateCounts("documents-done",num_documents_done);
+        updateJobsQueuedByType("comments-queued", num_jobs_comments_queued);
+        updateJobsQueuedByType("dockets-queued", num_jobs_dockets_queued);
+        updateJobsQueuedByType("documents-queued", num_jobs_documents_queued);
+        
+    })
+    .catch((err) => console.log(err));
+}
+
+const updateDeveloperDashboardData = () => {
+    fetch(`${BASE_URL}data`)
+    .then(response => response.json())
+    .then(jobInformation => {
+
         const {
             client1,
             client2,
@@ -71,25 +115,14 @@ const updateDashboardData = () => {
             client24,
             client25,
             client26,
-            client27,
-            jobs_total,
             nginx,
-            num_attachments_done,
-            num_comments_done,
-            num_dockets_done,
-            num_documents_done,
-            num_jobs_done, 
-            num_jobs_waiting,
-            num_jobs_comments_queued,
-            num_jobs_dockets_queued,
-            num_jobs_documents_queued,
             mongo,
             redis,
             work_generator,
-            work_server
+            work_server, 
+            rabbitmq
         } = jobInformation;
-        updateHtmlValues('jobs-waiting', num_jobs_waiting, jobs_total);
-        updateHtmlValues('jobs-done', num_jobs_done, jobs_total);
+
         updateStatus('client1-status', client1)
         updateStatus('client2-status', client2)
         updateStatus('client3-status', client3)
@@ -116,21 +149,12 @@ const updateDashboardData = () => {
         updateStatus('client24-status', client24)
         updateStatus('client25-status', client25)
         updateStatus('client26-status', client26)
-        updateStatus('client27-status', client27)
         updateStatus('nginx-status', nginx)
         updateStatus('mongo-status', mongo)
         updateStatus('redis-status', redis);
         updateStatus('work-generator-status', work_generator);
         updateStatus('work-server-status', work_server);
-        // Counts
-        updateCounts("attachments-done",num_attachments_done);
-        updateCounts("comments-done",num_comments_done);
-        updateCounts("dockets-done",num_dockets_done);
-        updateCounts("documents-done",num_documents_done);
-        updateJobsQueuedByType("comments-queued", num_jobs_comments_queued);
-        updateJobsQueuedByType("dockets-queued", num_jobs_dockets_queued);
-        updateJobsQueuedByType("documents-queued", num_jobs_documents_queued);
-        
+        updateStatus('rabbitmq-status', rabbitmq);
     })
     .catch((err) => console.log(err));
-}
+} 

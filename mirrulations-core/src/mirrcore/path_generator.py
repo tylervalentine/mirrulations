@@ -73,8 +73,6 @@ class PathGenerator:
         segments = item_i_d.split('-')  # list of segments separated by '-'
         segments_excluding_end = segments[:-1]  # drops the last segment
         parsed_docket_id = '-'.join(segments_excluding_end)
-        print('No DocketId Key found, parsing the "id" key')
-        print(f'Id = {item_i_d}, Parsed DocketId = {parsed_docket_id}')
         return parsed_docket_id
 
     def _check_for_none_values(self, docket_id, agency_id, ):
@@ -113,7 +111,6 @@ class PathGenerator:
     def get_docket_json_path(self, json):
         agency_i_d, docket_i_d, _ = self.get_attributes(json,
                                                         is_docket=True)
-
         return f'/{agency_i_d}/{docket_i_d}/text-{docket_i_d}/docket/' + \
                f'{docket_i_d}.json'
 
@@ -123,13 +120,19 @@ class PathGenerator:
         return f'/{agency_i_d}/{docket_i_d}/text-{docket_i_d}/documents' + \
                f'/{item_i_d}.json'
 
+    def get_document_htm_path(self, json):
+        agency_id, docket_id, item_id = self.get_attributes(json)
+
+        return f'/{agency_id}/{docket_id}/text-{docket_id}/' + \
+               f'documents/{item_id}_content.htm'
+
     def get_comment_json_path(self, json):
         agency_i_d, docket_i_d, item_i_d = self.get_attributes(json)
 
         return f'/{agency_i_d}/{docket_i_d}/text-{docket_i_d}/comments/' + \
                f'{item_i_d}.json'
 
-    def has_file_formats(self, attributes, attachment):
+    def _has_file_formats(self, attributes, attachment):
         if attributes["fileFormats"] and attributes["fileFormats"] \
                     != "null" and attributes["fileFormats"] is not None:
             return True
@@ -157,7 +160,7 @@ class PathGenerator:
         attachments = []
         for attachment in json["included"]:
             attributes = attachment["attributes"]
-            if self.has_file_formats(attributes, attachment):
+            if self._has_file_formats(attributes, attachment):
                 for file_format in attributes["fileFormats"]:
                     attachments = self._parse_attachment_path(json,
                                                               file_format,

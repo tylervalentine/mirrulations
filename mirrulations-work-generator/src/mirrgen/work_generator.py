@@ -6,16 +6,16 @@ from mirrgen.search_iterator import SearchIterator
 from mirrgen.results_processor import ResultsProcessor
 from mirrcore.regulations_api import RegulationsAPI
 from mirrcore.job_queue import JobQueue
-from mirrcore.data_storage import DataStorage
+from mirrcore.job_queue_exceptions import JobQueueException
 from mirrcore.redis_check import is_redis_available
 
 
 class WorkGenerator:
 
-    def __init__(self, job_queue, api, datastorage):
+    def __init__(self, job_queue, api):
         self.job_queue = job_queue
         self.api = api
-        self.processor = ResultsProcessor(job_queue, datastorage)
+        self.processor = ResultsProcessor(job_queue)
 
     def download(self, endpoint):
         # Gets the timestamp of the last known job in queue
@@ -49,9 +49,7 @@ if __name__ == '__main__':
 
         job_queue = JobQueue(database)
 
-        storage = DataStorage()
-
-        generator = WorkGenerator(job_queue, api, storage)
+        generator = WorkGenerator(job_queue, api)
 
         # Download dockets, documents, and comments
         # from all jobs in the job queue
@@ -66,6 +64,9 @@ if __name__ == '__main__':
         print('End generate comment jobs')
 
     while True:
-        generate_work()
+        try:
+            generate_work()
+        except JobQueueException:
+            print("FAILURE: Error occurred when adding a job. Sleeping...")
         # Sleeps for 6 hours
         time.sleep(60 * 60 * 6)

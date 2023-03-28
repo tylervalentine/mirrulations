@@ -31,6 +31,33 @@ def get_test_document():
         }}
 
 
+def get_test_document_htm():
+    return {
+        "data": {
+            "id": "USTR-2015-0010-0001",
+            "type": "documents",
+            "attributes": {
+                "agencyId": "USTR",
+                "docketId": "USTR-2015-0010",
+                "fileFormats": [
+                    {
+                        "fileUrl": "https://downloads.regulations.gov/" +
+                                   "USTR-2015-0010-0001/content.pdf",
+                        "format": "pdf",
+                        "size": 182010
+                    },
+                    {
+                        "fileUrl": "https://downloads.regulations.gov/" +
+                                   "USTR-2015-0010-0001/content.htm",
+                        "format": "htm",
+                        "size": 9709
+                    }
+                ]
+            }
+        }
+        }
+
+
 def get_test_comment():
     return {
         "data": {
@@ -271,6 +298,13 @@ def test_get_document_path_with_missing_agency_i_d_key(generator):
     expected_path = "/unknown/VETS-2010-0001/text-VETS-2010-0001/" + \
                     "documents/VETS-2010-0001-0010.json"
     assert expected_path == generator.get_document_json_path(json)
+
+
+def test_get_document_path_for_htm(generator):
+    document = get_test_document_htm()
+    expected_path = "/USTR/USTR-2015-0010/text-USTR-2015-0010/" + \
+                    "documents/USTR-2015-0010-0001_content.htm"
+    assert expected_path == generator.get_document_htm_path(document)
 
 
 # Comments
