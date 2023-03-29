@@ -62,7 +62,7 @@ def generate_work(collection=None):
     # Write unfound jobs to JSON file
     unfound_jobs_object = json.dumps(generator.unfound_jobs)
 
-    with open("unfound_jobs.json", "w", "utf-8") as outfile:
+    with open("unfound_jobs.json", "w", encoding="utf-8") as outfile:
         outfile.write(unfound_jobs_object)
 
 
