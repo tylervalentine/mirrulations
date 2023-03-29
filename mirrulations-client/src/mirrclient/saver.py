@@ -76,6 +76,7 @@ class Saver:
         Checks if a valid connection could be made to s3
         """
         try:
+            # Need to look at how to acquire the aws credentials for s3
             session = boto3.Session(profile_name="profile_name")
             s3_client = session.client("s3")
             return s3_client
@@ -86,7 +87,7 @@ class Saver:
     def save_to_s3(self, path, data):
         s3_client = self.establish_s3_connection()
         try:
-            s3_client.put_object(Bucket="test-mirrulations", Key=f'{path}', Body=json.dumps(data))
+            s3_client.put_object(Bucket="mirrulations", Key=f'{path}', Body=json.dumps(data))
             print("SUCCESS: Wrote results to S3")
 
         except botocore.exceptions.ClientError:
