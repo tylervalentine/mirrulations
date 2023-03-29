@@ -114,7 +114,6 @@ const updateDeveloperDashboardData = () => {
             client23,
             client24,
             client25,
-            client26,
             nginx,
             mongo,
             redis,
@@ -148,7 +147,6 @@ const updateDeveloperDashboardData = () => {
         updateStatus('client23-status', client23)
         updateStatus('client24-status', client24)
         updateStatus('client25-status', client25)
-        updateStatus('client26-status', client26)
         updateStatus('nginx-status', nginx)
         updateStatus('mongo-status', mongo)
         updateStatus('redis-status', redis);
