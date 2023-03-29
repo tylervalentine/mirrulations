@@ -21,7 +21,7 @@ def get_total_client_number():
                 matches += match
     return matches
 
-def write_files(api_key, env_path, total_clients):
+def write_files(api_key, validator_api_key, env_path, total_clients):
     # Write client files
     for i in range(1, len(total_clients) + 1):
           with open("{}client{}.env".format(env_path, i), 'w') as file:
@@ -44,7 +44,7 @@ def write_files(api_key, env_path, total_clients):
     
     # Write validator file
     with open("{}validator.env".format(env_path), 'w') as file:
-        file.write("API_KEY={}".format(api_key) + "\n")
+        file.write("API_KEY={}".format(validator_api_key) + "\n")
         file.write("PYTHONUNBUFFERED=TRUE")
     
     # Create data folder 
@@ -60,6 +60,8 @@ if __name__ == "__main__":
 
     # Get user input for API key
     api_key = input("Enter your API key from regulations.gov: ")
+    validator_api_key = input("Enter a different API key from regulations.gov for the validator: ")
+
 
     env_path = create_env_folder() 
     total_clients = get_total_client_number()
@@ -67,7 +69,7 @@ if __name__ == "__main__":
     # Install all packages
     os.system("bash install_packages.sh")
 
-    write_files(api_key, env_path, total_clients)
+    write_files(api_key, validator_api_key, env_path, total_clients)
 
             
 
