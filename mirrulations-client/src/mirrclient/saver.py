@@ -93,7 +93,6 @@ class Saver:
     def save_json_to_s3(self, path, data):
         s3 = AmazonS3()
         s3.put_text_s3(
-            "test-mirrulations",
             path,
             data
             )
@@ -102,7 +101,6 @@ class Saver:
     def save_attachment_to_s3(self, path, data):
         s3 = AmazonS3()
         s3.put_binary_s3(
-            "test-mirrulations",
             path,
             data
             )

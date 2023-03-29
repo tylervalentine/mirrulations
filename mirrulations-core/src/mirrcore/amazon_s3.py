@@ -6,12 +6,13 @@ import json
 
 class AmazonS3:
 
-    def __init__(self, api_key):
+    def __init__(self):
         # Not sure if this is the way to go about this
         load_dotenv()
         self.access_key = os.getenv("AWS_ACCESS_KEY")
         self.secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
         self.s3_client = self.establish_connection_to_s3()
+        self.bucket_name = "mirrulations"
 
     def establish_connection_to_s3(self):
         s3_client = boto3.client(
@@ -22,17 +23,17 @@ class AmazonS3:
                 )
         return s3_client
 
-    def put_text_s3(self, bucket, path, data):
+    def put_text_s3(self, path, data):
         self.s3_client.put_object(
-            Bucket=bucket,
+            Bucket=self.bucket_name,
             Key=path,
             Body=json.dumps(data)
             )
         return True
 
-    def put_binary_s3(self, bucket, path, data):
+    def put_binary_s3(self, path, data):
         self.s3_client.put_object(
-            Bucket=bucket,
+            Bucket=self.bucket_name,
             Key=path,
             Body=data)
         return True
