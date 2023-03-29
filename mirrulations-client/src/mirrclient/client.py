@@ -266,6 +266,16 @@ class Client:
             return True
         return False
 
+    def download_htm(self, json):
+        """
+        Attempts to download an HTM and saves it to its correct path
+        """
+        url = self.get_document_htm(json)
+        if url is not None:
+            response = requests.get(url, timeout=10)
+            self.saver.make_path("somewhere")
+            self.saver.save_attachment(f'/data{"changeThis"}/{"Change this"}', response.content)
+
     def get_document_htm(self, json):
         """
         Determines if an HTM file exists for a document, and gets
@@ -282,9 +292,6 @@ class Client:
                     fileUrl = fileFormat.get("fileUrl")
                     if fileUrl is not None:
                         return fileUrl
-                    else:
-                        None
-
 
     def document_has_file_formats(self, json):
         return bool(json.get("data", {}).get("attributes", {}).get("fileFormats", None))
