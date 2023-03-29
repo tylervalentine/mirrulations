@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+from collections import Counter
 from dotenv import load_dotenv
 import redis
 from mirrgen.search_iterator import SearchIterator
@@ -20,7 +21,7 @@ class Validator:
     def download(self, endpoint):
         beginning_timestamp = '1972-01-01 00:00:00'
         collection_size = self.datastorage.get_collection_size(endpoint)
-        counter = 0
+        counter = Counter()
         for result in SearchIterator(self.api, endpoint, beginning_timestamp):
             if result == {}:
                 continue
@@ -29,10 +30,13 @@ class Validator:
                     print(f"{res['id']} not in database, adding to job queue")
                     self.job_queue.add_job(res['links']['self'], res['type'])
                     print(f"Finished adding {res['id']}")
+                    counter['Not_in_db'] += 1
                 else:
                     print(f"{res['id']} exists in database")
-                counter += 1
-            percentage = (counter / collection_size) * 100
+                counter['Total_validated'] += 1
+            print(f'Jobs not found in database: {counter["Not_in_db"]}')
+            print(f'Total jobs validated: {counter["Total_validated"]}')
+            percentage = (counter['Total_validated'] / collection_size) * 100
             print(f'{percentage:.2f}%')
             time.sleep(3.6)
 
