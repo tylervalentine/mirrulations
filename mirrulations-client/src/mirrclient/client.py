@@ -153,7 +153,11 @@ class Client:
         dir_, filename = data['directory'].rsplit('/', 1)
         self.saver.make_path(dir_)
         self.saver.save_json(f'/data{dir_}/{filename}', data)
+        # no / in front of data since s3 is a different naming convention
+        self.saver.save_to_s3(f'data{dir_}/{filename}', data)
         print(f"{data['job_id']}: Results written to disk")
+        print(f"{data['job_id']}: Results written to S3")
+
 
     def perform_job(self, job_url):
         """
