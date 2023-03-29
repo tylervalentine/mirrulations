@@ -155,8 +155,6 @@ class Client:
         self.saver.save_json(f'/data{dir_}/{filename}', data)
         print(f"{data['job_id']}: Results written to disk")
 
-
-
     def perform_job(self, job_url):
         """
         Performs job via get_request function by giving it the job_url combined

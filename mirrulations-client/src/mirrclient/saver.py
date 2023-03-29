@@ -1,7 +1,9 @@
 import os
-import json
 from json import dumps, load
 from mirrcore.amazon_s3 import AmazonS3
+from dotenv import load_dotenv
+import boto3
+
 
 class Saver:
     """
@@ -79,30 +81,29 @@ class Saver:
         AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
         try:
             s3_client = boto3.client(
-                's3', 
+                's3',
                 region_name='us-east-1',
-                aws_access_key_id=AWS_ACCESS_KEY, 
-                aws_secret_access_key = AWS_SECRET_ACCESS_KEY
+                aws_access_key_id=AWS_ACCESS_KEY,
+                aws_secret_access_key=AWS_SECRET_ACCESS_KEY
                 )
             return s3_client
         except Exception:
             return False
-        
 
     def save_json_to_s3(self, path, data):
         s3 = AmazonS3()
         s3.put_text_s3(
-            "test-mirrulations", 
-            path, 
+            "test-mirrulations",
+            path,
             data
             )
         print("SUCCESS: Wrote json to S3")
-    
+
     def save_attachment_to_s3(self, path, data):
         s3 = AmazonS3()
         s3.put_binary_s3(
-            "test-mirrulations", 
-            path, 
+            "test-mirrulations",
+            path,
             data
             )
         print("SUCCESS: Wrote json to S3")

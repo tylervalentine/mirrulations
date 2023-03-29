@@ -154,7 +154,8 @@ def test_check_for_duplicates(capsys):
 
 # def test_save_to_s3():
 #     saver = Saver()
-#     test_path = "/USTR/USTR-2015-0010/text-USTR-2015-0010/comments/USTR-2015-0010-0001.json"
+#     test_path = "/USTR/USTR-2015-0010/text-USTR-2015-0010/comments/" + \
+#                 "USTR-2015-0010-0001.json"
 #     test_json = {
 #         "data": {
 #             "attributes": {
