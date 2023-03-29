@@ -287,9 +287,7 @@ class Client:
 
 
     def document_has_file_formats(self, json):
-        if "data" in json and "attributes" in json["data"] and "fileFormats" in json["data"]["attributes"]:
-            return True
-        return False
+        return bool(json.get("data", {}).get("attributes", {}).get("fileFormats", None))
 
     def job_operation(self):
         """
