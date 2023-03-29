@@ -151,3 +151,19 @@ def test_check_for_duplicates(capsys):
         print_data = ''
         captured = capsys.readouterr()
         assert captured.out == print_data
+
+# def test_save_to_s3():
+#     saver = Saver()
+#     test_path = "/USTR/USTR-2015-0010/text-USTR-2015-0010/comments/USTR-2015-0010-0001.json"
+#     test_json = {
+#         "data": {
+#             "attributes": {
+#                 "agencyId": "USTR",
+#                 "commentOnDocumentId": "USTR-2015-0010-0001",
+#                 "docketId": "USTR-2015-0010"
+#             },
+#             "id": "USTR-2015-0010-0002",
+#             "type": "comments"
+#         }
+#     }
+#     saver.save_to_s3(test_path, test_json)
