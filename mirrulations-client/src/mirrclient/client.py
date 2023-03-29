@@ -275,17 +275,18 @@ class Client:
         -------
         A download link to a documents HTM
         """
-        data = json.get("data")
-        if data is not None:
-            attributes = data.get("attributes")
-            file_formats = attributes.get("fileFormats")
-            for file_format in file_formats:
-                if file_format.get("format") == "htm":
-                    file_url = file_format.get("fileUrl")
-                    return file_url
-        return None
+        if (self.document_has_file_formats(self, json)):
+            fileFormats = json["data"]["attributes"]["fileFormats"]
+            for fileFormat in fileFormats:
+                if fileFormat.get("format") == "htm":
+                    fileUrl = fileFormat.get("fileUrl")
+                    if fileUrl is not None:
+                        return fileUrl
+                    else:
+                        None
 
-    def document_has_file_formats(json):
+
+    def document_has_file_formats(self, json):
         if "data" in json and "attributes" in json["data"] and "fileFormats" in json["data"]["attributes"]:
             return True
         return False
