@@ -285,6 +285,11 @@ class Client:
                     return file_url
         return None
 
+    def document_has_file_formats(json):
+        if "data" in json and "attributes" in json["data"] and "fileFormats" in json["data"]["attributes"]:
+            return True
+        return False
+
     def job_operation(self):
         """
         Processes a job.
