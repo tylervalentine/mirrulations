@@ -275,7 +275,7 @@ class Client:
         -------
         A download link to a documents HTM
         """
-        if (self.document_has_file_formats(self, json)):
+        if (self.document_has_file_formats(json)):
             fileFormats = json["data"]["attributes"]["fileFormats"]
             for fileFormat in fileFormats:
                 if fileFormat.get("format") == "htm":
