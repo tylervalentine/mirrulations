@@ -5,8 +5,8 @@ import sys
 from json import dumps, loads
 import requests
 from dotenv import load_dotenv
+from mirrclient.saver import Saver
 from mirrcore.path_generator import PathGenerator
-from mirrcore.saver import Saver
 
 
 class NoJobsAvailableException(Exception):
@@ -124,9 +124,7 @@ class Client:
             data['directory'] = self.path_generator.get_path(job_result)
 
         self._put_results(data)
-        requests.put(f'{self.url}/put_results', json=dumps(data),
-                     params={'client_id': self.client_id},
-                     timeout=10)
+        self.put_results_to_mongo(data)
         comment_has_attachment = self.does_comment_have_attachment(job_result)
 
         if data["job_type"] == "comments" and comment_has_attachment:
@@ -152,37 +150,10 @@ class Client:
         if any(x in data['results'] for x in ['error', 'errors']):
             print(f"{data['job_id']}: Errors found in results")
             return
-        self._write_results(data)
-        print(f"{data['job_id']}: Results written to disk")
-
-    def _write_results(self, data):
-        """
-        writes the results to disk. used by docket document and comment jobs
-
-        Parameters
-        ----------
-        data : dict
-            the results data to be written to disk
-        """
         dir_, filename = data['directory'].rsplit('/', 1)
-        self.make_path(dir_)
-        with open(f'/data{dir_}/{filename}', 'w+', encoding='utf8') as file:
-            print('Writing results to disk')
-            file.write(dumps(data['results']))
-
-    def make_attachment_directory(self, filepath):
-        '''
-        Makes a path for a attachment if one does not already exist
-        '''
-        filepath_components = filepath.split("/")
-        filepath = "/".join(filepath_components[0:-1])
-        self.make_path(filepath)
-
-    def make_path(self, path):
-        try:
-            os.makedirs(f'/data{path}')
-        except FileExistsError:
-            print(f'Directory already exists in root: /data{path}')
+        self.saver.make_path(dir_)
+        self.saver.save_json(f'/data{dir_}/{filename}', data)
+        print(f"{data['job_id']}: Results written to disk")
 
     def perform_job(self, job_url):
         """
@@ -212,14 +183,22 @@ class Client:
     def download_all_attachments_from_comment(self, data, comment_json):
         '''
         Downloads all attachments for a comment
+
+        Parameters
+        ----------
+        data : dict
+            Dictionary of the job
+            Keys include: 'job_type', 'job_id', 'results', 'reg_id', 'agency'
+
+        comment_json : dict
+            The json of the comment
+
         '''
-        # list of paths for attachmennts
 
         path_list = self.path_generator.get_attachment_json_paths(comment_json)
         counter = 0
         comment_id_str = f"Comment - {comment_json['data']['id']}"
         print(f"Found {len(path_list)} attachment(s) for {comment_id_str}")
-        # We need an additional check for if "included" exists in the json
         for included in comment_json["included"]:
             attributes = included["attributes"]
             if (attributes["fileFormats"] and
@@ -230,32 +209,45 @@ class Client:
                                                     data)
                     print(f"Downloaded {counter+1}/{len(path_list)} "
                           f"attachment(s) for {comment_id_str}")
-                    counter += 1  # re write this
+                    counter += 1
 
     def download_single_attachment(self, url, path, data):
         '''
         Downloads a single attachment for a comment and
         writes it to its correct path
+        Also puts the attachment 'data' dict to the work server for mongo entry
+
+        Parameters
+        ----------
+        url : str
+            The attachment download url
+            Ex: http://downloads.regulations.gov/####
+
+        path : str
+            The attachment path the download should be written to
+            Comes from the path_generator.get_attachment_json_paths
+
+        data : dict
+            Dictionary of the job
+            Keys include: 'job_type', 'job_id', 'results', 'reg_id', 'agency'
+
         '''
         response = requests.get(url, timeout=10)
-        self.make_attachment_directory(path)
-        self.saver.save(response.content, path)
+        dir_, filename = path.rsplit('/', 1)
+        self.saver.make_path(dir_)
+        self.saver.save_attachment(f'/data{dir_}/{filename}', response.content)
         print(f"SAVED attachment - {url} to path: ", path)
-
-        # Not sure where this would go
         filename = path.split('/')[-1]
-        data = {
-            'job_type': 'attachments',
-            'job_id': data['job_id'],
-            'results': data['results'],
-            # This is not returning the valid reg_id, agency
-            'reg_id': data['reg_id'],
-            'agency': data['agency'],
-            # Included attachment_path and attachment_filename for workserver
-            # request 3/14
-            'attachment_path': f'/data{path}',
-            'attachment_filename': filename
-        }
+        data = self.add_attachment_information_to_data(data, path, filename)
+        self.put_results_to_mongo(data)
+
+    def add_attachment_information_to_data(self, data, path, filename):
+        data['job_type'] = 'attachments'
+        data['attachment_path'] = f'/data/data{path}'
+        data['attachment_filename'] = filename
+        return data
+
+    def put_results_to_mongo(self, data):
         requests.put(f'{self.url}/put_results', json=dumps(data),
                      params={'client_id': self.client_id},
                      timeout=10)

@@ -88,6 +88,8 @@ services:
       context: .
       dockerfile: mirrulations-extractor/Dockerfile
     restart: always
+    volumes:
+      - "~/data/data:/data"
   dashboard:
     build:
       context: .
@@ -362,13 +364,4 @@ services:
     volumes:
       - ~/data/data:/data
     restart: always
-  client27:
-    build:
-      context: .
-      dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
-    env_file: env_files/client27.env
-    volumes:
-      - ~/data/data:/data
-    restart: always
+
