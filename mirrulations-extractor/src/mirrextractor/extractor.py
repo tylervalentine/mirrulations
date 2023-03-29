@@ -60,7 +60,7 @@ class Extractor:
         pdf_bytes = io.BytesIO()
         try:
             pdf.save(pdf_bytes)
-        except RuntimeError as err:
+        except (RuntimeError, pikepdf.PdfError) as err:
             print(f"FAILURE: failed to save {attachment_path}\n{err}")
             return
         text = pdfminer.high_level.extract_text(pdf_bytes)
