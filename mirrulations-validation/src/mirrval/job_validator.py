@@ -42,16 +42,16 @@ class Validator:
 
 
 def generate_work(collection=None):
-    load_dotenv(dotenv_path='env_files/validator.env')
 
     database = redis.Redis('redis')
     # Sleep for 30 seconds to give time to load
     while not is_redis_available(database):
         print("Redis database is busy loading")
         time.sleep(30)
-
-    api_key = os.getenv("API_KEY")
-    api = RegulationsAPI(api_key)
+    
+    # Get API key
+    load_dotenv()
+    api = RegulationsAPI(os.getenv("API_KEY"))
     storage = DataStorage()
     job_queue = JobQueue(database)
     generator = Validator(api, storage, job_queue)
