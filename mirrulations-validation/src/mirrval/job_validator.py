@@ -2,21 +2,21 @@ import os
 import sys
 import time
 from collections import Counter
+import json
 from dotenv import load_dotenv
 import redis
 from mirrgen.search_iterator import SearchIterator
 from mirrcore.redis_check import is_redis_available
 from mirrcore.regulations_api import RegulationsAPI
 from mirrcore.data_storage import DataStorage
-from mirrcore.job_queue import JobQueue
 
 
 class Validator:
 
-    def __init__(self, api, datastorage, job_queue):
+    def __init__(self, api, datastorage):
         self.api = api
         self.datastorage = datastorage
-        self.job_queue = job_queue
+        self.unfound_jobs = {}
 
     def download(self, endpoint):
         beginning_timestamp = '1972-01-01 00:00:00'
@@ -27,9 +27,9 @@ class Validator:
                 continue
             for res in result['data']:
                 if not self.datastorage.exists(res):
-                    print(f"{res['id']} not in database, adding to job queue")
-                    self.job_queue.add_job(res['links']['self'], res['type'])
-                    print(f"Finished adding {res['id']}")
+                    print(f"{res['id']} not in database, writing to file")
+                    self.unfound_jobs[res['type']] = res['links']['self']
+                    print(f"Finished adding {res['id']} to file")
                     counter['Not_in_db'] += 1
                 else:
                     print(f"{res['id']} exists in database")
@@ -48,20 +48,22 @@ def generate_work(collection=None):
     while not is_redis_available(database):
         print("Redis database is busy loading")
         time.sleep(30)
-    
     # Get API key
     load_dotenv()
     api = RegulationsAPI(os.getenv("API_KEY"))
     storage = DataStorage()
-    job_queue = JobQueue(database)
-    generator = Validator(api, storage, job_queue)
-
+    generator = Validator(api, storage)
     if not collection:
         generator.download('dockets')
         generator.download('documents')
         generator.download('comments')
     else:
         generator.download(collection)
+    # Write unfound jobs to JSON file
+    unfound_jobs_object = json.dumps(generator.unfound_jobs)
+
+    with open("unfound_jobs.json", "w", "utf-8") as outfile:
+        outfile.write(unfound_jobs_object)
 
 
 if __name__ == '__main__':
