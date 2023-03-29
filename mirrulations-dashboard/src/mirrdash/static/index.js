@@ -91,11 +91,11 @@ const updateClientDashboardData = () => {
         } = jobInformation;
         updateHtmlValues('jobs-waiting', num_jobs_waiting, jobs_total);
         updateHtmlValues('jobs-done', num_jobs_done, jobs_total);
-        updateCorpusProgressHtml([num_dockets_done, num_documents_done, num_comments_done], [232255, 1718669, 18072106]); //TO DO: change hard coded numbers
+        updateCorpusProgressHtml([num_dockets_done, num_documents_done, num_comments_done, num_attachments_done], [232255, 1718669, 18072106, 15000000]); //TO DO: change hard coded numbers
         // Counts
         updateJobTypeProgress("dockets-done",num_dockets_done, 232255);
-        // TODO: figure out how to estimate number of attachments
-        updateJobTypeProgress("attachments-done",num_attachments_done, 0);
+        // Current estimate of number of attachments (from comments)
+        updateJobTypeProgress("attachments-done",num_attachments_done, 15000000); 
         updateJobTypeProgress("comments-done",num_comments_done, 1718669);
         updateJobTypeProgress("documents-done",num_documents_done, 18072106);
         updateJobsQueuedByType("comments-queued", num_jobs_comments_queued);
