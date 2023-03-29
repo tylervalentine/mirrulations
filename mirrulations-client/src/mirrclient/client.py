@@ -154,7 +154,7 @@ class Client:
         self.saver.make_path(dir_)
         self.saver.save_json(f'/data{dir_}/{filename}', data)
         # no / in front of data since s3 is a different naming convention
-        self.saver.save_to_s3(f'data{dir_}/{filename}', data)
+        self.saver.save_json_to_s3(f'data{dir_}/{filename}', data)
         print(f"{data['job_id']}: Results written to disk")
         print(f"{data['job_id']}: Results written to S3")
 
@@ -240,6 +240,7 @@ class Client:
         dir_, filename = path.rsplit('/', 1)
         self.saver.make_path(dir_)
         self.saver.save_attachment(f'/data{dir_}/{filename}', response.content)
+        self.saver.save_attachment_to_s3(f'data/{dir_}/{filename}', response.content)
         print(f"SAVED attachment - {url} to path: ", path)
         filename = path.split('/')[-1]
         data = self.add_attachment_information_to_data(data, path, filename)

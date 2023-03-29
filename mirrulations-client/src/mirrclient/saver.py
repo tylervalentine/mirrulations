@@ -1,8 +1,7 @@
 import os
 import json
 from json import dumps, load
-import boto3
-import botocore
+from mirrcore.amazon_s3 import AmazonS3
 
 class Saver:
     """
@@ -75,20 +74,35 @@ class Saver:
         """
         Checks if a valid connection could be made to s3
         """
+        load_dotenv()
+        AWS_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY")
+        AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
         try:
-            # Need to look at how to acquire the aws credentials for s3
-            session = boto3.Session(profile_name="profile_name")
-            s3_client = session.client("s3")
+            s3_client = boto3.client(
+                's3', 
+                region_name='us-east-1',
+                aws_access_key_id=AWS_ACCESS_KEY, 
+                aws_secret_access_key = AWS_SECRET_ACCESS_KEY
+                )
             return s3_client
         except Exception:
             return False
         
 
-    def save_to_s3(self, path, data):
-        s3_client = self.establish_s3_connection()
-        try:
-            s3_client.put_object(Bucket="mirrulations", Key=f'{path}', Body=json.dumps(data))
-            print("SUCCESS: Wrote results to S3")
-
-        except botocore.exceptions.ClientError:
-            print("FAILURE: Writing to S3")
+    def save_json_to_s3(self, path, data):
+        s3 = AmazonS3()
+        s3.put_text_s3(
+            "test-mirrulations", 
+            path, 
+            data
+            )
+        print("SUCCESS: Wrote json to S3")
+    
+    def save_attachment_to_s3(self, path, data):
+        s3 = AmazonS3()
+        s3.put_binary_s3(
+            "test-mirrulations", 
+            path, 
+            data
+            )
+        print("SUCCESS: Wrote json to S3")
