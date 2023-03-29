@@ -762,3 +762,27 @@ def test_add_attachment_information_to_data():
     assert data['job_type'] == 'attachments'
     assert data['attachment_path'] == '/data/data/USTR/docket.json'
     assert data['attachment_filename'] == 'docket.json'
+
+
+def test_get_document_htm():
+    client = Client()
+    pdf = "https://downloads.regulations.gov/USTR/content.pdf"
+    htm = "https://downloads.regulations.gov/USTR/content.htm"
+    htm_json = {
+        "data": {
+            "attributes": {
+                "fileFormats": [{
+                    "fileUrl": pdf,
+                    "format": "pdf",
+                    "size": 182010
+                    }, {
+                    "fileUrl": htm,
+                    "format": "htm",
+                    "size": 9709
+                    }
+                ]
+            }
+        }
+    }
+    client_htm = client.get_document_htm(htm_json)
+    assert client_htm == "https://downloads.regulations.gov/USTR/content.htm"

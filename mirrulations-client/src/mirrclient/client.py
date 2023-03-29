@@ -266,6 +266,25 @@ class Client:
             return True
         return False
 
+    def get_document_htm(self, json):
+        """
+        Determines if an HTM file exists for a document, and gets
+        the download link
+
+        RETURNS
+        -------
+        A download link to a documents HTM
+        """
+        data = json.get("data")
+        if data is not None:
+            attributes = data.get("attributes")
+            file_formats = attributes.get("fileFormats")
+            for file_format in file_formats:
+                if file_format.get("format") == "htm":
+                    file_url = file_format.get("fileUrl")
+                    return file_url
+        return None
+
     def job_operation(self):
         """
         Processes a job.
