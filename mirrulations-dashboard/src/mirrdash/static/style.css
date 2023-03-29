@@ -19,6 +19,20 @@ header {
     text-align: right;
   }
 
+button {
+    height: 100%;
+    border: transparent;
+    background: transparent;
+    color: white;
+    display: inline-block;
+    padding: 5px;
+    transition-duration: 0.4s;
+  }
+  
+button:hover {
+    background: #729dfc;
+}
+
 /* Utilities */
 .container {
     max-width: 1100px;
