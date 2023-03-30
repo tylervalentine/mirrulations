@@ -51,6 +51,7 @@ def generate_work(collection=None):
     # Get API key
     load_dotenv()
     api = RegulationsAPI(os.getenv("API_KEY"))
+    # Download using validator
     storage = DataStorage()
     generator = Validator(api, storage)
     if not collection:
