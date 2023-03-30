@@ -126,12 +126,12 @@ class Client:
         self._put_results(data)
         self.put_results_to_mongo(data)
         comment_has_attachment = self.does_comment_have_attachment(job_result)
-        htm_has_file_format = self.document_has_file_formats(job_result)
+        # htm_has_file_format = self.document_has_file_formats(job_result)
 
         if data["job_type"] == "comments" and comment_has_attachment:
             self.download_all_attachments_from_comment(data, job_result)
-        if data["job_type"] == "documents" and htm_has_file_format:
-            self.download_htm(job_result)
+        # if data["job_type"] == "documents" and htm_has_file_format:
+        #     self.download_htm(job_result)
         # For now, still need to send original put request for Mongo
         # requests.put(
         #     f'{self.url}/_put_results',
@@ -277,7 +277,7 @@ class Client:
         if url is not None:
             response = requests.get(url, timeout=10)
             self.saver.make_path("somewhere")
-            self.saver.save_attachment(f'/data{"changeThis"}/{"Change this"}', response.content)
+            self.saver.save_attachment(f'/data{"c"}/{"C"}', response.content)
 
     def get_document_htm(self, json):
         """
@@ -288,16 +288,20 @@ class Client:
         -------
         A download link to a documents HTM
         """
-        if (self.document_has_file_formats(json)):
-            fileFormats = json["data"]["attributes"]["fileFormats"]
-            for fileFormat in fileFormats:
-                if fileFormat.get("format") == "htm":
-                    fileUrl = fileFormat.get("fileUrl")
-                    if fileUrl is not None:
-                        return fileUrl
+        file_formats = json["data"]["attributes"]["fileFormats"]
+        for file_format in file_formats:
+            if file_format.get("format") == "htm":
+                file_url = file_format.get("fileUrl")
+                if file_url is not None:
+                    return file_url
+        return None
 
     def document_has_file_formats(self, json):
-        return bool(json.get("data", {}).get("attributes", {}).get("fileFormats", None))
+        if ("data" in json and
+            "attributes" in json["data"] and
+                "fileFormats" in json["data"]["attributes"]):
+            return True
+        return False
 
     def job_operation(self):
         """

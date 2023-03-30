@@ -787,6 +787,7 @@ def test_get_document_htm():
     client_htm = client.get_document_htm(htm_json)
     assert client_htm == "https://downloads.regulations.gov/USTR/content.htm"
 
+
 def test_document_has_file_formats():
     client = Client()
     pdf = "https://downloads.regulations.gov/USTR/content.pdf"
