@@ -19,9 +19,6 @@ class AmazonS3:
                 )
         self.bucket_name = bucket_name
 
-    def get_s3_client(self):
-        return self.s3_client
-
     def put_text_s3(self, path, data):
         self.s3_client.put_object(
             Bucket=self.bucket_name,
