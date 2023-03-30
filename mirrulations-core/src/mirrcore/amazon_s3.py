@@ -23,14 +23,15 @@ class AmazonS3:
         return self.s3_client
 
     def put_text_s3(self, path, data):
-        self.s3_client.put_object(
+        return self.s3_client.put_object(
             Bucket=self.bucket_name,
             Key=path,
             Body=json.dumps(data)
             )
 
     def put_binary_s3(self, path, data):
-        self.s3_client.put_object(
+        return self.s3_client.put_object(
             Bucket=self.bucket_name,
             Key=path,
             Body=data)
+        
