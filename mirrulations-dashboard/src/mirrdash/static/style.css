@@ -14,10 +14,23 @@ p {
 }
 
 header {
-    padding-right: 10px;
-    padding-top: 5px;
     text-align: right;
+    padding: 5px;
   }
+
+button {
+    height: 100%;
+    border: transparent;
+    background: transparent;
+    color: white;
+    display: inline-block;
+    padding: 7.5px;
+    transition-duration: 0.4s;
+  }
+  
+button:hover {
+    background: #729dfc;
+}
 
 /* Utilities */
 .container {
@@ -202,7 +215,7 @@ header {
   }
 
   .progress-bar-to-corpus {
-    width: 50%;
+    width: 0%;
     border-radius: 16px;
     color: #4C84FF;
     animation: onReload 2s ease-out forwards;
