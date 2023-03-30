@@ -2,6 +2,10 @@ from json import dumps
 from unittest.mock import patch, mock_open, MagicMock
 from mirrclient.saver import Saver
 from pytest import fixture, mark
+import boto3
+from moto import mock_s3
+# from botocore.exceptions import ClientError
+# from mirrcore.amazon_s3 import AmazonS3
 
 
 @fixture(name='save_duplicate_json')
@@ -142,7 +146,6 @@ def test_check_for_duplicates(capsys):
     path = 'data/USTR/file.json'
     data = {'data': 'Hello world'}
     saver = Saver()
-    saver = Saver()
     mock = mock_open(read_data=dumps(data))
     with patch('mirrclient.saver.open', mock) as mocked_file:
         saver.open_json_file(path)
@@ -152,19 +155,31 @@ def test_check_for_duplicates(capsys):
         captured = capsys.readouterr()
         assert captured.out == print_data
 
-# def test_save_to_s3():
+
+@mock_s3
+def test_save_valid_json_to_s3():
+    conn = boto3.resource("s3", region_name="us-east-1")
+    conn.create_bucket(Bucket="test-mirrulations1")
+    saver = Saver()
+    test_path = "testpath"
+    test_json = {
+        "data": {"attributes": 0}
+    }
+    saver.save_json_to_s3("test-mirrulations1", test_path, test_json)
+    body = conn.Object("test-mirrulations1", "testpath").get()["Body"] \
+                                                        .read() \
+                                                        .decode("utf-8")
+    assert body == '{"data": {"attributes": 0}}'
+
+# @mock_s3
+# def test_save_valid_attachment_to_s3():
+#     conn = boto3.resource("s3", region_name="us-east-1")
+#     conn.create_bucket(Bucket="test-mirrulations1")
 #     saver = Saver()
-#     test_path = "/USTR/USTR-2015-0010/text-USTR-2015-0010/comments/" + \
-#                 "USTR-2015-0010-0001.json"
-#     test_json = {
-#         "data": {
-#             "attributes": {
-#                 "agencyId": "USTR",
-#                 "commentOnDocumentId": "USTR-2015-0010-0001",
-#                 "docketId": "USTR-2015-0010"
-#             },
-#             "id": "USTR-2015-0010-0002",
-#             "type": "comments"
-#         }
-#     }
-#     saver.save_to_s3(test_path, test_json)
+#     test_path = "testpath"
+#     test_file_path = ""
+#     saver.save_json_to_s3("test-mirrulations1", test_path, test_json)
+#     body = conn.Object("test-mirrulations1", "testpath").get()["Body"] \
+#                                                         .read() \
+#                                                         .decode("utf-8")
+#     assert body == '{"data": {"attributes": 0}}'

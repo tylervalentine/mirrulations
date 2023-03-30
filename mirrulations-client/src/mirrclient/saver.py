@@ -91,16 +91,16 @@ class Saver:
     #     except Exception:
     #         return False
 
-    def save_json_to_s3(self, path, data):
-        s_3 = AmazonS3('mirrulations')
+    def save_json_to_s3(self, bucket, path, data):
+        s_3 = AmazonS3(bucket)
         s_3.put_text_s3(
             path,
             data
             )
         print("SUCCESS: Wrote json to S3")
 
-    def save_attachment_to_s3(self, path, data):
-        s_3 = AmazonS3('mirrulations')
+    def save_attachment_to_s3(self, bucket, path, data):
+        s_3 = AmazonS3(bucket)
         s_3.put_binary_s3(
             path,
             data
