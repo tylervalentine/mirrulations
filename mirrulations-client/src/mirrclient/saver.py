@@ -1,8 +1,8 @@
 import os
 from json import dumps, load
 from mirrcore.amazon_s3 import AmazonS3
-from dotenv import load_dotenv
-import boto3
+# from dotenv import load_dotenv
+# import boto3
 
 
 class Saver:
@@ -72,35 +72,36 @@ class Saver:
         if self.is_duplicate(self.open_json_file(path), data) is False:
             self.save_duplicate_json(path, data, i)
 
-    def establish_s3_connection(self):
-        """
-        Checks if a valid connection could be made to s3
-        """
-        load_dotenv()
-        AWS_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY")
-        AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-        try:
-            s3_client = boto3.client(
-                's3',
-                region_name='us-east-1',
-                aws_access_key_id=AWS_ACCESS_KEY,
-                aws_secret_access_key=AWS_SECRET_ACCESS_KEY
-                )
-            return s3_client
-        except Exception:
-            return False
+    # # Move to amazon_s3 class?
+    # def establish_s3_connection(self):
+    #     """
+    #     Checks if a valid connection could be made to s3
+    #     """
+    #     load_dotenv()
+    #     aws_access_key = os.getenv("AWS_ACCESS_KEY")
+    #     aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+    #     try:
+    #         s3_client = boto3.client(
+    #             's3',
+    #             region_name='us-east-1',
+    #             aws_access_key_id=aws_access_key,
+    #             aws_secret_access_key=aws_secret_access_key
+    #             )
+    #         return s3_client
+    #     except Exception:
+    #         return False
 
     def save_json_to_s3(self, path, data):
-        s3 = AmazonS3()
-        s3.put_text_s3(
+        s_3 = AmazonS3('mirrulations')
+        s_3.put_text_s3(
             path,
             data
             )
         print("SUCCESS: Wrote json to S3")
 
     def save_attachment_to_s3(self, path, data):
-        s3 = AmazonS3()
-        s3.put_binary_s3(
+        s_3 = AmazonS3('mirrulations')
+        s_3.put_binary_s3(
             path,
             data
             )
