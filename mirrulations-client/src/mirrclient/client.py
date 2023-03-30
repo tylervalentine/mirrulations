@@ -126,12 +126,14 @@ class Client:
         self._put_results(data)
         self.put_results_to_mongo(data)
         comment_has_attachment = self.does_comment_have_attachment(job_result)
-        # htm_has_file_format = self.document_has_file_formats(job_result)
+        htm_has_file_format = self.document_has_file_formats(job_result)
 
         if data["job_type"] == "comments" and comment_has_attachment:
             self.download_all_attachments_from_comment(data, job_result)
-        # if data["job_type"] == "documents" and htm_has_file_format:
-        #     self.download_htm(job_result)
+        if data["job_type"] == "documents" and htm_has_file_format:
+            document_htm = self.get_document_htm(job_result)
+            if document_htm is not None:
+                self.download_htm(job_result)
         # For now, still need to send original put request for Mongo
         # requests.put(
         #     f'{self.url}/_put_results',
@@ -281,8 +283,7 @@ class Client:
 
     def get_document_htm(self, json):
         """
-        Determines if an HTM file exists for a document, and gets
-        the download link
+        Gets the download link for a documents HTM if one exists
 
         RETURNS
         -------
