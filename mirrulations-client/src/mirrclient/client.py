@@ -281,7 +281,8 @@ class Client:
             response = requests.get(url, timeout=10)
             dir_, filename = path.rsplit('/', 1)
             self.saver.make_path(dir_)
-            self.saver.save_attachment(f'/data{dir_}/{filename}', response.content)
+            self.saver.save_attachment(f'/data{dir_}/{filename}',
+                                       response.content)
             print(f"SAVED document HTM - {url} to path: ", path)
 
     def _get_document_htm(self, json):
@@ -301,13 +302,13 @@ class Client:
         return None
 
     def _document_has_file_formats(self, json):
-        if ("data" in json and
-            "attributes" in json["data"] and
-                "fileFormats" in json["data"]["attributes"]
-                and json["data"]["attributes"]["fileFormats"]
-                != None):
-            return True
-        return False
+        if "data" not in json:
+            return False
+        if "attributes" not in json["data"]:
+            return False
+        if "fileFormats" not in json["data"]["attributes"]:
+            return False
+        return True
 
     def job_operation(self):
         """

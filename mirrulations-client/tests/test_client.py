@@ -763,6 +763,7 @@ def test_add_attachment_information_to_data():
     assert data['attachment_path'] == '/data/data/USTR/docket.json'
     assert data['attachment_filename'] == 'docket.json'
 
+
 def test_download_htm(capsys, mocker, mock_requests):
     mocker.patch('mirrclient.saver.Saver.make_path', return_value=None)
     mocker.patch('mirrclient.saver.Saver.save_attachment', return_value=None)
@@ -787,13 +788,14 @@ def test_download_htm(capsys, mocker, mock_requests):
                 }
             }
         }
-    
+
     with mock_requests:
         mock_requests.get(
             htm,
             json={"data": 'foobar'},
             status_code=200
         )
-        
+
         client.download_htm(htm_json)
-        assert f"SAVED document HTM - {htm} to path:" in capsys.readouterr().out
+        captured = capsys.readouterr().out
+        assert f"SAVED document HTM - {htm} to path:" in captured
