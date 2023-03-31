@@ -277,6 +277,7 @@ class Client:
         """
         url = self.get_document_htm(json)
         path = self.path_generator.get_document_htm_path(json)
+        print("helloooo")
         if url is not None:
             response = requests.get(url, timeout=10)
             dir_, filename = path.rsplit('/', 1)
@@ -303,7 +304,9 @@ class Client:
     def document_has_file_formats(self, json):
         if ("data" in json and
             "attributes" in json["data"] and
-                "fileFormats" in json["data"]["attributes"]):
+                "fileFormats" in json["data"]["attributes"]
+                and json["data"]["attributes"]["fileFormats"]
+                != None):
             return True
         return False
 
