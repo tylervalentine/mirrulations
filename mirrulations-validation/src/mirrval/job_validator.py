@@ -19,7 +19,7 @@ class Validator:
         self.unfound_jobs = {}
 
     def download(self, endpoint):
-        beginning_timestamp = '1972-01-01 00:00:00'
+        beginning_timestamp = '1990-01-01 00:00:00'
         collection_size = self.datastorage.get_collection_size(endpoint)
         counter = Counter()
         for result in SearchIterator(self.api, endpoint, beginning_timestamp):
@@ -31,8 +31,6 @@ class Validator:
                     write_unfound_jobs(res, self.unfound_jobs)
                     time.sleep(3.6)
                     counter['Not_in_db'] += 1
-                else:
-                    print(f"{res['id']} exists in database")
                 counter['Total_validated'] += 1
             print(f'Jobs not found in database: {counter["Not_in_db"]} \n \
             Total jobs validated: {counter["Total_validated"]} \n \
