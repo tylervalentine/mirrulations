@@ -41,7 +41,7 @@ class Validator:
 
 
 def write_unfound_jobs(res, unfound_jobs):
-    if res['type'] not in unfound_jobs:
+    if f"missing_{res['type']}" not in unfound_jobs:
         unfound_jobs[f"missing_{res['type']}"] = [res['links']['self']]
     else:
         unfound_jobs[f"missing_{res['type']}"].append(
