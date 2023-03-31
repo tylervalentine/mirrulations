@@ -32,13 +32,11 @@ def test_put_text_to_bucket():
 def test_put_binary_to_bucket():
     conn = create_mock_mirrulations_bucket()
     s3_bucket = AmazonS3(bucket_name="test-mirrulations1")
-    test_binary_path = "/Users/jack11wagner/Courses/334/mirrulations/" + \
-                       "mirrulations-core/tests/test-mirrulations-pdf.pdf"
+    test_data = b'\x17'
     test_path = "data/test"
-    response = s3_bucket.put_binary_s3(test_path, test_binary_path)
+    response = s3_bucket.put_binary_s3(test_path, test_data)
     body = conn.Object("test-mirrulations1", "data/test").get()["Body"] \
                                                          .read() \
                                                          .decode("utf-8")
-    assert response['ResponseMetadata']['HTTPStatusCode'] == 200
-    assert body == "/Users/jack11wagner/Courses/334/mirrulations/" + \
-                   "mirrulations-core/tests/test-mirrulations-pdf.pdf"
+    assert body == '\x17'
+    assert response["ResponseMetadata"]['HTTPStatusCode'] == 200

@@ -72,25 +72,6 @@ class Saver:
         if self.is_duplicate(self.open_json_file(path), data) is False:
             self.save_duplicate_json(path, data, i)
 
-    # # Move to amazon_s3 class?
-    # def establish_s3_connection(self):
-    #     """
-    #     Checks if a valid connection could be made to s3
-    #     """
-    #     load_dotenv()
-    #     aws_access_key = os.getenv("AWS_ACCESS_KEY")
-    #     aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
-    #     try:
-    #         s3_client = boto3.client(
-    #             's3',
-    #             region_name='us-east-1',
-    #             aws_access_key_id=aws_access_key,
-    #             aws_secret_access_key=aws_secret_access_key
-    #             )
-    #         return s3_client
-    #     except Exception:
-    #         return False
-
     def save_json_to_s3(self, bucket, path, data):
         s_3 = AmazonS3(bucket)
         s_3.put_text_s3(
@@ -99,7 +80,7 @@ class Saver:
             )
         print("SUCCESS: Wrote json to S3")
 
-    def save_attachment_to_s3(self, bucket, path, data):
+    def save_binary_to_s3(self, bucket, path, data):
         s_3 = AmazonS3(bucket)
         s_3.put_binary_s3(
             path,

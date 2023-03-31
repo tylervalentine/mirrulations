@@ -171,15 +171,16 @@ def test_save_valid_json_to_s3():
                                                         .decode("utf-8")
     assert body == '{"data": {"attributes": 0}}'
 
-# @mock_s3
-# def test_save_valid_attachment_to_s3():
-#     conn = boto3.resource("s3", region_name="us-east-1")
-#     conn.create_bucket(Bucket="test-mirrulations1")
-#     saver = Saver()
-#     test_path = "testpath"
-#     test_file_path = ""
-#     saver.save_json_to_s3("test-mirrulations1", test_path, test_json)
-#     body = conn.Object("test-mirrulations1", "testpath").get()["Body"] \
-#                                                         .read() \
-#                                                         .decode("utf-8")
-#     assert body == '{"data": {"attributes": 0}}'
+
+@mock_s3
+def test_save_valid_attachment_to_s3():
+    conn = boto3.resource("s3", region_name="us-east-1")
+    conn.create_bucket(Bucket="test-mirrulations1")
+    saver = Saver()
+    test_binary_data = b"\x17"
+    test_path = "testpath"
+    saver.save_binary_to_s3("test-mirrulations1", test_path, test_binary_data)
+    body = conn.Object("test-mirrulations1", "testpath").get()["Body"] \
+                                                        .read() \
+                                                        .decode("utf-8")
+    assert body == '\x17'
