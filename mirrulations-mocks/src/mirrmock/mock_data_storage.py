@@ -17,5 +17,5 @@ class MockDataStorage:
     def add_attachment(self, data):
         self.attachments_added.append(data)
 
-    def get_collection_size(self, data):
+    def get_collection_size(self):
         return self.collection_size
