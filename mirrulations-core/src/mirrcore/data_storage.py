@@ -30,3 +30,10 @@ class DataStorage:
         entry = {'path': data['attachment_path'],
                  'file': data['attachment_filename']}
         self.attachments.insert_one(entry)
+
+    def get_collection_size(self, collection):
+        if collection == 'dockets':
+            return self.dockets.count_documents({})
+        if collection == 'documents':
+            return self.documents.count_documents({})
+        return self.comments.count_documents({})

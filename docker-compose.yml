@@ -61,6 +61,18 @@ services:
         condition: service_healthy
     env_file: env_files/work_gen.env
     restart: always
+  validator:
+    build:
+      context: .
+      dockerfile: mirrulations-validation/Dockerfile
+    depends_on:
+      - redis
+      - mongo
+      - work_generator
+    env_file: env_files/validator.env
+    restart: always
+    volumes:
+      - "./:/app/validator"
   work_server:
     build:
       context: .

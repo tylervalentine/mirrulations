@@ -42,6 +42,11 @@ def write_files(api_key, env_path, total_clients):
         file.write("REDIS_HOSTNAME=redis" + "\n")
         file.write("PYTHONUNBUFFERED=TRUE")
     
+    # Write validator file
+    with open("{}validator.env".format(env_path), 'w') as file:
+        file.write("API_KEY={}".format(api_key) + "\n")
+        file.write("PYTHONUNBUFFERED=TRUE")
+    
     # Create data folder 
     parent_dir = os.path.realpath(os.path.expanduser("~"))
     dir_name = "data/"
@@ -55,6 +60,7 @@ if __name__ == "__main__":
 
     # Get user input for API key
     api_key = input("Enter your API key from regulations.gov: ")
+
 
     env_path = create_env_folder() 
     total_clients = get_total_client_number()
