@@ -42,9 +42,9 @@ class Validator:
 
 def write_unfound_jobs(res, unfound_jobs):
     if res['type'] not in unfound_jobs:
-        unfound_jobs[res['type']] = [res['links']['self']]
+        unfound_jobs[f"missing_{res['type']}"] = [res['links']['self']]
     else:
-        unfound_jobs[res['type']].append(
+        unfound_jobs[f"missing_{res['type']}"].append(
             res['links']['self'])
     with open("validator/unfound_jobs.json", "w+",
               encoding="utf-8") as outfile:
