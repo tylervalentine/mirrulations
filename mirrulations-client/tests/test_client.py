@@ -6,7 +6,6 @@ from pytest import fixture, raises
 import requests_mock
 from mirrclient.client import NoJobsAvailableException, Client
 from mirrclient.client import is_environment_variables_present
-from mirrclient.saver import Saver
 from requests.exceptions import Timeout, ReadTimeout
 
 BASE_URL = 'http://work_server:8080'
@@ -764,9 +763,9 @@ def test_add_attachment_information_to_data():
     assert data['attachment_path'] == '/data/data/USTR/docket.json'
     assert data['attachment_filename'] == 'docket.json'
 
-def test_download_htm(capfd, mocker, mock_requests):
-    mocker.patch('Saver.make_path', return_value=None)
-    mocker.patch('Saver.save_attachment', return_value=None)
+def test_download_htm(capsys, mocker, mock_requests):
+    mocker.patch('mirrclient.saver.Saver.make_path', return_value=None)
+    mocker.patch('mirrclient.saver.Saver.save_attachment', return_value=None)
 
     client = Client()
 
@@ -796,5 +795,5 @@ def test_download_htm(capfd, mocker, mock_requests):
             status_code=200
         )
         
-        client.download_htm(json)
-        assert f"SAVED document HTM - {htm} to path:" in capfd.readoutter()[0]
+        client.download_htm(htm_json)
+        assert f"SAVED document HTM - {htm} to path:" in capsys.readouterr().out
