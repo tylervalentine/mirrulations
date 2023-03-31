@@ -126,12 +126,12 @@ class Client:
         self._put_results(data)
         self.put_results_to_mongo(data)
         comment_has_attachment = self.does_comment_have_attachment(job_result)
-        htm_has_file_format = self.document_has_file_formats(job_result)
+        json_has_file_format = self._document_has_file_formats(job_result)
 
         if data["job_type"] == "comments" and comment_has_attachment:
             self.download_all_attachments_from_comment(data, job_result)
-        if data["job_type"] == "documents" and htm_has_file_format:
-            document_htm = self.get_document_htm(job_result)
+        if data["job_type"] == "documents" and json_has_file_format:
+            document_htm = self._get_document_htm(job_result)
             if document_htm is not None:
                 self.download_htm(job_result)
         # For now, still need to send original put request for Mongo
@@ -275,8 +275,8 @@ class Client:
         """
         Attempts to download an HTM and saves it to its correct path
         """
-        url = self.get_document_htm(json)
-        path = self.path_generator.get_document_htm_path(json)
+        url = self._get_document_htm(json)
+        path = self.path_generator._get_document_htm_path(json)
         print("helloooo")
         if url is not None:
             response = requests.get(url, timeout=10)
@@ -285,7 +285,7 @@ class Client:
             self.saver.save_attachment(f'/data{dir_}/{filename}', response.content)
             print(f"SAVED document HTM - {url} to path: ", path)
 
-    def get_document_htm(self, json):
+    def _get_document_htm(self, json):
         """
         Gets the download link for a documents HTM if one exists
 
@@ -301,7 +301,7 @@ class Client:
                     return file_url
         return None
 
-    def document_has_file_formats(self, json):
+    def _document_has_file_formats(self, json):
         if ("data" in json and
             "attributes" in json["data"] and
                 "fileFormats" in json["data"]["attributes"]
