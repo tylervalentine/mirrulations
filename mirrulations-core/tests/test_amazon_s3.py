@@ -4,10 +4,8 @@ from moto import mock_s3
 # from botocore.exceptions import ClientError
 # from mirrclient.saver import Saver
 from mirrcore.amazon_s3 import AmazonS3
-# import os
 
 
-@staticmethod
 def create_mock_mirrulations_bucket():
     conn = boto3.resource("s3", region_name="us-east-1")
     conn.create_bucket(Bucket="test-mirrulations1")
