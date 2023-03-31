@@ -276,7 +276,7 @@ class Client:
         Attempts to download an HTM and saves it to its correct path
         """
         url = self._get_document_htm(json)
-        path = self.path_generator._get_document_htm_path(json)
+        path = self.path_generator.get_document_htm_path(json)
         if url is not None:
             response = requests.get(url, timeout=10)
             dir_, filename = path.rsplit('/', 1)
