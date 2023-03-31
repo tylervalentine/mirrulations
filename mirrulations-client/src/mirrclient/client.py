@@ -276,10 +276,13 @@ class Client:
         Attempts to download an HTM and saves it to its correct path
         """
         url = self.get_document_htm(json)
+        path = self.path_generator.get_document_htm_path(json)
         if url is not None:
             response = requests.get(url, timeout=10)
-            self.saver.make_path("somewhere")
-            self.saver.save_attachment(f'/data{"c"}/{"C"}', response.content)
+            dir_, filename = path.rsplit('/', 1)
+            self.saver.make_path(dir_)
+            self.saver.save_attachment(f'/data{dir_}/{filename}', response.content)
+            print(f"SAVED document HTM - {url} to path: ", path)
 
     def get_document_htm(self, json):
         """
