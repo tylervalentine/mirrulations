@@ -14,10 +14,24 @@ p {
 }
 
 header {
-    padding-right: 10px;
-    padding-top: 5px;
     text-align: right;
+    box-shadow: 0 0.125rem 0.8rem rgba(0, 0, 0, 0.1);
   }
+
+button {
+    height: 100%;
+    border: transparent;
+    background: transparent;
+    color: white;
+    display: inline-block;
+    padding: 10px;
+    transition-duration: 0.4s;
+  }
+  
+button:hover {
+    background: #729dfc;
+    cursor: pointer;
+}
 
 /* Utilities */
 .container {
@@ -70,6 +84,7 @@ header {
 .info-container-data span{
     font-weight: 500;
     color: #6c757d;
+    padding-right: 10px;
 }
 
 /* Dashboard */
@@ -202,7 +217,7 @@ header {
   }
 
   .progress-bar-to-corpus {
-    width: 50%;
+    width: 0%;
     border-radius: 16px;
     color: #4C84FF;
     animation: onReload 2s ease-out forwards;

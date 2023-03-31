@@ -356,14 +356,3 @@ services:
     volumes:
       - ~/data/data:/data
     restart: always
-  client26:
-    build:
-      context: .
-      dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
-    env_file: env_files/client26.env
-    volumes:
-      - ~/data/data:/data
-    restart: always
-
