@@ -6,6 +6,7 @@ from pytest import fixture, raises
 import requests_mock
 from mirrclient.client import NoJobsAvailableException, Client
 from mirrclient.client import is_environment_variables_present
+from mirrclient.saver import Saver
 from requests.exceptions import Timeout, ReadTimeout
 
 BASE_URL = 'http://work_server:8080'
@@ -763,51 +764,37 @@ def test_add_attachment_information_to_data():
     assert data['attachment_path'] == '/data/data/USTR/docket.json'
     assert data['attachment_filename'] == 'docket.json'
 
+def test_download_htm(capfd, mocker, mock_requests):
+    mocker.patch('Saver.make_path', return_value=None)
+    mocker.patch('Saver.save_attachment', return_value=None)
 
-# def test_get_document_htm():
-#     client = Client()
-#     pdf = "https://downloads.regulations.gov/USTR/content.pdf"
-#     htm = "https://downloads.regulations.gov/USTR/content.htm"
-#     htm_json = {
-#         "data": {
-#             "attributes": {
-#                 "fileFormats": [{
-#                     "fileUrl": pdf,
-#                     "format": "pdf",
-#                     "size": 182010
-#                     }, {
-#                     "fileUrl": htm,
-#                     "format": "htm",
-#                     "size": 9709
-#                     }
-#                 ]
-#             }
-#         }
-#     }
-#     client_htm = client.get_document_htm(htm_json)
-#     assert client_htm == "https://downloads.regulations.gov/USTR/content.htm"
+    client = Client()
 
-
-# def test_document_has_file_formats():
-#     client = Client()
-#     pdf = "https://downloads.regulations.gov/USTR/content.pdf"
-#     htm = "https://downloads.regulations.gov/USTR/content.htm"
-#     htm_json = {
-#         "data": {
-#             "attributes": {
-#                 "fileFormats": [{
-#                     "fileUrl": pdf,
-#                     "format": "pdf",
-#                     "size": 182010
-#                     }, {
-#                     "fileUrl": htm,
-#                     "format": "htm",
-#                     "size": 9709
-#                     }
-#                 ]
-#             }
-#         }
-#     }
-#     assert client.document_has_file_formats(htm_json) is True
-#     del htm_json["data"]["attributes"]["fileFormats"]
-#     assert client.document_has_file_formats(htm_json) is False
+    pdf = "https://downloads.regulations.gov/USTR/content.pdf"
+    htm = "https://downloads.regulations.gov/USTR/content.htm"
+    htm_json = {
+            "data": {
+                "attributes": {
+                    "fileFormats": [{
+                        "fileUrl": pdf,
+                        "format": "pdf",
+                        "size": 182010
+                        }, {
+                        "fileUrl": htm,
+                        "format": "htm",
+                        "size": 9709
+                        }
+                    ]
+                }
+            }
+        }
+    
+    with mock_requests:
+        mock_requests.get(
+            htm,
+            json={"data": 'foobar'},
+            status_code=200
+        )
+        
+        client.download_htm(json)
+        assert f"SAVED document HTM - {htm} to path:" in capfd.readoutter()[0]
