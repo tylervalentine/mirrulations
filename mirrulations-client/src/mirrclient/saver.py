@@ -84,7 +84,7 @@ class Saver:
     def save_binary_to_s3(self, bucket, path, data):
         s_3 = AmazonS3()
         s_3.put_binary_s3(
-            bucket, 
+            bucket,
             path,
             data
             )

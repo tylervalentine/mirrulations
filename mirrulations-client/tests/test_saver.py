@@ -1,12 +1,10 @@
 from json import dumps
 from unittest.mock import patch, mock_open, MagicMock
+import os
 from mirrclient.saver import Saver
 from pytest import fixture, mark
 import boto3
 from moto import mock_s3
-import os 
-# from botocore.exceptions import ClientError
-# from mirrcore.amazon_s3 import AmazonS3
 
 
 @fixture(name='save_duplicate_json')
@@ -156,10 +154,12 @@ def test_check_for_duplicates(capsys):
         captured = capsys.readouterr()
         assert captured.out == print_data
 
+
 @fixture(autouse=True)
 def mock_env():
     os.environ['AWS_ACCESS_KEY'] = 'test_key'
     os.environ['AWS_SECRET_ACCESS_KEY'] = 'test_secret_key'
+
 
 @mock_s3
 def test_save_valid_json_to_s3():
