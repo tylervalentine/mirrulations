@@ -277,7 +277,6 @@ class Client:
         """
         url = self._get_document_htm(json)
         path = self.path_generator._get_document_htm_path(json)
-        print("helloooo")
         if url is not None:
             response = requests.get(url, timeout=10)
             dir_, filename = path.rsplit('/', 1)
