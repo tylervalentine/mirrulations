@@ -1,6 +1,5 @@
 import os
 import json
-from unittest.mock import patch
 from mirrcore.path_generator import PathGenerator
 import pytest
 from pytest import fixture, raises
@@ -38,7 +37,7 @@ def mock_disk_writing(mocker):
     # patch _write_results and AttachmentSaver.save
     mocker.patch.object(
         Client,
-        '_write_results',
+        '_put_results',
         return_value=None
     )
     mocker.patch.object(
@@ -452,7 +451,6 @@ def test_success_client_logging(capsys, mock_requests):
         'API URL: https://api.regulations.gov/v4/documents/type_id\n',
         'Performing job\n',
         'Sending Job 1 to Work Server\n',
-        '1: Results written to disk\n',
         'SUCCESS: https://api.regulations.gov/v4/documents/type_id complete\n'
     ]
     assert captured.out == "".join(print_data)
@@ -491,7 +489,6 @@ def test_failure_job_results(capsys, mock_requests):
             'API URL: http://url.com\n'
             'Performing job\n'
             'Sending Job 1 to Work Server\n'
-            '1: Errors found in results\n'
             'FAILURE: Error in http://url.com\n'
             'Error: foobar\n'
         }
@@ -529,7 +526,7 @@ def test_client_downloads_attachment_results(mock_requests):
                 "included": [{
                     "attributes": {
                         "fileFormats": [{
-                            "fileUrl": "https://downloads.regulations.gov"
+                            "fileUrl": "https://fakeurl.gov"
                         }]
                     }
                 }]
@@ -537,7 +534,7 @@ def test_client_downloads_attachment_results(mock_requests):
             status_code=200
         )
         mock_requests.get(
-            "https://downloads.regulations.gov",
+            "https://fakeurl.gov",
             json={"data": 'foobar'},
             status_code=200
         )
@@ -602,79 +599,6 @@ def test_handles_empty_attachment_list(mock_requests):
         assert client.does_comment_have_attachment(results) is False
 
 
-def test_client_logs_for_multiple_attachments(capsys, mock_requests):
-    client = Client()
-    client.api_key = 1234
-
-    with mock_requests:
-        mock_requests.get(
-            'http://work_server:8080/get_job?client_id=-1',
-            json={'job_id': '1',
-                  'url': 'http://url.com',
-                  'job_type': 'comments',
-                  'reg_id': '1',
-                  'agency': 'foo'},
-            status_code=200
-        )
-        mock_requests.get(
-            'http://url.com?api_key=1234',
-            json={
-                "data": {
-                    "id": "agencyID-001-0002",
-                    "type": "comments",
-                    "attributes": {
-                        "agencyId": "agencyID",
-                        "docketId": "agencyID-001"
-                    }
-                },
-                "included": [{
-                    "attributes": {
-                        "fileFormats": [{
-                            "fileUrl": "https://downloads1.regulations.gov"
-                        }]
-                    }
-                },
-                    {
-                        "attributes": {
-                            "fileFormats": [{
-                                "fileUrl": "https://downloads2.regulations.gov"
-                            }]
-                        }
-                    }]
-            },
-            status_code=200
-        )
-
-        mock_requests.get(
-            "https://downloads1.regulations.gov",
-            json={"data": 'foobar'},
-            status_code=200
-        )
-        mock_requests.get(
-            "https://downloads2.regulations.gov",
-            json={"data": 'foobar'},
-            status_code=200
-        )
-        mock_requests.put('http://work_server:8080/put_results', text='{}')
-        client.job_operation()
-
-        print_data = {
-            'Processing job from work server\n'
-            'Regulations.gov link: https://www.regulations.gov//url.com\n'
-            'API URL: http://url.com\n'
-            'Performing job\n'
-            'Sending Job 1 to Work Server\n'
-            '1: Results written to disk\n'
-            'Found 2 attachment(s) for Comment - agencyID-001-0002\n'
-            'Downloaded 1/2 attachment(s) for Comment - agencyID-001-0002\n'
-            'Downloaded 2/2 attachment(s) for Comment - agencyID-001-0002\n'
-            'SUCCESS: http://url.com complete\n'
-        }
-
-        captured = capsys.readouterr()
-        assert captured.out == "".join(print_data)
-
-
 def test_success_attachment_logging(capsys, mock_requests):
     client = Client()
     client.api_key = 1234
@@ -725,7 +649,6 @@ def test_success_attachment_logging(capsys, mock_requests):
             'API URL: http://url.com\n'
             'Performing job\n'
             'Sending Job 1 to Work Server\n'
-            '1: Results written to disk\n'
             'Found 1 attachment(s) for Comment - agencyID-001-0002\n'
             'Downloaded 1/1 attachment(s) for Comment - agencyID-001-0002\n'
             'SUCCESS: http://url.com complete\n'
@@ -764,7 +687,6 @@ def test_success_no_attachment_logging(capsys, mock_requests):
             'API URL: http://url.com\n'
             'Performing job\n'
             'Sending Job 1 to Work Server\n'
-            '1: Results written to disk\n'
             'SUCCESS: http://url.com complete\n'
         }
 
@@ -822,7 +744,6 @@ def test_failure_attachment_job_results(capsys, mock_requests):
             'API URL: http://url.com\n'
             'Performing job\n'
             'Sending Job 1 to Work Server\n'
-            '1: Results written to disk\n'
             'Found 1 attachment(s) for Comment - agencyID-001-0002\n'
             'Downloaded 1/1 attachment(s) for Comment - agencyID-001-0002\n'
             'SUCCESS: http://url.com complete\n'
@@ -832,30 +753,12 @@ def test_failure_attachment_job_results(capsys, mock_requests):
         assert captured.out == "".join(print_data)
 
 
-def test_save_path_directory_does_not_already_exist():
-    with patch('os.makedirs') as mock_dir:
-        client = Client()
-        client.make_path('/USTR')
-        mock_dir.assert_called_once_with('/data/USTR')
-
-
-def test_save_path_directory_already_exists(capsys):
-    with patch('os.makedirs') as mock_dir:
-        client = Client()
-        mock_dir.side_effect = FileExistsError('Directory already exists')
-        client.make_path('/USTR')
-
-        print_data = 'Directory already exists in root: /data/USTR\n'
-        captured = capsys.readouterr()
-        assert captured.out == print_data
-
-
-def test_make_attachment_directory():
-    with patch('os.makedirs') as mock_dir:
-        client = Client()
-        client.make_attachment_directory(
-            '/USTR/USTR-2015-0010/binary-USTR-2015-0010/comments_attachments/'
-            'USTR-2015-0010-0002_attachment_1.pdf')
-        mock_dir.assert_called_once_with(
-            '/data/USTR/USTR-2015-0010/binary-USTR-2015-0010/'
-            'comments_attachments')
+def test_add_attachment_information_to_data():
+    data = {}
+    path = '/USTR/docket.json'
+    filename = "docket.json"
+    client = Client()
+    data = client.add_attachment_information_to_data(data, path, filename)
+    assert data['job_type'] == 'attachments'
+    assert data['attachment_path'] == '/data/data/USTR/docket.json'
+    assert data['attachment_filename'] == 'docket.json'
