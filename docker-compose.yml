@@ -71,6 +71,8 @@ services:
       - work_generator
     env_file: env_files/validator.env
     restart: always
+    volumes:
+      - "./:/app/validator"
   work_server:
     build:
       context: .

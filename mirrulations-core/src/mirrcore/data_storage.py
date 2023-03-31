@@ -32,4 +32,8 @@ class DataStorage:
         self.attachments.insert_one(entry)
 
     def get_collection_size(self, collection):
-        return getattr(collection).count_documents({})
+        if collection == 'dockets':
+            return self.dockets.count_documents({})
+        if collection == 'documents':
+            return self.documents.count_documents({})
+        return self.comments.count_documents({})

@@ -28,17 +28,27 @@ class Validator:
             for res in result['data']:
                 if not self.datastorage.exists(res):
                     print(f"{res['id']} not in database, writing to file")
-                    self.unfound_jobs[res['type']] = res['links']['self']
-                    print(f"Finished adding {res['id']} to file")
+                    write_unfound_jobs(res, self.unfound_jobs)
+                    time.sleep(3.6)
                     counter['Not_in_db'] += 1
                 else:
                     print(f"{res['id']} exists in database")
                 counter['Total_validated'] += 1
-            print(f'Jobs not found in database: {counter["Not_in_db"]}')
-            print(f'Total jobs validated: {counter["Total_validated"]}')
-            percentage = (counter['Total_validated'] / collection_size) * 100
-            print(f'{percentage:.2f}%')
-            time.sleep(3.6)
+            print(f'Jobs not found in database: {counter["Not_in_db"]} \n \
+            Total jobs validated: {counter["Total_validated"]} \n \
+            Percentage of jobs validated: \
+                {counter["Total_validated"] / collection_size * 100}%')
+
+
+def write_unfound_jobs(res, unfound_jobs):
+    if res['type'] not in unfound_jobs:
+        unfound_jobs[res['type']] = [res['links']['self']]
+    else:
+        unfound_jobs[res['type']].append(
+            res['links']['self'])
+    with open("validator/unfound_jobs.json", "w+",
+              encoding="utf-8") as outfile:
+        json.dump(unfound_jobs, outfile, indent=4)
 
 
 def generate_work(collection=None):
@@ -60,11 +70,6 @@ def generate_work(collection=None):
         generator.download('comments')
     else:
         generator.download(collection)
-    # Write unfound jobs to JSON file
-    unfound_jobs_object = json.dumps(generator.unfound_jobs)
-
-    with open("unfound_jobs.json", "w", encoding="utf-8") as outfile:
-        outfile.write(unfound_jobs_object)
 
 
 if __name__ == '__main__':
