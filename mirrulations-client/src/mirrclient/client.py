@@ -6,20 +6,8 @@ from json import dumps, loads
 import requests
 from dotenv import load_dotenv
 from mirrclient.saver import Saver
+from mirrclient.exceptions import NoJobsAvailableException
 from mirrcore.path_generator import PathGenerator
-
-
-class NoJobsAvailableException(Exception):
-    """
-    Raises an Exception when there are no jobs available in the workserver.
-    """
-
-    def __init__(self, message="There are no jobs available"):
-        self.message = message
-        super().__init__(self.message)
-
-    def __str__(self):
-        return f'{self.message}'
 
 
 def is_environment_variables_present():

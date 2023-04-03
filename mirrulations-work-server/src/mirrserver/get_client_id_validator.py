@@ -1,4 +1,4 @@
-from mirrserver.exceptions import InvalidClientIDException
+from mirrclient.exceptions import InvalidClientIDException
 
 
 class GetClientIDValidator():
