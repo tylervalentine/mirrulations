@@ -48,6 +48,7 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
+      start_period: 45s
   work_generator:
     build:
       context: .
@@ -61,6 +62,18 @@ services:
         condition: service_healthy
     env_file: env_files/work_gen.env
     restart: always
+  validator:
+    build:
+      context: .
+      dockerfile: mirrulations-validation/Dockerfile
+    depends_on:
+      - redis
+      - mongo
+      - work_generator
+    env_file: env_files/validator.env
+    restart: always
+    volumes:
+      - "./:/app/validator"
   work_server:
     build:
       context: .
@@ -344,14 +357,3 @@ services:
     volumes:
       - ~/data/data:/data
     restart: always
-  client26:
-    build:
-      context: .
-      dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
-    env_file: env_files/client26.env
-    volumes:
-      - ~/data/data:/data
-    restart: always
-

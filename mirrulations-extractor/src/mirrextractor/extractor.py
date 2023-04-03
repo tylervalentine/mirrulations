@@ -34,8 +34,8 @@ class Extractor:
             print(f"Extracting text from {attachment_path}")
             Extractor._extract_pdf(attachment_path, save_path)
         else:
-            print(f"FAILURE: attachment doesn't have appropriate extension \
-            {attachment_path}")
+            print("FAILURE: attachment doesn't have appropriate extension",
+                  attachment_path)
 
     @staticmethod
     def _extract_pdf(attachment_path, save_path):
@@ -60,7 +60,7 @@ class Extractor:
         pdf_bytes = io.BytesIO()
         try:
             pdf.save(pdf_bytes)
-        except RuntimeError as err:
+        except (RuntimeError, pikepdf.PdfError) as err:
             print(f"FAILURE: failed to save {attachment_path}\n{err}")
             return
         text = pdfminer.high_level.extract_text(pdf_bytes)
