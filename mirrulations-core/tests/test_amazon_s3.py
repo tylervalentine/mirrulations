@@ -18,21 +18,18 @@ def mock_env():
 
 
 def test_get_credentials():
-    s_3 = AmazonS3()
-    assert s_3.get_credentials() is True
+    assert AmazonS3().get_credentials() is True
 
 
 @mock_s3
 def test_get_s3_client():
-    s_3 = AmazonS3()
-    assert s_3.get_s3_client()
+    assert AmazonS3().get_s3_client()
 
 
 def test_get_s3_client_no_env_variables_present():
     del os.environ['AWS_ACCESS_KEY']
     del os.environ['AWS_SECRET_ACCESS_KEY']
-    s_3 = AmazonS3()
-    assert s_3.get_credentials() is False
+    assert AmazonS3().get_credentials() is False
 
 
 @mock_s3

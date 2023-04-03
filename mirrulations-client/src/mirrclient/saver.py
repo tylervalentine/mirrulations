@@ -1,8 +1,6 @@
 import os
 from json import dumps, load
 from mirrcore.amazon_s3 import AmazonS3
-# from dotenv import load_dotenv
-# import boto3
 
 
 class Saver:
