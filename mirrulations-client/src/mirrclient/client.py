@@ -302,6 +302,14 @@ class Client:
         return None
 
     def _document_has_file_formats(self, json):
+        """
+        Checks to see if the necessary attribute of fileFormats
+        exists
+
+        RETURNS
+        -------
+        true if the necessary attribute exists
+        """
         if "data" not in json:
             return False
         if "attributes" not in json["data"]:
