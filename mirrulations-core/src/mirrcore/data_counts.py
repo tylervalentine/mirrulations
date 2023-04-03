@@ -1,32 +1,49 @@
 import requests
 
-class DataStats:
+class DataCounts:
 
-    DOCS = "https://api.regulations.gov/v4/documents"
-    DOCKETS = "https://api.regulations.gov/v4/dockets"
-    COMMENTS = "https://api.regulations.gov/v4/comments"
-
-    def __init__(self, url, key):
+    def __init__(self, api_key):
         
-        self.url = url
-        self.key = key
+        self.url = "https://api.regulations.gov/v4"
+        self.api_key = api_key
 
-    def get_stats(self):
-        self.docs = get_documents_count()
-        self.dockets = get_dockets_count()
-        self.comments = get_comments_count()
+    def get_counts(self):
+        """ 
+        Get current counts from Regulations.gov
+        @return: list of counts for docket, document, and comments
+        """
+        dockets = self._get_dockets_count()
+        documents = self._get_documents_count()
+        comments = self._get_comments_count()
+        return [dockets, documents, comments]
 
-    def get_documents_count():
-        response = requests.get(DOCS, params={"api_key": self.key})
-        print(get_total_elements(response))
 
-    def get_dockets_count():
-        response = requests.get(DOCKETS, params={"api_key": self.key})
-        print(get_total_elements(response))
+    def _get_dockets_count(self):
+        """
+        Get the number of docket entries on Regulations.gov
+        @return integer count of docket entries
+        """
+        response = requests.get(f'{self.url}/{"dockets"}', params={"api_key": self.api_key})
+        return(self.__get_total_elements(response))
 
-    def get_comments_count():
-        response = requests.get(COMMENTS, params={"api_key": self.key})
-        print(get_total_elements(response))
 
-    def get_total_elements(response):
+    def _get_documents_count(self):
+        """
+        Get the number of document entries on Regulations.gov
+        @return integer count of document entries
+        """
+        response = requests.get(f'{self.url}/{"documents"}', params={"api_key": self.api_key})
+        return(self.__get_total_elements(response))
+
+
+    def _get_comments_count(self):
+        """
+        Get the number of comment entries on Regulations.gov
+        @return integer count of comment entries
+        """
+        response = requests.get(f'{self.url}/{"comments"}', params={"api_key": self.api_key})
+        return(self.__get_total_elements(response))
+
+
+    def __get_total_elements(response):
         return response.json()['meta']['totalElements']
