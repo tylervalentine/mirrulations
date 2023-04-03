@@ -76,7 +76,7 @@ services:
     env_file: env_files/validator.env
     restart: always
     volumes:
-      - "~/data:/data"
+      - "~/data/validator:/data"
   work_server:
     build:
       context: .
