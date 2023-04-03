@@ -274,6 +274,10 @@ class Client:
     def download_htm(self, json):
         """
         Attempts to download an HTM and saves it to its correct path
+        Parameters
+        ----------
+        json : dict
+            The json of a document
         """
         url = self._get_document_htm(json)
         path = self.path_generator.get_document_htm_path(json)
