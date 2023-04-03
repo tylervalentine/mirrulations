@@ -44,7 +44,7 @@ def write_unfound_jobs(res, unfound_jobs):
     else:
         unfound_jobs[f"missing_{res['type']}"].append(
             res['links']['self'])
-    with open("validator/unfound_jobs.json", "w+",
+    with open("/data/unfound_jobs.json", "w+",
               encoding="utf-8") as outfile:
         json.dump(unfound_jobs, outfile, indent=4)
 
