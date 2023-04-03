@@ -49,14 +49,15 @@ def write_unfound_jobs(res, unfound_jobs):
               encoding="utf-8") as outfile:
         json.dump(unfound_jobs, outfile, indent=4)
 
+
 def check_for_missing_jobs(res):
     with open("/data/unfound_jobs.json", "r",
               encoding="utf-8") as outfile:
-            lines = outfile.readlines()
-            for line in lines:
-                if res['links']['self'] in line:
-                    return True
-            return False
+        lines = outfile.readlines()
+        for line in lines:
+            if res['links']['self'] in line:
+                return True
+        return False
 
 
 def generate_work(collection=None):
