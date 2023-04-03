@@ -42,11 +42,21 @@ def write_unfound_jobs(res, unfound_jobs):
     if f"missing_{res['type']}" not in unfound_jobs:
         unfound_jobs[f"missing_{res['type']}"] = [res['links']['self']]
     else:
-        unfound_jobs[f"missing_{res['type']}"].append(
-            res['links']['self'])
+        if not check_for_missing_jobs(res):
+            unfound_jobs[f"missing_{res['type']}"].append(
+                        res['links']['self'])
     with open("/data/unfound_jobs.json", "w+",
               encoding="utf-8") as outfile:
         json.dump(unfound_jobs, outfile, indent=4)
+
+def check_for_missing_jobs(res):
+    with open("/data/unfound_jobs.json", "r",
+              encoding="utf-8") as outfile:
+            lines = outfile.readlines()
+            for line in lines:
+                if res['links']['self'] in line:
+                    return True
+            return False
 
 
 def generate_work(collection=None):
