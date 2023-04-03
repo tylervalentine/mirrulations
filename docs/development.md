@@ -44,7 +44,7 @@ there are `pytest.ini` files in each module as well as a global `pytest.ini`.
 
 * Open a terminal or file explorer window and navigate to your project directory.
 * Find the htmlcov folder and open it.
-* Inside the htmlcov folder, locate the index.html file and open it.
+* Inside the htmlcov folder, locate the index.html file and open it on your browser typing `open index.html`.
 
 #### The index.html file will display the test coverage report, showing you which lines of code were executed during the test run and which were not.
 
