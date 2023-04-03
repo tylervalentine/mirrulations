@@ -303,13 +303,3 @@ def create_server(database):
         return jsonify(validator[0]), validator[1]
 
     return workserver
-
-
-if __name__ == '__main__':
-    try:
-        r = redis.Redis('redis')
-        r.keys('*')
-        server = create_server(r)
-        server.app.run(host='0.0.0.0', port=8080, debug=False)
-    except redis.exceptions.ConnectionError:
-        print('There is no Redis database to connect to.')
