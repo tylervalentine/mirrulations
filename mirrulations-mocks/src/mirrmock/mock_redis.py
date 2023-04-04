@@ -11,12 +11,32 @@ class BusyRedis():
 
 
 class ReadyRedis():
+    def __init__(self):
+        self.dict = {}
+
     """
     Stub for testing in place of an active Redis server,
     ping replies with true
     """
     def ping(self):
         return True
+
+    def incr(self, key):
+        if key in self.dict:
+            self.dict[key] += 1
+
+    def decr(self, key):
+        if key in self.dict:
+            self.dict[key] -= 1
+
+    def exists(self, key):
+        return key in self.dict
+
+    def get(self, key):
+        return self.dict[key]
+
+    def set(self, key, value):
+        self.dict[key] = value
 
 
 class MockRedisWithStorage():
