@@ -26,3 +26,19 @@ class TestDataCounts(unittest.TestCase):
         # Make assertions about the function's behavior
         self.assertEqual(counts, [500, 1000, 2500])  # Expected results
 
+     # Test that __get_total_elements extracts the correct value from a response object
+    def test__get_total_elements(self):
+       """Tests that __get_total_elements correctly extracts the 'totalElements' value from a response"""
+       # Set up mock data and objects
+       response = MagicMock()
+       response.json.return_value = {"meta": {"totalElements": 123}}
+
+
+       # Call the function we want to test
+       total_elements = DataCounts(api_key="test")._DataCounts__get_total_elements(response)
+
+
+       # Make assertions about the function's behavior
+       self.assertEqual(total_elements, 123)  # Expected result
+
+
