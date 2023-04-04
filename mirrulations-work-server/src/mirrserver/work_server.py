@@ -93,7 +93,7 @@ def get_job(workserver):
         {'error': 'Client ID was not provided'}, 401
         {'error': 'No jobs available'}, 403
     """
-    check_for_database(workserver)
+    #check_for_database(workserver)
     client_id = request.args.get('client_id')
     print("Attempting to get job")
     try:

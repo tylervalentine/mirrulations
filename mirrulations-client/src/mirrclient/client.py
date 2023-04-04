@@ -3,11 +3,15 @@ import time
 import os
 import sys
 from json import dumps, loads
+from flask import jsonify
 import requests
+import redis
 from dotenv import load_dotenv
 from mirrclient.saver import Saver
 from mirrclient.exceptions import NoJobsAvailableException
+from mirrcore.job_queue_exceptions import JobQueueException
 from mirrcore.path_generator import PathGenerator
+from mirrcore.job_queue import JobQueue
 
 
 def is_environment_variables_present():
@@ -45,15 +49,34 @@ class Client:
         value from the workserver.
     """
 
-    def __init__(self):
+    def __init__(self, redis_server):
         self.api_key = os.getenv('API_KEY')
         self.client_id = os.getenv('ID')
         self.path_generator = PathGenerator()
         self.saver = Saver()
+        self.redis = redis_server
+        self.job_queue = JobQueue(redis_server)
 
         hostname = os.getenv('WORK_SERVER_HOSTNAME')
         port = os.getenv('WORK_SERVER_PORT')
         self.url = f'http://{hostname}:{port}'
+
+    def _check_for_database(self):
+        """
+        Checks if the database is connected
+        if not this raises an exception
+
+        Parameters
+        ----------
+        workserver : WorkServer
+            the work server class
+
+        Raises
+        ------
+        ConnectionError
+            if the database is not connected
+        """
+        self.redis.ping()
 
     def get_job(self):
         """
@@ -66,14 +89,35 @@ class Client:
             If no job is available from the work server
         """
 
-        response = requests.get(f'{self.url}/get_job',
-                                params={'client_id': self.client_id},
-                                timeout=10)
+        # response = requests.get(f'{self.url}/get_job',
+        #                         params={'client_id': self.client_id},
+        #                         timeout=10)
+        self._check_for_database()
+        print("Attempting to get job")
+        try:
+            if self.job_queue.get_num_jobs() == 0:
+                job = {'error': 'No jobs available'}
+            job = self.job_queue.get_job()
+            print(type(job))
+            print("Job received from job queue")
+        except JobQueueException:
+            job = {'error': 'No jobs available'}
 
-        job = loads(response.text)
+
+        self.redis.hset('jobs_in_progress', job['job_id'], job['url'])
+        self.redis.hset('client_jobs', job['job_id'], self.client_id)
+
+        self.job_queue.decrement_count(job.get('job_type', 'other'))
+        print(f'Job received: {job.get("job_type", "other")} for client: ', self.client_id)
+
         link = 'https://www.regulations.gov/'
         if 'error' in job:
             raise NoJobsAvailableException()
+        job = {'job_id': job['job_id'],
+                'url': job['url'],
+                'job_type': job.get('job_type', 'other'),
+                'reg_id': job.get('reg_id', 'other_reg_id'),
+                'agency': job.get('agency', 'other_agency')}
         split_url = str(job['url']).split('/')
         job_type = split_url[-2][:-1]  # Removes plural from job type
         type_id = split_url[-1]
@@ -112,18 +156,11 @@ class Client:
             data['directory'] = self.path_generator.get_path(job_result)
 
         self._put_results(data)
-        self.put_results_to_mongo(data)
+        #self.put_results_to_mongo(data)
         comment_has_attachment = self.does_comment_have_attachment(job_result)
 
         if data["job_type"] == "comments" and comment_has_attachment:
             self.download_all_attachments_from_comment(data, job_result)
-        # For now, still need to send original put request for Mongo
-        # requests.put(
-        #     f'{self.url}/_put_results',
-        #     json=dumps(data['job_id']),
-        #     params={'client_id': self.client_id},
-        #     timeout=10
-        # )
 
     def _put_results(self, data):
         """
@@ -227,7 +264,7 @@ class Client:
         print(f"SAVED attachment - {url} to path: ", path)
         filename = path.split('/')[-1]
         data = self.add_attachment_information_to_data(data, path, filename)
-        self.put_results_to_mongo(data)
+        #self.put_results_to_mongo(data)
 
     def add_attachment_information_to_data(self, data, path, filename):
         data['job_type'] = 'attachments'
@@ -277,7 +314,14 @@ if __name__ == '__main__':
         print('Need client environment variables')
         sys.exit(1)
 
-    client = Client()
+    try:
+        r = redis.Redis('redis')
+        r.keys('*')
+    except redis.exceptions.ConnectionError:
+        print('There is no Redis database to connect to.')
+        sys.exit(1)
+
+    client = Client(r)
 
     while True:
         try:
