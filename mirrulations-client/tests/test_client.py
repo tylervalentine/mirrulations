@@ -1,5 +1,6 @@
 import os
 import json
+from unittest.mock import patch
 from mirrcore.path_generator import PathGenerator
 import pytest
 from pytest import fixture, raises
@@ -7,12 +8,15 @@ import requests_mock
 from mirrclient.client import NoJobsAvailableException, Client
 from mirrclient.client import is_environment_variables_present
 from requests.exceptions import Timeout, ReadTimeout
+from mirrmock.mock_redis import BusyRedis, ReadyRedis
+
 
 BASE_URL = 'http://work_server:8080'
 
 
 @fixture(autouse=True)
-def mock_env():
+@patch('mirrclient.client.load_redis', side_effect=lambda: ReadyRedis())
+def mock_env(patched_load_redis):
     os.environ['WORK_SERVER_HOSTNAME'] = 'work_server'
     os.environ['WORK_SERVER_PORT'] = '8080'
     os.environ['API_KEY'] = 'TESTING_KEY'
@@ -86,6 +90,7 @@ def test_client_has_no_id():
     assert is_environment_variables_present() is False
 
 
+@patch('mirrclient.client.load_redis', side_effect=lambda: ReadyRedis())
 def test_client_gets_job(mock_requests):
     client = Client()
     link = 'https://api.regulations.gov/v4/type/type_id'

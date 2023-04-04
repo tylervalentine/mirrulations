@@ -7,6 +7,10 @@ from flask import jsonify
 import requests
 import redis
 from dotenv import load_dotenv
+import redis
+from mirrcore.redis_check import is_redis_available
+from mirrcore.job_queue import JobQueue
+from mirrcore.job_queue_exceptions import JobQueueException
 from mirrclient.saver import Saver
 from mirrclient.exceptions import NoJobsAvailableException
 from mirrcore.job_queue_exceptions import JobQueueException
@@ -27,6 +31,14 @@ def is_environment_variables_present():
             and os.getenv('WORK_SERVER_PORT') is not None
             and os.getenv('API_KEY') is not None
             and os.getenv('ID') is not None)
+
+
+def load_redis():
+    client = redis.Redis('redis')
+    while not is_redis_available(client):
+        print('Redis database is busy loading.')
+        time.sleep(30)
+    return client
 
 
 class Client:
@@ -61,22 +73,14 @@ class Client:
         port = os.getenv('WORK_SERVER_PORT')
         self.url = f'http://{hostname}:{port}'
 
-    def _check_for_database(self):
-        """
-        Checks if the database is connected
-        if not this raises an exception
 
-        Parameters
-        ----------
-        workserver : WorkServer
-            the work server class
+    def _can_connect_to_database(self):
+        try:
+            self.redis.ping()
+        except redis.exceptions.ConnectionError:
+            return False
+        return True
 
-        Raises
-        ------
-        ConnectionError
-            if the database is not connected
-        """
-        self.redis.ping()
 
     def get_job(self):
         """
@@ -88,13 +92,17 @@ class Client:
         :raises: NoJobsAvailableException
             If no job is available from the work server
         """
+        if not self._can_connect_to_database():
+            # TODO: raise some custom error
+            pass
 
         # response = requests.get(f'{self.url}/get_job',
         #                         params={'client_id': self.client_id},
         #                         timeout=10)
-        self._check_for_database()
+        
         print("Attempting to get job")
         try:
+            self._check_for_database()
             if self.job_queue.get_num_jobs() == 0:
                 job = {'error': 'No jobs available'}
             job = self.job_queue.get_job()
@@ -102,6 +110,9 @@ class Client:
             print("Job received from job queue")
         except JobQueueException:
             job = {'error': 'No jobs available'}
+        except redis.exceptions.ConnectionError:
+            job = {'error': 'Could nto connect to redis server.'}
+            print("Redis appears to be down.")
 
 
         self.redis.hset('jobs_in_progress', job['job_id'], job['url'])
@@ -121,8 +132,11 @@ class Client:
         split_url = str(job['url']).split('/')
         job_type = split_url[-2][:-1]  # Removes plural from job type
         type_id = split_url[-1]
+
+        link = 'https://www.regulations.gov/'
         print(f'Regulations.gov link: {link}{job_type}/{type_id}')
         print(f'API URL: {job["url"]}')
+
         return job
 
     def send_job(self, job, job_result):
