@@ -5,6 +5,10 @@ import sys
 from json import dumps, loads
 import requests
 from dotenv import load_dotenv
+import redis
+from mirrcore.redis_check import is_redis_available
+from mirrcore.job_queue import JobQueue
+from mirrcore.job_queue_exceptions import JobQueueException
 from mirrclient.saver import Saver
 from mirrclient.exceptions import NoJobsAvailableException
 from mirrcore.path_generator import PathGenerator
@@ -23,6 +27,14 @@ def is_environment_variables_present():
             and os.getenv('WORK_SERVER_PORT') is not None
             and os.getenv('API_KEY') is not None
             and os.getenv('ID') is not None)
+
+
+def load_redis():
+    client = redis.Redis('redis')
+    while not is_redis_available(client):
+        print('Redis database is busy loading.')
+        time.sleep(30)
+    return client
 
 
 class Client:
@@ -51,9 +63,22 @@ class Client:
         self.path_generator = PathGenerator()
         self.saver = Saver()
 
+        self.redis_client = load_redis()
+
+        self.job_queue = JobQueue(self.redis_client)
+
         hostname = os.getenv('WORK_SERVER_HOSTNAME')
         port = os.getenv('WORK_SERVER_PORT')
         self.url = f'http://{hostname}:{port}'
+
+
+    def can_connect_to_database(self):
+        try:
+            self.redis_client.ping()
+        except redis.exceptions.ConnectionError:
+            return False
+        return True
+
 
     def get_job(self):
         """
@@ -65,20 +90,36 @@ class Client:
         :raises: NoJobsAvailableException
             If no job is available from the work server
         """
+        if not self.can_connect_to_database():
+            # TODO: raise some custom error
+            pass
 
-        response = requests.get(f'{self.url}/get_job',
-                                params={'client_id': self.client_id},
-                                timeout=10)
-
-        job = loads(response.text)
-        link = 'https://www.regulations.gov/'
-        if 'error' in job:
+        print("Attempting to get a job.")
+        try:
+            if self.job_queue.get_num_jobs() == 0:
+                raise NoJobsAvailableException()
+            job = self.job_queue.get_job()
+        except JobQueueException:
             raise NoJobsAvailableException()
+
+        try:
+            self.redis_client.hset('jobs_in_progress', job['job_id'], job['url'])
+            self.redis_client.hset('client_jobs', job['job_id'], self.client_id)
+        except redis.exceptions.ConnectionError:
+            # TODO: raise some custom error
+            pass
+
+        self.job_queue.decrement_count(job['job_type'])
+        print(f"Job received: '{job['job_type']}' job for client '{self.client_id}'")
+
         split_url = str(job['url']).split('/')
         job_type = split_url[-2][:-1]  # Removes plural from job type
         type_id = split_url[-1]
+
+        link = 'https://www.regulations.gov/'
         print(f'Regulations.gov link: {link}{job_type}/{type_id}')
         print(f'API URL: {job["url"]}')
+
         return job
 
     def send_job(self, job, job_result):
