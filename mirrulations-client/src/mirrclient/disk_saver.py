@@ -4,11 +4,11 @@ from json import dumps, load
 
 class DiskSaver():
 
-    def make_path(self, path):
+    def make_path(self, _dir):
         try:
-            os.makedirs(f'/data{path}')
+            os.makedirs(_dir)
         except FileExistsError:
-            print(f'Directory already exists in root: /data{path}')
+            print(f'Directory already exists in root: /data{_dir}')
 
     def save_to_disk(self, path, data):
         with open(path, 'x', encoding='utf8') as file:
@@ -23,7 +23,8 @@ class DiskSaver():
         data : dict
             the results data to be written to disk
         """
-        self.make_path(path)
+        _dir = path.rsplit('/', 1)[0]
+        self.make_path(_dir)
         data = data['results']
         if os.path.exists(path) is False:
             self.save_to_disk(path, data)
@@ -40,7 +41,8 @@ class DiskSaver():
             self.check_for_duplicates(path, data, i + 1)
 
     def save_binary(self, path, data):
-        self.make_path(path)
+        _dir = path.rsplit('/', 1)[0]
+        self.make_path(_dir)
         with open(path, "wb") as file:
             file.write(data)
             file.close()

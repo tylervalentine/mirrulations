@@ -35,7 +35,7 @@ def test_save_path_directory_does_not_already_exist():
     with patch('os.makedirs') as mock_dir:
         saver = DiskSaver()
         saver.make_path('/USTR')
-        mock_dir.assert_called_once_with('/data/USTR')
+        mock_dir.assert_called_once_with('/USTR')
 
 
 def test_save_path_directory_already_exists(capsys):
@@ -56,7 +56,7 @@ def test_save_json():
     with patch('mirrclient.disk_saver.open', mock_open()) as mocked_file:
         with patch('os.makedirs') as mock_dir:
             saver.save_json(path, data)
-            mock_dir.assert_called_once_with('/data/USTR/file.json')
+            mock_dir.assert_called_once_with('/USTR')
             mocked_file.assert_called_once_with(path, 'x', encoding='utf8')
             mocked_file().write.assert_called_once_with(dumps(data['results']))
 
@@ -68,7 +68,7 @@ def test_save_binary():
     with patch('mirrclient.disk_saver.open', mock_open()) as mocked_file:
         with patch('os.makedirs') as mock_dir:
             saver.save_binary(path, data)
-            mock_dir.assert_called_once_with('/data/USTR/file.pdf')
+            mock_dir.assert_called_once_with('/USTR')
             mocked_file.assert_called_once_with(path, 'wb')
             mocked_file().write.assert_called_once_with(data)
 
@@ -121,7 +121,7 @@ def test_do_not_save_duplicate_data(capsys):
     with patch('os.path.exists', mock):
         with patch('os.makedirs') as mock_dir:
             saver.save_json(path, data)
-            mock_dir.assert_called_once_with('/data/USTR/file.json')
+            mock_dir.assert_called_once_with('/USTR')
             print_data = ''
             captured = capsys.readouterr()
             assert captured.out == print_data

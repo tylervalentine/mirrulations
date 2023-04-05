@@ -70,17 +70,19 @@ class S3Saver():
         -------
         path : str
             Where to save the data to in the S3 bucket
+            Ex path: bucket/Agency/
 
         data : dict
             The json as a dict to save.
         """
+        # Bucket structure is different than disk
+        # So we remove the /data/ from the path
+        path = path.replace("/data/", "")
         response = self.s3_client.put_object(
             Bucket=self.bucket_name,
-            # Path needs to be data/xxx
             Key=path,
             Body=json.dumps(data)
             )
-        print(f"SUCCESS: Wrote json to S3: {path}")
         return response
 
     def save_binary(self, path, binary):
@@ -95,10 +97,11 @@ class S3Saver():
         binary : bytes
             The binary response.content returns
         """
+        # Bucket structure is different than disk
+        # So we remove the /data/ from the path
+        path = path.replace("/data/", "")
         response = self.s3_client.put_object(
             Bucket=self.bucket_name,
-            # Path needs to be data/xxx
             Key=path,
             Body=binary)
-        print(f"SUCCESS: Wrote binary to S3: {path}")
         return response
