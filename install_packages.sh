@@ -13,3 +13,4 @@ fi
 .venv/bin/pip install -e mirrulations-work-generator 
 .venv/bin/pip install -e mirrulations-work-server
 .venv/bin/pip install -e mirrulations-extractor 
+.venv/bin/pip install -e mirrulations-validation
