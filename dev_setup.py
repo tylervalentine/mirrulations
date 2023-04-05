@@ -21,7 +21,7 @@ def get_total_client_number():
                 matches += match
     return matches
 
-def write_files(api_key, env_path, total_clients):
+def write_files(api_key, env_path, total_clients, aws_access_key, aws_secret_access_key):
     # Write client files
     for i in range(1, len(total_clients) + 1):
           with open("{}client{}.env".format(env_path, i), 'w') as file:
@@ -30,6 +30,9 @@ def write_files(api_key, env_path, total_clients):
             file.write("API_KEY={}".format(api_key) + "\n")
             file.write("ID={}".format(i) + "\n")
             file.write("PYTHONUNBUFFERED=TRUE")
+            file.write(f"AWS_ACCESS_KEY={aws_access_key}")
+            file.write(f"AWS_SECRET_ACCESS_KEY={aws_secret_access_key}")
+
 
     # Write work generator file
     with open("{}work_gen.env".format(env_path), 'w') as file:
@@ -60,7 +63,8 @@ if __name__ == "__main__":
 
     # Get user input for API key
     api_key = input("Enter your API key from regulations.gov: ")
-
+    aws_access_key = input("Enter your AWS Access Key: ")
+    aws_secret_access_key = input("Enter your AWS Secret Access Key: ")
 
     env_path = create_env_folder() 
     total_clients = get_total_client_number()
@@ -68,7 +72,7 @@ if __name__ == "__main__":
     # Install all packages
     os.system("bash install_packages.sh")
 
-    write_files(api_key, env_path, total_clients)
+    write_files(api_key, env_path, total_clients, aws_access_key, aws_secret_access_key)
 
             
 
