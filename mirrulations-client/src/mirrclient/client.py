@@ -68,15 +68,15 @@ class Client:
         port = os.getenv('WORK_SERVER_PORT')
         self.url = f'http://{hostname}:{port}'
 
-    def _can_connect_to_database(self):
+    def can_connect_to_database(self):
         try:
             self.redis.ping()
         except redis.exceptions.ConnectionError:
             return False
         return True
 
-    def _get_job_from_job_queue(self):
-        self._can_connect_to_database()
+    def get_job_from_job_queue(self):
+        self.can_connect_to_database()
         if self.job_queue.get_num_jobs() == 0:
             job = {'error': 'No jobs available'}
         else:
@@ -84,18 +84,18 @@ class Client:
         print("Job received from job queue")
         return job
 
-    def _generate_job_dict(self, job):
+    def generate_job_dict(self, job):
         return {'job_id': job['job_id'],
                 'url': job['url'],
                 'job_type': job.get('job_type', 'other'),
                 'reg_id': job.get('reg_id', 'other_reg_id'),
                 'agency': job.get('agency', 'other_agency')}
 
-    def _set_redis_values(self, job):
+    def set_redis_values(self, job):
         self.redis.hset('jobs_in_progress', job['job_id'], job['url'])
         self.redis.hset('client_jobs', job['job_id'], self.client_id)
 
-    def _remove_plural_from_job_type(self, job):
+    def remove_plural_from_job_type(self, job):
         split_url = str(job['url']).split('/')
         job_type = split_url[-2][:-1]  # Removes plural from job type
         type_id = split_url[-1]
@@ -114,13 +114,13 @@ class Client:
 
         print("Attempting to get job")
         try:
-            job = self._get_job_from_job_queue
+            job = self.get_job_from_job_queue
         except JobQueueException:
             job = {'error': 'No jobs available'}
         except redis.exceptions.ConnectionError:
             job = {'error': 'Could not connect to redis server.'}
             print("Redis appears to be down.")
-        self. _set_redis_values(job)
+        self.set_redis_values(job)
 
         self.job_queue.decrement_count(job.get('job_type', 'other'))
         print(f'Job received: {job.get("job_type", "other")} for client: ',
@@ -129,10 +129,10 @@ class Client:
         link = 'https://www.regulations.gov/'
         if 'error' in job:
             raise NoJobsAvailableException()
-        job = self._generate_job_dict(job)
+        job = self.generate_job_dict(job)
 
         print(f'Regulations.gov link: {link}' +
-              f'{self._remove_plural_from_job_type}')
+              f'{self.remove_plural_from_job_type}')
         print(f'API URL: {job["url"]}')
 
         return job

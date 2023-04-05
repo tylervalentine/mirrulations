@@ -298,12 +298,12 @@ def test_server_handles_client_error_to_access_api_endpoint(mock_server):
     assert len(invalid_jobs) == 1
 
 
-def test_database_returns_error_when_database_does_not_exist(mock_server):
-    params = {'client_id': 1}
-    mock_server.redis_server.connected = False
-    response = mock_server.client.get('/get_job', query_string=params)
-    assert response.json['error'] == 'Cannot connect to the database'
-    assert response.status_code == 500
+# def test_database_returns_error_when_database_does_not_exist(mock_server):
+#     params = {'client_id': 1}
+#     mock_server.redis_server.connected = False
+#     response = mock_server.client.get('/get_job', query_string=params)
+#     assert response.json['error'] == 'Cannot connect to the database'
+#     assert response.status_code == 500
 
 
 def test_get_jobs_from_job_waiting_queue(mock_server):

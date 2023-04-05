@@ -4,10 +4,39 @@ import redis
 class BusyRedis():
     """
     Stub for testing in place of a Redis server that is busy loading the data
-    to memory, ping replies with true
+    to memory, ping raises a BusyLoadingError
     """
     def ping(self):
         raise redis.BusyLoadingError
+
+
+class InactiveRedis():
+    """
+    Stub for testing in place of an active Redis server,
+    ping raises a ConnectionErrorException
+    """
+    def __init__(self):
+        self.dict = {}
+
+    def ping(self):
+        raise redis.ConnectionError
+
+    def incr(self, key):
+        if key in self.dict:
+            self.dict[key] += 1
+
+    def decr(self, key):
+        if key in self.dict:
+            self.dict[key] -= 1
+
+    def exists(self, key):
+        return key in self.dict
+
+    def get(self, key):
+        return self.dict[key]
+
+    def set(self, key, value):
+        self.dict[key] = value
 
 
 class ReadyRedis():
