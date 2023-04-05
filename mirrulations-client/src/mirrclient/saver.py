@@ -75,8 +75,7 @@ class Saver:
         s_3.put_text_s3(
             bucket,
             path,
-            data
-            )
+            data)
         print(f"SUCCESS: Wrote json to S3: {path}")
 
     def save_binary_to_s3(self, bucket, path, data):
@@ -84,6 +83,5 @@ class Saver:
         s_3.put_binary_s3(
             bucket,
             path,
-            data
-            )
+            data)
         print(f"SUCCESS: Wrote binary to S3: {path}")
