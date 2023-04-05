@@ -14,8 +14,8 @@ class TestDataCounts(unittest.TestCase):
         dockets_response = MagicMock()
         dockets_response.json.return_value = {"meta": {"totalElements": 500}}
         documents_response = MagicMock()
-        documents_response.json.return_value = {"meta": 
-            {"totalElements": 1000}}
+        documents_response.json.return_value = {
+            "meta": {"totalElements": 1000}}
         comments_response = MagicMock()
         comments_response.json.return_value = {"meta": {"totalElements": 2500}}
         mock_api_request.side_effect = [
@@ -30,7 +30,6 @@ class TestDataCounts(unittest.TestCase):
         # Make assertions about the function's behavior
         self.assertEqual(counts, [500, 1000, 2500])  # Expected results
 
-    # Test that __get_total_elements extracts the correct value from a response object
     def test__get_total_elements(self):
         """Tests that __get_total_elements correctly extracts
           the 'totalElements' value from a response"""
