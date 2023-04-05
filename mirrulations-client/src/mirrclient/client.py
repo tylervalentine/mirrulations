@@ -92,8 +92,8 @@ class Client:
                 'agency': job.get('agency', 'other_agency')}
 
     def set_redis_values(self, job):
-        self.redis.hset('jobs_in_progress', job['job_id'], job['url'])
-        self.redis.hset('client_jobs', job['job_id'], self.client_id)
+        self.redis.hset('jobs_in_progress', job.get('job_id'), job.get('url'))
+        self.redis.hset('client_jobs', job.get('job_id'), self.client_id)
 
     def remove_plural_from_job_type(self, job):
         split_url = str(job['url']).split('/')
@@ -114,7 +114,7 @@ class Client:
 
         print("Attempting to get job")
         try:
-            job = self.get_job_from_job_queue
+            job = self.get_job_from_job_queue()
         except JobQueueException:
             job = {'error': 'No jobs available'}
         except redis.exceptions.ConnectionError:
@@ -132,7 +132,7 @@ class Client:
         job = self.generate_job_dict(job)
 
         print(f'Regulations.gov link: {link}' +
-              f'{self.remove_plural_from_job_type}')
+              f'{self.remove_plural_from_job_type(job)}')
         print(f'API URL: {job["url"]}')
 
         return job
