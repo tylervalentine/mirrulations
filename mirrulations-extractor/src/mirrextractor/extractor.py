@@ -65,9 +65,9 @@ class Extractor:
             return
         try:
             text = pdfminer.high_level.extract_text(pdf_bytes)
-        except Exception as err:
-            print(f"FAILURE: failed to extract \
-                  text from {attachment_path}\n{err}")
+        except ValueError as err:
+            print("FAILURE: failed to extract "
+                  f"text from {attachment_path}\n{err}")
             return
         # Make dirs if they do not already exist
         os.makedirs(save_path[:save_path.rfind('/')], exist_ok=True)
