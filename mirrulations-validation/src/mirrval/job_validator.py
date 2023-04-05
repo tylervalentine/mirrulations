@@ -45,13 +45,14 @@ def write_unfound_jobs(res, unfound_jobs):
         if not check_for_missing_jobs(res):
             unfound_jobs[f"missing_{res['type']}"].append(
                         res['links']['self'])
-    with open("/data/unfound_jobs.json", "w+",
-              encoding="utf-8") as outfile:
+    with open("/data/unfound_jobs.json", "w+", 
+               encoding="utf-8") as outfile:
         json.dump(unfound_jobs, outfile, indent=4)
+
 
 def check_for_missing_jobs(res):
     with open("/data/unfound_jobs.json", "r",
-              encoding="utf-8") as outfile:
+            encoding="utf-8") as outfile:
             lines = outfile.readlines()
             for line in lines:
                 if res['links']['self'] in line:
