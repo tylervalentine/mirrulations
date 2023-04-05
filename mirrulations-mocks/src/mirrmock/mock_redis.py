@@ -11,13 +11,13 @@ class BusyRedis():
 
 
 class ReadyRedis():
-    def __init__(self):
-        self.dict = {}
-
     """
     Stub for testing in place of an active Redis server,
     ping replies with true
     """
+    def __init__(self):
+        self.dict = {}
+
     def ping(self):
         return True
 

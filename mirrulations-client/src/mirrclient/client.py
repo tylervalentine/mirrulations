@@ -1,21 +1,16 @@
-# pylint: disable=too-many-locals
 import time
 import os
 import sys
-from json import dumps, loads
-from flask import jsonify
+from json import dumps
 import requests
 import redis
 from dotenv import load_dotenv
-import redis
-from mirrcore.redis_check import is_redis_available
+# from mirrcore.redis_check import is_redis_available
+from mirrcore.path_generator import PathGenerator
 from mirrcore.job_queue import JobQueue
 from mirrcore.job_queue_exceptions import JobQueueException
 from mirrclient.saver import Saver
 from mirrclient.exceptions import NoJobsAvailableException
-from mirrcore.job_queue_exceptions import JobQueueException
-from mirrcore.path_generator import PathGenerator
-from mirrcore.job_queue import JobQueue
 
 
 def is_environment_variables_present():
@@ -33,12 +28,12 @@ def is_environment_variables_present():
             and os.getenv('ID') is not None)
 
 
-def load_redis():
-    client = redis.Redis('redis')
-    while not is_redis_available(client):
-        print('Redis database is busy loading.')
-        time.sleep(30)
-    return client
+# def load_redis():
+#     client = redis.Redis('redis')
+#     while not is_redis_available(client):
+#         print('Redis database is busy loading.')
+#         time.sleep(30)
+#     return client
 
 
 class Client:
@@ -73,7 +68,6 @@ class Client:
         port = os.getenv('WORK_SERVER_PORT')
         self.url = f'http://{hostname}:{port}'
 
-
     def _can_connect_to_database(self):
         try:
             self.redis.ping()
@@ -81,6 +75,31 @@ class Client:
             return False
         return True
 
+    def _get_job_from_job_queue(self):
+        self._can_connect_to_database()
+        if self.job_queue.get_num_jobs() == 0:
+            job = {'error': 'No jobs available'}
+        else:
+            job = self.job_queue.get_job()
+        print("Job received from job queue")
+        return job
+
+    def _generate_job_dict(self, job):
+        return {'job_id': job['job_id'],
+                'url': job['url'],
+                'job_type': job.get('job_type', 'other'),
+                'reg_id': job.get('reg_id', 'other_reg_id'),
+                'agency': job.get('agency', 'other_agency')}
+
+    def _set_redis_values(self, job):
+        self.redis.hset('jobs_in_progress', job['job_id'], job['url'])
+        self.redis.hset('client_jobs', job['job_id'], self.client_id)
+
+    def _remove_plural_from_job_type(self, job):
+        split_url = str(job['url']).split('/')
+        job_type = split_url[-2][:-1]  # Removes plural from job type
+        type_id = split_url[-1]
+        return f'{job_type}/{type_id}'
 
     def get_job(self):
         """
@@ -92,49 +111,28 @@ class Client:
         :raises: NoJobsAvailableException
             If no job is available from the work server
         """
-        if not self._can_connect_to_database():
-            # TODO: raise some custom error
-            pass
 
-        # response = requests.get(f'{self.url}/get_job',
-        #                         params={'client_id': self.client_id},
-        #                         timeout=10)
-        
         print("Attempting to get job")
         try:
-            self._check_for_database()
-            if self.job_queue.get_num_jobs() == 0:
-                job = {'error': 'No jobs available'}
-            job = self.job_queue.get_job()
-            print(type(job))
-            print("Job received from job queue")
+            job = self._get_job_from_job_queue
         except JobQueueException:
             job = {'error': 'No jobs available'}
         except redis.exceptions.ConnectionError:
-            job = {'error': 'Could nto connect to redis server.'}
+            job = {'error': 'Could not connect to redis server.'}
             print("Redis appears to be down.")
-
-
-        self.redis.hset('jobs_in_progress', job['job_id'], job['url'])
-        self.redis.hset('client_jobs', job['job_id'], self.client_id)
+        self. _set_redis_values(job)
 
         self.job_queue.decrement_count(job.get('job_type', 'other'))
-        print(f'Job received: {job.get("job_type", "other")} for client: ', self.client_id)
+        print(f'Job received: {job.get("job_type", "other")} for client: ',
+              self.client_id)
 
         link = 'https://www.regulations.gov/'
         if 'error' in job:
             raise NoJobsAvailableException()
-        job = {'job_id': job['job_id'],
-                'url': job['url'],
-                'job_type': job.get('job_type', 'other'),
-                'reg_id': job.get('reg_id', 'other_reg_id'),
-                'agency': job.get('agency', 'other_agency')}
-        split_url = str(job['url']).split('/')
-        job_type = split_url[-2][:-1]  # Removes plural from job type
-        type_id = split_url[-1]
+        job = self._generate_job_dict(job)
 
-        link = 'https://www.regulations.gov/'
-        print(f'Regulations.gov link: {link}{job_type}/{type_id}')
+        print(f'Regulations.gov link: {link}' +
+              f'{self._remove_plural_from_job_type}')
         print(f'API URL: {job["url"]}')
 
         return job
@@ -170,7 +168,7 @@ class Client:
             data['directory'] = self.path_generator.get_path(job_result)
 
         self._put_results(data)
-        #self.put_results_to_mongo(data)
+        # self.put_results_to_mongo(data)
         comment_has_attachment = self.does_comment_have_attachment(job_result)
 
         if data["job_type"] == "comments" and comment_has_attachment:
@@ -239,12 +237,12 @@ class Client:
         comment_id_str = f"Comment - {comment_json['data']['id']}"
         print(f"Found {len(path_list)} attachment(s) for {comment_id_str}")
         for included in comment_json["included"]:
-            attributes = included["attributes"]
-            if (attributes["fileFormats"] and
-                    attributes["fileFormats"] not in ["null", None]):
+            if (included["attributes"]["fileFormats"] and
+                    included["attributes"]["fileFormats"]
+                    not in ["null", None]):
                 for attachment in included['attributes']['fileFormats']:
-                    url = attachment['fileUrl']
-                    self.download_single_attachment(url, path_list[counter],
+                    self.download_single_attachment(attachment['fileUrl'],
+                                                    path_list[counter],
                                                     data)
                     print(f"Downloaded {counter+1}/{len(path_list)} "
                           f"attachment(s) for {comment_id_str}")
@@ -278,7 +276,7 @@ class Client:
         print(f"SAVED attachment - {url} to path: ", path)
         filename = path.split('/')[-1]
         data = self.add_attachment_information_to_data(data, path, filename)
-        #self.put_results_to_mongo(data)
+        # self.put_results_to_mongo(data)
 
     def add_attachment_information_to_data(self, data, path, filename):
         data['job_type'] = 'attachments'
