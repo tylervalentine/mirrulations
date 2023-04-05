@@ -9,6 +9,8 @@ def create_mock_mirrulations_bucket():
     conn = boto3.resource("s3", region_name="us-east-1")
     conn.create_bucket(Bucket="test-mirrulations1")
     return conn
+
+
 @fixture(autouse=True)
 def mock_env():
     os.environ['AWS_ACCESS_KEY'] = 'test_key'

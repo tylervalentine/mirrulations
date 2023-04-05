@@ -9,10 +9,12 @@ class DiskSaver():
             os.makedirs(f'/data{path}')
         except FileExistsError:
             print(f'Directory already exists in root: /data{path}')
+
     def save_to_disk(self, path, data):
         with open(path, 'x', encoding='utf8') as file:
             print('Writing results to disk')
             file.write(dumps(data))
+
     def save_json(self, path, data):
         """
         writes the results to disk. used by docket document and comment jobs
@@ -27,6 +29,7 @@ class DiskSaver():
             self.save_to_disk(path, data)
         else:
             self.check_for_duplicates(path, data, 1)
+
     def save_duplicate_json(self, path, data, i):
         path_without_file_type = path.strip(".json")
         path = f'{path_without_file_type}({i}).json'
@@ -46,6 +49,7 @@ class DiskSaver():
         with open(path, encoding='utf8') as file:
             saved_data = load(file)
         return saved_data
+
     def is_duplicate(self, existing, new):
         if existing == new:
             print('Data is a duplicate, skipping this download')

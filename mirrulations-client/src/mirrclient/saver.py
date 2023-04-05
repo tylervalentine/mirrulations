@@ -8,7 +8,7 @@ class Saver:
     save_json(path = string, data = response)
         Calls each Saver Objects save_json method
         and saves the file in the appropriate way
-    
+
     save_binary(path = string, data, = response.content)
     """
     def __init__(self, savers=None) -> None:

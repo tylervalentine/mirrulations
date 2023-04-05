@@ -22,6 +22,7 @@ class S3Saver():
                 aws_access_key_id=self.access_key,
                 aws_secret_access_key=self.secret_access_key
                 )
+
     def get_credentials(self):
         load_dotenv()
         self.access_key = os.getenv("AWS_ACCESS_KEY")
