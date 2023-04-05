@@ -63,7 +63,12 @@ class Extractor:
         except (RuntimeError, pikepdf.PdfError) as err:
             print(f"FAILURE: failed to save {attachment_path}\n{err}")
             return
-        text = pdfminer.high_level.extract_text(pdf_bytes)
+        try:
+            text = pdfminer.high_level.extract_text(pdf_bytes)
+        except Exception as err:
+            print(f"FAILURE: failed to extract \
+                  text from {attachment_path}\n{err}")
+            return
         # Make dirs if they do not already exist
         os.makedirs(save_path[:save_path.rfind('/')], exist_ok=True)
         # Save the extracted text to a file
