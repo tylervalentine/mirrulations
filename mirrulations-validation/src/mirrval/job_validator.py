@@ -4,9 +4,8 @@ import time
 from collections import Counter
 import json
 from dotenv import load_dotenv
-import redis
 from mirrgen.search_iterator import SearchIterator
-from mirrcore.redis_check import is_redis_available
+# from mirrcore.redis_check import load_redis
 from mirrcore.regulations_api import RegulationsAPI
 from mirrcore.data_storage import DataStorage
 
@@ -45,13 +44,13 @@ def write_unfound_jobs(res, unfound_jobs):
         if not check_for_missing_jobs(res):
             unfound_jobs[f"missing_{res['type']}"].append(
                         res['links']['self'])
-    with open("/data/validator/unfound_jobs.json", "w+",
+    with open("/data/unfound_jobs.json", "w+",
               encoding="utf-8") as outfile:
         json.dump(unfound_jobs, outfile, indent=4)
 
 
 def check_for_missing_jobs(res):
-    with open("/data/validator/unfound_jobs.json", "r",
+    with open("/data/unfound_jobs.json", "r",
               encoding="utf-8") as outfile:
         lines = outfile.readlines()
         for line in lines:
@@ -61,12 +60,10 @@ def check_for_missing_jobs(res):
 
 
 def generate_work(collection=None):
+    # commented out for static analysis reasons since
+    # the variable 'database' isn't being used.
+    # database = load_redis()
 
-    database = redis.Redis('redis')
-    # Sleep for 30 seconds to give time to load
-    while not is_redis_available(database):
-        print("Redis database is busy loading")
-        time.sleep(30)
     # Get API key
     load_dotenv()
     api = RegulationsAPI(os.getenv("API_KEY"))
