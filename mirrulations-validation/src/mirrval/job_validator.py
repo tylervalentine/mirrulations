@@ -4,9 +4,8 @@ import time
 from collections import Counter
 import json
 from dotenv import load_dotenv
-import redis
 from mirrgen.search_iterator import SearchIterator
-from mirrcore.redis_check import is_redis_available
+# from mirrcore.redis_check import load_redis
 from mirrcore.regulations_api import RegulationsAPI
 from mirrcore.data_storage import DataStorage
 
@@ -61,12 +60,10 @@ def check_for_missing_jobs(res):
 
 
 def generate_work(collection=None):
+    # commented out for static analysis reasons since
+    # the variable 'database' isn't being used.
+    # database = load_redis()
 
-    database = redis.Redis('redis')
-    # Sleep for 30 seconds to give time to load
-    while not is_redis_available(database):
-        print("Redis database is busy loading")
-        time.sleep(30)
     # Get API key
     load_dotenv()
     api = RegulationsAPI(os.getenv("API_KEY"))
