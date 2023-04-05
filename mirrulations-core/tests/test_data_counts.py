@@ -38,7 +38,7 @@ class TestDataCounts(unittest.TestCase):
         response.json.return_value = {"meta": {"totalElements": 123}}
 
         # Call the function we want to test
-        total_elements = DataCounts(
+        total_elements = DataCounts(  # pylint: disable=W0212
             api_key="test")._DataCounts__get_total_elements(response)
 
         # Make assertions about the function's behavior
