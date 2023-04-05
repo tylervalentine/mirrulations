@@ -5,7 +5,7 @@ from json import dumps
 import requests
 import redis
 from dotenv import load_dotenv
-# from mirrcore.redis_check import is_redis_available
+from mirrcore.redis_check import load_redis
 from mirrcore.path_generator import PathGenerator
 from mirrcore.job_queue import JobQueue
 from mirrcore.job_queue_exceptions import JobQueueException
@@ -26,14 +26,6 @@ def is_environment_variables_present():
             and os.getenv('WORK_SERVER_PORT') is not None
             and os.getenv('API_KEY') is not None
             and os.getenv('ID') is not None)
-
-
-# def load_redis():
-#     client = redis.Redis('redis')
-#     while not is_redis_available(client):
-#         print('Redis database is busy loading.')
-#         time.sleep(30)
-#     return client
 
 
 class Client:
@@ -389,14 +381,8 @@ if __name__ == '__main__':
         print('Need client environment variables')
         sys.exit(1)
 
-    try:
-        r = redis.Redis('redis')
-        r.keys('*')
-    except redis.exceptions.ConnectionError:
-        print('There is no Redis database to connect to.')
-        sys.exit(1)
-
-    client = Client(r)
+    redis = load_redis()
+    client = Client(redis)
 
     while True:
         try:
