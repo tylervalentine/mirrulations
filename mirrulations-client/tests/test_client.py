@@ -637,7 +637,7 @@ def test_get_output_path_error(path_generator):
 #     captured = capsys.readouterr()
 #     print_data = [
 #         'Processing job from work server\n',
-#         'Regulations.gov link: https://www.regulations.gov/document/type_id\n',
+#      'Regulations.gov link: https://www.regulations.gov/document/type_id\n',
 #         'API URL: https://api.regulations.gov/v4/documents/type_id\n',
 #         'Performing job\n',
 #         'Sending Job 1 to Work Server\n',
@@ -646,6 +646,6 @@ def test_get_output_path_error(path_generator):
 #             'content.htm to path:  '
 #             '/NOAA/NOAA-0001-0001/text-NOAA-0001-0001/documents/'
 #             '1_content.htm\n'),
-#         'SUCCESS: https://api.regulations.gov/v4/documents/type_id complete\n'
+#      'SUCCESS: https://api.regulations.gov/v4/documents/type_id complete\n'
 #     ]
 #     assert captured.out == "".join(print_data)
