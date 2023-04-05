@@ -6,6 +6,8 @@ from json import dumps, loads
 import requests
 from dotenv import load_dotenv
 from mirrclient.saver import Saver
+from mirrclient.disk_saver import DiskSaver
+from mirrclient.s3_saver import S3Saver
 from mirrcore.path_generator import PathGenerator
 
 
@@ -61,7 +63,8 @@ class Client:
         self.api_key = os.getenv('API_KEY')
         self.client_id = os.getenv('ID')
         self.path_generator = PathGenerator()
-        self.saver = Saver()
+        self.saver = Saver(savers=[DiskSaver(),
+                                   S3Saver(bucket_name="mirrulations")])
 
         hostname = os.getenv('WORK_SERVER_HOSTNAME')
         port = os.getenv('WORK_SERVER_PORT')
@@ -156,9 +159,9 @@ class Client:
             print(f"{data['job_id']}: Errors found in results")
             return
         dir_, filename = data['directory'].rsplit('/', 1)
-        self.saver.make_path(dir_)
+        # self.saver.make_path(dir_)
         self.saver.save_json(f'/data{dir_}/{filename}', data)
-        print(f"{data['job_id']}: Results written to disk")
+        print(f"{data['job_id']}: Results written to disk and S3")
 
     def perform_job(self, job_url):
         """
@@ -239,8 +242,7 @@ class Client:
         '''
         response = requests.get(url, timeout=10)
         dir_, filename = path.rsplit('/', 1)
-        self.saver.make_path(dir_)
-        self.saver.save_attachment(f'/data{dir_}/{filename}', response.content)
+        self.saver.save_binary(f'/data{dir_}/{filename}', response.content)
         print(f"SAVED attachment - {url} to path: ", path)
         filename = path.split('/')[-1]
         data = self.add_attachment_information_to_data(data, path, filename)
@@ -284,9 +286,8 @@ class Client:
         if url is not None:
             response = requests.get(url, timeout=10)
             dir_, filename = path.rsplit('/', 1)
-            self.saver.make_path(dir_)
-            self.saver.save_attachment(f'/data{dir_}/{filename}',
-                                       response.content)
+            self.saver.save_binary(f'/data{dir_}/{filename}',
+                                   response.content)
             print(f"SAVED document HTM - {url} to path: ", path)
 
     def _get_document_htm(self, json):
