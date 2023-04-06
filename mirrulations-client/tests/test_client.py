@@ -7,6 +7,8 @@ import requests_mock
 from mirrclient.client import NoJobsAvailableException, Client
 from mirrclient.client import is_environment_variables_present
 from requests.exceptions import Timeout, ReadTimeout
+from mirrmock.mock_redis import MockRedisWithStorage
+from mirrmock.mock_job_statistics import MockJobStatistics
 
 BASE_URL = 'http://work_server:8080'
 
@@ -87,7 +89,7 @@ def test_client_has_no_id():
 
 
 def test_client_gets_job(mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     link = 'https://api.regulations.gov/v4/type/type_id'
     with mock_requests:
         mock_requests.get(
@@ -105,7 +107,7 @@ def test_client_gets_job(mock_requests):
 
 
 def test_client_throws_exception_when_no_jobs(mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     with mock_requests:
         mock_requests.get(
             'http://work_server:8080/get_job?client_id=-1',
@@ -118,7 +120,7 @@ def test_client_throws_exception_when_no_jobs(mock_requests):
 
 
 def test_api_call_has_api_key(mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 'KEY12345'
     with mock_requests:
         mock_requests.get(
@@ -132,7 +134,7 @@ def test_api_call_has_api_key(mock_requests):
 
 
 def test_client_performs_job(mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -165,7 +167,7 @@ def test_client_performs_job(mock_requests):
 
 
 def test_client_performs_job_with_new_url(mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -198,7 +200,7 @@ def test_client_performs_job_with_new_url(mock_requests):
 
 
 def test_client_returns_403_error_to_server(mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -241,7 +243,7 @@ def test_get_job_timesout(mock_requests):
             exc=Timeout)
 
         with pytest.raises(Timeout):
-            Client().get_job()
+            Client(MockRedisWithStorage()).get_job()
 
 
 def test_perform_job_timesout(mock_requests):
@@ -251,11 +253,11 @@ def test_perform_job_timesout(mock_requests):
             fake_url,
             exc=ReadTimeout)
 
-        assert Client().perform_job(fake_url) == {"error": "Read Timeout"}
+        assert Client(MockRedisWithStorage()).perform_job(fake_url) == {"error": "Read Timeout"}
 
 
 def test_client_returns_400_error_to_server(mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -290,7 +292,7 @@ def test_client_returns_400_error_to_server(mock_requests):
 
 
 def test_client_returns_500_error_to_server(mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -327,7 +329,7 @@ def test_client_returns_500_error_to_server(mock_requests):
 
 
 def test_client_handles_empty_json(mock_requests, path_generator):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -377,7 +379,7 @@ def test_handles_nonetype_error(mock_requests, path_generator):
     """
     Test for handling of the NoneType Error caused by null fileformats
     """
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -421,7 +423,7 @@ def test_handles_nonetype_error(mock_requests, path_generator):
 
 
 def test_success_client_logging(capsys, mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -457,7 +459,7 @@ def test_success_client_logging(capsys, mock_requests):
 
 
 def test_failure_job_results(capsys, mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -499,7 +501,7 @@ def test_failure_job_results(capsys, mock_requests):
 
 # Client Attachments Tests
 def test_client_downloads_attachment_results(mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -557,7 +559,7 @@ def test_handles_empty_attachment_list(mock_requests):
                     }
     }
     """
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -600,7 +602,7 @@ def test_handles_empty_attachment_list(mock_requests):
 
 
 def test_success_attachment_logging(capsys, mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -659,7 +661,7 @@ def test_success_attachment_logging(capsys, mock_requests):
 
 
 def test_success_no_attachment_logging(capsys, mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -695,7 +697,7 @@ def test_success_no_attachment_logging(capsys, mock_requests):
 
 
 def test_failure_attachment_job_results(capsys, mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -757,18 +759,18 @@ def test_add_attachment_information_to_data():
     data = {}
     path = '/USTR/docket.json'
     filename = "docket.json"
-    client = Client()
+    client = Client(MockRedisWithStorage())
     data = client.add_attachment_information_to_data(data, path, filename)
     assert data['job_type'] == 'attachments'
     assert data['attachment_path'] == '/data/data/USTR/docket.json'
     assert data['attachment_filename'] == 'docket.json'
 
 
-def test_download_htm(capsys, mocker, mock_requests):
+def test_download_htm(capsys, mocker, mock_requests):    
     mocker.patch('mirrclient.saver.Saver.make_path', return_value=None)
     mocker.patch('mirrclient.saver.Saver.save_attachment', return_value=None)
 
-    client = Client()
+    client = Client(MockRedisWithStorage())
 
     pdf = "https://downloads.regulations.gov/USTR/content.pdf"
     htm = "https://downloads.regulations.gov/USTR/content.htm"
@@ -804,7 +806,7 @@ def test_download_htm(capsys, mocker, mock_requests):
 def test_downloading_htm_send_job(capsys, mock_requests, mocker):
     mocker.patch('mirrclient.saver.Saver.make_path', return_value=None)
     mocker.patch('mirrclient.saver.Saver.save_attachment', return_value=None)
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:

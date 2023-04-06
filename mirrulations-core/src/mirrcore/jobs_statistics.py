@@ -1,5 +1,3 @@
-import redis
-
 DOCKETS_DONE = "num_dockets_done"
 DOCUMENTS_DONE = "num_documents_done"
 COMMENTS_DONE = "num_comments_done"
@@ -8,9 +6,8 @@ ATTACHMENTS_DONE = 'num_attachments_done'
 
 class JobStatistics:
 
-    def __init__(self):
-        self.url = "https://api.regulations.gov/v4"
-        self.cache = redis.Redis('redis')
+    def __init__(self, cache):
+        self.cache = cache
 
         self._check_keys_exist()
 
