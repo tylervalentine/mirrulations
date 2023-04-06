@@ -19,11 +19,11 @@ import docker
 
 
 class Dashboard:
-    def __init__(self, job_queue, docker_server):
+    def __init__(self, job_queue, docker_server, cache):
         self.app = Flask(__name__)
         self.job_queue = job_queue
         self.docker = docker_server
-        self.cache = JobStatistics()
+        self.cache = JobStatistics(cache)
         CORS(self.app, resources={r'/data': {'origins': '*'}})
         CORS(self.app, resources={r'/devdata': {'origins': '*'}})
 
@@ -53,8 +53,8 @@ def get_container_name(container_name):
     return '_'.join(long_name_lst)
 
 
-def create_server(job_queue, docker_server):
-    dashboard = Dashboard(job_queue, docker_server)
+def create_server(job_queue, docker_server, cache):
+    dashboard = Dashboard(job_queue, docker_server, cache)
 
     @dashboard.app.route('/', methods=['GET'])
     def _index():
@@ -105,8 +105,10 @@ def create_server(job_queue, docker_server):
 if __name__ == '__main__':
     load_dotenv()
     mongo_host = os.getenv('MONGO_HOSTNAME')
-    the_job_queue = JobQueue(Redis(os.getenv('REDIS_HOSTNAME')))
+    redis = Redis(os.getenv('REDIS_HOSTNAME'))
+    the_job_queue = JobQueue(redis)
     server = create_server(the_job_queue,
                            docker.from_env(),
+                           redis
                            )
     server.app.run(port=5000)

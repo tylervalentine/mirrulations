@@ -23,14 +23,14 @@ class JobStatistics:
 
     def get_jobs_done(self):
         dockets = int(self.cache.get(DOCKETS_DONE))
-        documnets = int(self.cache.get(DOCUMENTS_DONE))
+        documents = int(self.cache.get(DOCUMENTS_DONE))
         comments = int(self.cache.get(COMMENTS_DONE))
         attachments = int(self.cache.get(ATTACHMENTS_DONE))
 
         return {
-            'num_jobs_done': dockets + documnets + comments + attachments,
+            'num_jobs_done': dockets + documents + comments + attachments,
             DOCKETS_DONE: dockets,
-            DOCUMENTS_DONE: documnets,
+            DOCUMENTS_DONE: documents,
             COMMENTS_DONE: comments,
             ATTACHMENTS_DONE: attachments
         }
