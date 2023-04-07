@@ -65,7 +65,6 @@ class Client:
         self.path_generator = PathGenerator()
         self.saver = Saver(savers=[DiskSaver(),
                                    S3Saver(bucket_name="mirrulations")])
-
         hostname = os.getenv('WORK_SERVER_HOSTNAME')
         port = os.getenv('WORK_SERVER_PORT')
         self.url = f'http://{hostname}:{port}'
@@ -162,6 +161,7 @@ class Client:
         # self.saver.make_path(dir_)
         self.saver.save_json(f'/data{dir_}/{filename}', data)
         print(f"{data['job_id']}: Results written to disk and S3")
+
 
     def perform_job(self, job_url):
         """

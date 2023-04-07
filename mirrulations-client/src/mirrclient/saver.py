@@ -1,3 +1,4 @@
+
 class Saver:
     """
     A class which encapsulates the saving for the Client
@@ -49,3 +50,4 @@ class Saver:
         """
         for saver in self.savers:
             saver.save_binary(path, binary)
+
