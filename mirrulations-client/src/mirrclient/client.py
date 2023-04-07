@@ -129,6 +129,38 @@ class Client:
 
         return job
 
+    def process_job_results(self, job, job_result):
+        # TODO new function for handling errors
+        # This function is not complete yet, but should replace send_job
+        data = {
+            'job_type': job['job_type'],
+            'job_id': job['job_id'],
+            'results': job_result,
+            'reg_id': job['reg_id'],
+            'agency': job['agency']
+        }
+        print(f'Sending Job {job["job_id"]} to Work Server')
+        if 'error' in job_result:
+            # Handles errors in job_results
+            result = self.redis.hget('jobs_in_progress', job.get('job_id'))
+            self.redis.hset('invalid_jobs', job.get('job_id'), result)
+            
+        data['directory'] = self.path_generator.get_path(job_result)
+
+        self._put_results(data)
+        # We should increment the redis counter for the type downloaded here 
+
+        comment_has_attachment = self.does_comment_have_attachment(job_result)
+        json_has_file_format = self._document_has_file_formats(job_result)
+
+        if data["job_type"] == "comments" and comment_has_attachment:
+            self.download_all_attachments_from_comment(data, job_result)
+        if data["job_type"] == "documents" and json_has_file_format:
+            document_htm = self._get_document_htm(job_result)
+            if document_htm is not None:
+                self.download_htm(job_result)
+        
+
     def send_job(self, job, job_result):
         """
         Returns the job results to the workserver
@@ -150,8 +182,6 @@ class Client:
             'job_type': job['job_type'],
             'job_id': job['job_id'],
             'results': job_result,
-            # Updated to get reg_id and agency from regulations json
-            # - Jack W. 3/14
             'reg_id': job['reg_id'],
             'agency': job['agency']
         }
@@ -161,6 +191,8 @@ class Client:
 
         self._put_results(data)
         # self.put_results_to_mongo(data)
+        # Instead we should increment the redis counter for things downloaded
+
         comment_has_attachment = self.does_comment_have_attachment(job_result)
         json_has_file_format = self._document_has_file_formats(job_result)
 
@@ -170,13 +202,6 @@ class Client:
             document_htm = self._get_document_htm(job_result)
             if document_htm is not None:
                 self.download_htm(job_result)
-        # For now, still need to send original put request for Mongo
-        # requests.put(
-        #     f'{self.url}/_put_results',
-        #     json=dumps(data['job_id']),
-        #     params={'client_id': self.client_id},
-        #     timeout=10
-        # )
 
     def _put_results(self, data):
         """
@@ -281,6 +306,7 @@ class Client:
         filename = path.split('/')[-1]
         data = self.add_attachment_information_to_data(data, path, filename)
         # self.put_results_to_mongo(data)
+        # Instead we should increment the redis counter for attachments downloaded
 
     def add_attachment_information_to_data(self, data, path, filename):
         data['job_type'] = 'attachments'
