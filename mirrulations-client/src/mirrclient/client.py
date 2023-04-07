@@ -65,11 +65,8 @@ class Client:
         self.client_id = os.getenv('ID')
         self.path_generator = PathGenerator()
         self.saver = Saver()
-<<<<<<< HEAD
         self.cache = JobStatistics(cache_server)
-=======
         self.bucket_name = "mirrulations"
->>>>>>> 3d98537e52fcb8dd56a8a3c8c7949e357b28fe64
 
         hostname = os.getenv('WORK_SERVER_HOSTNAME')
         port = os.getenv('WORK_SERVER_PORT')
