@@ -162,7 +162,6 @@ class Client:
         self.saver.save_json(f'/data{dir_}/{filename}', data)
         print(f"{data['job_id']}: Results written to disk and S3")
 
-
     def perform_job(self, job_url):
         """
         Performs job via get_request function by giving it the job_url combined
@@ -243,7 +242,7 @@ class Client:
         response = requests.get(url, timeout=10)
         dir_, filename = path.rsplit('/', 1)
         self.saver.save_binary(f'/data{dir_}/{filename}', response.content)
-        print(f"SAVED attachment - {url} to path: ", path)
+        print(f"SAVED attachment - {url} to S3 and Disk - path: ", path)
         filename = path.split('/')[-1]
         data = self.add_attachment_information_to_data(data, path, filename)
         self.put_results_to_mongo(data)

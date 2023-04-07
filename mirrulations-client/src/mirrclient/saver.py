@@ -50,4 +50,3 @@ class Saver:
         """
         for saver in self.savers:
             saver.save_binary(path, binary)
-
