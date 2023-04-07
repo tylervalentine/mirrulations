@@ -8,7 +8,6 @@ from mirrclient.client import NoJobsAvailableException, Client
 from mirrclient.client import is_environment_variables_present
 from requests.exceptions import Timeout, ReadTimeout
 from mirrmock.mock_redis import MockRedisWithStorage
-from mirrmock.mock_job_statistics import MockJobStatistics
 
 BASE_URL = 'http://work_server:8080'
 
@@ -253,7 +252,8 @@ def test_perform_job_timesout(mock_requests):
             fake_url,
             exc=ReadTimeout)
 
-        assert Client(MockRedisWithStorage()).perform_job(fake_url) == {"error": "Read Timeout"}
+        assert Client(MockRedisWithStorage()).perform_job(fake_url) \
+            == {"error": "Read Timeout"}
 
 
 def test_client_returns_400_error_to_server(mock_requests):
@@ -766,7 +766,7 @@ def test_add_attachment_information_to_data():
     assert data['attachment_filename'] == 'docket.json'
 
 
-def test_download_htm(capsys, mocker, mock_requests):    
+def test_download_htm(capsys, mocker, mock_requests):
     mocker.patch('mirrclient.saver.Saver.make_path', return_value=None)
     mocker.patch('mirrclient.saver.Saver.save_attachment', return_value=None)
 
@@ -853,3 +853,37 @@ def test_downloading_htm_send_job(capsys, mock_requests, mocker):
         'SUCCESS: https://api.regulations.gov/v4/documents/type_id complete\n'
     ]
     assert captured.out == "".join(print_data)
+
+
+def test_downloading_docket(mock_requests):
+    client = Client(MockRedisWithStorage())
+    client.api_key = 1234
+
+    with mock_requests:
+        mock_requests.get(
+            'http://work_server:8080/get_job?client_id=-1',
+            json={'job_id': '1',
+                  'url': 'http://regulations.gov/job',
+                  'job_type': 'dockets',
+                  'reg_id': '1',
+                  'agency': 'foo'},
+            status_code=200
+        )
+        mock_requests.get(
+            'http://regulations.gov/job?api_key=1234',
+            json={
+                "data": {
+                    "id": "agencyID-001-0002",
+                    "type": "dockets"
+                },
+            },
+            status_code=200
+        )
+
+        mock_requests.put('http://work_server:8080/put_results', text='{}')
+        client.job_operation()
+        put_request = mock_requests.request_history[2]
+        json_data = json.loads(put_request.json())
+        assert json_data['job_type'] == "dockets"
+        results = json_data['results']['data']
+        assert results['type'] == 'dockets'
