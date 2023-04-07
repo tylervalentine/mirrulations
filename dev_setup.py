@@ -29,8 +29,8 @@ def write_files(api_key, env_path, total_clients, aws_access_key, aws_secret_acc
             file.write("WORK_SERVER_PORT=8080" + "\n")
             file.write("API_KEY={}".format(api_key) + "\n")
             file.write("ID={}".format(i) + "\n")
-            file.write("PYTHONUNBUFFERED=TRUE")
-            file.write(f"AWS_ACCESS_KEY={aws_access_key}")
+            file.write("PYTHONUNBUFFERED=TRUE\n")
+            file.write(f"AWS_ACCESS_KEY={aws_access_key}\n")
             file.write(f"AWS_SECRET_ACCESS_KEY={aws_secret_access_key}")
 
 
