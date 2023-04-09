@@ -39,7 +39,7 @@ class JobStatistics:
         if job_type == "dockets":
             self.cache.incr(DOCKETS_DONE)
         elif job_type == 'documents':
-            self.cache.incr(DOCKETS_DONE)
+            self.cache.incr(DOCUMENTS_DONE)
         elif job_type == 'comments':
             self.cache.incr(COMMENTS_DONE)
         elif job_type == 'attachment':

@@ -127,16 +127,15 @@ class Client:
         print(f'Sending Job {job["job_id"]} to Work Server')
         if 'error' not in job_result:
             data['directory'] = self.path_generator.get_path(job_result)
+            self.cache.increase_jobs_done(data['job_type'])
 
         self._put_results(data)
         self.put_results(data)
-        self.cache.increase_jobs_done(data['job_type'])
         comment_has_attachment = self.does_comment_have_attachment(job_result)
         json_has_file_format = self._document_has_file_formats(job_result)
 
         if data["job_type"] == "comments" and comment_has_attachment:
             self.download_all_attachments_from_comment(data, job_result)
-            self.cache.increase_jobs_done('attachment')
         if data["job_type"] == "documents" and json_has_file_format:
             document_htm = self._get_document_htm(job_result)
             if document_htm is not None:
@@ -225,6 +224,7 @@ class Client:
                     print(f"Downloaded {counter+1}/{len(path_list)} "
                           f"attachment(s) for {comment_id_str}")
                     counter += 1
+                    self.cache.increase_jobs_done('attachment')
 
     def download_single_attachment(self, url, path, data):
         '''

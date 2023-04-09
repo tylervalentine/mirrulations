@@ -156,7 +156,7 @@ def test_client_performs_job(mock_requests):
         )
         mock_requests.put('http://work_server:8080/put_results', text='{}')
         client.job_operation()
-
+        assert client.cache.get_jobs_done()['num_documents_done'] == 1
         put_request = mock_requests.request_history[2]
         json_data = json.loads(put_request.json())
         saved_data = json_data['results']['data']
@@ -485,6 +485,11 @@ def test_failure_job_results(capsys, mock_requests):
         mock_requests.put('http://work_server:8080/put_results', text='{}')
         client.job_operation()
 
+        put_request = mock_requests.request_history[2]
+        json_data = json.loads(put_request.json())
+        assert json_data['results'] == {'error': 'foobar'}
+        assert client.cache.get_jobs_done()['num_documents_done'] == 0
+
         print_data = {
             'Processing job from work server\n'
             'Regulations.gov link: https://www.regulations.gov//url.com\n'
@@ -645,6 +650,9 @@ def test_success_attachment_logging(capsys, mock_requests):
         mock_requests.put('http://work_server:8080/put_results', text='{}')
         client.job_operation()
 
+        assert client.cache.get_jobs_done()['num_comments_done'] == 1
+        assert client.cache.get_jobs_done()['num_attachments_done'] == 1
+
         print_data = {
             'Processing job from work server\n'
             'Regulations.gov link: https://www.regulations.gov//url.com\n'
@@ -753,6 +761,56 @@ def test_failure_attachment_job_results(capsys, mock_requests):
 
         captured = capsys.readouterr()
         assert captured.out == "".join(print_data)
+
+
+def test_two_attachments_in_comment(mock_requests):
+    client = Client(MockRedisWithStorage())
+    client.api_key = 1234
+
+    with mock_requests:
+        mock_requests.get(
+            'http://work_server:8080/get_job?client_id=-1',
+            json={'job_id': '1',
+                  'url': 'http://url.com',
+                  'job_type': 'comments',
+                  'reg_id': '1',
+                  'agency': 'foo'},
+            status_code=200
+        )
+        mock_requests.get(
+            'http://url.com?api_key=1234',
+            json={
+                "data": {
+                    "id": "agencyID-001-0002",
+                    "type": "comments",
+                    "attributes": {
+                        "agencyId": "agencyID",
+                        "docketId": "agencyID-001"
+                    }
+                },
+                "included": [{
+                    "attributes": {
+                        "fileFormats": [{
+                            "fileUrl": "https://downloads.regulations.gov/1"
+                        }, {
+                            "fileUrl": "https://downloads.regulations.gov/2"
+                        }]
+                    }
+                }]
+            },
+            status_code=200
+        )
+
+        mock_requests.get(
+            "https://downloads.regulations.gov",
+            json={"data": 'foobar'},
+            status_code=200
+        )
+        mock_requests.put('http://work_server:8080/put_results', text='{}')
+        client.job_operation()
+
+        assert client.cache.get_jobs_done()['num_comments_done'] == 1
+        assert client.cache.get_jobs_done()['num_attachments_done'] == 2
 
 
 def test_add_attachment_information_to_data():
@@ -882,6 +940,7 @@ def test_downloading_docket(mock_requests):
 
         mock_requests.put('http://work_server:8080/put_results', text='{}')
         client.job_operation()
+        assert client.cache.get_jobs_done()['num_dockets_done'] == 1
         put_request = mock_requests.request_history[2]
         json_data = json.loads(put_request.json())
         assert json_data['job_type'] == "dockets"
