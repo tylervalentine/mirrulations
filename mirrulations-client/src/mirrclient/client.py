@@ -151,7 +151,7 @@ class Client:
         # We should increment the redis counter for the type downloaded here
 
         comment_has_attachment = self.does_comment_have_attachment(job_result)
-        json_has_file_format = self._document_has_file_formats(job_result)
+        json_has_file_format = self.document_has_file_formats(job_result)
 
         if data["job_type"] == "comments" and comment_has_attachment:
             self.download_all_attachments_from_comment(data, job_result)
@@ -193,7 +193,7 @@ class Client:
         # Instead we should increment the redis counter for things downloaded
 
         comment_has_attachment = self.does_comment_have_attachment(job_result)
-        json_has_file_format = self._document_has_file_formats(job_result)
+        json_has_file_format = self.document_has_file_formats(job_result)
 
         if data["job_type"] == "comments" and comment_has_attachment:
             self.download_all_attachments_from_comment(data, job_result)
@@ -314,10 +314,10 @@ class Client:
         data['attachment_filename'] = filename
         return data
 
-    def put_results_to_mongo(self, data):
-        requests.put(f'{self.url}/put_results', json=dumps(data),
-                     params={'client_id': self.client_id},
-                     timeout=10)
+    # def put_results_to_mongo(self, data):
+    #     requests.put(f'{self.url}/put_results', json=dumps(data),
+    #                  params={'client_id': self.client_id},
+    #                  timeout=10)
 
     def does_comment_have_attachment(self, comment_json):
         """
