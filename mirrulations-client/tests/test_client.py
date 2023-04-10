@@ -92,7 +92,7 @@ def test_client_has_no_id():
 
 
 def test_generate_job_dict():
-    client = Client(ReadyRedis())
+    client = Client(ReadyRedis(), MockJobQueue())
     job = {
         'job_id': 1,
         'url': 'regulations.gov',
@@ -110,66 +110,65 @@ def test_generate_job_dict():
 
 
 def test_remove_plural_from_job():
-    client = Client(ReadyRedis())
+    client = Client(ReadyRedis(), MockJobQueue())
     job = {'url': 'regulations.gov/comments/DOD-0001-0001'}
     job_without_plural = client.remove_plural_from_job_type(job)
+
     assert job_without_plural == 'comment/DOD-0001-0001'
 
 
 def test_can_connect_to_database():
-    client = Client(ReadyRedis())
-    assert client.can_connect_to_database()
+    client = Client(ReadyRedis(), MockJobQueue())
+
+    assert client._can_connect_to_database()
 
 
 def test_cannot_connect_to_database():
-    client = Client(InactiveRedis())
-    assert not client.can_connect_to_database()
+    client = Client(InactiveRedis(), MockJobQueue())
+    assert not client._can_connect_to_database()
 
 
 def test_job_queue_is_empty():
-    client = Client(ReadyRedis())
+    client = Client(ReadyRedis(), MockJobQueue())
     client.job_queue = MockJobQueue()
     job = {'error': 'No jobs available'}
     assert client.get_job_from_job_queue() == job
 
 
 def test_get_job_from_job_queue_gets_job():
-    client = Client(ReadyRedis())
+    client = Client(ReadyRedis(), MockJobQueue())
     client.job_queue = MockJobQueue()
     client.job_queue.add_job({'job': 'This is a job'})
     assert client.get_job_from_job_queue() == {'job': 'This is a job'}
 
 
 def test_does_comment_have_attachment_has_attachment():
-    client = Client(ReadyRedis())
+    client = Client(ReadyRedis(), MockJobQueue())
     comment_json = {'included': [0]}
     assert client.does_comment_have_attachment(comment_json)
 
 
 def test_does_comment_have_attachment_does_have_attachment():
-    client = Client(ReadyRedis())
+    client = Client(ReadyRedis(), MockJobQueue())
     comment_json = {'included': []}
     assert not client.does_comment_have_attachment(comment_json)
 
 
 def test_client_can_get_a_job_from_job_queue():
-    client = Client(ReadyRedis())
     mock_queue = MockJobQueue()
-    client.job_queue = mock_queue
+    client = Client(ReadyRedis(), mock_queue)
     mock_queue.add_job({"job": 'This is a job'})
     assert client.get_job_from_job_queue() == {"job": 'This is a job'}
 
 
 def test_client_handles_no_jobs_existing():
-    client = Client(ReadyRedis())
-    mock_queue = MockJobQueue()
-    client.job_queue = mock_queue
+    client = Client(ReadyRedis(), MockJobQueue())
     assert client.get_job_from_job_queue() == {'error': 'No jobs available'}
 
 
 def test_client_hsets_redis_values():
     mock_redis = ReadyRedis()
-    client = Client(mock_redis)
+    client = Client(mock_redis, MockJobQueue())
     mock_redis.set('jobs_in_progress', ['foo', 'var'])
     mock_redis.set('client_jobs', ['foo', 'bar'])
     job = {'job_id': 1,
@@ -180,31 +179,31 @@ def test_client_hsets_redis_values():
 
 
 def test_document_has_file_formats_does_not_have_data():
-    client = Client(ReadyRedis())
+    client = Client(ReadyRedis(), MockJobQueue())
     json = {}
     assert not client.document_has_file_formats(json)
 
 
 def test_document_has_file_formats_does_not_have_attributes():
-    client = Client(ReadyRedis())
+    client = Client(ReadyRedis(), MockJobQueue())
     json = {'data': {}}
     assert not client.document_has_file_formats(json)
 
 
 def test_document_has_file_formats_does_not_have_file_formats():
-    client = Client(ReadyRedis())
+    client = Client(ReadyRedis(), MockJobQueue())
     json = {'data': {'attributes': []}}
     assert not client.document_has_file_formats(json)
 
 
 def test_document_has_file_formats_ha_required_fields():
-    client = Client(ReadyRedis())
+    client = Client(ReadyRedis(), MockJobQueue())
     json = {'data': {'attributes': {'fileFormats': {}}}}
     assert client.document_has_file_formats(json)
 
 
 def test_get_document_htm_returns_link():
-    client = Client(ReadyRedis())
+    client = Client(ReadyRedis(), MockJobQueue())
     json = {'data': {
                 'attributes': {
                     'fileFormats': [{
@@ -214,7 +213,7 @@ def test_get_document_htm_returns_link():
 
 
 def test_get_document_htm_returns_none():
-    client = Client(ReadyRedis())
+    client = Client(ReadyRedis(), MockJobQueue())
     json = {'data': {
                 'attributes': {
                     'fileFormats': [{

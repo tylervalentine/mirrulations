@@ -48,19 +48,19 @@ class Client:
         value from the workserver.
     """
 
-    def __init__(self, redis_server):
+    def __init__(self, redis_server, job_queue):
         self.api_key = os.getenv('API_KEY')
         self.client_id = os.getenv('ID')
         self.path_generator = PathGenerator()
         self.saver = Saver()
         self.redis = redis_server
-        self.job_queue = JobQueue(redis_server)
+        self.job_queue = job_queue
 
         hostname = os.getenv('WORK_SERVER_HOSTNAME')
         port = os.getenv('WORK_SERVER_PORT')
         self.url = f'http://{hostname}:{port}'
 
-    def can_connect_to_database(self):
+    def _can_connect_to_database(self):
         try:
             self.redis.ping()
         except redis.exceptions.ConnectionError:
@@ -68,7 +68,7 @@ class Client:
         return True
 
     def get_job_from_job_queue(self):
-        self.can_connect_to_database()
+        self._can_connect_to_database()
         if self.job_queue.get_num_jobs() == 0:
             job = {'error': 'No jobs available'}
         else:
@@ -407,7 +407,9 @@ if __name__ == '__main__':
         print('Need client environment variables')
         sys.exit(1)
 
-    client = Client(load_redis())
+    redis_client = load_redis()
+    job_queue = JobQueue(redis_client)
+    client = Client(redis_client, job_queue)
 
     while True:
         try:
