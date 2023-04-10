@@ -314,10 +314,10 @@ class Client:
         data['attachment_filename'] = filename
         return data
 
-    def put_results_to_mongo(self, data):
-        requests.put(f'{self.url}/put_results', json=dumps(data),
-                     params={'client_id': self.client_id},
-                     timeout=10)
+    # def put_results_to_mongo(self, data):
+    #     requests.put(f'{self.url}/put_results', json=dumps(data),
+    #                  params={'client_id': self.client_id},
+    #                  timeout=10)
 
     def does_comment_have_attachment(self, comment_json):
         """
