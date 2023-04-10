@@ -3,7 +3,8 @@ import requests
 
 class DataCounts:
     """
-    Class to get the number of dockets, documents, and comments entries on Regulations.gov
+    Class to get the number of dockets, documents,
+    and comments entries on Regulations.gov
     """
 
     def __init__(self, api_key):
