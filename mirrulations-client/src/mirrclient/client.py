@@ -1,7 +1,6 @@
 import time
 import os
 import sys
-from json import dumps
 import requests
 import redis
 from dotenv import load_dotenv
@@ -67,7 +66,7 @@ class Client:
             return False
         return True
 
-    def get_job_from_job_queue(self):
+    def _get_job_from_job_queue(self):
         self._can_connect_to_database()
         if self.job_queue.get_num_jobs() == 0:
             job = {'error': 'No jobs available'}
@@ -76,24 +75,24 @@ class Client:
         print("Job received from job queue")
         return job
 
-    def generate_job_dict(self, job):
+    def _generate_job_dict(self, job):
         return {'job_id': job['job_id'],
                 'url': job['url'],
                 'job_type': job.get('job_type', 'other'),
                 'reg_id': job.get('reg_id', 'other_reg_id'),
                 'agency': job.get('agency', 'other_agency')}
 
-    def set_redis_values(self, job):
+    def _set_redis_values(self, job):
         self.redis.hset('jobs_in_progress', job.get('job_id'), job.get('url'))
         self.redis.hset('client_jobs', job.get('job_id'), self.client_id)
 
-    def remove_plural_from_job_type(self, job):
+    def _remove_plural_from_job_type(self, job):
         split_url = str(job['url']).split('/')
         job_type = split_url[-2][:-1]  # Removes plural from job type
         type_id = split_url[-1]
         return f'{job_type}/{type_id}'
 
-    def get_job(self):
+    def _get_job(self):
         """
         Get a job from the work server.
         Converts API URL to regulations.gov URL and prints to logs.
@@ -106,13 +105,13 @@ class Client:
 
         print("Attempting to get job")
         try:
-            job = self.get_job_from_job_queue()
+            job = self._get_job_from_job_queue()
         except JobQueueException:
             job = {'error': 'No jobs available'}
         except redis.exceptions.ConnectionError:
             job = {'error': 'Could not connect to redis server.'}
             print("Redis appears to be down.")
-        self.set_redis_values(job)
+        self._set_redis_values(job)
 
         self.job_queue.decrement_count(job.get('job_type', 'other'))
         print(f'Job received: {job.get("job_type", "other")} for client: ',
@@ -121,15 +120,15 @@ class Client:
         link = 'https://www.regulations.gov/'
         if 'error' in job:
             raise NoJobsAvailableException()
-        job = self.generate_job_dict(job)
+        job = self._generate_job_dict(job)
 
         print(f'Regulations.gov link: {link}' +
-              f'{self.remove_plural_from_job_type(job)}')
+              f'{self._remove_plural_from_job_type(job)}')
         print(f'API URL: {job["url"]}')
 
         return job
 
-    def process_job_results(self, job, job_result):
+    def _process_job_results(self, job, job_result):
         # TODO new function for handling errors
         # This function is not complete yet, but should replace send_job
         data = {
@@ -150,17 +149,17 @@ class Client:
         self._put_results(data)
         # We should increment the redis counter for the type downloaded here
 
-        comment_has_attachment = self.does_comment_have_attachment(job_result)
-        json_has_file_format = self.document_has_file_formats(job_result)
+        comment_has_attachment = self._does_comment_have_attachment(job_result)
+        json_has_file_format = self._document_has_file_formats(job_result)
 
         if data["job_type"] == "comments" and comment_has_attachment:
-            self.download_all_attachments_from_comment(data, job_result)
+            self._download_all_attachments_from_comment(data, job_result)
         if data["job_type"] == "documents" and json_has_file_format:
             document_htm = self._get_document_htm(job_result)
             if document_htm is not None:
-                self.download_htm(job_result)
+                self._download_htm(job_result)
 
-    def send_job(self, job, job_result):
+    def _send_job(self, job, job_result):
         """
         Returns the job results to the workserver
         If there are any errors in the job_result, the data json is returned
@@ -192,15 +191,15 @@ class Client:
         # self.put_results_to_mongo(data)
         # Instead we should increment the redis counter for things downloaded
 
-        comment_has_attachment = self.does_comment_have_attachment(job_result)
-        json_has_file_format = self.document_has_file_formats(job_result)
+        comment_has_attachment = self._does_comment_have_attachment(job_result)
+        json_has_file_format = self._document_has_file_formats(job_result)
 
         if data["job_type"] == "comments" and comment_has_attachment:
-            self.download_all_attachments_from_comment(data, job_result)
+            self._download_all_attachments_from_comment(data, job_result)
         if data["job_type"] == "documents" and json_has_file_format:
             document_htm = self._get_document_htm(job_result)
             if document_htm is not None:
-                self.download_htm(job_result)
+                self._download_htm(job_result)
 
     def _put_results(self, data):
         """
@@ -220,7 +219,7 @@ class Client:
         self.saver.save_json(f'/data{dir_}/{filename}', data)
         print(f"{data['job_id']}: Results written to disk")
 
-    def perform_job(self, job_url):
+    def _perform_job(self, job_url):
         """
         Performs job via get_request function by giving it the job_url combined
         with the Client api_key for validation.
@@ -245,7 +244,7 @@ class Client:
         except requests.exceptions.ReadTimeout:
             return {"error": "Read Timeout"}
 
-    def download_all_attachments_from_comment(self, data, comment_json):
+    def _download_all_attachments_from_comment(self, data, comment_json):
         '''
         Downloads all attachments for a comment
 
@@ -269,14 +268,14 @@ class Client:
                     included["attributes"]["fileFormats"]
                     not in ["null", None]):
                 for attachment in included['attributes']['fileFormats']:
-                    self.download_single_attachment(attachment['fileUrl'],
-                                                    path_list[counter],
-                                                    data)
+                    self._download_single_attachment(attachment['fileUrl'],
+                                                     path_list[counter],
+                                                     data)
                     print(f"Downloaded {counter+1}/{len(path_list)} "
                           f"attachment(s) for {comment_id_str}")
                     counter += 1
 
-    def download_single_attachment(self, url, path, data):
+    def _download_single_attachment(self, url, path, data):
         '''
         Downloads a single attachment for a comment and
         writes it to its correct path
@@ -303,12 +302,12 @@ class Client:
         self.saver.save_attachment(f'/data{dir_}/{filename}', response.content)
         print(f"SAVED attachment - {url} to path: ", path)
         filename = path.split('/')[-1]
-        data = self.add_attachment_information_to_data(data, path, filename)
+        data = self._add_attachment_information_to_data(data, path, filename)
         # self.put_results_to_mongo(data)
         # Instead we should increment the redis counter for attachments
         # downloaded
 
-    def add_attachment_information_to_data(self, data, path, filename):
+    def _add_attachment_information_to_data(self, data, path, filename):
         data['job_type'] = 'attachments'
         data['attachment_path'] = f'/data/data{path}'
         data['attachment_filename'] = filename
@@ -319,7 +318,7 @@ class Client:
     #                  params={'client_id': self.client_id},
     #                  timeout=10)
 
-    def does_comment_have_attachment(self, comment_json):
+    def _does_comment_have_attachment(self, comment_json):
         """
         Validates whether a json for a comment has any
         attachments to be downloaded.
@@ -333,7 +332,7 @@ class Client:
             return True
         return False
 
-    def download_htm(self, json):
+    def _download_htm(self, json):
         """
         Attempts to download an HTM and saves it to its correct path
         Parameters
@@ -367,7 +366,7 @@ class Client:
                     return file_url
         return None
 
-    def document_has_file_formats(self, json):
+    def _document_has_file_formats(self, json):
         """
         Checks to see if the necessary attribute of fileFormats
         exists
@@ -392,9 +391,9 @@ class Client:
         the workserver.
         """
         print('Processing job from work server')
-        job = self.get_job()
-        result = self.perform_job(job['url'])
-        self.send_job(job, result)
+        job = self._get_job()
+        result = self._perform_job(job['url'])
+        self._send_job(job, result)
         if any(x in result for x in ('error', 'errors')):
             print(f'FAILURE: Error in {job["url"]}\nError: {result["error"]}')
         else:
@@ -408,8 +407,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     redis_client = load_redis()
-    job_queue = JobQueue(redis_client)
-    client = Client(redis_client, job_queue)
+    client = Client(redis_client, JobQueue(redis_client))
 
     while True:
         try:
