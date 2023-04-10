@@ -326,11 +326,11 @@ class Client:
         -------
         true if the necessary attribute exists
         """
-        if "data" not in json:
+        if "data" not in json or "attributes" not in \
+            json["data"] or "fileFormats" not in \
+                json["data"]["attributes"]:
             return False
-        if "attributes" not in json["data"]:
-            return False
-        if "fileFormats" not in json["data"]["attributes"]:
+        if json["data"]["attributes"]["fileFormats"] is None:
             return False
         return True
 
