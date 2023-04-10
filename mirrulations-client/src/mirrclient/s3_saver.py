@@ -90,7 +90,7 @@ class S3Saver():
         """
         Saves json file to Amazon S3 bucket
         Bucket Structure: /AGENCYID/path/to/item
-        
+
         Parameters
         -------
         path : str
