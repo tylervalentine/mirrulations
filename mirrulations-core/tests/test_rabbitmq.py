@@ -56,7 +56,7 @@ def test_rabbit_interactions(monkeypatch):
 
     monkeypatch.setattr(pika, 'BlockingConnection', PikaSpy)
 
-    rabbit = RabbitMQ()
+    rabbit = RabbitMQ('jobs_waiting_queue')
     rabbit.add('foo')
     rabbit.size()
     rabbit.get()
@@ -65,7 +65,7 @@ def test_rabbit_interactions(monkeypatch):
 def test_rabbit_error_interactions(monkeypatch):
     monkeypatch.setattr(pika, 'BlockingConnection', BadPikaSpy)
 
-    rabbitmq = RabbitMQ()
+    rabbitmq = RabbitMQ('jobs_waiting_queue')
 
     # Ensure that the exception is raised when add() is called
     with pytest.raises(JobQueueException):
