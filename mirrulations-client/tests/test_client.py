@@ -152,16 +152,75 @@ def test_does_comment_have_attachment_does_have_attachment():
     assert not client.does_comment_have_attachment(comment_json)
 
 
-# def test_client_gets_job():
-#     client = Client()
-#     link = 'https://api.regulations.gov/v4/type/type_id'
+def test_client_can_get_a_job_from_job_queue():
+    client = Client(ReadyRedis())
+    mock_queue = MockJobQueue()
+    client.job_queue = mock_queue
+    mock_queue.add_job({"job": 'This is a job'})
+    assert client.get_job_from_job_queue() == {"job": 'This is a job'}
 
-#     job_info = client.get_job()
-#     assert {'job_id': '1',
-#             'url': link,
-#             'job_type': 'attachments',
-#             'reg_id': '1',
-#             'agency': 'foo'} == job_info
+
+def test_client_handles_no_jobs_existing():
+    client = Client(ReadyRedis())
+    mock_queue = MockJobQueue()
+    client.job_queue = mock_queue
+    assert client.get_job_from_job_queue() == {'error': 'No jobs available'}
+
+
+def test_client_hsets_redis_values():
+    mock_redis = ReadyRedis()
+    client = Client(mock_redis)
+    mock_redis.set('jobs_in_progress', ['foo', 'var'])
+    mock_redis.set('client_jobs', ['foo', 'bar'])
+    job = {'job_id': 1,
+           'url': 'fake.com'}
+    client.set_redis_values(job)
+    assert mock_redis.get('jobs_in_progress') == [1, 'fake.com']
+    assert mock_redis.get('client_jobs') == [1, '-1']
+
+
+def test_document_has_file_formats_does_not_have_data():
+    client = Client(ReadyRedis())
+    json = {}
+    assert not client.document_has_file_formats(json)
+
+
+def test_document_has_file_formats_does_not_have_attributes():
+    client = Client(ReadyRedis())
+    json = {'data': {}}
+    assert not client.document_has_file_formats(json)
+
+
+def test_document_has_file_formats_does_not_have_file_formats():
+    client = Client(ReadyRedis())
+    json = {'data': {'attributes': []}}
+    assert not client.document_has_file_formats(json)
+
+
+def test_document_has_file_formats_ha_required_fields():
+    client = Client(ReadyRedis())
+    json = {'data': {'attributes': {'fileFormats': {}}}}
+    assert client.document_has_file_formats(json)
+
+
+def test_get_document_htm_returns_link():
+    client = Client(ReadyRedis())
+    json = {'data': {
+                'attributes': {
+                    'fileFormats': [{
+                        'format': 'htm',
+                        'fileUrl': 'fake.com'}]}}}
+    assert client._get_document_htm(json) == 'fake.com'
+
+
+def test_get_document_htm_returns_none():
+    client = Client(ReadyRedis())
+    json = {'data': {
+                'attributes': {
+                    'fileFormats': [{
+                        'format': 'pdf',
+                        'fileUrl': 'fake.pdf'}]}}}
+    assert client._get_document_htm(json) is None
 
 
 def test_get_output_path_error(path_generator):

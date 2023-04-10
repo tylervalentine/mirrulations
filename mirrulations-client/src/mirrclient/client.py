@@ -144,11 +144,11 @@ class Client:
             # Handles errors in job_results
             result = self.redis.hget('jobs_in_progress', job.get('job_id'))
             self.redis.hset('invalid_jobs', job.get('job_id'), result)
-            
+
         data['directory'] = self.path_generator.get_path(job_result)
 
         self._put_results(data)
-        # We should increment the redis counter for the type downloaded here 
+        # We should increment the redis counter for the type downloaded here
 
         comment_has_attachment = self.does_comment_have_attachment(job_result)
         json_has_file_format = self._document_has_file_formats(job_result)
@@ -159,7 +159,6 @@ class Client:
             document_htm = self._get_document_htm(job_result)
             if document_htm is not None:
                 self.download_htm(job_result)
-        
 
     def send_job(self, job, job_result):
         """
@@ -306,7 +305,8 @@ class Client:
         filename = path.split('/')[-1]
         data = self.add_attachment_information_to_data(data, path, filename)
         # self.put_results_to_mongo(data)
-        # Instead we should increment the redis counter for attachments downloaded
+        # Instead we should increment the redis counter for attachments
+        # downloaded
 
     def add_attachment_information_to_data(self, data, path, filename):
         data['job_type'] = 'attachments'
@@ -367,7 +367,7 @@ class Client:
                     return file_url
         return None
 
-    def _document_has_file_formats(self, json):
+    def document_has_file_formats(self, json):
         """
         Checks to see if the necessary attribute of fileFormats
         exists
@@ -407,8 +407,7 @@ if __name__ == '__main__':
         print('Need client environment variables')
         sys.exit(1)
 
-    redis = load_redis()
-    client = Client(redis)
+    client = Client(load_redis())
 
     while True:
         try:

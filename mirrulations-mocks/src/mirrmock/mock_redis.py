@@ -67,6 +67,9 @@ class ReadyRedis():
     def set(self, key, value):
         self.dict[key] = value
 
+    def hset(self, key, value1, value2):
+        self.dict[key] = [value1, value2]
+
 
 class MockRedisWithStorage():
     """
