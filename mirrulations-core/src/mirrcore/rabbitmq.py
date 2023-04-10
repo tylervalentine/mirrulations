@@ -70,10 +70,8 @@ class RabbitMQ:
         self._ensure_channel()
         try:
             get_channel = self.channel.basic_get(self.queue_name)
-            get_job_waiting_queue = get_channel
-            frames = get_job_waiting_queue
-            method_frame = frames[0]
-            body = frames[2]
+            method_frame = get_channel[0]
+            body = get_channel[2]
             # If there was no job available
             if method_frame is None:
                 return None
