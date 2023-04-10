@@ -8,7 +8,12 @@ class RabbitMQ:
     Encapsulate calls to RabbitMQ in one place
     """
 
-    def __init__(self):
+    def __init__(self, queue_name):
+        """
+        Create a new RabbitMQ object
+        @param queue_name: the name of the queue to use
+        """
+        self.queue_name = queue_name
         self.connection = None
         self.channel = None
 
@@ -17,7 +22,7 @@ class RabbitMQ:
             connection_parameter = pika.ConnectionParameters('rabbitmq')
             self.connection = pika.BlockingConnection(connection_parameter)
             self.channel = self.connection.channel()
-            self.channel.queue_declare('jobs_waiting_queue', durable=True)
+            self.channel.queue_declare(self.queue_name, durable=True)
 
     def add(self, job):
         """
@@ -30,7 +35,7 @@ class RabbitMQ:
         try:
             persistent_delivery = pika.spec.PERSISTENT_DELIVERY_MODE
             self.channel.basic_publish(exchange='',
-                                       routing_key='jobs_waiting_queue',
+                                       routing_key=self.queue_name,
                                        body=json.dumps(job),
                                        properties=pika.BasicProperties(
                                         delivery_mode=persistent_delivery)
@@ -49,7 +54,7 @@ class RabbitMQ:
         """
         self._ensure_channel()
         try:
-            queue = self.channel.queue_declare('jobs_waiting_queue',
+            queue = self.channel.queue_declare(self.queue_name,
                                                durable=True)
             return queue.method.message_count
         except pika.exceptions.StreamLostError as error:
@@ -64,7 +69,7 @@ class RabbitMQ:
         # Check if channel is up, if not, create a new one
         self._ensure_channel()
         try:
-            get_channel = self.channel.basic_get('jobs_waiting_queue')
+            get_channel = self.channel.basic_get(self.queue_name)
             get_job_waiting_queue = get_channel
             frames = get_job_waiting_queue
             method_frame = frames[0]
