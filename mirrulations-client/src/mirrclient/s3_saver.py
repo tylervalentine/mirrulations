@@ -65,6 +65,7 @@ class S3Saver():
     def save_json(self, path, data):
         """
         Saves json file to Amazon S3 bucket
+        Bucket Structure: /AGENCYID/path/to/item
 
         Parameters
         -------
@@ -88,7 +89,8 @@ class S3Saver():
     def save_binary(self, path, binary):
         """
         Saves json file to Amazon S3 bucket
-
+        Bucket Structure: /AGENCYID/path/to/item
+        
         Parameters
         -------
         path : str
