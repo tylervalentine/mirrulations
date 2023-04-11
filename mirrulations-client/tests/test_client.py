@@ -2,15 +2,16 @@
 import os
 # import json
 # from unittest.mock import patch
+import responses
 from mirrcore.path_generator import PathGenerator
-# import pytest
+import pytest
 from pytest import fixture  # , raises
 import requests_mock
 from mirrclient.client import NoJobsAvailableException, Client
 from mirrclient.client import is_environment_variables_present
 from mirrmock.mock_redis import ReadyRedis, InactiveRedis
 from mirrmock.mock_job_queue import MockJobQueue
-# from requests.exceptions import Timeout, ReadTimeout
+from requests.exceptions import ReadTimeout
 # from mirrmock.mock_redis import ReadyRedis  # BusyRedis
 
 
@@ -134,6 +135,9 @@ def test_job_queue_is_empty():
     client.job_queue = MockJobQueue()
     job = {'error': 'No jobs available'}
     assert client._get_job_from_job_queue() == job
+    # If no jobs are in the queue we will raise this Exception
+    with pytest.raises(NoJobsAvailableException):
+        client.job_operation()
 
 
 def test_get_job_from_job_queue_gets_job():
@@ -230,51 +234,138 @@ def test_get_output_path_error(path_generator):
     assert output_path == "/unknown/unknown.json"
 
 
-# def test_handles_nonetype_error(mock_requests, path_generator):
-#     """
-#     Test for handling of the NoneType Error caused by null fileformats
-#     """
-#     client = Client()
-#     client.api_key = 1234
+@responses.activate
+def test_client_handles_read_timeout():
+    mock_redis = ReadyRedis()
+    client = Client(mock_redis, MockJobQueue())
+    client.api_key = 1234
+    client.job_queue.add_job({'job_id': 1,
+                              'url': 'http://regulations.gov/job',
+                              "job_type": "comments"})
+    mock_redis.set('jobs_in_progress', [1, 'http://regulations.gov/job'])
 
-#     with mock_requests:
-#         mock_requests.get(
-#             'http://work_server:8080/get_job?client_id=-1',
-#             json={'job_id': '1',
-#                   'url': 'http://regulations.gov/job',
-#                   'job_type': 'comments',
-#                   'reg_id': '1',
-#                   'agency': 'foo'},
-#             status_code=200
-#         )
-#         mock_requests.get(
-#             'http://regulations.gov/job?api_key=1234',
-#             json={
-#                 "data": {
-#                     "id": "agencyID-001-0002",
-#                     "type": "comments",
-#                     "attributes": {
-#                         "agencyId": "agencyID",
-#                         "docketId": "agencyID-001"
-#                     }
-#                 },
-#                 "included": [{
-#                     "attributes": {
-#                         "fileFormats": None
-#                     },
-#                 }]
-#             },
-#             status_code=200
-#         )
+    responses.get("http://regulations.gov/job",
+                  body=ReadTimeout("Read Timeout"))
+    client.job_operation()
+    assert mock_redis.get('invalid_jobs') == [1, 'http://regulations.gov/job']
 
-#         mock_requests.put('http://work_server:8080/put_results', text='{}')
-#         client.job_operation()
-#         put_request = mock_requests.request_history[2]
-#         json_data = json.loads(put_request.json())
-#         assert json_data['job_type'] == "comments"
-#         results = json_data['results']
-#         attachment_paths = path_generator.get_attachment_json_paths(results)
-#         assert attachment_paths == []
+
+def test_client_handles_error_in_download_job():
+    mock_redis = ReadyRedis()
+    client = Client(mock_redis, MockJobQueue())
+    mock_redis.set('jobs_in_progress', ['foo', 'var'])
+    mock_redis.set('client_jobs', ['foo', 'bar'])
+    job = {'job_id': 1,
+           'url': 'fake.com',
+           'job_type': "comments",
+           "reg_id": "test_id",
+           "agency": "test_agency"
+           }
+    job_result = {"error": "Timeout"}
+    client._download_job(job, job_result)
+    assert mock_redis.get('invalid_jobs') == [1, 'fake.com']
+
+
+@responses.activate
+def test_handles_nonetype_error(path_generator):
+    """
+    Test for handling of the NoneType Error caused by null fileformats
+    """
+    mock_redis = ReadyRedis()
+    client = Client(mock_redis, MockJobQueue())
+    client.api_key = 1234
+    client.job_queue.add_job({'job_id': 1,
+                              'url': 'http://regulations.gov/job',
+                              "job_type": "comments"})
+    mock_redis.set('jobs_in_progress', [1,
+                                        'http://regulations.gov/job'])
+
+    test_json = {
+                "data": {
+                    "id": "agencyID-001-0002",
+                    "type": "comments",
+                    "attributes": {
+                        "agencyId": "agencyID",
+                        "docketId": "agencyID-001"
+                    }
+                },
+                "included": [{
+                    "attributes": {
+                        "fileFormats": None
+                    },
+                }]}
+    responses.add(responses.GET, 'http://regulations.gov/job',
+                  json=test_json, status=200)
+    client.job_operation()
+    assert mock_redis.get('jobs_in_progress') == [1,
+                                                  'http://regulations.gov/job']
+    assert mock_redis.get('client_jobs') == [1, '-1']
+
+    attachment_paths = path_generator.get_attachment_json_paths(test_json)
+    assert attachment_paths == []
+
+
+@responses.activate
+def test_downloading_htm_send_job(capsys, mocker):
+    mocker.patch('mirrclient.saver.Saver.make_path', return_value=None)
+    mocker.patch('mirrclient.saver.Saver.save_attachment', return_value=None)
+    mock_redis = ReadyRedis()
+    client = Client(mock_redis, MockJobQueue())
+    client.api_key = 1234
+    client.job_queue.add_job({'job_id': 1,
+                              'url': 'http://regulations.gov/documents',
+                              "job_type": "documents"})
+    mock_redis.set('jobs_in_progress', [1, 'http://regulations.gov/documents'])
+
+    test_json = {'data': {'id': '1', 'type': 'documents',
+                                'attributes':
+                                {'agencyId': 'USTR',
+                                 'docketId': 'USTR-2015-0010',
+                                    "fileFormats": [{
+                                        "fileUrl":
+                                            ("http://downloads.regulations."
+                                                "gov/USTR-2015-0010-0001/"
+                                             "content.htm"),
+                                        "format": "htm",
+                                        "size": 9709
+                                    }]},
+                                'job_type': 'documents'}}
+    responses.add(responses.GET, 'http://regulations.gov/documents',
+                  json=test_json, status=200)
+    responses.add(responses.GET,
+                  'http://downloads.regulations.gov/' +
+                  'USTR-2015-0010-0001/content.htm',
+                  json='\bx17', status=200)
+    client.job_operation()
+    captured = capsys.readouterr()
+    print_data = [
+        'Processing job from work server\n',
+        'Attempting to get job\n',
+        'Job received from job queue\n',
+        'Job received: documents for client:  -1\n'
+        'Regulations.gov link: http://regulations.gov/documents\n',
+        'API URL: http://regulations.gov/documents\n',
+        'Performing job\n',
+        ('SAVED document HTM '
+            '- http://downloads.regulations.gov/USTR-2015-0010-0001/'
+            'content.htm to path:  '
+            '/USTR/USTR-2015-0010/text-USTR-2015-0010/documents/'
+            '1_content.htm\n'),
+        'SUCCESS: http://regulations.gov/documents complete\n'
+    ]
+    assert captured.out == "".join(print_data)
+
+
+def test_add_attachment_information_to_data():
+    data = {}
+    path = '/USTR/docket.json'
+    filename = "docket.json"
+    mock_redis = ReadyRedis()
+    client = Client(mock_redis, MockJobQueue())
+    data = client._add_attachment_information_to_data(data, path, filename)
+    assert data['job_type'] == 'attachments'
+    assert data['attachment_path'] == '/data/data/USTR/docket.json'
+    assert data['attachment_filename'] == 'docket.json'
 
 
 # def test_success_client_logging(capsys, mock_requests):
@@ -354,54 +445,61 @@ def test_get_output_path_error(path_generator):
 #         assert captured.out == "".join(print_data)
 
 
-# # Client Attachments Tests
-# def test_client_downloads_attachment_results(mock_requests):
-#     client = Client()
-#     client.api_key = 1234
+# Client Attachments Tests
+@responses.activate
+def test_client_downloads_attachment_results(mocker, capsys):
+    mocker.patch('mirrclient.saver.Saver.make_path', return_value=None)
+    mocker.patch('mirrclient.saver.Saver.save_attachment', return_value=None)
+    mock_redis = ReadyRedis()
+    client = Client(mock_redis, MockJobQueue())
+    client.api_key = 1234
+    client.job_queue.add_job({'job_id': 1,
+                              'url': 'http://regulations.gov/comments',
+                              "job_type": "comments"})
+    mock_redis.set('jobs_in_progress', [1, 'http://regulations.gov/comments'])
 
-#     with mock_requests:
-#         mock_requests.get(
-#             'http://work_server:8080/get_job?client_id=-1',
-#             json={'job_id': '1',
-#                   'url': 'http://url.com',
-#                   'job_type': 'comments',
-#                   'reg_id': '1',
-#                   'agency': 'foo'},
-#             status_code=200
-#         )
-#         mock_requests.get(
-#             'http://url.com?api_key=1234',
-#             json={
-#                 "data": {
-#                     "id": "FDA-2016-D-2335-1566",
-#                     "type": "comments",
-#                     "attributes": {
-#                         "agencyId": "FDA",
-#                         "docketId": "FDA-2016-D-2335"
-#                     }
-#                 },
-#                 "included": [{
-#                     "attributes": {
-#                         "fileFormats": [{
-#                             "fileUrl": "https://fakeurl.gov"
-#                         }]
-#                     }
-#                 }]
-#             },
-#             status_code=200
-#         )
-#         mock_requests.get(
-#             "https://fakeurl.gov",
-#             json={"data": 'foobar'},
-#             status_code=200
-#         )
-#         mock_requests.put('http://work_server:8080/put_results', text='{}')
+    test_json = {
+                "data": {
+                    "id": "FDA-2016-D-2335-1566",
+                    "type": "comments",
+                    "attributes": {
+                        "agencyId": "FDA",
+                        "docketId": "FDA-2016-D-2335"
+                    }
+                },
+                "included": [{
+                    "attributes": {
+                        "fileFormats": [{
+                            "fileUrl": ("http://downloads.regulations."
+                                        "gov/FDA-2016-D-2335/"
+                                        "attachment_1.pdf")
+                        }]
+                    }
+                }]
+            }
+    responses.add(responses.GET, 'http://regulations.gov/comments',
+                  json=test_json, status=200)
+    responses.add(responses.GET,
+                  ('http://downloads.regulations.gov/\
+                   FDA-2016-D-2335/attachment_1.pdf'),
+                  json='\bx17', status=200)
+    client.job_operation()
+    captured = capsys.readouterr()
+    print_data = [
+        'Processing job from work server\n',
+        'Attempting to get job\n',
+        'Job received from job queue\n',
+        'Job received: comments for client:  -1\n'
+        'Regulations.gov link: http://regulations.gov/comments\n',
+        'API URL: http://regulations.gov/comments\n',
+        'Performing job\n',
+        'Found 1 attachment(s) for Comment - FDA-2016-D-2335-1566\n'
+        'Downloaded 1/1 attachment(s) for Comment - FDA-2016-D-2335-1566\n'
+        'SUCCESS: http://regulations.gov/comments complete\n'
+    ]
+    assert captured.out == "".join(print_data)
 
-#         client.job_operation()
-#         put_request = mock_requests.request_history[2]
-#         json_data = json.loads(put_request.json())
-#         assert json_data['job_id'] == "1"
-#         assert json_data['job_type'] == "comments"
+    client.job_operation()
 
 
 # def test_handles_empty_attachment_list(mock_requests):
@@ -610,17 +708,6 @@ def test_get_output_path_error(path_generator):
 #         assert captured.out == "".join(print_data)
 
 
-# def test_add_attachment_information_to_data():
-#     data = {}
-#     path = '/USTR/docket.json'
-#     filename = "docket.json"
-#     client = Client()
-#     data = client.add_attachment_information_to_data(data, path, filename)
-#     assert data['job_type'] == 'attachments'
-#     assert data['attachment_path'] == '/data/data/USTR/docket.json'
-#     assert data['attachment_filename'] == 'docket.json'
-
-
 # def test_download_htm(capsys, mocker, mock_requests):
 #     mocker.patch('mirrclient.saver.Saver.make_path', return_value=None)
 #     mocker.patch('mirrclient.saver.Saver.save_attachment', return_value=None)
@@ -656,55 +743,3 @@ def test_get_output_path_error(path_generator):
 #         client.download_htm(htm_json)
 #         captured = capsys.readouterr().out
 #         assert f"SAVED document HTM - {htm} to path:" in captured
-
-
-# def test_downloading_htm_send_job(capsys, mock_requests, mocker):
-#     mocker.patch('mirrclient.saver.Saver.make_path', return_value=None)
-#     mocker.patch('mirrclient.saver.Saver.save_attachment', return_value=None)
-#     client = Client()
-#     client.api_key = 1234
-
-#     with mock_requests:
-#         mock_requests.get(
-#             'http://work_server:8080/get_job?client_id=-1',
-#             json={'job_id': '1',
-#                   'url': 'https://api.regulations.gov/v4/documents/type_id',
-#                   'job_type': 'documents',
-#                   'reg_id': '1',
-#                   'agency': 'foo'},
-#             status_code=200
-#         )
-#         mock_requests.get(
-#             'https://api.regulations.gov/v4/documents/type_id?api_key=1234',
-#             json={'data': {'id': '1', 'type': 'documents',
-#                            'attributes':
-#                            {'agencyId': 'NOAA', 'docketId': 'NOAA-0001-0001',
-#                             "fileFormats": [{
-#                                "fileUrl": ("https://downloads.regulations."
-#                                             "gov/USTR-2015-0010-0001/"
-#                                             "content.htm"),
-#                                "format": "htm",
-#                                "size": 9709
-#                             }]},
-#                            'job_type': 'documents'}},
-#             status_code=200
-#         )
-#         mock_requests.put('http://work_server:8080/put_results', text='{}')
-#         mock_requests.get('https://downloads.regulations.gov/'
-#                           'USTR-2015-0010-0001/content.htm')
-#         client.job_operation()
-#     captured = capsys.readouterr()
-#     print_data = [
-#         'Processing job from work server\n',
-#      'Regulations.gov link: https://www.regulations.gov/document/type_id\n',
-#         'API URL: https://api.regulations.gov/v4/documents/type_id\n',
-#         'Performing job\n',
-#         'Sending Job 1 to Work Server\n',
-#         ('SAVED document HTM '
-#             '- https://downloads.regulations.gov/USTR-2015-0010-0001/'
-#             'content.htm to path:  '
-#             '/NOAA/NOAA-0001-0001/text-NOAA-0001-0001/documents/'
-#             '1_content.htm\n'),
-#      'SUCCESS: https://api.regulations.gov/v4/documents/type_id complete\n'
-#     ]
-#     assert captured.out == "".join(print_data)
