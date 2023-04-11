@@ -146,6 +146,24 @@ def test_get_job_from_job_queue_gets_job():
     client.job_queue.add_job({'job': 'This is a job'})
     assert client._get_job_from_job_queue() == {'job': 'This is a job'}
 
+def test_get_job():
+    client = Client(ReadyRedis(), MockJobQueue())
+    client.job_queue = MockJobQueue()
+    job = {
+        'job_id': 1,
+        'url': 'https://api.regulations.gov/v4/dockets/type_id',
+        'job_type': 'comments',
+        'reg_id': 'other_reg_id',
+        'agency': 'other_agency'
+    }
+    client.job_queue.add_job(job)
+    assert client._get_job() == job
+
+def test_get_job_is_empty():
+    client = Client(ReadyRedis(), MockJobQueue())
+    client.job_queue = MockJobQueue()
+    job = {'error': 'No jobs available'}
+    assert client._get_job() == job
 
 def test_does_comment_have_attachment_has_attachment():
     client = Client(ReadyRedis(), MockJobQueue())

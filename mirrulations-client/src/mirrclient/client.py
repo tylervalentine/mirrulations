@@ -69,7 +69,7 @@ class Client:
     def _get_job_from_job_queue(self):
         self._can_connect_to_database()
         if self.job_queue.get_num_jobs() == 0:
-            job = {'error': 'No jobs available'}
+            return {'error': 'No jobs available'}
         else:
             job = self.job_queue.get_job()
         print("Job received from job queue")
@@ -109,10 +109,11 @@ class Client:
 
         # Isn't this the same logic as NoJobsAvailable ??
         except JobQueueException:
-            job = {'error': 'No jobs available'}
+            return {'error': 'The job queue encountered an error'}
         except redis.exceptions.ConnectionError:
-            job = {'error': 'Could not connect to redis server.'}
-            print("Redis appears to be down.")
+            return {'error': 'Could not connect to redis server.'}
+        if (job == {'error': 'No jobs available'}) : return job 
+
         self._set_redis_values(job)
 
         # what is the line below for??
