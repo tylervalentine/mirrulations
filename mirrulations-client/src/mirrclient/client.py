@@ -106,6 +106,8 @@ class Client:
         print("Attempting to get job")
         try:
             job = self._get_job_from_job_queue()
+
+        # Isn't this the same logic as NoJobsAvailable ??
         except JobQueueException:
             job = {'error': 'No jobs available'}
         except redis.exceptions.ConnectionError:
@@ -113,53 +115,22 @@ class Client:
             print("Redis appears to be down.")
         self._set_redis_values(job)
 
-        self.job_queue.decrement_count(job.get('job_type', 'other'))
+        # what is the line below for??
+        # self.job_queue.decrement_count(job.get('job_type', 'other'))
         print(f'Job received: {job.get("job_type", "other")} for client: ',
               self.client_id)
 
-        link = 'https://www.regulations.gov/'
+        # link = 'https://www.regulations.gov/'
         if 'error' in job:
             raise NoJobsAvailableException()
         job = self._generate_job_dict(job)
 
-        print(f'Regulations.gov link: {link}' +
-              f'{self._remove_plural_from_job_type(job)}')
+        print(f'Regulations.gov link: {job["url"]}')
         print(f'API URL: {job["url"]}')
 
         return job
 
-    def _process_job_results(self, job, job_result):
-        # TODO new function for handling errors
-        # This function is not complete yet, but should replace send_job
-        data = {
-            'job_type': job['job_type'],
-            'job_id': job['job_id'],
-            'results': job_result,
-            'reg_id': job['reg_id'],
-            'agency': job['agency']
-        }
-        print(f'Sending Job {job["job_id"]} to Work Server')
-        if 'error' in job_result:
-            # Handles errors in job_results
-            result = self.redis.hget('jobs_in_progress', job.get('job_id'))
-            self.redis.hset('invalid_jobs', job.get('job_id'), result)
-
-        data['directory'] = self.path_generator.get_path(job_result)
-
-        self._put_results(data)
-        # We should increment the redis counter for the type downloaded here
-
-        comment_has_attachment = self._does_comment_have_attachment(job_result)
-        json_has_file_format = self._document_has_file_formats(job_result)
-
-        if data["job_type"] == "comments" and comment_has_attachment:
-            self._download_all_attachments_from_comment(data, job_result)
-        if data["job_type"] == "documents" and json_has_file_format:
-            document_htm = self._get_document_htm(job_result)
-            if document_htm is not None:
-                self._download_htm(job_result)
-
-    def _send_job(self, job, job_result):
+    def _download_job(self, job, job_result):
         """
         Returns the job results to the workserver
         If there are any errors in the job_result, the data json is returned
@@ -183,13 +154,15 @@ class Client:
             'reg_id': job['reg_id'],
             'agency': job['agency']
         }
-        print(f'Sending Job {job["job_id"]} to Work Server')
-        if 'error' not in job_result:
-            data['directory'] = self.path_generator.get_path(job_result)
+        if 'error' in job_result:
+            # Handles errors in job_results
+            self.redis.hdel('jobs_in_progress', job.get('job_id'))
+            self.redis.hset('invalid_jobs', job.get('job_id'), job['url'])
+            return
+
+        data['directory'] = self.path_generator.get_path(job_result)
 
         self._put_results(data)
-        # self.put_results_to_mongo(data)
-        # Instead we should increment the redis counter for things downloaded
 
         comment_has_attachment = self._does_comment_have_attachment(job_result)
         json_has_file_format = self._document_has_file_formats(job_result)
@@ -211,9 +184,6 @@ class Client:
         data : dict
             the results from a performed job
         """
-        if any(x in data['results'] for x in ['error', 'errors']):
-            print(f"{data['job_id']}: Errors found in results")
-            return
         dir_, filename = data['directory'].rsplit('/', 1)
         self.saver.make_path(dir_)
         self.saver.save_json(f'/data{dir_}/{filename}', data)
@@ -393,7 +363,7 @@ class Client:
         print('Processing job from work server')
         job = self._get_job()
         result = self._perform_job(job['url'])
-        self._send_job(job, result)
+        self._download_job(job, result)
         if any(x in result for x in ('error', 'errors')):
             print(f'FAILURE: Error in {job["url"]}\nError: {result["error"]}')
         else:
