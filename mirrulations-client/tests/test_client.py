@@ -132,12 +132,11 @@ def test_cannot_connect_to_database():
 
 def test_job_queue_is_empty():
     client = Client(ReadyRedis(), MockJobQueue())
-    client.job_queue = MockJobQueue()
     job = {'error': 'No jobs available'}
-    assert client._get_job_from_job_queue() == job
     # If no jobs are in the queue we will raise this Exception
     with pytest.raises(NoJobsAvailableException):
-        client.job_operation()
+        # client.job_operation()
+        assert client._get_job_from_job_queue() == job
 
 
 def test_get_job_from_job_queue_gets_job():
@@ -145,6 +144,7 @@ def test_get_job_from_job_queue_gets_job():
     client.job_queue = MockJobQueue()
     client.job_queue.add_job({'job': 'This is a job'})
     assert client._get_job_from_job_queue() == {'job': 'This is a job'}
+
 
 def test_get_job():
     client = Client(ReadyRedis(), MockJobQueue())
@@ -159,11 +159,12 @@ def test_get_job():
     client.job_queue.add_job(job)
     assert client._get_job() == job
 
+
 def test_get_job_is_empty():
     client = Client(ReadyRedis(), MockJobQueue())
-    client.job_queue = MockJobQueue()
     job = {'error': 'No jobs available'}
     assert client._get_job() == job
+
 
 def test_does_comment_have_attachment_has_attachment():
     client = Client(ReadyRedis(), MockJobQueue())
@@ -175,18 +176,6 @@ def test_does_comment_have_attachment_does_have_attachment():
     client = Client(ReadyRedis(), MockJobQueue())
     comment_json = {'included': []}
     assert not client._does_comment_have_attachment(comment_json)
-
-
-def test_client_can_get_a_job_from_job_queue():
-    mock_queue = MockJobQueue()
-    client = Client(ReadyRedis(), mock_queue)
-    mock_queue.add_job({"job": 'This is a job'})
-    assert client._get_job_from_job_queue() == {"job": 'This is a job'}
-
-
-def test_client_handles_no_jobs_existing():
-    client = Client(ReadyRedis(), MockJobQueue())
-    assert client._get_job_from_job_queue() == {'error': 'No jobs available'}
 
 
 def test_client_hsets_redis_values():

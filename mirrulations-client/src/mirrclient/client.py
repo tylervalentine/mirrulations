@@ -70,8 +70,7 @@ class Client:
         self._can_connect_to_database()
         if self.job_queue.get_num_jobs() == 0:
             raise NoJobsAvailableException
-        else:
-            job = self.job_queue.get_job()
+        job = self.job_queue.get_job()
         print("Job received from job queue")
         return job
 
@@ -113,7 +112,7 @@ class Client:
         except redis.exceptions.ConnectionError:
             return {'error': 'Could not connect to redis server.'}
         except NoJobsAvailableException:
-            return {'error': 'No jobs available'} 
+            return {'error': 'No jobs available'}
 
         self._set_redis_values(job)
 
@@ -363,6 +362,8 @@ class Client:
         """
         print('Processing job from work server')
         job = self._get_job()
+        # TODO raise NoJobsAvailableException back to main
+        # TODO error handling after ._get_job() ?
         result = self._perform_job(job['url'])
         self._download_job(job, result)
         if any(x in result for x in ('error', 'errors')):
