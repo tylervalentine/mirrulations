@@ -69,7 +69,7 @@ class Client:
     def _get_job_from_job_queue(self):
         self._can_connect_to_database()
         if self.job_queue.get_num_jobs() == 0:
-            return {'error': 'No jobs available'}
+            raise NoJobsAvailableException
         else:
             job = self.job_queue.get_job()
         print("Job received from job queue")
@@ -112,7 +112,8 @@ class Client:
             return {'error': 'The job queue encountered an error'}
         except redis.exceptions.ConnectionError:
             return {'error': 'Could not connect to redis server.'}
-        if (job == {'error': 'No jobs available'}) : return job 
+        except NoJobsAvailableException:
+            return {'error': 'No jobs available'} 
 
         self._set_redis_values(job)
 
@@ -122,8 +123,7 @@ class Client:
               self.client_id)
 
         # link = 'https://www.regulations.gov/'
-        if 'error' in job:
-            raise NoJobsAvailableException()
+
         job = self._generate_job_dict(job)
 
         print(f'Regulations.gov link: {job["url"]}')
