@@ -105,8 +105,6 @@ class Client:
         print("Attempting to get job")
         try:
             job = self._get_job_from_job_queue()
-
-        # Isn't this the same logic as NoJobsAvailable ??
         except JobQueueException:
             return {'error': 'The job queue encountered an error'}
         except redis.exceptions.ConnectionError:
@@ -362,8 +360,11 @@ class Client:
         """
         print('Processing job from work server')
         job = self._get_job()
-        # TODO raise NoJobsAvailableException back to main
-        # TODO error handling after ._get_job() ?
+        if any(x in job for x in ('error', 'errors')):
+            if job == {'error': 'No jobs available'}:
+                raise NoJobsAvailableException
+            print(f'FAILURE: Error in job\nError: {job["error"]}')
+            # TODO if job is an error, should not continue with perform or download
         result = self._perform_job(job['url'])
         self._download_job(job, result)
         if any(x in result for x in ('error', 'errors')):

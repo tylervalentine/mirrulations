@@ -132,11 +132,9 @@ def test_cannot_connect_to_database():
 
 def test_job_queue_is_empty():
     client = Client(ReadyRedis(), MockJobQueue())
-    job = {'error': 'No jobs available'}
     # If no jobs are in the queue we will raise this Exception
     with pytest.raises(NoJobsAvailableException):
-        # client.job_operation()
-        assert client._get_job_from_job_queue() == job
+        client.job_operation()
 
 
 def test_get_job_from_job_queue_gets_job():
