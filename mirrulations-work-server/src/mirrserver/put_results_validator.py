@@ -1,6 +1,6 @@
-from mirrclient.exceptions import InvalidResultsException
-from mirrclient.exceptions import InvalidClientIDException
-from mirrclient.exceptions import MissingClientIDException
+from mirrserver.exceptions import InvalidResultsException
+from mirrserver.exceptions import InvalidClientIDException
+from mirrserver.exceptions import MissingClientIDException
 
 
 class PutResultsValidator():

@@ -68,8 +68,10 @@ class Client:
 
     def _get_job_from_job_queue(self):
         self._can_connect_to_database()
+
         if self.job_queue.get_num_jobs() == 0:
             raise NoJobsAvailableException
+
         job = self.job_queue.get_job()
         print("Job received from job queue")
         return job
@@ -364,7 +366,8 @@ class Client:
             if job == {'error': 'No jobs available'}:
                 raise NoJobsAvailableException
             print(f'FAILURE: Error in job\nError: {job["error"]}')
-            # TODO if job is an error, should not continue with perform or download
+            # TODO if job is an error,
+            # should not continue with perform or download
         result = self._perform_job(job['url'])
         self._download_job(job, result)
         if any(x in result for x in ('error', 'errors')):
