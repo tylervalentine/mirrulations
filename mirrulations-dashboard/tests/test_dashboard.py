@@ -7,8 +7,7 @@ from mirrcore.job_queue_exceptions import JobQueueException
 from mirrdash.dashboard_server import create_server, \
     get_container_stats, get_container_name, get_jobs_stats
 from fakeredis import FakeRedis, FakeServer
-from mirrmock.mock_data_storage import MockDataStorage
-from mirrmock.mock_document_count import create_mock_mongodb
+from mirrmock.mock_job_statistics import MockJobStatistics
 from mirrmock.mock_rabbitmq import MockRabbit
 
 
@@ -17,19 +16,17 @@ def fixture_mock_server():
     redis_server = FakeServer()
     mock_redis_db = FakeRedis(server=redis_server)
     mock_docker = MagicMock()
-    mock_mongo_db = create_mock_mongodb(1, 2, 3, 4)
     job_queue = JobQueue(mock_redis_db)
     job_queue.rabbitmq = MockRabbit()
     server = create_server(job_queue,
-                           mock_docker, mock_mongo_db)
+                           mock_docker, mock_redis_db)
     server.redis_server = redis_server
     server.app.config['TESTING'] = True
     server.client = server.app.test_client()
-    server.data = MockDataStorage()
     return server
 
 
-def add_mock_data_to_database(job_queue):
+def add_mock_data_to_database(job_queue, job_stats=MockJobStatistics()):
     for job in range(1, 6):
         job_queue.add_job(f'http://requlations.gov/job{job}')
     jobs_in_progress = {i: i for i in range(6, 10)}
@@ -41,6 +38,10 @@ def add_mock_data_to_database(job_queue):
     job_queue.database.set('num_jobs_comments_waiting', 2)
     job_queue.database.set('num_jobs_documents_waiting', 2)
     job_queue.database.set('num_jobs_dockets_waiting', 1)
+    job_stats.cache.set('num_dockets_done', 1)
+    job_stats.cache.set('num_documents_done', 2)
+    job_stats.cache.set('num_comments_done', 4)
+    job_stats.cache.set('num_attachments_done', 3)
 
 
 def test_dashboard_returns_job_information(mock_server):
@@ -53,7 +54,7 @@ def test_dashboard_returns_job_information(mock_server):
                     Container('capstone_work_server_1', 'running')]
     client.containers.list = Mock(return_value=return_value)
 
-    add_mock_data_to_database(mock_server.job_queue)
+    add_mock_data_to_database(mock_server.job_queue, mock_server.cache)
     mock_server.docker = client
     response = mock_server.client.get('/data')
 

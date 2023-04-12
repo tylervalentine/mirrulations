@@ -9,6 +9,8 @@ from mirrclient.client import is_environment_variables_present
 from requests.exceptions import Timeout, ReadTimeout
 from moto import mock_s3
 import boto3
+from mirrmock.mock_redis import MockRedisWithStorage
+
 
 BASE_URL = 'http://work_server:8080'
 
@@ -97,7 +99,7 @@ def create_mock_mirrulations_bucket():
 
 
 def test_client_gets_job(mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     link = 'https://api.regulations.gov/v4/type/type_id'
     with mock_requests:
         mock_requests.get(
@@ -115,7 +117,7 @@ def test_client_gets_job(mock_requests):
 
 
 def test_client_throws_exception_when_no_jobs(mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     with mock_requests:
         mock_requests.get(
             'http://work_server:8080/get_job?client_id=-1',
@@ -128,7 +130,7 @@ def test_client_throws_exception_when_no_jobs(mock_requests):
 
 
 def test_api_call_has_api_key(mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 'KEY12345'
     with mock_requests:
         mock_requests.get(
@@ -142,7 +144,7 @@ def test_api_call_has_api_key(mock_requests):
 
 
 def test_client_performs_job(mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -165,7 +167,7 @@ def test_client_performs_job(mock_requests):
         )
         mock_requests.put('http://work_server:8080/put_results', text='{}')
         client.job_operation()
-
+        assert client.cache.get_jobs_done()['num_documents_done'] == 1
         put_request = mock_requests.request_history[2]
         json_data = json.loads(put_request.json())
         saved_data = json_data['results']['data']
@@ -175,7 +177,7 @@ def test_client_performs_job(mock_requests):
 
 
 def test_client_performs_job_with_new_url(mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -208,7 +210,7 @@ def test_client_performs_job_with_new_url(mock_requests):
 
 
 def test_client_returns_403_error_to_server(mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -251,7 +253,7 @@ def test_get_job_timesout(mock_requests):
             exc=Timeout)
 
         with pytest.raises(Timeout):
-            Client().get_job()
+            Client(MockRedisWithStorage()).get_job()
 
 
 def test_perform_job_timesout(mock_requests):
@@ -261,11 +263,12 @@ def test_perform_job_timesout(mock_requests):
             fake_url,
             exc=ReadTimeout)
 
-        assert Client().perform_job(fake_url) == {"error": "Read Timeout"}
+        assert Client(MockRedisWithStorage()).perform_job(fake_url) \
+            == {"error": "Read Timeout"}
 
 
 def test_client_returns_400_error_to_server(mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -300,7 +303,7 @@ def test_client_returns_400_error_to_server(mock_requests):
 
 
 def test_client_returns_500_error_to_server(mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -337,7 +340,7 @@ def test_client_returns_500_error_to_server(mock_requests):
 
 
 def test_client_handles_empty_json(mock_requests, path_generator):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -387,7 +390,7 @@ def test_handles_nonetype_error(mock_requests, path_generator):
     """
     Test for handling of the NoneType Error caused by null fileformats
     """
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -433,7 +436,7 @@ def test_handles_nonetype_error(mock_requests, path_generator):
 @mock_s3
 def test_success_client_logging(capsys, mock_requests):
     create_mock_mirrulations_bucket()
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -469,7 +472,7 @@ def test_success_client_logging(capsys, mock_requests):
 
 
 def test_failure_job_results(capsys, mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -495,6 +498,11 @@ def test_failure_job_results(capsys, mock_requests):
         mock_requests.put('http://work_server:8080/put_results', text='{}')
         client.job_operation()
 
+        put_request = mock_requests.request_history[2]
+        json_data = json.loads(put_request.json())
+        assert json_data['results'] == {'error': 'foobar'}
+        assert client.cache.get_jobs_done()['num_documents_done'] == 0
+
         print_data = {
             'Processing job from work server\n'
             'Regulations.gov link: https://www.regulations.gov//url.com\n'
@@ -511,7 +519,7 @@ def test_failure_job_results(capsys, mock_requests):
 
 # Client Attachments Tests
 def test_client_downloads_attachment_results(mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -569,7 +577,7 @@ def test_handles_empty_attachment_list(mock_requests):
                     }
     }
     """
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -612,7 +620,7 @@ def test_handles_empty_attachment_list(mock_requests):
 
 
 def test_success_attachment_logging(capsys, mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -655,6 +663,9 @@ def test_success_attachment_logging(capsys, mock_requests):
         mock_requests.put('http://work_server:8080/put_results', text='{}')
         client.job_operation()
 
+        assert client.cache.get_jobs_done()['num_comments_done'] == 1
+        assert client.cache.get_jobs_done()['num_attachments_done'] == 1
+
         print_data = {
             'Processing job from work server\n'
             'Regulations.gov link: https://www.regulations.gov//url.com\n'
@@ -671,7 +682,7 @@ def test_success_attachment_logging(capsys, mock_requests):
 
 
 def test_success_no_attachment_logging(capsys, mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -707,7 +718,7 @@ def test_success_no_attachment_logging(capsys, mock_requests):
 
 
 def test_failure_attachment_job_results(capsys, mock_requests):
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -765,11 +776,61 @@ def test_failure_attachment_job_results(capsys, mock_requests):
         assert captured.out == "".join(print_data)
 
 
+def test_two_attachments_in_comment(mock_requests):
+    client = Client(MockRedisWithStorage())
+    client.api_key = 1234
+
+    with mock_requests:
+        mock_requests.get(
+            'http://work_server:8080/get_job?client_id=-1',
+            json={'job_id': '1',
+                  'url': 'http://url.com',
+                  'job_type': 'comments',
+                  'reg_id': '1',
+                  'agency': 'foo'},
+            status_code=200
+        )
+        mock_requests.get(
+            'http://url.com?api_key=1234',
+            json={
+                "data": {
+                    "id": "agencyID-001-0002",
+                    "type": "comments",
+                    "attributes": {
+                        "agencyId": "agencyID",
+                        "docketId": "agencyID-001"
+                    }
+                },
+                "included": [{
+                    "attributes": {
+                        "fileFormats": [{
+                            "fileUrl": "https://downloads.regulations.gov/1"
+                        }, {
+                            "fileUrl": "https://downloads.regulations.gov/2"
+                        }]
+                    }
+                }]
+            },
+            status_code=200
+        )
+
+        mock_requests.get(
+            "https://downloads.regulations.gov",
+            json={"data": 'foobar'},
+            status_code=200
+        )
+        mock_requests.put('http://work_server:8080/put_results', text='{}')
+        client.job_operation()
+
+        assert client.cache.get_jobs_done()['num_comments_done'] == 1
+        assert client.cache.get_jobs_done()['num_attachments_done'] == 2
+
+
 def test_add_attachment_information_to_data():
     data = {}
     path = '/USTR/docket.json'
     filename = "docket.json"
-    client = Client()
+    client = Client(MockRedisWithStorage())
     data = client.add_attachment_information_to_data(data, path, filename)
     assert data['job_type'] == 'attachments'
     assert data['attachment_path'] == '/data/data/USTR/docket.json'
@@ -779,7 +840,7 @@ def test_add_attachment_information_to_data():
 def test_download_htm(capsys, mocker, mock_requests):
     mocker.patch('mirrclient.saver.Saver.save_binary', return_value=None)
 
-    client = Client()
+    client = Client(MockRedisWithStorage())
 
     pdf = "https://downloads.regulations.gov/USTR/content.pdf"
     htm = "https://downloads.regulations.gov/USTR/content.htm"
@@ -814,7 +875,7 @@ def test_download_htm(capsys, mocker, mock_requests):
 
 def test_downloading_htm_send_job(capsys, mock_requests, mocker):
     mocker.patch('mirrclient.saver.Saver.save_binary', return_value=None)
-    client = Client()
+    client = Client(MockRedisWithStorage())
     client.api_key = 1234
 
     with mock_requests:
@@ -858,6 +919,82 @@ def test_downloading_htm_send_job(capsys, mock_requests, mocker):
             'content.htm to path:  '
             '/NOAA/NOAA-0001-0001/text-NOAA-0001-0001/documents/'
             '1_content.htm\n'),
+        'SUCCESS: https://api.regulations.gov/v4/documents/type_id complete\n'
+    ]
+    assert captured.out == "".join(print_data)
+
+
+def test_downloading_docket(mock_requests):
+    client = Client(MockRedisWithStorage())
+    client.api_key = 1234
+
+    with mock_requests:
+        mock_requests.get(
+            'http://work_server:8080/get_job?client_id=-1',
+            json={'job_id': '1',
+                  'url': 'http://regulations.gov/job',
+                  'job_type': 'dockets',
+                  'reg_id': '1',
+                  'agency': 'foo'},
+            status_code=200
+        )
+        mock_requests.get(
+            'http://regulations.gov/job?api_key=1234',
+            json={
+                "data": {
+                    "id": "agencyID-001-0002",
+                    "type": "dockets"
+                },
+            },
+            status_code=200
+        )
+
+        mock_requests.put('http://work_server:8080/put_results', text='{}')
+        client.job_operation()
+        assert client.cache.get_jobs_done()['num_dockets_done'] == 1
+        put_request = mock_requests.request_history[2]
+        json_data = json.loads(put_request.json())
+        assert json_data['job_type'] == "dockets"
+        results = json_data['results']['data']
+        assert results['type'] == 'dockets'
+
+
+def test_download_no_htm_send_job(capsys, mock_requests, mocker):
+
+    mocker.patch('mirrclient.saver.Saver.save_binary', return_value=None)
+    client = Client(MockRedisWithStorage())
+    client.api_key = 1234
+
+    with mock_requests:
+        mock_requests.get(
+            'http://work_server:8080/get_job?client_id=-1',
+            json={'job_id': '1',
+                  'url': 'https://api.regulations.gov/v4/documents/type_id',
+                  'job_type': 'documents',
+                  'reg_id': '1',
+                  'agency': 'foo'},
+            status_code=200
+        )
+        mock_requests.get(
+            'https://api.regulations.gov/v4/documents/type_id?api_key=1234',
+            json={'data': {'id': '1', 'type': 'documents',
+                           'attributes':
+                           {'agencyId': 'NOAA', 'docketId': 'NOAA-0001-0001',
+                            "fileFormats": None},
+                           'job_type': 'documents'}},
+            status_code=200
+        )
+        mock_requests.put('http://work_server:8080/put_results', text='{}')
+        mock_requests.get('https://downloads.regulations.gov/'
+                          'USTR-2015-0010-0001/content.htm')
+        client.job_operation()
+    captured = capsys.readouterr()
+    print_data = [
+        'Processing job from work server\n',
+        'Regulations.gov link: https://www.regulations.gov/document/type_id\n',
+        'API URL: https://api.regulations.gov/v4/documents/type_id\n',
+        'Performing job\n',
+        'Sending Job 1 to Work Server\n',
         'SUCCESS: https://api.regulations.gov/v4/documents/type_id complete\n'
     ]
     assert captured.out == "".join(print_data)

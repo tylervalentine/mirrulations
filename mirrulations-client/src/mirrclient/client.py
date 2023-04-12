@@ -4,11 +4,14 @@ import os
 import sys
 from json import dumps, loads
 import requests
+import redis
 from dotenv import load_dotenv
 from mirrclient.saver import Saver
 from mirrclient.disk_saver import DiskSaver
 from mirrclient.s3_saver import S3Saver
 from mirrcore.path_generator import PathGenerator
+from mirrcore.jobs_statistics import JobStatistics
+from mirrcore.redis_check import load_redis
 
 
 class NoJobsAvailableException(Exception):
@@ -59,12 +62,14 @@ class Client:
         value from the workserver.
     """
 
-    def __init__(self):
+    def __init__(self, cache_server):
         self.api_key = os.getenv('API_KEY')
         self.client_id = os.getenv('ID')
         self.path_generator = PathGenerator()
         self.saver = Saver(savers=[DiskSaver(),
                                    S3Saver(bucket_name="mirrulations")])
+        self.cache = JobStatistics(cache_server)
+
         hostname = os.getenv('WORK_SERVER_HOSTNAME')
         port = os.getenv('WORK_SERVER_PORT')
         self.url = f'http://{hostname}:{port}'
@@ -124,9 +129,10 @@ class Client:
         print(f'Sending Job {job["job_id"]} to Work Server')
         if 'error' not in job_result:
             data['directory'] = self.path_generator.get_path(job_result)
+            self.cache.increase_jobs_done(data['job_type'])
 
         self._put_results(data)
-        self.put_results_to_mongo(data)
+        self.put_results(data)
         comment_has_attachment = self.does_comment_have_attachment(job_result)
         json_has_file_format = self._document_has_file_formats(job_result)
 
@@ -217,6 +223,7 @@ class Client:
                     print(f"Downloaded {counter+1}/{len(path_list)} "
                           f"attachment(s) for {comment_id_str}")
                     counter += 1
+                    self.cache.increase_jobs_done('attachment')
 
     def download_single_attachment(self, url, path, data):
         '''
@@ -245,7 +252,6 @@ class Client:
         print(f"SAVED attachment - {url} to S3 and Disk - path: ", path)
         filename = path.split('/')[-1]
         data = self.add_attachment_information_to_data(data, path, filename)
-        self.put_results_to_mongo(data)
 
     def add_attachment_information_to_data(self, data, path, filename):
         data['job_type'] = 'attachments'
@@ -253,7 +259,7 @@ class Client:
         data['attachment_filename'] = filename
         return data
 
-    def put_results_to_mongo(self, data):
+    def put_results(self, data):
         requests.put(f'{self.url}/put_results', json=dumps(data),
                      params={'client_id': self.client_id},
                      timeout=10)
@@ -314,11 +320,11 @@ class Client:
         -------
         true if the necessary attribute exists
         """
-        if "data" not in json:
+        if "data" not in json or "attributes" not in \
+            json["data"] or "fileFormats" not in \
+                json["data"]["attributes"]:
             return False
-        if "attributes" not in json["data"]:
-            return False
-        if "fileFormats" not in json["data"]["attributes"]:
+        if json["data"]["attributes"]["fileFormats"] is None:
             return False
         return True
 
@@ -345,7 +351,14 @@ if __name__ == '__main__':
         print('Need client environment variables')
         sys.exit(1)
 
-    client = Client()
+    try:
+        r = load_redis()
+        r.keys('*')
+    except redis.exceptions.ConnectionError:
+        print('There is no Redis database to connect to.')
+        sys.exit(1)
+
+    client = Client(r)
 
     while True:
         try:
