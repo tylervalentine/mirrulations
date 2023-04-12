@@ -238,9 +238,9 @@ class Client:
         try:
             if "?" in job_url:
                 return requests.get(job_url + f'&api_key={self.api_key}',
-                                    timeout=10).json()
+                                    timeout=10)
             return requests.get(job_url + f'?api_key={self.api_key}',
-                                timeout=10).json()
+                                timeout=10)
         except requests.exceptions.ReadTimeout:
             return {"error": "Read Timeout"}
 
@@ -392,7 +392,10 @@ class Client:
         """
         print('Processing job from work server')
         job = self._get_job()
-        result = self._perform_job(job['url'])
+        response = self._perform_job(job['url'])
+        response.raise_for_status()
+        result = response.json()
+
         self._send_job(job, result)
         if any(x in result for x in ('error', 'errors')):
             print(f'FAILURE: Error in {job["url"]}\nError: {result["error"]}')
@@ -414,4 +417,7 @@ if __name__ == '__main__':
             client.job_operation()
         except NoJobsAvailableException:
             print("No Jobs Available")
+        except requests.exceptions.HTTPError as err: 
+            print(f"HTTP error {err.response.status_code} occurred: {err}")
+    
         time.sleep(3.6)
