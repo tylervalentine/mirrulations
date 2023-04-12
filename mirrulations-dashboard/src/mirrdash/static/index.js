@@ -14,18 +14,23 @@ window.addEventListener('load', function init() {
     }
 })
 
-const updateHtmlValues = (id, value, total) => {
-    if (value === null || total === null) {
+const updateHtmlValues = (jobsWaiting, jobsDone) => {
+    if (jobsWaiting === null || jobsDone === null) {
         // Handle the case where value or total is null,
         // indicating Job Queue Error from dashboard
         document.getElementById(id+'-number').textContent = "Error";
     }
     else {
-        let percent = (value/total) * 100;
-        percent = isNaN(percent) ? 0 : Math.round(percent * 10) / 10;
-        document.getElementById(id+'-number').textContent = value.toLocaleString('en');
-        document.getElementById(id+'-circle-percentage').textContent = `${percent}%`;
-        document.getElementById(id+'-circle-front').style.strokeDasharray = `${percent}, 100`;
+        let ids = ['jobs-waiting', 'jobs-done']
+        let numerators = [jobsWaiting, jobsDone]
+        let totalJobs = jobsWaiting + jobsDone
+
+        for (let [i, id] of ids.entries()) {
+            let percent = (numerators[i]/totalJobs) * 100;
+            document.getElementById(id+'-number').textContent = numerators[i].toLocaleString('en');
+            document.getElementById(id+'-circle-percentage').textContent = `${percent.toFixed(1)}%`;
+            document.getElementById(id+'-circle-front').style.strokeDasharray = `${percent}, 100`;
+        }
     }
 }
 
@@ -93,8 +98,7 @@ const updateClientDashboardData = () => {
             num_jobs_dockets_queued,
             num_jobs_documents_queued,
         } = jobInformation;
-        updateHtmlValues('jobs-waiting', num_jobs_waiting, jobs_total);
-        updateHtmlValues('jobs-done', num_jobs_done, jobs_total);
+        updateHtmlValues(num_jobs_waiting, num_jobs_done);
         updateCorpusProgressHtml([num_dockets_done, num_documents_done, num_comments_done, num_attachments_done], [232255, 1718669, 18072106, 15000000]); //TO DO: change hard coded numbers
         // Counts for percents
         updateJobTypeProgress("dockets-done",num_dockets_done, 232255);
