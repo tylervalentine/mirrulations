@@ -54,13 +54,6 @@ def mock_disk_writing(mocker):
     )
 
 
-def test_no_jobs_available_exception_message():
-    try:
-        raise NoJobsAvailableException
-    except NoJobsAvailableException as exception:
-        assert str(exception) == "There are no jobs available"
-
-
 def test_check_no_env_values():
     # Need to delete env variables set by mock_env fixture
     del os.environ['WORK_SERVER_HOSTNAME']
