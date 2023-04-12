@@ -248,7 +248,7 @@ class Client:
                     counter += 1
                     self.cache.increase_jobs_done('attachment')
 
-    def _download_single_attachment(self, url, path, data):
+    def _download_single_attachment(self, url, path):
         '''
         Downloads a single attachment for a comment and
         writes it to its correct path
@@ -277,13 +277,6 @@ class Client:
                                      data=response.content)
         print(f"SAVED attachment - {url} to path: ", path)
         filename = path.split('/')[-1]
-        data = self.add_attachment_information_to_data(data, path, filename)
-
-    def _add_attachment_information_to_data(self, data, path, filename):
-        data['job_type'] = 'attachments'
-        data['attachment_path'] = f'/data/data{path}'
-        data['attachment_filename'] = filename
-        return data
 
     def _does_comment_have_attachment(self, comment_json):
         """

@@ -137,6 +137,12 @@ def test_job_queue_is_empty():
         client.job_operation()
 
 
+def test_get_job_from_job_queue_no_redis():
+    client = Client(InactiveRedis(), MockJobQueue())
+    with pytest.raises(NoJobsAvailableException):
+        client._get_job_from_job_queue()
+
+
 def test_get_job_from_job_queue_gets_job():
     client = Client(ReadyRedis(), MockJobQueue())
     client.job_queue = MockJobQueue()
@@ -158,24 +164,6 @@ def test_get_job():
     assert client._get_job() == job
 
 
-def test_get_job_is_empty():
-    client = Client(ReadyRedis(), MockJobQueue())
-    with pytest.raises(NoJobsAvailableException):
-        client._get_job()
-
-
-def test_does_comment_have_attachment_has_attachment():
-    client = Client(ReadyRedis(), MockJobQueue())
-    comment_json = {'included': [0]}
-    assert client._does_comment_have_attachment(comment_json)
-
-
-def test_does_comment_have_attachment_does_have_attachment():
-    client = Client(ReadyRedis(), MockJobQueue())
-    comment_json = {'included': []}
-    assert not client._does_comment_have_attachment(comment_json)
-
-
 def test_client_hsets_redis_values():
     mock_redis = ReadyRedis()
     client = Client(mock_redis, MockJobQueue())
@@ -188,6 +176,7 @@ def test_client_hsets_redis_values():
     assert mock_redis.get('client_jobs') == [1, '-1']
 
 
+# Document HTM Tests
 def test_document_has_file_formats_does_not_have_data():
     client = Client(ReadyRedis(), MockJobQueue())
     json = {}
@@ -200,16 +189,10 @@ def test_document_has_file_formats_does_not_have_attributes():
     assert not client._document_has_file_formats(json)
 
 
-def test_perform_job_times_out(mock_requests):
-    with mock_requests:
-        fake_url = 'http://regulations.gov/fake/api/call'
-        mock_requests.get(
-            fake_url,
-            exc=ReadTimeout)
-
-        with pytest.raises(APITimeoutException):
-            client = Client(MockRedisWithStorage(), MockJobQueue())
-            client._perform_job(fake_url)
+def test_document_has_file_formats_where_file_formats_is_none():
+    client = Client(ReadyRedis(), MockJobQueue())
+    json = {'data': {"attributes": {"fileFormats": None}}}
+    assert not client._document_has_file_formats(json)
 
 
 def test_document_has_file_formats_does_not_have_file_formats():
@@ -245,65 +228,7 @@ def test_get_document_htm_returns_none():
 
 
 @responses.activate
-def test_client_handles_api_timeout():
-    mock_redis = ReadyRedis()
-    client = Client(mock_redis, MockJobQueue())
-    client.api_key = 1234
-    client.job_queue.add_job({'job_id': 1,
-                              'url': 'http://regulations.gov/job',
-                              "job_type": "comments"})
-    mock_redis.set('jobs_in_progress', [1, 'http://regulations.gov/job'])
-
-    responses.get("http://regulations.gov/job",
-                  body=ReadTimeout("Read Timeout"))
-
-    with pytest.raises(APITimeoutException):
-        client.job_operation()
-
-    assert mock_redis.get('invalid_jobs') == [1, 'http://regulations.gov/job']
-
-
-@responses.activate
-def test_handles_nonetype_error(path_generator):
-    """
-    Test for handling of the NoneType Error caused by null fileformats
-    """
-    mock_redis = ReadyRedis()
-    client = Client(mock_redis, MockJobQueue())
-    client.api_key = 1234
-    client.job_queue.add_job({'job_id': 1,
-                              'url': 'http://regulations.gov/job',
-                              "job_type": "comments"})
-    mock_redis.set('jobs_in_progress', [1,
-                                        'http://regulations.gov/job'])
-
-    test_json = {
-                "data": {
-                    "id": "agencyID-001-0002",
-                    "type": "comments",
-                    "attributes": {
-                        "agencyId": "agencyID",
-                        "docketId": "agencyID-001"
-                    }
-                },
-                "included": [{
-                    "attributes": {
-                        "fileFormats": None
-                    },
-                }]}
-    responses.add(responses.GET, 'http://regulations.gov/job',
-                  json=test_json, status=200)
-    client.job_operation()
-    assert mock_redis.get('jobs_in_progress') == [1,
-                                                  'http://regulations.gov/job']
-    assert mock_redis.get('client_jobs') == [1, '-1']
-
-    attachment_paths = path_generator.get_attachment_json_paths(test_json)
-    assert attachment_paths == []
-
-
-@responses.activate
-def test_downloading_htm_send_job(capsys, mocker):
+def test_client_downloads_document_htm(capsys, mocker):
     mocker.patch('mirrclient.saver.Saver.make_path', return_value=None)
     mocker.patch('mirrclient.saver.Saver.save_attachment', return_value=None)
     mock_redis = ReadyRedis()
@@ -353,19 +278,57 @@ def test_downloading_htm_send_job(capsys, mocker):
     assert captured.out == "".join(print_data)
 
 
-def test_add_attachment_information_to_data():
-    data = {}
-    path = '/USTR/docket.json'
-    filename = "docket.json"
+# Client Comment Attachments
+def test_does_comment_have_attachment_has_attachment():
+    client = Client(ReadyRedis(), MockJobQueue())
+    comment_json = {'included': [0]}
+    assert client._does_comment_have_attachment(comment_json)
+
+
+def test_does_comment_have_attachment_does_have_attachment():
+    client = Client(ReadyRedis(), MockJobQueue())
+    comment_json = {'included': []}
+    assert not client._does_comment_have_attachment(comment_json)
+
+
+@responses.activate
+def test_handles_none_in_comment_file_formats(path_generator):
+    """
+    Test for handling of the NoneType Error caused by null fileformats
+    """
     mock_redis = ReadyRedis()
     client = Client(mock_redis, MockJobQueue())
-    data = client._add_attachment_information_to_data(data, path, filename)
-    assert data['job_type'] == 'attachments'
-    assert data['attachment_path'] == '/data/data/USTR/docket.json'
-    assert data['attachment_filename'] == 'docket.json'
+    client.api_key = 1234
+    client.job_queue.add_job({'job_id': 1,
+                              'url': 'http://regulations.gov/job',
+                              "job_type": "comments"})
+    mock_redis.set('jobs_in_progress', [1,
+                                        'http://regulations.gov/job'])
+    test_json = {
+                "data": {
+                    "id": "agencyID-001-0002",
+                    "type": "comments",
+                    "attributes": {
+                        "agencyId": "agencyID",
+                        "docketId": "agencyID-001"
+                    }
+                },
+                "included": [{
+                    "attributes": {
+                        "fileFormats": None
+                    },
+                }]}
+    responses.add(responses.GET, 'http://regulations.gov/job',
+                  json=test_json, status=200)
+    client.job_operation()
+    assert mock_redis.get('jobs_in_progress') == [1,
+                                                  'http://regulations.gov/job']
+    assert mock_redis.get('client_jobs') == [1, '-1']
+
+    attachment_paths = path_generator.get_attachment_json_paths(test_json)
+    assert attachment_paths == []
 
 
-# Client Attachments Tests
 @responses.activate
 def test_client_downloads_attachment_results(mocker, capsys):
     mocker.patch('mirrclient.saver.Saver.make_path', return_value=None)
@@ -420,82 +383,71 @@ def test_client_downloads_attachment_results(mocker, capsys):
     assert captured.out == "".join(print_data)
 
 
-# def test_handles_empty_attachment_list(mock_requests):
-#     """
-#     Test that handles empty attachment list from comments json being:
-#     {
-#         "relationships" : {
-#                 "attachments" : {
-#                     "data" : [ ]}
-#                     }
-#     }
-#     """
-#     client = Client(MockRedisWithStorage())
-#     client.api_key = 1234
+@responses.activate
+def test_does_comment_have_attachment_with_empty_attachment_list():
+    """
+    Test that handles empty attachment list from comments json being:
+    {
+        "relationships" : {
+                "attachments" : {
+                    "data" : [ ]}
+                    }
+    }
+    """
+    client = Client(ReadyRedis(), MockJobQueue())
+    client.api_key = 1234
 
-#     with mock_requests:
-#         mock_requests.get(
-#             'http://work_server:8080/get_job?client_id=-1',
-#             json={'job_id': '1',
-#                   'url': 'http://regulations.gov/job',
-#                   'job_type': 'comments',
-#                   'reg_id': '1',
-#                   'agency': 'foo'},
-#             status_code=200
-#         )
-#         mock_requests.get(
-#             'http://regulations.gov/job?api_key=1234',
-#             json={
-#                 "data": {
-#                     "id": "agencyID-001-0002",
-#                     "type": "comments",
-#                     "attributes": {
-#                         "agencyId": "agencyID",
-#                         "docketId": "agencyID-001"
-#                     }
-#                 },
-#                 "relationships": {
-#                     "attachments": {
-#                         "data": []
-#                     }
-#                 }
-#             },
-#             status_code=200
-#         )
-
-#         mock_requests.put('http://work_server:8080/put_results', text='{}')
-#         client.job_operation()
-#         put_request = mock_requests.request_history[2]
-#         json_data = json.loads(put_request.json())
-#         results = json_data['results']
-#         assert json_data['job_type'] == "comments"
-#         assert client.does_comment_have_attachment(results) is False
-
-
-def test_download_htm(capsys, mocker, mock_requests):
-    mocker.patch('mirrclient.saver.Saver.make_path', return_value=None)
-    mocker.patch('mirrclient.saver.Saver.save_attachment', return_value=None)
-    mock_queue = MockJobQueue()
-    client = Client(MockRedisWithStorage(), mock_queue)
-
-    pdf = "https://downloads.regulations.gov/USTR/content.pdf"
-    htm = "https://downloads.regulations.gov/USTR/content.htm"
-    htm_json = {
-            "data": {
-                "attributes": {
-                    "fileFormats": [{
-                        "fileUrl": pdf,
-                        "format": "pdf",
-                        "size": 182010
-                        }, {
-                        "fileUrl": htm,
-                        "format": "htm",
-                        "size": 9709
-                        }
-                    ]
+    test_json = {
+                "data": {
+                    "id": "agencyID-001-0002",
+                    "type": "comments",
+                    "attributes": {
+                        "agencyId": "agencyID",
+                        "docketId": "agencyID-001"
+                    }
+                },
+                "relationships": {
+                    "attachments": {
+                        "data": []
+                    }
                 }
             }
-    }
-    client._download_htm(htm_json)
-    captured = capsys.readouterr().out
-    assert f"SAVED document HTM - {htm} to path:" in captured
+    assert client._does_comment_have_attachment(test_json) is False
+
+
+# Exception Tests
+def test_get_job_is_empty():
+    client = Client(ReadyRedis(), MockJobQueue())
+    with pytest.raises(NoJobsAvailableException):
+        client._get_job()
+
+
+def test_client_perform_job_times_out(mock_requests):
+    with mock_requests:
+        fake_url = 'http://regulations.gov/fake/api/call'
+        mock_requests.get(
+            fake_url,
+            exc=ReadTimeout)
+
+        with pytest.raises(APITimeoutException):
+            client = Client(MockRedisWithStorage(), MockJobQueue())
+            client._perform_job(fake_url)
+
+
+@responses.activate
+def test_client_handles_api_timeout():
+    mock_redis = ReadyRedis()
+    client = Client(mock_redis, MockJobQueue())
+    client.api_key = 1234
+    client.job_queue.add_job({'job_id': 1,
+                              'url': 'http://regulations.gov/job',
+                              "job_type": "comments"})
+    mock_redis.set('jobs_in_progress', [1, 'http://regulations.gov/job'])
+
+    responses.get("http://regulations.gov/job",
+                  body=ReadTimeout("Read Timeout"))
+
+    with pytest.raises(APITimeoutException):
+        client.job_operation()
+
+    assert mock_redis.get('invalid_jobs') == [1, 'http://regulations.gov/job']
