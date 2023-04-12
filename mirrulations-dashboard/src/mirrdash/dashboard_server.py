@@ -104,7 +104,6 @@ def create_server(job_queue, docker_server, cache):
 
 if __name__ == '__main__':
     load_dotenv()
-    mongo_host = os.getenv('MONGO_HOSTNAME')
     redis = Redis(os.getenv('REDIS_HOSTNAME'))
     the_job_queue = JobQueue(redis)
     server = create_server(the_job_queue,
