@@ -5,10 +5,10 @@ from mirrcore.job_queue import JobQueue
 from mirrcore.job_queue_exceptions import JobQueueException
 from mirrserver.put_results_validator import PutResultsValidator
 from mirrserver.get_job_validator import GetJobValidator
-from mirrclient.exceptions import InvalidResultsException
-from mirrclient.exceptions import InvalidClientIDException
-from mirrclient.exceptions import MissingClientIDException
-from mirrclient.exceptions import NoJobsException
+from mirrserver.exceptions import InvalidResultsException
+from mirrserver.exceptions import InvalidClientIDException
+from mirrserver.exceptions import MissingClientIDException
+from mirrserver.exceptions import NoJobsException
 
 
 class WorkServer:

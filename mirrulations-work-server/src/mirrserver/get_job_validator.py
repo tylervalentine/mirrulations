@@ -1,5 +1,5 @@
-from mirrclient.exceptions import MissingClientIDException
-from mirrclient.exceptions import InvalidClientIDException
+from mirrserver.exceptions import MissingClientIDException
+from mirrserver.exceptions import InvalidClientIDException
 
 
 class GetJobValidator():

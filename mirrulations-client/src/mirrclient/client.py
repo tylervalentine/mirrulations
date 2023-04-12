@@ -29,22 +29,29 @@ def is_environment_variables_present():
 
 class Client:
     """
-    The Client class performs jobs given to it by a workserver
+    The Client class gets a job directly from the job queue.
     It receives a job, performs it depending on the job type.
     A job is performed by calling an api endpoint to request
-    a json object. The Client sends back the results back
-    to the workserver.
+    a json object. The client saves the result of the job and any included
+    attachments using the Saver class.
 
     Attributes
     ----------
     api_key : str
         Api key used to authenticate requests made to api
-    server_validator : ServerValidator
-        This is used to validate requests made between the
-        workserver and the Client
     client_id : int
-        An id that defaults to -1 but is eventually replaced by a
-        value from the workserver.
+        An id that is included in the client.env file.
+    path_generator : PathGenerator
+        Returns a path for the result of a job to be saved to.
+    saver : Saver
+        Handles the making of directories and the saving of files either
+        to disk or Amazon s3.
+    redis : redis_server
+        Allows for a direct connection to the Redis server, incrementing the
+        jobs completed.
+    job_queue : JobQueue
+        Queue of all of the jobs that need to be completed. The client will
+        directly pull jobs from this queue.
     """
 
     def __init__(self, redis_server, job_queue):
@@ -55,10 +62,6 @@ class Client:
         self.redis = redis_server
         self.job_queue = job_queue
 
-        hostname = os.getenv('WORK_SERVER_HOSTNAME')
-        port = os.getenv('WORK_SERVER_PORT')
-        self.url = f'http://{hostname}:{port}'
-
     def _can_connect_to_database(self):
         try:
             self.redis.ping()
@@ -68,10 +71,11 @@ class Client:
 
     def _get_job_from_job_queue(self):
         self._can_connect_to_database()
+
         if self.job_queue.get_num_jobs() == 0:
-            job = {'error': 'No jobs available'}
-        else:
-            job = self.job_queue.get_job()
+            raise NoJobsAvailableException
+
+        job = self.job_queue.get_job()
         print("Job received from job queue")
         return job
 
@@ -94,74 +98,45 @@ class Client:
 
     def _get_job(self):
         """
-        Get a job from the work server.
+        Get a job from the JobQueue.
         Converts API URL to regulations.gov URL and prints to logs.
         From: https://api.regulations.gov/v4/dockets/type_id
         To: https://www.regulations.gov/docket/type_id
 
         :raises: NoJobsAvailableException
-            If no job is available from the work server
+            If no job is available from the job queue
         """
 
         print("Attempting to get job")
         try:
             job = self._get_job_from_job_queue()
         except JobQueueException:
-            job = {'error': 'No jobs available'}
+            return {'error': 'The job queue encountered an error'}
         except redis.exceptions.ConnectionError:
-            job = {'error': 'Could not connect to redis server.'}
-            print("Redis appears to be down.")
+            return {'error': 'Could not connect to redis server.'}
+        except NoJobsAvailableException:
+            return {'error': 'No jobs available'}
+
         self._set_redis_values(job)
 
-        self.job_queue.decrement_count(job.get('job_type', 'other'))
+        # what is the line below for??
+        # self.job_queue.decrement_count(job.get('job_type', 'other'))
         print(f'Job received: {job.get("job_type", "other")} for client: ',
               self.client_id)
 
-        link = 'https://www.regulations.gov/'
-        if 'error' in job:
-            raise NoJobsAvailableException()
+        # link = 'https://www.regulations.gov/'
+
         job = self._generate_job_dict(job)
 
-        print(f'Regulations.gov link: {link}' +
-              f'{self._remove_plural_from_job_type(job)}')
+        print(f'Regulations.gov link: {job["url"]}')
         print(f'API URL: {job["url"]}')
 
         return job
 
-    def _process_job_results(self, job, job_result):
-        # TODO new function for handling errors
-        # This function is not complete yet, but should replace send_job
-        data = {
-            'job_type': job['job_type'],
-            'job_id': job['job_id'],
-            'results': job_result,
-            'reg_id': job['reg_id'],
-            'agency': job['agency']
-        }
-        print(f'Sending Job {job["job_id"]} to Work Server')
-        if 'error' in job_result:
-            # Handles errors in job_results
-            result = self.redis.hget('jobs_in_progress', job.get('job_id'))
-            self.redis.hset('invalid_jobs', job.get('job_id'), result)
-
-        data['directory'] = self.path_generator.get_path(job_result)
-
-        self._put_results(data)
-        # We should increment the redis counter for the type downloaded here
-
-        comment_has_attachment = self._does_comment_have_attachment(job_result)
-        json_has_file_format = self._document_has_file_formats(job_result)
-
-        if data["job_type"] == "comments" and comment_has_attachment:
-            self._download_all_attachments_from_comment(data, job_result)
-        if data["job_type"] == "documents" and json_has_file_format:
-            document_htm = self._get_document_htm(job_result)
-            if document_htm is not None:
-                self._download_htm(job_result)
-
-    def _send_job(self, job, job_result):
+    def _download_job(self, job, job_result):
         """
-        Returns the job results to the workserver
+        Downloads the current job and saves the data using the Saver. Downloads
+        the attachments if there are any.
         If there are any errors in the job_result, the data json is returned
         as  {'job_id': job_id, 'results': job_result}
         else {
@@ -171,8 +146,8 @@ class Client:
 
         Parameters
         ----------
-        job_id : str
-            id for current job
+        job : dict
+            information about the job being completed
         job_result : dict
             results from a performed job
         """
@@ -183,13 +158,15 @@ class Client:
             'reg_id': job['reg_id'],
             'agency': job['agency']
         }
-        print(f'Sending Job {job["job_id"]} to Work Server')
-        if 'error' not in job_result:
-            data['directory'] = self.path_generator.get_path(job_result)
+        if 'error' in job_result:
+            # Handles errors in job_results
+            self.redis.hdel('jobs_in_progress', job.get('job_id'))
+            self.redis.hset('invalid_jobs', job.get('job_id'), job['url'])
+            return
+
+        data['directory'] = self.path_generator.get_path(job_result)
 
         self._put_results(data)
-        # self.put_results_to_mongo(data)
-        # Instead we should increment the redis counter for things downloaded
 
         comment_has_attachment = self._does_comment_have_attachment(job_result)
         json_has_file_format = self._document_has_file_formats(job_result)
@@ -211,9 +188,6 @@ class Client:
         data : dict
             the results from a performed job
         """
-        if any(x in data['results'] for x in ['error', 'errors']):
-            print(f"{data['job_id']}: Errors found in results")
-            return
         dir_, filename = data['directory'].rsplit('/', 1)
         self.saver.make_path(dir_)
         self.saver.save_json(f'/data{dir_}/{filename}', data)
@@ -279,7 +253,6 @@ class Client:
         '''
         Downloads a single attachment for a comment and
         writes it to its correct path
-        Also puts the attachment 'data' dict to the work server for mongo entry
 
         Parameters
         ----------
@@ -386,9 +359,8 @@ class Client:
     def job_operation(self):
         """
         Processes a job.
-        The Client gets the job from the workserver, performs the job
-        based on job_type, then sends back the job results to
-        the workserver.
+        The Client gets the job from the job queue, performs the job
+        based on job_type, then saves the job results using the saver class.
         """
         print('Processing job from work server')
         job = self._get_job()
@@ -397,6 +369,14 @@ class Client:
         result = response.json()
 
         self._send_job(job, result)
+        if any(x in job for x in ('error', 'errors')):
+            if job == {'error': 'No jobs available'}:
+                raise NoJobsAvailableException
+            print(f'FAILURE: Error in job\nError: {job["error"]}')
+            # if job is an error,
+            # should not continue with perform or download
+        result = self._perform_job(job['url'])
+        self._download_job(job, result)
         if any(x in result for x in ('error', 'errors')):
             print(f'FAILURE: Error in {job["url"]}\nError: {result["error"]}')
         else:
