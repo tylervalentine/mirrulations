@@ -1,11 +1,9 @@
 # pylint: disable=W0212
 import os
-# import json
-# from unittest.mock import patch
 import responses
 from mirrcore.path_generator import PathGenerator
 import pytest
-from pytest import fixture  # , raises
+from pytest import fixture
 import requests_mock
 from mirrclient.client import Client
 from mirrclient.client import is_environment_variables_present
@@ -14,7 +12,6 @@ from mirrclient.exceptions import APITimeoutException
 from mirrmock.mock_redis import ReadyRedis, InactiveRedis
 from mirrmock.mock_job_queue import MockJobQueue
 from requests.exceptions import ReadTimeout
-# from mirrmock.mock_redis import ReadyRedis  # BusyRedis
 
 
 BASE_URL = 'http://work_server:8080'
