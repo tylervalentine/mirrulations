@@ -34,8 +34,7 @@ class TestDataCounts(unittest.TestCase):
         """Tests that __get_total_elements correctly extracts
           the 'totalElements' value from a response"""
         # Set up mock data and objects
-        response = MagicMock()
-        response.json.return_value = {"meta": {"totalElements": 123}}
+        response = {"meta": {"totalElements": 123}}
 
         # Call the function we want to test
         total_elements = DataCounts(  # pylint: disable=W0212
