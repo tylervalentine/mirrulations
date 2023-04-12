@@ -466,7 +466,9 @@ def test_client_downloads_attachment_results(mocker, capsys):
                   ('http://downloads.regulations.gov/\
                    FDA-2016-D-2335/attachment_1.pdf'),
                   json='\bx17', status=200)
+
     client.job_operation()
+
     captured = capsys.readouterr()
     print_data = [
         'Processing job from RabbitMQ.\n',

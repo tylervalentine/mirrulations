@@ -116,7 +116,6 @@ class Client:
 
         self._set_redis_values(job)
 
-
         # update count for dashboard
         self.job_queue.decrement_count(job['job_type'])
 
@@ -206,7 +205,7 @@ class Client:
             delimiter = '&' if '?' in job_url else '?'
             url = f'{job_url}{delimiter}api_key={self.api_key}'
 
-            response = requests.get(url, timeout=10)
+            return requests.get(url, timeout=10)
         except requests.exceptions.ReadTimeout as exc:
             raise APITimeoutException from exc
 
@@ -402,7 +401,7 @@ if __name__ == '__main__':
             print('FAILURE: No Jobs Available.')
         except APITimeoutException:
             print('FAILURE: Request to API timed out.')
-        except requests.exceptions.HTTPError as err: 
+        except requests.exceptions.HTTPError as err:
             print(f"HTTP error {err.response.status_code} occurred: {err}")
         except Exception as e:  # pylint: disable=W0718
             print(e)
