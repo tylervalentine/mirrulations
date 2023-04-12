@@ -116,8 +116,10 @@ class Client:
 
         self._set_redis_values(job)
 
-        # what is the line below for??
-        # self.job_queue.decrement_count(job.get('job_type', 'other'))
+
+        # update count for dashboard
+        self.job_queue.decrement_count(job['job_type'])
+
         print(f'Job received: {job.get("job_type", "other")} for client: ',
               self.client_id)
 
