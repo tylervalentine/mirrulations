@@ -201,11 +201,10 @@ class Client:
             json results of the performed job
         """
         try:
-            if "?" in job_url:
-                return requests.get(job_url + f'&api_key={self.api_key}',
-                                    timeout=10)
-            return requests.get(job_url + f'?api_key={self.api_key}',
-                                timeout=10)
+            delimiter = '&' if '?' in job_url else '?'
+            url = f'{job_url}{delimiter}api_key={self.api_key}'
+
+            response = requests.get(url, timeout=10)
         except requests.exceptions.ReadTimeout as exc:
             raise APITimeoutException from exc
 
