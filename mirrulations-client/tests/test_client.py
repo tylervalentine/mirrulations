@@ -7,8 +7,10 @@ from mirrcore.path_generator import PathGenerator
 import pytest
 from pytest import fixture  # , raises
 import requests_mock
-from mirrclient.client import NoJobsAvailableException, Client
+from mirrclient.client import Client
 from mirrclient.client import is_environment_variables_present
+from mirrclient.exceptions import NoJobsAvailableException
+from mirrclient.exceptions import APITimeoutException
 from mirrmock.mock_redis import ReadyRedis, InactiveRedis
 from mirrmock.mock_job_queue import MockJobQueue
 from requests.exceptions import ReadTimeout
@@ -153,8 +155,8 @@ def test_get_job():
 
 def test_get_job_is_empty():
     client = Client(ReadyRedis(), MockJobQueue())
-    job = {'error': 'No jobs available'}
-    assert client._get_job() == job
+    with pytest.raises(NoJobsAvailableException):
+        client._get_job()
 
 
 def test_does_comment_have_attachment_has_attachment():
@@ -233,7 +235,7 @@ def test_get_output_path_error(path_generator):
 
 
 @responses.activate
-def test_client_handles_read_timeout():
+def test_client_handles_api_timeout():
     mock_redis = ReadyRedis()
     client = Client(mock_redis, MockJobQueue())
     client.api_key = 1234
@@ -244,24 +246,11 @@ def test_client_handles_read_timeout():
 
     responses.get("http://regulations.gov/job",
                   body=ReadTimeout("Read Timeout"))
-    client.job_operation()
+
+    with pytest.raises(APITimeoutException):
+        client.job_operation()
+
     assert mock_redis.get('invalid_jobs') == [1, 'http://regulations.gov/job']
-
-
-def test_client_handles_error_in_download_job():
-    mock_redis = ReadyRedis()
-    client = Client(mock_redis, MockJobQueue())
-    mock_redis.set('jobs_in_progress', ['foo', 'var'])
-    mock_redis.set('client_jobs', ['foo', 'bar'])
-    job = {'job_id': 1,
-           'url': 'fake.com',
-           'job_type': "comments",
-           "reg_id": "test_id",
-           "agency": "test_agency"
-           }
-    job_result = {"error": "Timeout"}
-    client._download_job(job, job_result)
-    assert mock_redis.get('invalid_jobs') == [1, 'fake.com']
 
 
 @responses.activate
@@ -337,19 +326,18 @@ def test_downloading_htm_send_job(capsys, mocker):
     client.job_operation()
     captured = capsys.readouterr()
     print_data = [
-        'Processing job from work server\n',
+        'Processing job from RabbitMQ.\n',
         'Attempting to get job\n',
         'Job received from job queue\n',
-        'Job received: documents for client:  -1\n'
+        'Job received: documents for client:  -1\n',
         'Regulations.gov link: http://regulations.gov/documents\n',
         'API URL: http://regulations.gov/documents\n',
-        'Performing job\n',
+        'Performing job.\n',
         ('SAVED document HTM '
             '- http://downloads.regulations.gov/USTR-2015-0010-0001/'
             'content.htm to path:  '
             '/USTR/USTR-2015-0010/text-USTR-2015-0010/documents/'
-            '1_content.htm\n'),
-        'SUCCESS: http://regulations.gov/documents complete\n'
+            '1_content.htm\n')
     ]
     assert captured.out == "".join(print_data)
 
@@ -484,16 +472,15 @@ def test_client_downloads_attachment_results(mocker, capsys):
     client.job_operation()
     captured = capsys.readouterr()
     print_data = [
-        'Processing job from work server\n',
+        'Processing job from RabbitMQ.\n',
         'Attempting to get job\n',
         'Job received from job queue\n',
-        'Job received: comments for client:  -1\n'
+        'Job received: comments for client:  -1\n',
         'Regulations.gov link: http://regulations.gov/comments\n',
         'API URL: http://regulations.gov/comments\n',
-        'Performing job\n',
-        'Found 1 attachment(s) for Comment - FDA-2016-D-2335-1566\n'
+        'Performing job.\n',
+        'Found 1 attachment(s) for Comment - FDA-2016-D-2335-1566\n',
         'Downloaded 1/1 attachment(s) for Comment - FDA-2016-D-2335-1566\n'
-        'SUCCESS: http://regulations.gov/comments complete\n'
     ]
     assert captured.out == "".join(print_data)
 

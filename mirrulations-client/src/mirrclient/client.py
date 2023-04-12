@@ -7,9 +7,9 @@ from dotenv import load_dotenv
 from mirrcore.redis_check import load_redis
 from mirrcore.path_generator import PathGenerator
 from mirrcore.job_queue import JobQueue
-from mirrcore.job_queue_exceptions import JobQueueException
 from mirrclient.saver import Saver
 from mirrclient.exceptions import NoJobsAvailableException
+from mirrclient.exceptions import APITimeoutException
 
 
 def is_environment_variables_present():
@@ -67,13 +67,19 @@ class Client:
         return True
 
     def _get_job_from_job_queue(self):
-        self._can_connect_to_database()
+        print('Attempting to get job')
+
+        if not self._can_connect_to_database():
+            # temporary, ideally we should get
+            # rid of _can_connect_to_database() altogether
+            raise NoJobsAvailableException
 
         if self.job_queue.get_num_jobs() == 0:
             raise NoJobsAvailableException
 
         job = self.job_queue.get_job()
-        print("Job received from job queue")
+        print('Job received from job queue')
+
         return job
 
     def _generate_job_dict(self, job):
@@ -103,16 +109,7 @@ class Client:
         :raises: NoJobsAvailableException
             If no job is available from the work server
         """
-
-        print("Attempting to get job")
-        try:
-            job = self._get_job_from_job_queue()
-        except JobQueueException:
-            return {'error': 'The job queue encountered an error'}
-        except redis.exceptions.ConnectionError:
-            return {'error': 'Could not connect to redis server.'}
-        except NoJobsAvailableException:
-            return {'error': 'No jobs available'}
+        job = self._get_job_from_job_queue()
 
         self._set_redis_values(job)
 
@@ -154,11 +151,6 @@ class Client:
             'reg_id': job['reg_id'],
             'agency': job['agency']
         }
-        if 'error' in job_result:
-            # Handles errors in job_results
-            self.redis.hdel('jobs_in_progress', job.get('job_id'))
-            self.redis.hset('invalid_jobs', job.get('job_id'), job['url'])
-            return
 
         data['directory'] = self.path_generator.get_path(job_result)
 
@@ -204,15 +196,14 @@ class Client:
         dict
             json results of the performed job
         """
-        print('Performing job')
         try:
             if "?" in job_url:
                 return requests.get(job_url + f'&api_key={self.api_key}',
                                     timeout=10).json()
             return requests.get(job_url + f'?api_key={self.api_key}',
                                 timeout=10).json()
-        except requests.exceptions.ReadTimeout:
-            return {"error": "Read Timeout"}
+        except requests.exceptions.ReadTimeout as exc:
+            raise APITimeoutException from exc
 
     def _download_all_attachments_from_comment(self, data, comment_json):
         '''
@@ -353,33 +344,43 @@ class Client:
             return False
         return True
 
+    def _report_bad_job(self, job):
+        self.redis.hdel('jobs_in_progress', job['job_id'])
+        self.redis.hset('invalid_jobs', job['job_id'], job['url'])
+
     def job_operation(self):
         """
         Processes a job.
-        The Client gets the job from the workserver, performs the job
-        based on job_type, then sends back the job results to
-        the workserver.
+        The Client gets a job from RabbitMQ,
+        and then performs it based on its 'job_type'.
         """
-        print('Processing job from work server')
+        print('Processing job from RabbitMQ.')
+
         job = self._get_job()
-        if any(x in job for x in ('error', 'errors')):
-            if job == {'error': 'No jobs available'}:
-                raise NoJobsAvailableException
-            print(f'FAILURE: Error in job\nError: {job["error"]}')
-            # TODO if job is an error,
-            # should not continue with perform or download
-        result = self._perform_job(job['url'])
-        self._download_job(job, result)
-        if any(x in result for x in ('error', 'errors')):
-            print(f'FAILURE: Error in {job["url"]}\nError: {result["error"]}')
-        else:
-            print(f'SUCCESS: {job["url"]} complete')
+
+        try:
+            print('Performing job.')
+            result = self._perform_job(job['url'])
+
+            self._download_job(job, result)
+        except Exception as exc:
+            try:
+                self._report_bad_job(job)
+            except redis.exceptions.ConnectionError:
+                print('FAILURE: Could save bad job to Redis.')
+            except Exception as exc2:  # pylint: disable=W0718
+                print(exc2)
+
+            # re-raise whatever exception was being thrown
+            raise exc
+
+        return job
 
 
 if __name__ == '__main__':
     load_dotenv()
     if not is_environment_variables_present():
-        print('Need client environment variables')
+        print('Need client environment variables.')
         sys.exit(1)
 
     redis_client = load_redis()
@@ -387,7 +388,15 @@ if __name__ == '__main__':
 
     while True:
         try:
-            client.job_operation()
+            job_ = client.job_operation()
+        except redis.exceptions.ConnectionError:
+            print('FAILURE: Could not connect to Redis.')
         except NoJobsAvailableException:
-            print("No Jobs Available")
+            print('FAILURE: No Jobs Available.')
+        except APITimeoutException:
+            print('FAILURE: Request to API timed out.')
+        except Exception as e:  # pylint: disable=W0718
+            print(e)
+
+        print(f'SUCCESS: {job_["url"]} complete.')
         time.sleep(3.6)
