@@ -85,14 +85,14 @@ def test_client_has_no_id():
     assert is_environment_variables_present() is False
 
 
-def test_generate_job_dict():
+def test_set_missing_job_key_defaults():
     client = Client(ReadyRedis(), MockJobQueue())
     job = {
         'job_id': 1,
         'url': 'regulations.gov',
         'job_type': 'comments'
     }
-    job = client._generate_job_dict(job)
+    job = client._set_missing_job_key_defaults(job)
     final_job = {
         'job_id': 1,
         'url': 'regulations.gov',
@@ -326,7 +326,7 @@ def test_downloading_htm_send_job(capsys, mocker):
         'Processing job from RabbitMQ.\n',
         'Attempting to get job\n',
         'Job received from job queue\n',
-        'Job received: documents for client:  -1\n',
+        'Job received: documents for client: -1\n',
         'Regulations.gov link: http://regulations.gov/documents\n',
         'API URL: http://regulations.gov/documents\n',
         'Performing job.\n',
@@ -474,7 +474,7 @@ def test_client_downloads_attachment_results(mocker, capsys):
         'Processing job from RabbitMQ.\n',
         'Attempting to get job\n',
         'Job received from job queue\n',
-        'Job received: comments for client:  -1\n',
+        'Job received: comments for client: -1\n',
         'Regulations.gov link: http://regulations.gov/comments\n',
         'API URL: http://regulations.gov/comments\n',
         'Performing job.\n',

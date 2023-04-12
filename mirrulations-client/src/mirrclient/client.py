@@ -85,16 +85,19 @@ class Client:
 
         return job
 
-    def _generate_job_dict(self, job):
-        return {'job_id': job['job_id'],
-                'url': job['url'],
-                'job_type': job.get('job_type', 'other'),
-                'reg_id': job.get('reg_id', 'other_reg_id'),
-                'agency': job.get('agency', 'other_agency')}
+    def _set_default_key(self, job, key, default_value):
+        if key not in job:
+            job[key] = default_value
+
+    def _set_missing_job_key_defaults(self, job):
+        self._set_default_key(job, 'job_type', 'other')
+        self._set_default_key(job, 'reg_id', 'other_reg_id')
+        self._set_default_key(job, 'agency', 'other_agency')
+        return job
 
     def _set_redis_values(self, job):
-        self.redis.hset('jobs_in_progress', job.get('job_id'), job.get('url'))
-        self.redis.hset('client_jobs', job.get('job_id'), self.client_id)
+        self.redis.hset('jobs_in_progress', job['job_id'], job['url'])
+        self.redis.hset('client_jobs', job['job_id'], self.client_id)
 
     def _remove_plural_from_job_type(self, job):
         split_url = str(job['url']).split('/')
@@ -114,17 +117,15 @@ class Client:
         """
         job = self._get_job_from_job_queue()
 
+        job = self._set_missing_job_key_defaults(job)
+
         self._set_redis_values(job)
 
         # update count for dashboard
         self.job_queue.decrement_count(job['job_type'])
 
-        print(f'Job received: {job.get("job_type", "other")} for client: ',
-              self.client_id)
-
-        # link = 'https://www.regulations.gov/'
-
-        job = self._generate_job_dict(job)
+        print(f'Job received: {job["job_type"]}'
+              + f' for client: {self.client_id}')
 
         print(f'Regulations.gov link: {job["url"]}')
         print(f'API URL: {job["url"]}')
