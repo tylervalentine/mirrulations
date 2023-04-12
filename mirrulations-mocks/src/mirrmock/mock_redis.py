@@ -86,6 +86,9 @@ class MockRedisWithStorage():
             self.data[key] = int(0)
         self.data[f'{key}'] = value
 
+    def ping(self):
+        return True
+
     def exists(self, key):
         return key in self.data
 

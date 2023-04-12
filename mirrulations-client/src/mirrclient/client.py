@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from mirrcore.redis_check import load_redis
 from mirrcore.path_generator import PathGenerator
 from mirrcore.job_queue import JobQueue
+from mirrcore.jobs_statistics import JobStatistics
 from mirrclient.saver import Saver
 from mirrclient.exceptions import NoJobsAvailableException
 from mirrclient.exceptions import APITimeoutException
@@ -53,7 +54,6 @@ class Client:
         Queue of all of the jobs that need to be completed. The client will
         directly pull jobs from this queue.
     """
-
     def __init__(self, redis_server, job_queue):
         self.api_key = os.getenv('API_KEY')
         self.client_id = os.getenv('ID')
@@ -61,6 +61,8 @@ class Client:
         self.saver = Saver()
         self.redis = redis_server
         self.job_queue = job_queue
+        self.cache = JobStatistics(redis_server)
+        self.bucket_name = "mirrulations"
 
     def _can_connect_to_database(self):
         try:
@@ -157,8 +159,9 @@ class Client:
             'reg_id': job['reg_id'],
             'agency': job['agency']
         }
-
+        print(f'Downloading Job {job["job_id"]}')
         data['directory'] = self.path_generator.get_path(job_result)
+        self.cache.increase_jobs_done(data['job_type'])
 
         self._put_results(data)
 
@@ -185,6 +188,9 @@ class Client:
         dir_, filename = data['directory'].rsplit('/', 1)
         self.saver.make_path(dir_)
         self.saver.save_json(f'/data{dir_}/{filename}', data)
+        self.saver.save_json_to_s3(bucket=self.bucket_name,
+                                   path=f'{dir_[1:]}/{filename}',
+                                   data=data)
         print(f"{data['job_id']}: Results written to disk")
 
     def _perform_job(self, job_url):
@@ -240,6 +246,7 @@ class Client:
                     print(f"Downloaded {counter+1}/{len(path_list)} "
                           f"attachment(s) for {comment_id_str}")
                     counter += 1
+                    self.cache.increase_jobs_done('attachment')
 
     def _download_single_attachment(self, url, path, data):
         '''
@@ -265,23 +272,18 @@ class Client:
         dir_, filename = path.rsplit('/', 1)
         self.saver.make_path(dir_)
         self.saver.save_attachment(f'/data{dir_}/{filename}', response.content)
+        self.saver.save_binary_to_s3(bucket=self.bucket_name,
+                                     path=f'{dir_[1:]}/{filename}',
+                                     data=response.content)
         print(f"SAVED attachment - {url} to path: ", path)
         filename = path.split('/')[-1]
-        data = self._add_attachment_information_to_data(data, path, filename)
-        # self.put_results_to_mongo(data)
-        # Instead we should increment the redis counter for attachments
-        # downloaded
+        data = self.add_attachment_information_to_data(data, path, filename)
 
     def _add_attachment_information_to_data(self, data, path, filename):
         data['job_type'] = 'attachments'
         data['attachment_path'] = f'/data/data{path}'
         data['attachment_filename'] = filename
         return data
-
-    # def put_results_to_mongo(self, data):
-    #     requests.put(f'{self.url}/put_results', json=dumps(data),
-    #                  params={'client_id': self.client_id},
-    #                  timeout=10)
 
     def _does_comment_have_attachment(self, comment_json):
         """
@@ -314,6 +316,7 @@ class Client:
             self.saver.save_attachment(f'/data{dir_}/{filename}',
                                        response.content)
             print(f"SAVED document HTM - {url} to path: ", path)
+            self.cache.increase_jobs_done('attachment')
 
     def _get_document_htm(self, json):
         """
@@ -340,11 +343,11 @@ class Client:
         -------
         true if the necessary attribute exists
         """
-        if "data" not in json:
+        if "data" not in json or "attributes" not in \
+            json["data"] or "fileFormats" not in \
+                json["data"]["attributes"]:
             return False
-        if "attributes" not in json["data"]:
-            return False
-        if "fileFormats" not in json["data"]["attributes"]:
+        if json["data"]["attributes"]["fileFormats"] is None:
             return False
         return True
 
@@ -374,9 +377,7 @@ class Client:
             try:
                 self._report_bad_job(job)
             except redis.exceptions.ConnectionError:
-                print('FAILURE: Could save bad job to Redis.')
-            except Exception as exc2:  # pylint: disable=W0718
-                print(exc2)
+                print("FAILURE: Couldn't save bad job to Redis.")
 
             # re-raise whatever exception was being thrown
             raise exc
@@ -390,7 +391,11 @@ if __name__ == '__main__':
         print('Need client environment variables.')
         sys.exit(1)
 
-    redis_client = load_redis()
+    try:
+        redis_client = load_redis()
+    except redis.exceptions.ConnectionError:
+        print('There is no Redis database to connect to.')
+        sys.exit(1)
     client = Client(redis_client, JobQueue(redis_client))
 
     while True:
@@ -404,8 +409,6 @@ if __name__ == '__main__':
             print('FAILURE: Request to API timed out.')
         except requests.exceptions.HTTPError as err:
             print(f"HTTP error {err.response.status_code} occurred: {err}")
-        except Exception as e:  # pylint: disable=W0718
-            print(e)
 
         print(f'SUCCESS: {job_["url"]} complete.')
         time.sleep(3.6)

@@ -11,7 +11,7 @@ class JobQueue:
 
     def __init__(self, database):
         self.database = database
-        self.rabbitmq = RabbitMQ()
+        self.rabbitmq = RabbitMQ('jobs_waiting_queue')
 
         if not self.database.exists('num_jobs_comments_waiting'):
             self.database.set('num_jobs_comments_waiting', 0)
