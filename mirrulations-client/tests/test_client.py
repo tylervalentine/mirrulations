@@ -483,8 +483,6 @@ def test_client_downloads_attachment_results(mocker, capsys):
     ]
     assert captured.out == "".join(print_data)
 
-    client.job_operation()
-
 
 # def test_handles_empty_attachment_list(mock_requests):
 #     """
