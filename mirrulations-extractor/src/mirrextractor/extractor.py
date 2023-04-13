@@ -50,7 +50,7 @@ class Extractor:
                   attachment_path)
 
     @staticmethod
-    def _extract_pdf(attachment_path, save_path):
+    def _extract_pdf(attachment_path, save_path):  # pylint: disable=R0915
         """
         This method takes a complete path to a pdf and stores
         the extracted text in the save_path.

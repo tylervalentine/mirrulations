@@ -32,7 +32,7 @@ class JobStatistics:
         extractions = int(self.cache.get(EXTRACTIONS_DONE))
 
         return {
-            'num_jobs_done': dockets + documents + comments + attachments + 
+            'num_jobs_done': dockets + documents + comments + attachments +
             extractions,
 
             DOCKETS_DONE: dockets,
