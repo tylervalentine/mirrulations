@@ -45,7 +45,6 @@ class JobStatistics:
         elif job_type == 'attachment':
             self.cache.incr(ATTACHMENTS_DONE)
 
-
     def get_data_totals(self):
         """
         Gets the total number of dockets, documents, and comments
