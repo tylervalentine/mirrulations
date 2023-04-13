@@ -44,3 +44,14 @@ class JobStatistics:
             self.cache.incr(COMMENTS_DONE)
         elif job_type == 'attachment':
             self.cache.incr(ATTACHMENTS_DONE)
+
+
+    def get_data_totals(self):
+        """
+        Gets the total number of dockets, documents, and comments
+        in Regulations.gov from the values in Redis.
+        """
+        dockets_total = int(self.cache.get('dockets_total'))
+        documents_total = int(self.cache.get('documents_total'))
+        comments_total = int(self.cache.get('comments_total'))
+        return [dockets_total, documents_total, comments_total]
