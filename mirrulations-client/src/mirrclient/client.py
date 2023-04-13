@@ -62,7 +62,6 @@ class Client:
         self.redis = redis_server
         self.job_queue = job_queue
         self.cache = JobStatistics(redis_server)
-        self.bucket_name = "mirrulations"
 
     def _can_connect_to_database(self):
         try:
@@ -169,7 +168,7 @@ class Client:
         json_has_file_format = self._document_has_file_formats(job_result)
 
         if data["job_type"] == "comments" and comment_has_attachment:
-            self._download_all_attachments_from_comment(data, job_result)
+            self._download_all_attachments_from_comment(job_result)
         if data["job_type"] == "documents" and json_has_file_format:
             document_htm = self._get_document_htm(job_result)
             if document_htm is not None:
@@ -188,7 +187,7 @@ class Client:
         dir_, filename = data['directory'].rsplit('/', 1)
         self.saver.make_path(dir_)
         self.saver.save_json(f'/data{dir_}/{filename}', data)
-        self.saver.save_json_to_s3(bucket=self.bucket_name,
+        self.saver.save_json_to_s3(bucket="mirrulations",
                                    path=f'{dir_[1:]}/{filename}',
                                    data=data)
         print(f"{data['job_id']}: Results written to disk")
@@ -216,7 +215,7 @@ class Client:
         except requests.exceptions.ReadTimeout as exc:
             raise APITimeoutException from exc
 
-    def _download_all_attachments_from_comment(self, data, comment_json):
+    def _download_all_attachments_from_comment(self, comment_json):
         '''
         Downloads all attachments for a comment
 
@@ -241,8 +240,7 @@ class Client:
                     not in ["null", None]):
                 for attachment in included['attributes']['fileFormats']:
                     self._download_single_attachment(attachment['fileUrl'],
-                                                     path_list[counter],
-                                                     data)
+                                                     path_list[counter])
                     print(f"Downloaded {counter+1}/{len(path_list)} "
                           f"attachment(s) for {comment_id_str}")
                     counter += 1
@@ -272,7 +270,7 @@ class Client:
         dir_, filename = path.rsplit('/', 1)
         self.saver.make_path(dir_)
         self.saver.save_attachment(f'/data{dir_}/{filename}', response.content)
-        self.saver.save_binary_to_s3(bucket=self.bucket_name,
+        self.saver.save_binary_to_s3(bucket="mirrulations",
                                      path=f'{dir_[1:]}/{filename}',
                                      data=response.content)
         print(f"SAVED attachment - {url} to path: ", path)
