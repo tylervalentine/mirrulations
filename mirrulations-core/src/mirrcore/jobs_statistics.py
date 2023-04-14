@@ -2,7 +2,8 @@ DOCKETS_DONE = "num_dockets_done"
 DOCUMENTS_DONE = "num_documents_done"
 COMMENTS_DONE = "num_comments_done"
 ATTACHMENTS_DONE = 'num_attachments_done'
-PDF_EXTRACTIONS_DONE = 'num_extractions_done'
+PDF_ATTACHMENTS_DONE = 'num_pdf_attachments_done'
+EXTRACTIONS_DONE = 'num_extractions_done'
 
 
 class JobStatistics:
@@ -13,23 +14,19 @@ class JobStatistics:
         self._check_keys_exist()
 
     def _check_keys_exist(self):
-        if not self.cache.exists(DOCKETS_DONE):
-            self.cache.set(DOCKETS_DONE, 0)
-        if not self.cache.exists(DOCUMENTS_DONE):
-            self.cache.set(DOCUMENTS_DONE, 0)
-        if not self.cache.exists(COMMENTS_DONE):
-            self.cache.set(COMMENTS_DONE, 0)
-        if not self.cache.exists(ATTACHMENTS_DONE):
-            self.cache.set(ATTACHMENTS_DONE, 0)
-        if not self.cache.exists(PDF_EXTRACTIONS_DONE):
-            self.cache.set(PDF_EXTRACTIONS_DONE, 0)
+        keys = [DOCKETS_DONE, DOCUMENTS_DONE, COMMENTS_DONE, ATTACHMENTS_DONE,
+                PDF_ATTACHMENTS_DONE, EXTRACTIONS_DONE]
+        for key in keys:
+            if not self.cache.exists(key):
+                self.cache.set(key, 0)
 
     def get_jobs_done(self):
         dockets = int(self.cache.get(DOCKETS_DONE))
         documents = int(self.cache.get(DOCUMENTS_DONE))
         comments = int(self.cache.get(COMMENTS_DONE))
         attachments = int(self.cache.get(ATTACHMENTS_DONE))
-        extractions = int(self.cache.get(PDF_EXTRACTIONS_DONE))
+        pdfs = int(self.cache.get(PDF_ATTACHMENTS_DONE))
+        extractions = int(self.cache.get(EXTRACTIONS_DONE))
 
         return {
             'num_jobs_done': dockets + documents + comments + attachments +
@@ -39,10 +36,18 @@ class JobStatistics:
             DOCUMENTS_DONE: documents,
             COMMENTS_DONE: comments,
             ATTACHMENTS_DONE: attachments,
-            PDF_EXTRACTIONS_DONE: extractions
+            PDF_ATTACHMENTS_DONE: pdfs,
+            EXTRACTIONS_DONE: extractions
         }
 
-    def increase_jobs_done(self, job_type):
+    def increase_jobs_done(self, job_type, is_pdf=False):
+        """
+        increment the cache counter (currently redis) for the given job type
+        when completed
+
+        :param job_type: the type of job completed
+        :param is_pdf: whether an attachment completed is a pdf
+        """
         if job_type == "dockets":
             self.cache.incr(DOCKETS_DONE)
         elif job_type == 'documents':
@@ -51,9 +56,11 @@ class JobStatistics:
             self.cache.incr(COMMENTS_DONE)
         elif job_type == 'attachment':
             self.cache.incr(ATTACHMENTS_DONE)
+            if is_pdf:
+                self.cache.incr(PDF_ATTACHMENTS_DONE)
 
-    def increase_pdf_extractions_done(self):
+    def increase_extractions_done(self):
         """
         Not a job being completed in the client
         """
-        self.cache.incr(PDF_EXTRACTIONS_DONE)
+        self.cache.incr(EXTRACTIONS_DONE)

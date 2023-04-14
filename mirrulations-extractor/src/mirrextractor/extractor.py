@@ -88,7 +88,7 @@ class Extractor:
             out_file.write(text.strip())
         print(f"SUCCESS: Saved extraction at {save_path}")
         try:
-            Extractor.job_stat.increase_pdf_extractions_done()
+            Extractor.job_stat.increase_extractions_done()
         except redis.ConnectionError as error:
             print(f"Coudn't increase extraction cache number due to: {error}")
 
