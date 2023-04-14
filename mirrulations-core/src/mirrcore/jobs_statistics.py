@@ -2,7 +2,7 @@ DOCKETS_DONE = "num_dockets_done"
 DOCUMENTS_DONE = "num_documents_done"
 COMMENTS_DONE = "num_comments_done"
 ATTACHMENTS_DONE = 'num_attachments_done'
-EXTRACTIONS_DONE = 'num_extractions_done'
+PDF_EXTRACTIONS_DONE = 'num_extractions_done'
 
 
 class JobStatistics:
@@ -21,15 +21,15 @@ class JobStatistics:
             self.cache.set(COMMENTS_DONE, 0)
         if not self.cache.exists(ATTACHMENTS_DONE):
             self.cache.set(ATTACHMENTS_DONE, 0)
-        if not self.cache.exists(EXTRACTIONS_DONE):
-            self.cache.set(EXTRACTIONS_DONE, 0)
+        if not self.cache.exists(PDF_EXTRACTIONS_DONE):
+            self.cache.set(PDF_EXTRACTIONS_DONE, 0)
 
     def get_jobs_done(self):
         dockets = int(self.cache.get(DOCKETS_DONE))
         documents = int(self.cache.get(DOCUMENTS_DONE))
         comments = int(self.cache.get(COMMENTS_DONE))
         attachments = int(self.cache.get(ATTACHMENTS_DONE))
-        extractions = int(self.cache.get(EXTRACTIONS_DONE))
+        extractions = int(self.cache.get(PDF_EXTRACTIONS_DONE))
 
         return {
             'num_jobs_done': dockets + documents + comments + attachments +
@@ -39,7 +39,7 @@ class JobStatistics:
             DOCUMENTS_DONE: documents,
             COMMENTS_DONE: comments,
             ATTACHMENTS_DONE: attachments,
-            EXTRACTIONS_DONE: extractions
+            PDF_EXTRACTIONS_DONE: extractions
         }
 
     def increase_jobs_done(self, job_type):
@@ -52,8 +52,8 @@ class JobStatistics:
         elif job_type == 'attachment':
             self.cache.incr(ATTACHMENTS_DONE)
 
-    def increase_extractions_done(self):
+    def increase_pdf_extractions_done(self):
         """
         Not a job being completed in the client
         """
-        self.cache.incr(EXTRACTIONS_DONE)
+        self.cache.incr(PDF_EXTRACTIONS_DONE)

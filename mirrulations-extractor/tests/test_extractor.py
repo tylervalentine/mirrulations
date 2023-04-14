@@ -49,7 +49,6 @@ def test_text_extraction_throws_error(mocker, capfd):
 
 def test_init_job_statistics(mocker):
     mocker.patch('redis.Redis', return_value=MockRedisWithStorage())
-    # Extractor.job_stat = job_stat
     Extractor.init_job_stat()
 
 
@@ -61,7 +60,7 @@ def test_redis_connection_error(mocker, capfd):
     mocker.patch("builtins.open", mocker.mock_open())
     job_stat = JobStatistics(MockRedisWithStorage())
     Extractor.job_stat = job_stat
-    Extractor.job_stat.increase_extractions_done = \
+    Extractor.job_stat.increase_pdf_extractions_done = \
         mocker.Mock(side_effect=redis.ConnectionError)
     Extractor.extract_text('a.pdf', 'b.txt')
     assert "Coudn't increase extraction cache number due to:" \
