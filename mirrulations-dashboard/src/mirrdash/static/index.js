@@ -113,6 +113,7 @@ const updateClientDashboardData = () => {
         updateCount("dockets-done",num_dockets_done);
         // Current estimate of number of attachments (from comments)
         updateCount("attachments-done",num_attachments_done); 
+        updateCount("pdf-attachments-done", num_pdf_attachments_done)
         updateCount("comments-done",num_comments_done);
         updateCount("documents-done",num_documents_done);
         updateCount("pdf-extractions-done", num_extractions_done)
