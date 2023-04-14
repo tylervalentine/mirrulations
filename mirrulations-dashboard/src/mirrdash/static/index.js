@@ -108,7 +108,8 @@ const updateClientDashboardData = () => {
         updateJobTypeProgress("documents-done",num_documents_done, regulations_total_documents);
         updateJobTypeProgress("comments-done",num_comments_done, regulations_total_comments);
         // Current estimate of number of attachments (from comments)
-        updateJobTypeProgress("attachments-done",num_attachments_done, 15000000); 
+        const regulations_total_attachments = num_attachments_done / num_comments_done * regulations_total_comments;
+        updateJobTypeProgress("attachments-done",num_attachments_done, regulations_total_attachments); 
         // Counts for numbers
         updateCount("dockets-done",num_dockets_done);
         updateCount("documents-done",num_documents_done);
