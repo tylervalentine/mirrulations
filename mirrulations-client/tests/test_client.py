@@ -533,7 +533,7 @@ def test_client_downloads_attachment_results(mock_requests):
                 "included": [{
                     "attributes": {
                         "fileFormats": [{
-                            "fileUrl": "https://fakeurl.gov"
+                            "fileUrl": "https://fakeurl.gov.pdf"
                         }]
                     }
                 }]
@@ -548,6 +548,10 @@ def test_client_downloads_attachment_results(mock_requests):
         mock_requests.put('http://work_server:8080/put_results', text='{}')
 
         client.job_operation()
+        job_stat_results = client.cache.get_jobs_done()
+        assert job_stat_results['num_comments_done'] == 1
+        assert job_stat_results['num_attachments_done'] == 1
+        assert job_stat_results['num_pdf_attachments_done'] == 1
         put_request = mock_requests.request_history[2]
         json_data = json.loads(put_request.json())
         assert json_data['job_id'] == "1"
@@ -649,9 +653,6 @@ def test_success_attachment_logging(capsys, mock_requests):
         )
         mock_requests.put('http://work_server:8080/put_results', text='{}')
         client.job_operation()
-
-        assert client.cache.get_jobs_done()['num_comments_done'] == 1
-        assert client.cache.get_jobs_done()['num_attachments_done'] == 1
 
         print_data = {
             'Processing job from work server\n'
@@ -791,9 +792,9 @@ def test_two_attachments_in_comment(mock_requests):
                 "included": [{
                     "attributes": {
                         "fileFormats": [{
-                            "fileUrl": "https://downloads.regulations.gov/1"
+                            "fileUrl": "https://downloads.regulations.gov/.pdf"
                         }, {
-                            "fileUrl": "https://downloads.regulations.gov/2"
+                            "fileUrl": "https://downloads.regulations.gov/.doc"
                         }]
                     }
                 }]
@@ -808,9 +809,10 @@ def test_two_attachments_in_comment(mock_requests):
         )
         mock_requests.put('http://work_server:8080/put_results', text='{}')
         client.job_operation()
-
-        assert client.cache.get_jobs_done()['num_comments_done'] == 1
-        assert client.cache.get_jobs_done()['num_attachments_done'] == 2
+        results = client.cache.get_jobs_done()
+        assert results['num_comments_done'] == 1
+        assert results['num_attachments_done'] == 2
+        assert results['num_pdf_attachments_done'] == 1
 
 
 def test_add_attachment_information_to_data():

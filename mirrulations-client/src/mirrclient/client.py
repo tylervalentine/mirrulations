@@ -224,7 +224,8 @@ class Client:
                     print(f"Downloaded {counter+1}/{len(path_list)} "
                           f"attachment(s) for {comment_id_str}")
                     counter += 1
-                    self.cache.increase_jobs_done('attachment')
+                    self.cache.increase_jobs_done('attachment',
+                                                  url.endswith('.pdf'))
 
     def download_single_attachment(self, url, path, data):
         '''
