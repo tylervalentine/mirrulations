@@ -1,4 +1,3 @@
-# pylint: disable=too-many-arguments
 import os
 from mirrcore.rabbitmq import RabbitMQ
 
