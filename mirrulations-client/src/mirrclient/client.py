@@ -403,7 +403,8 @@ if __name__ == '__main__':
         except APITimeoutException:
             print('FAILURE: Request to API timed out.')
         except requests.exceptions.HTTPError as err:
-            print(f"FAILURE: HTTP error {err.response.status_code} occurred: {err}")
+            print(f"FAILURE: HTTP error\
+                  {err.response.status_code} occurred: {err}")
         except JobQueueException:
             print("The Job Queue is down.")
         except AMQPConnectionError:
