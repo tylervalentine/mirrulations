@@ -8,9 +8,11 @@ from mirrcore.redis_check import load_redis
 from mirrcore.path_generator import PathGenerator
 from mirrcore.job_queue import JobQueue
 from mirrcore.jobs_statistics import JobStatistics
+from mirrcore.job_queue_exceptions import JobQueueException
 from mirrclient.saver import Saver
 from mirrclient.exceptions import NoJobsAvailableException
 from mirrclient.exceptions import APITimeoutException
+from pika.exceptions import AMQPConnectionError
 
 
 def is_environment_variables_present():
@@ -392,6 +394,7 @@ if __name__ == '__main__':
     while True:
         try:
             job_ = client.job_operation()
+            print(f'SUCCESS: {job_["url"]} complete.')
         except redis.exceptions.ConnectionError:
             print('FAILURE: Could not connect to Redis.')
         except NoJobsAvailableException:
@@ -400,6 +403,9 @@ if __name__ == '__main__':
             print('FAILURE: Request to API timed out.')
         except requests.exceptions.HTTPError as err:
             print(f"HTTP error {err.response.status_code} occurred: {err}")
+        except JobQueueException:
+            print("The Job Queue is down.")
+        except AMQPConnectionError:
+            print("RabbitMQ is still loading")
 
-        print(f'SUCCESS: {job_["url"]} complete.')
         time.sleep(3.6)
