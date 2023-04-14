@@ -77,18 +77,6 @@ services:
     restart: always
     volumes:
       - "~/data/validator:/data"
-  work_server:
-    build:
-      context: .
-      dockerfile: mirrulations-work-server/Dockerfile
-    depends_on:
-      redis:
-        condition: service_healthy
-      mongo:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    restart: always
   extractor:
     build:
       context: .
@@ -114,8 +102,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client1.env
     volumes:
       - ~/data/data:/data
@@ -124,8 +110,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client2.env
     volumes:
       - ~/data/data:/data
@@ -134,8 +118,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client3.env
     volumes:
       - ~/data/data:/data
@@ -144,8 +126,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client4.env
     volumes:
       - ~/data/data:/data
@@ -154,8 +134,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client5.env
     volumes:
       - ~/data/data:/data
@@ -164,8 +142,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client6.env
     volumes:
       - ~/data/data:/data
@@ -174,8 +150,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client7.env
     volumes:
       - ~/data/data:/data
@@ -184,8 +158,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client8.env
     volumes:
       - ~/data/data:/data
@@ -194,8 +166,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client9.env
     volumes:
       - ~/data/data:/data
@@ -204,8 +174,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client10.env
     volumes:
       - ~/data/data:/data
@@ -214,8 +182,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client11.env
     volumes:
       - ~/data/data:/data
@@ -224,8 +190,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client12.env
     volumes:
       - ~/data/data:/data
@@ -234,8 +198,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client13.env
     volumes:
       - ~/data/data:/data
@@ -244,8 +206,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client14.env
     volumes:
       - ~/data/data:/data
@@ -254,8 +214,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client15.env
     volumes:
       - ~/data/data:/data
@@ -264,8 +222,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client16.env
     volumes:
       - ~/data/data:/data
@@ -274,8 +230,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client17.env
     volumes:
       - ~/data/data:/data
@@ -284,8 +238,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client18.env
     volumes:
       - ~/data/data:/data
@@ -294,8 +246,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client19.env
     volumes:
       - ~/data/data:/data
@@ -304,8 +254,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client20.env
     volumes:
       - ~/data/data:/data
@@ -314,8 +262,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client21.env
     volumes:
       - ~/data/data:/data
@@ -324,8 +270,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client22.env
     volumes:
       - ~/data/data:/data
@@ -334,8 +278,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client23.env
     volumes:
       - ~/data/data:/data
@@ -344,8 +286,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client24.env
     volumes:
       - ~/data/data:/data
@@ -354,8 +294,6 @@ services:
     build:
       context: .
       dockerfile: mirrulations-client/Dockerfile
-    depends_on:
-      - work_server
     env_file: env_files/client25.env
     volumes:
       - ~/data/data:/data
