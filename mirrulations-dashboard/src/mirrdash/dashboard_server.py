@@ -83,7 +83,9 @@ def create_server(job_queue, docker_server, cache):
         # Get the number of jobs done from the mongo db
         # and add it to the data
         jobs_done_info = dashboard.cache.get_jobs_done()
-        data.update(jobs_done_info)
+        regulations_jobs_info = dashboard.cache.get_data_totals()
+
+        data.update(**jobs_done_info, **regulations_jobs_info)
 
         # Add this value to the total jobs
         data['jobs_total'] += jobs_done_info['num_jobs_done']

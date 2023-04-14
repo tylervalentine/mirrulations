@@ -8,6 +8,7 @@ from mirrcore.job_queue import JobQueue
 from mirrcore.job_queue_exceptions import JobQueueException
 from mirrcore.redis_check import load_redis
 from mirrcore.data_counts import DataCounts
+from mirrcore.jobs_statistics import JobStatistics
 
 
 class WorkGenerator:
@@ -47,13 +48,12 @@ if __name__ == '__main__':
 
         generator = WorkGenerator(job_queue, api)
 
+        job_stats = JobStatistics(database)
+
         # Save the total number of docket, document, and comment
-        # entries in Regulations.gov to Redis
-        [dockets_total, documents_total, comments_total] = (
-            DataCounts(api_key).get_counts())
-        database.set('dockets_total', dockets_total)
-        database.set('documents_total', documents_total)
-        database.set('comments_total', comments_total)
+        # entries in Regulations.gov
+        regulations_data_counts = DataCounts(api_key).get_counts()
+        job_stats.set_regulations_data(regulations_data_counts)
 
         # Download dockets, documents, and comments
         # from all jobs in the job queue

@@ -42,6 +42,9 @@ def add_mock_data_to_database(job_queue, job_stats=MockJobStatistics()):
     job_stats.cache.set('num_documents_done', 2)
     job_stats.cache.set('num_comments_done', 4)
     job_stats.cache.set('num_attachments_done', 3)
+    job_stats.cache.set('regulations_total_dockets', 1)
+    job_stats.cache.set('regulations_total_documents', 2)
+    job_stats.cache.set('regulations_total_comments', 3)
 
 
 def test_dashboard_returns_job_information(mock_server):
@@ -67,6 +70,9 @@ def test_dashboard_returns_job_information(mock_server):
     assert results['num_jobs_comments_queued'] == 2
     assert results['num_jobs_documents_queued'] == 2
     assert results['num_jobs_dockets_queued'] == 1
+    assert results['regulations_total_dockets'] == 1
+    assert results['regulations_total_documents'] == 2
+    assert results['regulations_total_comments'] == 3
 
 
 def test_dev_dashboard_returns_container_information(mock_server):

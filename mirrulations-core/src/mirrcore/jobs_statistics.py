@@ -3,6 +3,10 @@ DOCUMENTS_DONE = "num_documents_done"
 COMMENTS_DONE = "num_comments_done"
 ATTACHMENTS_DONE = 'num_attachments_done'
 
+REGULATIONS_TOTAL_DOCKETS = 'regulations_total_dockets'
+REGULATIONS_TOTAL_DOCUMENTS = 'regulations_total_documents'
+REGULATIONS_TOTAL_COMMENTS = 'regulations_total_comments'
+
 
 class JobStatistics:
 
@@ -12,6 +16,9 @@ class JobStatistics:
         self._check_keys_exist()
 
     def _check_keys_exist(self):
+        """
+        Keys that should not be overwritten
+        """
         if not self.cache.exists(DOCKETS_DONE):
             self.cache.set(DOCKETS_DONE, 0)
         if not self.cache.exists(DOCUMENTS_DONE):
@@ -45,12 +52,31 @@ class JobStatistics:
         elif job_type == 'attachment':
             self.cache.incr(ATTACHMENTS_DONE)
 
+    def set_regulations_data(self, data_counts):
+        """
+        Sets the total number of dockets, documents, and comments
+        in Regulations.gov with Redis values
+
+        PARAMETERS
+        ------------
+        data_counts: an array like:
+          [dockets_total, documents_total, comments_total]
+
+        """
+        self.cache.set(REGULATIONS_TOTAL_DOCKETS, data_counts[0])
+        self.cache.set(REGULATIONS_TOTAL_DOCUMENTS, data_counts[1])
+        self.cache.set(REGULATIONS_TOTAL_COMMENTS, data_counts[2])
+
     def get_data_totals(self):
         """
         Gets the total number of dockets, documents, and comments
         in Regulations.gov from the values in Redis.
         """
-        dockets_total = int(self.cache.get('dockets_total'))
-        documents_total = int(self.cache.get('documents_total'))
-        comments_total = int(self.cache.get('comments_total'))
-        return [dockets_total, documents_total, comments_total]
+        dockets_total = int(self.cache.get(REGULATIONS_TOTAL_DOCKETS))
+        documents_total = int(self.cache.get(REGULATIONS_TOTAL_DOCUMENTS))
+        comments_total = int(self.cache.get(REGULATIONS_TOTAL_COMMENTS))
+        return {
+            REGULATIONS_TOTAL_DOCKETS: dockets_total,
+            REGULATIONS_TOTAL_DOCUMENTS: documents_total,
+            REGULATIONS_TOTAL_COMMENTS: comments_total
+        }
