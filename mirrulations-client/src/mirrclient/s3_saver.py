@@ -42,14 +42,14 @@ class S3Saver():
         Returns S3 client connection using aws credentials
         """
         if self.get_credentials() is False:
-            print("No credentials provided, Unable to connect to S3")
+            print("No AWS credentials provided, Unable to write to S3.")
 
         return boto3.client(
-                's3',
-                region_name='us-east-1',
-                aws_access_key_id=self.access_key,
-                aws_secret_access_key=self.secret_access_key
-                )
+                    's3',
+                    region_name='us-east-1',
+                    aws_access_key_id=self.access_key,
+                    aws_secret_access_key=self.secret_access_key
+                    )
 
     def get_credentials(self):
         """
@@ -79,7 +79,10 @@ class S3Saver():
         """
         # Bucket structure is different than disk
         # So we remove the /data/ from the path
+
         path = path.replace("/data/", "")
+        if self.get_credentials() is False:
+            return False
         response = self.s3_client.put_object(
             Bucket=self.bucket_name,
             Key=path,
@@ -104,6 +107,8 @@ class S3Saver():
         # Bucket structure is different than disk
         # So we remove the /data/ from the path
         path = path.replace("/data/", "")
+        if self.get_credentials() is False:
+            return False
         response = self.s3_client.put_object(
             Bucket=self.bucket_name,
             Key=path,

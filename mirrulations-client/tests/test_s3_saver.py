@@ -32,6 +32,32 @@ def test_get_s3_client_no_env_variables_present():
     assert S3Saver().get_credentials() is False
 
 
+def test_try_saving_json_without_credentials(capsys):
+    del os.environ['AWS_ACCESS_KEY']
+    del os.environ['AWS_SECRET_ACCESS_KEY']
+    s3_saver = S3Saver()
+    s3_saver.save_json("path", "json")
+    assert s3_saver.get_credentials() is False
+    captured = capsys.readouterr()
+    print_data = [
+        'No AWS credentials provided, Unable to write to S3.\n',
+    ]
+    assert captured.out == "".join(print_data)
+
+
+def test_try_saving_binary_without_credentials(capsys):
+    del os.environ['AWS_ACCESS_KEY']
+    del os.environ['AWS_SECRET_ACCESS_KEY']
+    s3_saver = S3Saver()
+    s3_saver.save_binary("path", "json")
+    assert s3_saver.get_credentials() is False
+    captured = capsys.readouterr()
+    print_data = [
+        'No AWS credentials provided, Unable to write to S3.\n',
+    ]
+    assert captured.out == "".join(print_data)
+
+
 @mock_s3
 def test_put_text_to_bucket():
     conn = create_mock_mirrulations_bucket()
