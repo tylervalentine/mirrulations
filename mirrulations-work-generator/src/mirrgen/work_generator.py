@@ -7,6 +7,8 @@ from mirrcore.regulations_api import RegulationsAPI
 from mirrcore.job_queue import JobQueue
 from mirrcore.job_queue_exceptions import JobQueueException
 from mirrcore.redis_check import load_redis
+from mirrcore.data_counts import DataCounts
+from mirrcore.jobs_statistics import JobStatistics
 
 
 class WorkGenerator:
@@ -37,13 +39,21 @@ if __name__ == '__main__':
     def generate_work():
         # Gets an API key
         dotenv.load_dotenv()
-        api = RegulationsAPI(os.getenv('API_KEY'))
+        api_key = os.getenv('API_KEY')
+        api = RegulationsAPI(api_key)
 
         database = load_redis()
 
         job_queue = JobQueue(database)
 
         generator = WorkGenerator(job_queue, api)
+
+        job_stats = JobStatistics(database)
+
+        # Save the total number of docket, document, and comment
+        # entries in Regulations.gov
+        regulations_data_counts = DataCounts(api_key).get_counts()
+        job_stats.set_regulations_data(regulations_data_counts)
 
         # Download dockets, documents, and comments
         # from all jobs in the job queue
