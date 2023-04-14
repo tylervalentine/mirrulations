@@ -37,15 +37,12 @@ const updateHtmlValues = (jobsWaiting, jobsDone) => {
 /**
  * Calculates the progression towards corpus
  * @param jobTypeCountsDone : array of number of jobs for each job type (dockets, documents, comments, attachments) completed
- * @param totalJobs : array of number of jobs from Regulations for each job type 
- * TODO: totalJobs should ideally be be an int that is calculated
+ * @param totalCorpus : amount of jobs available from Regulations (dockets, documents, comments)
  */
-const updateCorpusProgressHtml = (jobTypeCountsDone, totalJobs) => {
-    let totalCorpus = 0
+const updateCorpusProgressHtml = (jobTypeCountsDone, totalCorpus) => {
     let currentProgress = 0
     for (let i = 0; i < jobTypeCountsDone.length; i++) {
         currentProgress += jobTypeCountsDone[i]
-        totalCorpus += totalJobs[i]
     }
     let percent = (currentProgress/totalCorpus) * 100;
     document.getElementById('progress-to-corpus-bar-percentage').textContent = `${percent.toFixed(2)}%`
@@ -97,21 +94,26 @@ const updateClientDashboardData = () => {
             num_jobs_comments_queued,
             num_jobs_dockets_queued,
             num_jobs_documents_queued,
+            regulations_total_dockets,
+            regulations_total_documents,
+            regulations_total_comments
         } = jobInformation;
+
+        let regulations_totals = regulations_total_dockets + regulations_total_documents + regulations_total_comments
+
         updateHtmlValues(num_jobs_waiting, num_jobs_done);
-        updateCorpusProgressHtml([num_dockets_done, num_documents_done, num_comments_done, num_attachments_done], [232255, 1718669, 18072106, 15000000]); //TO DO: change hard coded numbers
+        updateCorpusProgressHtml([num_dockets_done, num_documents_done, num_comments_done, num_attachments_done], regulations_totals)
         // Counts for percents
-        updateJobTypeProgress("dockets-done",num_dockets_done, 232255);
+        updateJobTypeProgress("dockets-done", num_dockets_done, regulations_total_dockets);
+        updateJobTypeProgress("documents-done",num_documents_done, regulations_total_documents);
+        updateJobTypeProgress("comments-done",num_comments_done, regulations_total_comments);
         // Current estimate of number of attachments (from comments)
         updateJobTypeProgress("attachments-done",num_attachments_done, 15000000); 
-        updateJobTypeProgress("comments-done",num_comments_done, 18072106);
-        updateJobTypeProgress("documents-done",num_documents_done, 1718669);
         // Counts for numbers
         updateCount("dockets-done",num_dockets_done);
-        // Current estimate of number of attachments (from comments)
-        updateCount("attachments-done",num_attachments_done); 
-        updateCount("comments-done",num_comments_done);
         updateCount("documents-done",num_documents_done);
+        updateCount("comments-done",num_comments_done);
+        updateCount("attachments-done",num_attachments_done); 
         updateJobsQueuedByType("comments-queued", num_jobs_comments_queued);
         updateJobsQueuedByType("dockets-queued", num_jobs_dockets_queued);
         updateJobsQueuedByType("documents-queued", num_jobs_documents_queued);
