@@ -12,8 +12,8 @@ class DiskSaver():
 
     def save_to_disk(self, path, data):
         with open(path, 'x', encoding='utf8') as file:
-            print('Writing results to disk')
             file.write(dumps(data))
+            print(f'Wrote json to Disk: {path}')
 
     def save_json(self, path, data):
         """
@@ -46,6 +46,7 @@ class DiskSaver():
         with open(path, "wb") as file:
             file.write(data)
             file.close()
+            print(f'Wrote binary to Disk: {path}')
 
     def open_json_file(self, path):
         with open(path, encoding='utf8') as file:

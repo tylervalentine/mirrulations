@@ -43,6 +43,7 @@ class S3Saver():
         """
         if self.get_credentials() is False:
             print("No credentials provided, Unable to connect to S3")
+
         return boto3.client(
                 's3',
                 region_name='us-east-1',
@@ -84,6 +85,7 @@ class S3Saver():
             Key=path,
             Body=json.dumps(data)
             )
+        print(f"Wrote json to S3: {path}")
         return response
 
     def save_binary(self, path, binary):
@@ -106,4 +108,5 @@ class S3Saver():
             Bucket=self.bucket_name,
             Key=path,
             Body=binary)
+        print(f"Wrote binary to S3: {path}")
         return response
