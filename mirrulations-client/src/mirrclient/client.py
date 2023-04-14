@@ -13,6 +13,7 @@ from mirrclient.saver import Saver
 from mirrclient.exceptions import NoJobsAvailableException
 from mirrclient.exceptions import APITimeoutException
 from pika.exceptions import AMQPConnectionError
+from botocore.exceptions import NoCredentialsError
 
 
 def is_environment_variables_present():
@@ -402,10 +403,12 @@ if __name__ == '__main__':
         except APITimeoutException:
             print('FAILURE: Request to API timed out.')
         except requests.exceptions.HTTPError as err:
-            print(f"HTTP error {err.response.status_code} occurred: {err}")
+            print(f"FAILURE: HTTP error {err.response.status_code} occurred: {err}")
         except JobQueueException:
             print("The Job Queue is down.")
         except AMQPConnectionError:
             print("RabbitMQ is still loading")
+        except NoCredentialsError:
+            print("FAILURE: Missing AWS credentials")
 
         time.sleep(3.6)
