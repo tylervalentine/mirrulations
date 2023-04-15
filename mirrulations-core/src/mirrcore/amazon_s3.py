@@ -14,7 +14,7 @@ class AmazonS3:
 
     def get_s3_client(self):
         if self.get_credentials() is False:
-            print("No credentials provided, Unable to connect to S3")
+            print("No AWS credentials provided, Unable to connect to S3 Client")
         return boto3.client(
                 's3',
                 region_name='us-east-1',
