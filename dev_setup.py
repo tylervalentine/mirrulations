@@ -21,12 +21,11 @@ def get_total_client_number():
                 matches += match
     return matches
 
+
 def write_files(api_key, env_path, total_clients, aws_access_key, aws_secret_access_key):
     # Write client files
     for i in range(1, len(total_clients) + 1):
           with open("{}client{}.env".format(env_path, i), 'w') as file:
-            file.write("WORK_SERVER_HOSTNAME=work_server" + "\n")
-            file.write("WORK_SERVER_PORT=8080" + "\n")
             file.write("API_KEY={}".format(api_key) + "\n")
             file.write("ID={}".format(i) + "\n")
             file.write("PYTHONUNBUFFERED=TRUE\n")
