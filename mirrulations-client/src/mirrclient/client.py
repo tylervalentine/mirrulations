@@ -1,30 +1,22 @@
-# pylint: disable=too-many-locals
 import time
 import os
 import sys
-from json import dumps, loads
 import requests
 import redis
 from dotenv import load_dotenv
 from mirrclient.saver import Saver
 from mirrclient.disk_saver import DiskSaver
 from mirrclient.s3_saver import S3Saver
-from mirrcore.path_generator import PathGenerator
-from mirrcore.jobs_statistics import JobStatistics
 from mirrcore.redis_check import load_redis
-
-
-class NoJobsAvailableException(Exception):
-    """
-    Raises an Exception when there are no jobs available in the workserver.
-    """
-
-    def __init__(self, message="There are no jobs available"):
-        self.message = message
-        super().__init__(self.message)
-
-    def __str__(self):
-        return f'{self.message}'
+from mirrcore.path_generator import PathGenerator
+from mirrcore.job_queue import JobQueue
+from mirrcore.jobs_statistics import JobStatistics
+from mirrcore.job_queue_exceptions import JobQueueException
+from mirrclient.saver import Saver
+from mirrclient.exceptions import NoJobsAvailableException
+from mirrclient.exceptions import APITimeoutException
+from pika.exceptions import AMQPConnectionError
+from botocore.exceptions import NoCredentialsError
 
 
 def is_environment_variables_present():
@@ -44,65 +36,114 @@ def is_environment_variables_present():
 
 class Client:
     """
-    The Client class performs jobs given to it by a workserver
+    The Client class gets a job directly from the job queue.
     It receives a job, performs it depending on the job type.
     A job is performed by calling an api endpoint to request
-    a json object. The Client sends back the results back
-    to the workserver.
+    a json object. The client saves the result of the job and any included
+    attachments using the Saver class.
 
     Attributes
     ----------
     api_key : str
         Api key used to authenticate requests made to api
-    server_validator : ServerValidator
-        This is used to validate requests made between the
-        workserver and the Client
     client_id : int
-        An id that defaults to -1 but is eventually replaced by a
-        value from the workserver.
+        An id that is included in the client.env file.
+    path_generator : PathGenerator
+        Returns a path for the result of a job to be saved to.
+    saver : Saver
+        Handles the making of directories and the saving of files either
+        to disk or Amazon s3.
+    redis : redis_server
+        Allows for a direct connection to the Redis server, incrementing the
+        jobs completed.
+    job_queue : JobQueue
+        Queue of all of the jobs that need to be completed. The client will
+        directly pull jobs from this queue.
     """
-
-    def __init__(self, cache_server):
+    def __init__(self, redis_server, job_queue):
         self.api_key = os.getenv('API_KEY')
         self.client_id = os.getenv('ID')
         self.path_generator = PathGenerator()
         self.saver = Saver(savers=[DiskSaver(),
                                    S3Saver(bucket_name="mirrulations")])
-        self.cache = JobStatistics(cache_server)
+        self.redis = redis_server
+        self.job_queue = job_queue
+        self.cache = JobStatistics(redis_server)
 
-        hostname = os.getenv('WORK_SERVER_HOSTNAME')
-        port = os.getenv('WORK_SERVER_PORT')
-        self.url = f'http://{hostname}:{port}'
+    def _can_connect_to_database(self):
+        try:
+            self.redis.ping()
+        except redis.exceptions.ConnectionError:
+            return False
+        return True
 
-    def get_job(self):
+    def _get_job_from_job_queue(self):
+        print('Attempting to get job')
+
+        if not self._can_connect_to_database():
+            # temporary, ideally we should get
+            # rid of _can_connect_to_database() altogether
+            raise NoJobsAvailableException
+
+        if self.job_queue.get_num_jobs() == 0:
+            raise NoJobsAvailableException
+
+        job = self.job_queue.get_job()
+        print('Job received from job queue')
+
+        return job
+
+    def _set_default_key(self, job, key, default_value):
+        if key not in job:
+            job[key] = default_value
+
+    def _set_missing_job_key_defaults(self, job):
+        self._set_default_key(job, 'job_type', 'other')
+        self._set_default_key(job, 'reg_id', 'other_reg_id')
+        self._set_default_key(job, 'agency', 'other_agency')
+        return job
+
+    def _set_redis_values(self, job):
+        self.redis.hset('jobs_in_progress', job['job_id'], job['url'])
+        self.redis.hset('client_jobs', job['job_id'], self.client_id)
+
+    def _remove_plural_from_job_type(self, job):
+        split_url = str(job['url']).split('/')
+        job_type = split_url[-2][:-1]  # Removes plural from job type
+        type_id = split_url[-1]
+        return f'{job_type}/{type_id}'
+
+    def _get_job(self):
         """
-        Get a job from the work server.
+        Get a job from the JobQueue.
         Converts API URL to regulations.gov URL and prints to logs.
         From: https://api.regulations.gov/v4/dockets/type_id
         To: https://www.regulations.gov/docket/type_id
 
         :raises: NoJobsAvailableException
-            If no job is available from the work server
+            If no job is available from the job queue
         """
+        job = self._get_job_from_job_queue()
 
-        response = requests.get(f'{self.url}/get_job',
-                                params={'client_id': self.client_id},
-                                timeout=10)
+        job = self._set_missing_job_key_defaults(job)
 
-        job = loads(response.text)
-        link = 'https://www.regulations.gov/'
-        if 'error' in job:
-            raise NoJobsAvailableException()
-        split_url = str(job['url']).split('/')
-        job_type = split_url[-2][:-1]  # Removes plural from job type
-        type_id = split_url[-1]
-        print(f'Regulations.gov link: {link}{job_type}/{type_id}')
+        self._set_redis_values(job)
+
+        # update count for dashboard
+        self.job_queue.decrement_count(job['job_type'])
+
+        print(f'Job received: {job["job_type"]}'
+              + f' for client: {self.client_id}')
+
+        print(f'Regulations.gov link: {job["url"]}')
         print(f'API URL: {job["url"]}')
+
         return job
 
-    def send_job(self, job, job_result):
+    def _download_job(self, job, job_result):
         """
-        Returns the job results to the workserver
+        Downloads the current job and saves the data using the Saver. Downloads
+        the attachments if there are any.
         If there are any errors in the job_result, the data json is returned
         as  {'job_id': job_id, 'results': job_result}
         else {
@@ -112,8 +153,8 @@ class Client:
 
         Parameters
         ----------
-        job_id : str
-            id for current job
+        job : dict
+            information about the job being completed
         job_result : dict
             results from a performed job
         """
@@ -121,34 +162,24 @@ class Client:
             'job_type': job['job_type'],
             'job_id': job['job_id'],
             'results': job_result,
-            # Updated to get reg_id and agency from regulations json
-            # - Jack W. 3/14
             'reg_id': job['reg_id'],
             'agency': job['agency']
         }
-        print(f'Sending Job {job["job_id"]} to Work Server')
-        if 'error' not in job_result:
-            data['directory'] = self.path_generator.get_path(job_result)
-            self.cache.increase_jobs_done(data['job_type'])
+        print(f'Downloading Job {job["job_id"]}')
+        data['directory'] = self.path_generator.get_path(job_result)
+        self.cache.increase_jobs_done(data['job_type'])
 
         self._put_results(data)
-        self.put_results(data)
-        comment_has_attachment = self.does_comment_have_attachment(job_result)
+
+        comment_has_attachment = self._does_comment_have_attachment(job_result)
         json_has_file_format = self._document_has_file_formats(job_result)
 
         if data["job_type"] == "comments" and comment_has_attachment:
-            self.download_all_attachments_from_comment(data, job_result)
+            self._download_all_attachments_from_comment(job_result)
         if data["job_type"] == "documents" and json_has_file_format:
             document_htm = self._get_document_htm(job_result)
             if document_htm is not None:
-                self.download_htm(job_result)
-        # For now, still need to send original put request for Mongo
-        # requests.put(
-        #     f'{self.url}/_put_results',
-        #     json=dumps(data['job_id']),
-        #     params={'client_id': self.client_id},
-        #     timeout=10
-        # )
+                self._download_htm(job_result)
 
     def _put_results(self, data):
         """
@@ -160,13 +191,10 @@ class Client:
         data : dict
             the results from a performed job
         """
-        if any(x in data['results'] for x in ['error', 'errors']):
-            print(f"{data['job_id']}: Errors found in results")
-            return
         dir_, filename = data['directory'].rsplit('/', 1)
         self.saver.save_json(f'/data{dir_}/{filename}', data)
 
-    def perform_job(self, job_url):
+    def _perform_job(self, job_url):
         """
         Performs job via get_request function by giving it the job_url combined
         with the Client api_key for validation.
@@ -181,17 +209,15 @@ class Client:
         dict
             json results of the performed job
         """
-        print('Performing job')
         try:
-            if "?" in job_url:
-                return requests.get(job_url + f'&api_key={self.api_key}',
-                                    timeout=10).json()
-            return requests.get(job_url + f'?api_key={self.api_key}',
-                                timeout=10).json()
-        except requests.exceptions.ReadTimeout:
-            return {"error": "Read Timeout"}
+            delimiter = '&' if '?' in job_url else '?'
+            url = f'{job_url}{delimiter}api_key={self.api_key}'
 
-    def download_all_attachments_from_comment(self, data, comment_json):
+            return requests.get(url, timeout=10)
+        except requests.exceptions.ReadTimeout as exc:
+            raise APITimeoutException from exc
+
+    def _download_all_attachments_from_comment(self, comment_json):
         '''
         Downloads all attachments for a comment
 
@@ -211,23 +237,21 @@ class Client:
         comment_id_str = f"Comment - {comment_json['data']['id']}"
         print(f"Found {len(path_list)} attachment(s) for {comment_id_str}")
         for included in comment_json["included"]:
-            attributes = included["attributes"]
-            if (attributes["fileFormats"] and
-                    attributes["fileFormats"] not in ["null", None]):
+            if (included["attributes"]["fileFormats"] and
+                    included["attributes"]["fileFormats"]
+                    not in ["null", None]):
                 for attachment in included['attributes']['fileFormats']:
-                    url = attachment['fileUrl']
-                    self.download_single_attachment(url, path_list[counter],
-                                                    data)
+                    self._download_single_attachment(attachment['fileUrl'],
+                                                     path_list[counter])
                     print(f"Downloaded {counter+1}/{len(path_list)} "
                           f"attachment(s) for {comment_id_str}")
                     counter += 1
                     self.cache.increase_jobs_done('attachment')
 
-    def download_single_attachment(self, url, path, data):
+    def _download_single_attachment(self, url, path):
         '''
         Downloads a single attachment for a comment and
         writes it to its correct path
-        Also puts the attachment 'data' dict to the work server for mongo entry
 
         Parameters
         ----------
@@ -248,20 +272,8 @@ class Client:
         dir_, filename = path.rsplit('/', 1)
         self.saver.save_binary(f'/data{dir_}/{filename}', response.content)
         filename = path.split('/')[-1]
-        data = self.add_attachment_information_to_data(data, path, filename)
 
-    def add_attachment_information_to_data(self, data, path, filename):
-        data['job_type'] = 'attachments'
-        data['attachment_path'] = f'/data/data{path}'
-        data['attachment_filename'] = filename
-        return data
-
-    def put_results(self, data):
-        requests.put(f'{self.url}/put_results', json=dumps(data),
-                     params={'client_id': self.client_id},
-                     timeout=10)
-
-    def does_comment_have_attachment(self, comment_json):
+    def _does_comment_have_attachment(self, comment_json):
         """
         Validates whether a json for a comment has any
         attachments to be downloaded.
@@ -275,7 +287,7 @@ class Client:
             return True
         return False
 
-    def download_htm(self, json):
+    def _download_htm(self, json):
         """
         Attempts to download an HTM and saves it to its correct path
         Parameters
@@ -291,6 +303,7 @@ class Client:
             self.saver.save_binary(f'/data{dir_}/{filename}',
                                    response.content)
             print(f"SAVED document HTM - {url} to path: ", path)
+            self.cache.increase_jobs_done('attachment')
 
     def _get_document_htm(self, json):
         """
@@ -325,41 +338,71 @@ class Client:
             return False
         return True
 
+    def _report_bad_job(self, job):
+        self.redis.hdel('jobs_in_progress', job['job_id'])
+        self.redis.hset('invalid_jobs', job['job_id'], job['url'])
+
     def job_operation(self):
         """
         Processes a job.
-        The Client gets the job from the workserver, performs the job
-        based on job_type, then sends back the job results to
-        the workserver.
+        The Client gets the job from the job queue, performs the job
+        based on job_type, then saves the job results using the saver class.
         """
-        print('Processing job from work server')
-        job = self.get_job()
-        result = self.perform_job(job['url'])
-        self.send_job(job, result)
-        if any(x in result for x in ('error', 'errors')):
-            print(f'FAILURE: Error in {job["url"]}\nError: {result["error"]}')
-        else:
-            print(f'SUCCESS: {job["url"]} complete')
+        print('Processing job from RabbitMQ.')
+
+        job = self._get_job()
+
+        try:
+            print('Performing job.')
+
+            response = self._perform_job(job['url'])
+            response.raise_for_status()
+            result = response.json()
+
+            self._download_job(job, result)
+        except Exception as exc:
+            try:
+                self._report_bad_job(job)
+            except redis.exceptions.ConnectionError:
+                print("FAILURE: Couldn't save bad job to Redis.")
+
+            # re-raise whatever exception was being thrown
+            raise exc
+
+        return job
 
 
 if __name__ == '__main__':
     load_dotenv()
     if not is_environment_variables_present():
-        print('Need client environment variables')
+        print('Need client environment variables.')
         sys.exit(1)
 
     try:
-        r = load_redis()
-        r.keys('*')
+        redis_client = load_redis()
     except redis.exceptions.ConnectionError:
         print('There is no Redis database to connect to.')
         sys.exit(1)
-
-    client = Client(r)
+    client = Client(redis_client, JobQueue(redis_client))
 
     while True:
         try:
-            client.job_operation()
+            job_ = client.job_operation()
+            print(f'SUCCESS: {job_["url"]} complete.')
+        except redis.exceptions.ConnectionError:
+            print('FAILURE: Could not connect to Redis.')
         except NoJobsAvailableException:
-            print("No Jobs Available")
+            print('FAILURE: No Jobs Available.')
+        except APITimeoutException:
+            print('FAILURE: Request to API timed out.')
+        except requests.exceptions.HTTPError as err:
+            print(f"FAILURE: HTTP error\
+                  {err.response.status_code} occurred: {err}")
+        except JobQueueException:
+            print("The Job Queue is down.")
+        except AMQPConnectionError:
+            print("RabbitMQ is still loading")
+        except NoCredentialsError:
+            print("FAILURE: Missing AWS credentials")
+
         time.sleep(3.6)

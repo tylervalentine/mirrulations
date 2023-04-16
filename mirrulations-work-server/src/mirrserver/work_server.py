@@ -3,11 +3,11 @@ import redis
 from mirrcore.job_queue import JobQueue
 from mirrcore.job_queue_exceptions import JobQueueException
 from mirrserver.put_results_validator import PutResultsValidator
+from mirrserver.get_job_validator import GetJobValidator
 from mirrserver.exceptions import InvalidResultsException
 from mirrserver.exceptions import InvalidClientIDException
 from mirrserver.exceptions import MissingClientIDException
 from mirrserver.exceptions import NoJobsException
-from mirrserver.get_job_validator import GetJobValidator
 
 
 class WorkServer:
@@ -91,7 +91,7 @@ def get_job(workserver):
         {'error': 'Client ID was not provided'}, 401
         {'error': 'No jobs available'}, 403
     """
-    check_for_database(workserver)
+    # check_for_database(workserver)
     client_id = request.args.get('client_id')
     print("Attempting to get job")
     try:
@@ -299,13 +299,3 @@ def create_server(database):
         return jsonify(validator[0]), validator[1]
 
     return workserver
-
-
-if __name__ == '__main__':
-    try:
-        r = redis.Redis('redis')
-        r.keys('*')
-        server = create_server(r)
-        server.app.run(host='0.0.0.0', port=8080, debug=False)
-    except redis.exceptions.ConnectionError:
-        print('There is no Redis database to connect to.')
