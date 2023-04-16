@@ -5,7 +5,6 @@ import boto3
 from botocore.exceptions import NoCredentialsError
 
 
-
 class AmazonS3:
 
     def __init__(self):

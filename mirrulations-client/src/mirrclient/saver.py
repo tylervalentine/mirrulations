@@ -4,7 +4,6 @@ from mirrcore.amazon_s3 import AmazonS3
 from botocore.exceptions import NoCredentialsError
 
 
-
 class Saver:
     """
     A class which takes the content of an attachment (pdf, doc, etc.), and
@@ -75,23 +74,21 @@ class Saver:
     def save_json_to_s3(self, bucket, path, data):
         try:
             s_3 = AmazonS3()
-            s_3.put_text_s3(
-            bucket,
-            path,
-            data)
+            s_3.put_text_s3(bucket,
+                            path,
+                            data)
             print(f"SUCCESS: Wrote json to S3: {path}")
-        except Exception as error:
+        except NoCredentialsError as error:
             print(error)
-            pass
+            return
 
     def save_binary_to_s3(self, bucket, path, data):
         try:
             s_3 = AmazonS3()
-            s_3.put_binary_s3(
-                bucket,
-                path,
-                data)
+            s_3.put_binary_s3(bucket,
+                              path,
+                              data)
             print(f"SUCCESS: Wrote binary to S3: {path}")
-        except Exception as error:
+        except NoCredentialsError as error:
             print(error)
-            pass
+            return

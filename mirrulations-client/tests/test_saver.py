@@ -3,10 +3,8 @@ from unittest.mock import patch, mock_open, MagicMock
 import os
 from mirrclient.saver import Saver
 from pytest import fixture, mark
-import pytest
 import boto3
 from moto import mock_s3
-from botocore.exceptions import NoCredentialsError
 
 
 @fixture(name='save_duplicate_json')
