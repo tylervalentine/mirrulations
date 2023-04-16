@@ -73,23 +73,25 @@ class Saver:
             self.save_duplicate_json(path, data, i)
 
     def save_json_to_s3(self, bucket, path, data):
-        s_3 = AmazonS3()
         try:
+            s_3 = AmazonS3()
             s_3.put_text_s3(
             bucket,
             path,
             data)
             print(f"SUCCESS: Wrote json to S3: {path}")
-        except NoCredentialsError as error:
+        except Exception as error:
+            print(error)
             pass
 
     def save_binary_to_s3(self, bucket, path, data):
-        s_3 = AmazonS3()
         try:
+            s_3 = AmazonS3()
             s_3.put_binary_s3(
                 bucket,
                 path,
                 data)
             print(f"SUCCESS: Wrote binary to S3: {path}")
-        except NoCredentialsError as error:
+        except Exception as error:
+            print(error)
             pass
