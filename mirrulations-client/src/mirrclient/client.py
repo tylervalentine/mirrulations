@@ -7,16 +7,13 @@ from dotenv import load_dotenv
 from mirrclient.saver import Saver
 from mirrclient.disk_saver import DiskSaver
 from mirrclient.s3_saver import S3Saver
+from mirrclient.exceptions import NoJobsAvailableException, APITimeoutException
 from mirrcore.redis_check import load_redis
 from mirrcore.path_generator import PathGenerator
 from mirrcore.job_queue import JobQueue
 from mirrcore.jobs_statistics import JobStatistics
 from mirrcore.job_queue_exceptions import JobQueueException
-from mirrclient.saver import Saver
-from mirrclient.exceptions import NoJobsAvailableException
-from mirrclient.exceptions import APITimeoutException
 from pika.exceptions import AMQPConnectionError
-from botocore.exceptions import NoCredentialsError
 
 
 def is_environment_variables_present():
@@ -402,7 +399,5 @@ if __name__ == '__main__':
             print("The Job Queue is down.")
         except AMQPConnectionError:
             print("RabbitMQ is still loading")
-        except NoCredentialsError:
-            print("FAILURE: Missing AWS credentials")
 
         time.sleep(3.6)

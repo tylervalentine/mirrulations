@@ -1,18 +1,14 @@
 # pylint: disable=W0212
 import os
 import responses
-from mirrcore.path_generator import PathGenerator
 from pytest import fixture
 import pytest
 import requests_mock
-from mirrclient.client import Client
-from mirrclient.client import is_environment_variables_present
-from requests.exceptions import Timeout, ReadTimeout
-from moto import mock_s3
+from requests.exceptions import ReadTimeout
 import boto3
-from mirrmock.mock_redis import MockRedisWithStorage
-from mirrclient.exceptions import NoJobsAvailableException
-from mirrclient.exceptions import APITimeoutException
+from mirrcore.path_generator import PathGenerator
+from mirrclient.client import Client, is_environment_variables_present
+from mirrclient.exceptions import NoJobsAvailableException, APITimeoutException
 from mirrmock.mock_redis import ReadyRedis, InactiveRedis, MockRedisWithStorage
 from mirrmock.mock_job_queue import MockJobQueue
 
@@ -241,8 +237,12 @@ def test_get_document_htm_returns_none():
 
 @responses.activate
 def test_client_downloads_document_htm(capsys, mocker):
-    mocker.patch('mirrclient.saver.Saver.make_path', return_value=None)
-    mocker.patch('mirrclient.saver.Saver.save_attachment', return_value=None)
+    mocker.patch('mirrclient.disk_saver.DiskSaver.make_path',
+                 return_value=None)
+    mocker.patch('mirrclient.disk_saver.DiskSaver.save_binary',
+                 return_value=None)
+    mocker.patch('mirrclient.s3_saver.S3Saver.save_binary',
+                 return_value=None)
     mock_redis = ReadyRedis()
     client = Client(mock_redis, MockJobQueue())
     client.api_key = 1234
@@ -343,8 +343,10 @@ def test_handles_none_in_comment_file_formats(path_generator):
 
 @responses.activate
 def test_client_downloads_attachment_results(mocker, capsys):
-    mocker.patch('mirrclient.saver.Saver.make_path', return_value=None)
-    mocker.patch('mirrclient.saver.Saver.save_attachment', return_value=None)
+    mocker.patch('mirrclient.disk_saver.DiskSaver.make_path',
+                 return_value=None)
+    mocker.patch('mirrclient.disk_saver.DiskSaver.save_binary',
+                 return_value=None)
     mock_redis = ReadyRedis()
     client = Client(mock_redis, MockJobQueue())
     client.api_key = 1234

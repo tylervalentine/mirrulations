@@ -31,7 +31,6 @@ class S3Saver():
         bucket_name : str
             Name of the bucket to write data to.
         """
-        self.get_credentials()
         self.access_key = None
         self.secret_access_key = None
         self.s3_client = self.get_s3_client()
@@ -43,7 +42,7 @@ class S3Saver():
         """
         if self.get_credentials() is False:
             print("No AWS credentials provided, Unable to write to S3.")
-
+            return False
         return boto3.client(
                     's3',
                     region_name='us-east-1',
@@ -81,7 +80,7 @@ class S3Saver():
         # So we remove the /data/ from the path
 
         path = path.replace("/data/", "")
-        if self.get_credentials() is False:
+        if self.s3_client is False:
             return False
         response = self.s3_client.put_object(
             Bucket=self.bucket_name,
@@ -107,7 +106,7 @@ class S3Saver():
         # Bucket structure is different than disk
         # So we remove the /data/ from the path
         path = path.replace("/data/", "")
-        if self.get_credentials() is False:
+        if self.s3_client is False:
             return False
         response = self.s3_client.put_object(
             Bucket=self.bucket_name,
