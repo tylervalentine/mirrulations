@@ -242,12 +242,14 @@ class Client:
                     included["attributes"]["fileFormats"]
                     not in ["null", None]):
                 for attachment in included['attributes']['fileFormats']:
-                    self._download_single_attachment(attachment['fileUrl'],
+                    url = attachment["fileUrl"]
+                    self._download_single_attachment(url,
                                                      path_list[counter])
                     print(f"Downloaded {counter+1}/{len(path_list)} "
                           f"attachment(s) for {comment_id_str}")
                     counter += 1
-                    self.cache.increase_jobs_done('attachment')
+                    self.cache.increase_jobs_done('attachment',
+                                                  url.endswith('.pdf'))
 
     def _download_single_attachment(self, url, path):
         '''
