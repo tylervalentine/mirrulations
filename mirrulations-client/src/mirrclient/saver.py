@@ -76,7 +76,7 @@ class Saver:
             s_3 = AmazonS3()
             s_3.put_text_s3(bucket,
                             path,
-                            data)
+                            data["results"])
             print(f"SUCCESS: Wrote json to S3: {path}")
         except NoCredentialsError as error:
             print(error)
