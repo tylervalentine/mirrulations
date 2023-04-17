@@ -115,6 +115,7 @@ const updateClientDashboardData = () => {
         updateJobTypeProgress("attachments-done",num_attachments_done, regulations_total_attachments); 
         // Counts for numbers
         updateCount("dockets-done",num_dockets_done);
+        updateCount("regulations-total-dockets", regulations_total_dockets)
         updateCount("documents-done",num_documents_done);
         updateCount("comments-done",num_comments_done);
         updateCount("attachments-done",num_attachments_done);
