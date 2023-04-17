@@ -47,11 +47,11 @@ class DiskSaver():
             file.write(data)
             file.close()
             print(f'Wrote binary to Disk: {path}')
-    
+
     def save_text(self, path, data):
         _dir = path.rsplit('/', 1)[0]
         self.make_path(_dir)
-        with open(path, "w") as file:
+        with open(path, "w", encoding="utf-8") as file:
             file.write(data)
             file.close()
             print(f'Wrote extracted text to Disk: {path}')

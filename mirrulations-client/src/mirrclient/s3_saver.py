@@ -110,7 +110,6 @@ class S3Saver():
         print(f"Wrote binary to S3: {path}")
         return response
 
-
     def save_text(self, path, text):
         """
         Saves extracted text to Amazon S3 bucket
@@ -121,7 +120,7 @@ class S3Saver():
         path : str
             Where to save the data to in the S3 bucket
 
-        text : str 
+        text : str
             Extracted text to be saved
         """
         path = path.replace("/data/", "")
