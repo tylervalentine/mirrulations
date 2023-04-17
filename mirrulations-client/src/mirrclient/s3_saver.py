@@ -114,3 +114,29 @@ class S3Saver():
             Body=binary)
         print(f"Wrote binary to S3: {path}")
         return response
+
+
+    def save_text(self, path, text):
+        """
+        Saves extracted text to Amazon S3 bucket
+        Bucket Structure: /AGENCYID/path/to/item
+
+        Parameters
+        -------
+        path : str
+            Where to save the data to in the S3 bucket
+
+        text : str 
+            Extracted text to be saved
+        """
+        # Bucket structure is different than disk
+        # So we remove the /data/ from the path
+        path = path.replace("/data/", "")
+        if self.s3_client is False:
+            return False
+        response = self.s3_client.put_object(
+            Bucket=self.bucket_name,
+            Key=path,
+            Body=text)
+        print(f"Wrote extracted text to S3: {path}")
+        return response
