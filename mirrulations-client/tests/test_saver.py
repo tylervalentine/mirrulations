@@ -107,7 +107,8 @@ def test_saver_saves_text_to_multiple_places():
                 S3Saver(bucket_name="test-mirrulations1")])
             saver.save_text(test_path, test_data)
             mock_dir.assert_called_once_with('/USTR')
-            mocked_file.assert_called_once_with(test_path, 'w', encoding="utf-8")
+            mocked_file.assert_called_once_with(test_path, 'w',
+                                                encoding="utf-8")
             mocked_file().write.assert_called_once_with(test_data)
             body = conn.Object("test-mirrulations1",
                                "/USTR/file.txt").get()["Body"].read()\
