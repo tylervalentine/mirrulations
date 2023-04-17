@@ -37,13 +37,14 @@ def test_saving_to_s3():
     saver = Saver(savers=[
         S3Saver(bucket_name="test-mirrulations1")])
     test_data = {
-        "data": "test"
+        "results": "test"
     }
     test_path = "data/test.json"
     saver.save_json(test_path, test_data)
     body = conn.Object("test-mirrulations1",
-                       "data/test.json").get()["Body"].read().decode("utf-8")
-    assert body == '{"data": "test"}'
+                       "data/test.json").get()["Body"].read()\
+        .decode("utf-8").strip('/"')
+    assert body == test_data["results"]
 
 
 @mock_s3
@@ -66,8 +67,8 @@ def test_saver_saves_text_to_multiple_places():
                 dumps(test_data['results']))
             body = conn.Object("test-mirrulations1",
                                "/USTR/file.json").get()["Body"].read()\
-                .decode("utf-8")
-            assert body == '{"results": "Hello world"}'
+                .decode("utf-8").strip('/"')
+            assert body == test_data["results"]
 
 
 @mock_s3

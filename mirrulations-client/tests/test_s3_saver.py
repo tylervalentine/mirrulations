@@ -63,13 +63,14 @@ def test_put_text_to_bucket():
     conn = create_mock_mirrulations_bucket()
     s3_bucket = S3Saver(bucket_name="test-mirrulations1")
     test_data = {
-        "data": "test"
+        "results": 'test'
     }
     test_path = "data/test.json"
     response = s3_bucket.save_json(test_path, test_data)
     body = conn.Object("test-mirrulations1",
-                       "data/test.json").get()["Body"].read().decode("utf-8")
-    assert body == '{"data": "test"}'
+                       "data/test.json").get()["Body"].read()\
+        .decode("utf-8").strip('/"')
+    assert body == test_data["results"]
     assert response["ResponseMetadata"]['HTTPStatusCode'] == 200
 
 
