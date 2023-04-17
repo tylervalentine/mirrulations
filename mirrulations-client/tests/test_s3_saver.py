@@ -84,3 +84,19 @@ def test_put_binary_to_bucket():
                        "data/test.binary").get()["Body"].read().decode("utf-8")
     assert body == '\x17'
     assert response["ResponseMetadata"]['HTTPStatusCode'] == 200
+
+
+def test_save_json_to_s3_no_credentials_returns_false(capsys):
+    del os.environ['AWS_ACCESS_KEY']
+    del os.environ['AWS_SECRET_ACCESS_KEY']
+    assert S3Saver().save_json("test", "test") is False
+    assert capsys.readouterr().out == "No AWS credentials provided, "\
+                                      "Unable to write to S3.\n"
+
+
+def test_save_binary_to_s3_no_credentials_returns_false(capsys):
+    del os.environ['AWS_ACCESS_KEY']
+    del os.environ['AWS_SECRET_ACCESS_KEY']
+    assert S3Saver().save_binary("test", "test") is False
+    assert capsys.readouterr().out == "No AWS credentials provided, "\
+                                      "Unable to write to S3.\n"

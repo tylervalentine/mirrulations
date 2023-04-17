@@ -437,8 +437,10 @@ def test_does_comment_have_attachment_with_empty_attachment_list():
 
 @responses.activate
 def test_two_attachments_in_comment(mocker):
-    mocker.patch('mirrclient.saver.Saver.make_path', return_value=None)
-    mocker.patch('mirrclient.saver.Saver.save_attachment', return_value=None)
+    mocker.patch('mirrclient.disk_saver.DiskSaver.make_path',
+                 return_value=None)
+    mocker.patch('mirrclient.disk_saver.DiskSaver.save_binary',
+                 return_value=None)
     client = Client(ReadyRedis(), MockJobQueue())
     client.api_key = 1234
 

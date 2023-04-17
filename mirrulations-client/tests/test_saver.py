@@ -90,17 +90,3 @@ def test_saver_saves_binary_to_multiple_places():
                                "/USTR/file.pdf").get()["Body"].read()\
                 .decode("utf-8")
             assert body == '\x17'
-
-
-def test_save_json_to_s3_no_credentials_throws_exception(capsys):
-    del os.environ['AWS_ACCESS_KEY']
-    del os.environ['AWS_SECRET_ACCESS_KEY']
-    Saver().save_json_to_s3("testbucket", "test", "test")
-    assert capsys.readouterr().out == "Unable to locate credentials\n"
-
-
-def test_save_binary_to_s3_no_credentials_throws_exception(capsys):
-    del os.environ['AWS_ACCESS_KEY']
-    del os.environ['AWS_SECRET_ACCESS_KEY']
-    Saver().save_binary_to_s3("testbucket", "test", "test")
-    assert capsys.readouterr().out == "Unable to locate credentials\n"
