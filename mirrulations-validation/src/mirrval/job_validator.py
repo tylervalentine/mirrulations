@@ -5,36 +5,32 @@ from collections import Counter
 import json
 from dotenv import load_dotenv
 from mirrgen.search_iterator import SearchIterator
-# from mirrcore.redis_check import load_redis
 from mirrcore.regulations_api import RegulationsAPI
-from mirrcore.data_storage import DataStorage
+from mirrcore.path_generator import PathGenerator
 
 
 class Validator:
 
-    def __init__(self, api, datastorage):
+    def __init__(self, api, path_gen):
         self.api = api
-        self.datastorage = datastorage
+        self.path_gen = path_gen
         self.unfound_jobs = {}
 
     def download(self, endpoint):
         beginning_timestamp = '1990-01-01 00:00:00'
-        collection_size = self.datastorage.get_collection_size(endpoint)
         counter = Counter()
         for result in SearchIterator(self.api, endpoint, beginning_timestamp):
             if result == {}:
                 continue
             for res in result['data']:
-                if not self.datastorage.exists(res):
+                if not os.path.exists(self.path_gen.get_path(res)):
                     print(f"{res['id']} not in database, writing to file")
                     write_unfound_jobs(res, self.unfound_jobs)
                     time.sleep(3.6)
                     counter['Not_in_db'] += 1
                 counter['Total_validated'] += 1
             print(f'Jobs not found in database: {counter["Not_in_db"]} \n \
-            Total jobs validated: {counter["Total_validated"]} \n \
-            Percentage of jobs validated: \
-                {counter["Total_validated"] / collection_size * 100}%')
+            Total jobs validated: {counter["Total_validated"]}')
 
 
 def write_unfound_jobs(res, unfound_jobs):
@@ -66,10 +62,11 @@ def generate_work(collection=None):
 
     # Get API key
     load_dotenv()
-    api = RegulationsAPI(os.getenv("API_KEY"))
+    api_key = os.getenv("API_KEY")
+    api = RegulationsAPI(api_key)
+    path_gen = PathGenerator()
     # Download using validator
-    storage = DataStorage()
-    generator = Validator(api, storage)
+    generator = Validator(api, path_gen)
     if not collection:
         generator.download('dockets')
         generator.download('documents')
