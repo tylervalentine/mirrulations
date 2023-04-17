@@ -79,6 +79,9 @@ services:
     build:
       context: .
       dockerfile: mirrulations-extractor/Dockerfile
+    depends_on:
+      redis:
+        condition: service_healthy
     restart: always
     volumes:
       - "~/data/data:/data"
