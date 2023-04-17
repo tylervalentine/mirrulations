@@ -1,4 +1,3 @@
-
 class Saver:
     """
     A class which encapsulates the saving for the Client
