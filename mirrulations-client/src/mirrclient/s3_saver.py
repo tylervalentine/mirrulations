@@ -76,9 +76,6 @@ class S3Saver():
         data : dict
             The json as a dict to save.
         """
-        # Bucket structure is different than disk
-        # So we remove the /data/ from the path
-
         path = path.replace("/data/", "")
         if self.s3_client is False:
             return False
@@ -103,8 +100,6 @@ class S3Saver():
         binary : bytes
             The binary response.content returns
         """
-        # Bucket structure is different than disk
-        # So we remove the /data/ from the path
         path = path.replace("/data/", "")
         if self.s3_client is False:
             return False
@@ -129,8 +124,6 @@ class S3Saver():
         text : str 
             Extracted text to be saved
         """
-        # Bucket structure is different than disk
-        # So we remove the /data/ from the path
         path = path.replace("/data/", "")
         if self.s3_client is False:
             return False
