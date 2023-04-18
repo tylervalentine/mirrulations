@@ -23,7 +23,12 @@ class Validator:
             if result == {}:
                 continue
             for res in result['data']:
-                if not os.path.exists(self.path_gen.get_path(res)):
+                job_path = self.path_gen.get_path({'data':res})
+                print(('data'+job_path).strip())
+                if_path_exist = os.path.exists(('data'+job_path).strip())
+                print(if_path_exist)
+                if not if_path_exist:
+                    print(res)
                     print(f"{res['id']} not in database, writing to file")
                     write_unfound_jobs(res, self.unfound_jobs)
                     time.sleep(3.6)
