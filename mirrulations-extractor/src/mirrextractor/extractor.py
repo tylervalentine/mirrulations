@@ -84,8 +84,6 @@ class Extractor:
             print("FAILURE: failed to extract "
                   f"text from {attachment_path}\n{err}")
             return
-        # Make dirs if they do not already exist
-        os.makedirs(save_path[:save_path.rfind('/')], exist_ok=True)
         # Save the extracted text to a file
         saver = Saver([DiskSaver(), S3Saver("mirrulations")])
         saver.save_text(save_path, text.strip())
