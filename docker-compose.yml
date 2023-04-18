@@ -82,6 +82,7 @@ services:
     restart: always
     volumes:
       - "~/data/data:/data"
+    env_file: env_files/extractor.env
   dashboard:
     build:
       context: .
