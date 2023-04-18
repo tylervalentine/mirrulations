@@ -1,17 +1,17 @@
 # pylint: disable=W0212
 import os
 import responses
-from mirrcore.path_generator import PathGenerator
 from pytest import fixture
 import pytest
 import requests_mock
-from mirrclient.client import Client
-from mirrclient.client import is_environment_variables_present
-from mirrclient.exceptions import NoJobsAvailableException
-from mirrclient.exceptions import APITimeoutException
+from requests.exceptions import ReadTimeout
+import boto3
+from mirrcore.path_generator import PathGenerator
+from mirrclient.client import Client, is_environment_variables_present
+from mirrclient.exceptions import NoJobsAvailableException, APITimeoutException
 from mirrmock.mock_redis import ReadyRedis, InactiveRedis, MockRedisWithStorage
 from mirrmock.mock_job_queue import MockJobQueue
-from requests.exceptions import ReadTimeout
+
 
 BASE_URL = 'http://work_server:8080'
 
@@ -22,6 +22,8 @@ def mock_env():
     os.environ['WORK_SERVER_PORT'] = '8080'
     os.environ['API_KEY'] = 'TESTING_KEY'
     os.environ['ID'] = '-1'
+    os.environ['AWS_ACCESS_KEY'] = 'test_key'
+    os.environ['AWS_SECRET_ACCESS_KEY'] = 'test_secret_key'
 
 
 @fixture(name='mock_requests')
@@ -82,6 +84,12 @@ def test_client_has_no_id():
     # Need to delete id env variable set by mock_env fixture
     del os.environ['ID']
     assert is_environment_variables_present() is False
+
+
+def create_mock_mirrulations_bucket():
+    conn = boto3.resource("s3", region_name="us-east-1")
+    conn.create_bucket(Bucket="mirrulations")
+    return conn
 
 
 def test_set_missing_job_key_defaults():
@@ -229,8 +237,12 @@ def test_get_document_htm_returns_none():
 
 @responses.activate
 def test_client_downloads_document_htm(capsys, mocker):
-    mocker.patch('mirrclient.saver.Saver.make_path', return_value=None)
-    mocker.patch('mirrclient.saver.Saver.save_attachment', return_value=None)
+    mocker.patch('mirrclient.disk_saver.DiskSaver.make_path',
+                 return_value=None)
+    mocker.patch('mirrclient.disk_saver.DiskSaver.save_binary',
+                 return_value=None)
+    mocker.patch('mirrclient.s3_saver.S3Saver.save_binary',
+                 return_value=None)
     mock_redis = ReadyRedis()
     client = Client(mock_redis, MockJobQueue())
     client.api_key = 1234
@@ -331,8 +343,10 @@ def test_handles_none_in_comment_file_formats(path_generator):
 
 @responses.activate
 def test_client_downloads_attachment_results(mocker, capsys):
-    mocker.patch('mirrclient.saver.Saver.make_path', return_value=None)
-    mocker.patch('mirrclient.saver.Saver.save_attachment', return_value=None)
+    mocker.patch('mirrclient.disk_saver.DiskSaver.make_path',
+                 return_value=None)
+    mocker.patch('mirrclient.disk_saver.DiskSaver.save_binary',
+                 return_value=None)
     mock_redis = ReadyRedis()
     client = Client(mock_redis, MockJobQueue())
     client.api_key = 1234
@@ -423,8 +437,10 @@ def test_does_comment_have_attachment_with_empty_attachment_list():
 
 @responses.activate
 def test_two_attachments_in_comment(mocker):
-    mocker.patch('mirrclient.saver.Saver.make_path', return_value=None)
-    mocker.patch('mirrclient.saver.Saver.save_attachment', return_value=None)
+    mocker.patch('mirrclient.disk_saver.DiskSaver.make_path',
+                 return_value=None)
+    mocker.patch('mirrclient.disk_saver.DiskSaver.save_binary',
+                 return_value=None)
     client = Client(ReadyRedis(), MockJobQueue())
     client.api_key = 1234
 

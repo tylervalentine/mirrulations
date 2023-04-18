@@ -4,14 +4,15 @@ import sys
 import requests
 import redis
 from dotenv import load_dotenv
+from mirrclient.saver import Saver
+from mirrclient.disk_saver import DiskSaver
+from mirrclient.s3_saver import S3Saver
+from mirrclient.exceptions import NoJobsAvailableException, APITimeoutException
 from mirrcore.redis_check import load_redis
 from mirrcore.path_generator import PathGenerator
 from mirrcore.job_queue import JobQueue
 from mirrcore.jobs_statistics import JobStatistics
 from mirrcore.job_queue_exceptions import JobQueueException
-from mirrclient.saver import Saver
-from mirrclient.exceptions import NoJobsAvailableException
-from mirrclient.exceptions import APITimeoutException
 from pika.exceptions import AMQPConnectionError
 
 
@@ -60,7 +61,8 @@ class Client:
         self.api_key = os.getenv('API_KEY')
         self.client_id = os.getenv('ID')
         self.path_generator = PathGenerator()
-        self.saver = Saver()
+        self.saver = Saver(savers=[DiskSaver(),
+                                   S3Saver(bucket_name="mirrulations")])
         self.redis = redis_server
         self.job_queue = job_queue
         self.cache = JobStatistics(redis_server)
@@ -187,12 +189,7 @@ class Client:
             the results from a performed job
         """
         dir_, filename = data['directory'].rsplit('/', 1)
-        self.saver.make_path(dir_)
         self.saver.save_json(f'/data{dir_}/{filename}', data)
-        self.saver.save_json_to_s3(bucket="mirrulations",
-                                   path=f'{dir_[1:]}/{filename}',
-                                   data=data)
-        print(f"{data['job_id']}: Results written to disk")
 
     def _perform_job(self, job_url):
         """
@@ -272,12 +269,7 @@ class Client:
         '''
         response = requests.get(url, timeout=10)
         dir_, filename = path.rsplit('/', 1)
-        self.saver.make_path(dir_)
-        self.saver.save_attachment(f'/data{dir_}/{filename}', response.content)
-        self.saver.save_binary_to_s3(bucket="mirrulations",
-                                     path=f'{dir_[1:]}/{filename}',
-                                     data=response.content)
-        print(f"SAVED attachment - {url} to path: ", path)
+        self.saver.save_binary(f'/data{dir_}/{filename}', response.content)
         filename = path.split('/')[-1]
 
     def _does_comment_have_attachment(self, comment_json):
@@ -307,9 +299,8 @@ class Client:
         if url is not None:
             response = requests.get(url, timeout=10)
             dir_, filename = path.rsplit('/', 1)
-            self.saver.make_path(dir_)
-            self.saver.save_attachment(f'/data{dir_}/{filename}',
-                                       response.content)
+            self.saver.save_binary(f'/data{dir_}/{filename}',
+                                   response.content)
             print(f"SAVED document HTM - {url} to path: ", path)
             self.cache.increase_jobs_done('attachment')
 
