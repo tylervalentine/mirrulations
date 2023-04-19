@@ -23,16 +23,14 @@ class Validator:
             if result == {}:
                 continue
             for res in result['data']:
-                job_path = self.path_gen.get_path({'data':res})
+                job_path = self.path_gen.get_path({'data': res})
                 if_path_exist = os.path.exists(('/data/data'+job_path).strip())
                 if not if_path_exist:
-                    print(res)
                     print(f"{res['id']} not in database, writing to file")
                     write_unfound_jobs(res, self.unfound_jobs)
                     time.sleep(3.6)
                     counter['Not_in_db'] += 1
                 counter['Total_validated'] += 1
-                print("File found")
             print(f'Jobs not found in database: {counter["Not_in_db"]} \n \
             Total jobs validated: {counter["Total_validated"]}')
 
