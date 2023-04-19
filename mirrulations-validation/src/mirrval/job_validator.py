@@ -24,9 +24,7 @@ class Validator:
                 continue
             for res in result['data']:
                 job_path = self.path_gen.get_path({'data':res})
-                print(('data'+job_path).strip())
-                if_path_exist = os.path.exists(('data'+job_path).strip())
-                print(if_path_exist)
+                if_path_exist = os.path.exists(('/data/data'+job_path).strip())
                 if not if_path_exist:
                     print(res)
                     print(f"{res['id']} not in database, writing to file")
@@ -34,6 +32,7 @@ class Validator:
                     time.sleep(3.6)
                     counter['Not_in_db'] += 1
                 counter['Total_validated'] += 1
+                print("File found")
             print(f'Jobs not found in database: {counter["Not_in_db"]} \n \
             Total jobs validated: {counter["Total_validated"]}')
 
@@ -45,13 +44,13 @@ def write_unfound_jobs(res, unfound_jobs):
         if not check_for_missing_jobs(res):
             unfound_jobs[f"missing_{res['type']}"].append(
                         res['links']['self'])
-    with open("/data/unfound_jobs.json", "w+",
+    with open("/data/validator/unfound_jobs.json", "w+",
               encoding="utf-8") as outfile:
         json.dump(unfound_jobs, outfile, indent=4)
 
 
 def check_for_missing_jobs(res):
-    with open("/data/unfound_jobs.json", "r",
+    with open("/data/validator/unfound_jobs.json", "r",
               encoding="utf-8") as outfile:
         lines = outfile.readlines()
         for line in lines:
