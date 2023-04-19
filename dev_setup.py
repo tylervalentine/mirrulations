@@ -40,7 +40,6 @@ def write_files(api_key, env_path, total_clients, aws_access_key, aws_secret_acc
 
     # Write dashboard file
     with open("{}dashboard.env".format(env_path), 'w') as file:
-        file.write("MONGO_HOSTNAME=mongo" + "\n")
         file.write("REDIS_HOSTNAME=redis" + "\n")
         file.write("PYTHONUNBUFFERED=TRUE")
     
