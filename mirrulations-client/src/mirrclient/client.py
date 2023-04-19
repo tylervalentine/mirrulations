@@ -6,6 +6,7 @@ import redis
 from dotenv import load_dotenv
 from mirrclient.saver import Saver
 from mirrclient.disk_saver import DiskSaver
+from mirrclient.s3_saver import S3Saver
 from mirrclient.exceptions import NoJobsAvailableException, APITimeoutException
 from mirrcore.redis_check import load_redis
 from mirrcore.path_generator import PathGenerator
@@ -58,7 +59,8 @@ class Client:
         self.api_key = os.getenv('API_KEY')
         self.client_id = os.getenv('ID')
         self.path_generator = PathGenerator()
-        self.saver = Saver(savers=[DiskSaver()])
+        self.saver = Saver(savers=[DiskSaver(),
+                                   S3Saver(bucket_name="mirrulations")])
         self.redis = redis_server
         self.job_queue = job_queue
         self.cache = JobStatistics(redis_server)
