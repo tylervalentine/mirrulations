@@ -6,7 +6,6 @@ import redis
 from dotenv import load_dotenv
 from mirrclient.saver import Saver
 from mirrclient.disk_saver import DiskSaver
-from mirrclient.s3_saver import S3Saver
 from mirrclient.exceptions import NoJobsAvailableException, APITimeoutException
 from mirrcore.redis_check import load_redis
 from mirrcore.path_generator import PathGenerator
@@ -25,9 +24,7 @@ def is_environment_variables_present():
     -------
     Boolean
     """
-    return (os.getenv('WORK_SERVER_HOSTNAME') is not None
-            and os.getenv('WORK_SERVER_PORT') is not None
-            and os.getenv('API_KEY') is not None
+    return (os.getenv('API_KEY') is not None
             and os.getenv('ID') is not None)
 
 
@@ -61,8 +58,7 @@ class Client:
         self.api_key = os.getenv('API_KEY')
         self.client_id = os.getenv('ID')
         self.path_generator = PathGenerator()
-        self.saver = Saver(savers=[DiskSaver(),
-                                   S3Saver(bucket_name="mirrulations")])
+        self.saver = Saver(savers=[DiskSaver()])
         self.redis = redis_server
         self.job_queue = job_queue
         self.cache = JobStatistics(redis_server)
