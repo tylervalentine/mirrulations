@@ -76,7 +76,7 @@ const updateJobTypeProgress = (id, value, total) => {
 }
 
 const updateJobsQueuedByType = (id, value) => {
-    document.getElementById(id+'-number').textContent = value;
+    document.getElementById(id+'-number').textContent = value.toLocaleString('en');
 }
 
 const updateClientDashboardData = () => {
