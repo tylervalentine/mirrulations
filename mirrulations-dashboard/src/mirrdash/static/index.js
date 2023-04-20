@@ -101,7 +101,8 @@ const updateClientDashboardData = () => {
             regulations_total_comments,
         } = jobInformation;
 
-        let regulations_totals = regulations_total_dockets + regulations_total_documents + regulations_total_comments;
+        const regulations_total_attachments = num_attachments_done / num_comments_done * regulations_total_comments;
+        let regulations_totals = regulations_total_dockets + regulations_total_documents + regulations_total_comments + regulations_total_attachments;
 
         updateHtmlValues(num_jobs_waiting, num_jobs_done);
         updateCorpusProgressHtml([num_dockets_done, num_documents_done, num_comments_done, num_attachments_done], regulations_totals);
@@ -111,7 +112,6 @@ const updateClientDashboardData = () => {
         updateJobTypeProgress("comments-done",num_comments_done, regulations_total_comments);
         updateJobTypeProgress("pdf-extractions-done", num_extractions_done, num_pdf_attachments_done);
         // Current estimate of number of attachments (from comments)
-        const regulations_total_attachments = num_attachments_done / num_comments_done * regulations_total_comments;
         updateJobTypeProgress("attachments-done",num_attachments_done, regulations_total_attachments); 
         // Counts for numbers
         updateCount("dockets-done",num_dockets_done);
