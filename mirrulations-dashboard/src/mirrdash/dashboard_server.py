@@ -1,11 +1,11 @@
 """
 This module creates the dashboard application that queries
-    the redis and mongo databases to return stats about
+    the redis database to return stats about
     the number of jobs in progress/complete and the status
     of the containers.
 
 Dependencies:
-    docker, dotenv, flask, flask_cors, os, pymongo, redis
+    docker, dotenv, flask, flask_cors, os, redis
 """
 import os
 from flask import Flask, jsonify, render_template
