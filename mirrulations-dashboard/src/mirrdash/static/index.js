@@ -21,6 +21,7 @@ const updateHtmlValues = (jobsWaiting, jobsDone) => {
         // indicating Job Queue Error from dashboard
         unknown = true;
         document.getElementById('jobs-waiting-number').textContent = "Unknown";
+        document.getElementById('jobs-done-number').textContent = "Unknown";
     }
     else {
         let ids = ['jobs-waiting', 'jobs-done']
