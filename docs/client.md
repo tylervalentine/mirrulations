@@ -2,14 +2,13 @@
 
 
 ## Summary
-The clients are their own objects that will connect to the work server, receive work, 
-and send results back to the server by making the calls to [regulations.gov]
-(https://www.regulations.gov/) for data downloads. 
+The clients are their own objects that will request work from the job queue, perform the work by making calls to [regulations.gov]
+(https://www.regulations.gov/) for data downloads, and saves the results. 
 
 ## Description 
-Multiple clients will be able to connect to the work server at once. The goal is 
+The goal is 
 that the client will request and complete work in order to download data from 
-[regulations.gov](https://www.regulations.gov/) to disk. 
+[regulations.gov](https://www.regulations.gov/).
 
 
 ### `/get_job`
