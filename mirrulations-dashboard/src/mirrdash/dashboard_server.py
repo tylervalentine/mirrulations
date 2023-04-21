@@ -87,7 +87,7 @@ def create_server(job_queue, docker_server, cache):
             # Index.js expects some values to update. by providing None or
             # 'null' to num_jobs_waiting (supposed to be an int), dashboard
             # javascript will recognize something went wrong and reflect status
-            return {'num_jobs_waiting': None}, error.status_code
+            return {'num_jobs_waiting': None}
 
         return jsonify(data), 200
 

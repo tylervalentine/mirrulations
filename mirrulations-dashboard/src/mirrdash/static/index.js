@@ -18,7 +18,8 @@ const updateHtmlValues = (jobsWaiting, jobsDone) => {
     if (jobsWaiting === null || jobsDone === null) {
         // Handle the case where value or total is null,
         // indicating Job Queue Error from dashboard
-        document.getElementById(id+'-number').textContent = "Error";
+        console.log("got into the if")
+        document.getElementById('jobs-waiting-number').textContent = "Error"; // todo here
     }
     else {
         let ids = ['jobs-waiting', 'jobs-done']
