@@ -2,7 +2,7 @@
 
 
 ## Summary
-The clients are their own objects that will request work from the job queue, perform the work by making calls to [regulations.gov]
+The clients are their own objects that will request work from the job queue, and perform the work by making calls to [regulations.gov]
 (https://www.regulations.gov/) for data downloads, and saves the results. 
 
 ## Description 

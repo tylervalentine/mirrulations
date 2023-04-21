@@ -41,7 +41,7 @@ While the above section describes how to generate all jobs, the client will do t
 
 The client will get a job from regulations.gov, process the job URL, and finally downloads the job.
 
-Additionally, if a document/comment is being retrieved, it will return any attachments that go along with that document/comment. These can be identified in the JSON given under data/attributes/fileFormats.
+Additionally, if a document/comment is being retrieved, the client will get their respective attachments alongside the document/comment. These can be identified in the JSON given under data/attributes/fileFormats.
 
 ### **Job Generator Endpoints**
 ***Three job generating endpoints***
