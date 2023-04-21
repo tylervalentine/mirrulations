@@ -67,7 +67,7 @@ const updateStatus = (container, status) => {
 }
 
 const updateCount = (id, value) => {
-    document.getElementById(id+'-number').textContent = value.toLocaleString('en');
+    document.getElementById(id+'-number').textContent = Math.ceil(value.toLocaleString('en'));
 }
 
 const updateJobTypeProgress = (id, value, total) => {
