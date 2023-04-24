@@ -83,7 +83,7 @@ const updateJobTypeProgress = (id, value, total) => {
 
 const updateCount = (id, value, is_pdf) => {
     if (!unknown) {
-        document.getElementById(id+'-number').textContent = Math.ceil(value.toLocaleString('en'));
+        document.getElementById(id+'-number').textContent = Math.ceil(value).toLocaleString('en');
     } else {
         if (is_pdf) {
             document.getElementById(id+'-number').textContent = "Unknown"
