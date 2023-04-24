@@ -21,9 +21,9 @@ class DataCounts:
         Uses 3 API calls each time it is called.
         @return: list of counts for docket, document, and comments
         """
-        dockets = self._get_dockets_count()
-        documents = self._get_documents_count()
-        comments = self._get_comments_count()
+        dockets = self._get_data_count("dockets")
+        documents = self._get_data_count("documents")
+        comments = self._get_data_count("comments")
 
         for data in [dockets, documents, comments]:
             if not isinstance(data, int) or data < 0:
@@ -31,28 +31,13 @@ class DataCounts:
 
         return [dockets, documents, comments]
 
-    def _get_dockets_count(self):
+    def _get_data_count(self, endpoint):
         """
-        Get the number of docket entries on Regulations.gov
-        @return integer count of docket entries
+        Get the number of entries on Regulations.gov
+        @param endpoint: string "dockets", "documents", or "comments"
+        @return integer count of entries
         """
-        response = self.__make_api_call("dockets")
-        return self.__get_total_elements(response)
-
-    def _get_documents_count(self):
-        """
-        Get the number of document entries on Regulations.gov
-        @return integer count of document entries
-        """
-        response = self.__make_api_call("documents")
-        return self.__get_total_elements(response)
-
-    def _get_comments_count(self):
-        """
-        Get the number of comment entries on Regulations.gov
-        @return integer count of comment entries
-        """
-        response = self.__make_api_call("comments")
+        response = self.__make_api_call(endpoint)
         return self.__get_total_elements(response)
 
     def __get_total_elements(self, response):
