@@ -27,13 +27,13 @@ class DataCounts:
 
         for data in [dockets, documents, comments]:
             if not isinstance(data, int) or data < 0:
-                raise DataNotFoundException("Invalid data")
+                raise DataNotFoundException("Invalid data in response")
 
         return [dockets, documents, comments]
 
     def _get_data_count(self, endpoint):
         """
-        Get the number of entries on Regulations.gov
+        Get the number of entries on Regulations.govou
         @param endpoint: string "dockets", "documents", or "comments"
         @return integer count of entries
         """
